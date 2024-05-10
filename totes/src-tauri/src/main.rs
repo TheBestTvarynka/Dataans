@@ -8,7 +8,8 @@ fn greet(name: &str) -> String {
 }
 
 use tauri::{
-    AppHandle, CustomMenuItem, Manager, Result, SystemTray, SystemTrayEvent, SystemTrayMenu, SystemTrayMenuItem,
+    AppHandle, CustomMenuItem, GlobalShortcutManager, Manager, Result, RunEvent, SystemTray, SystemTrayEvent,
+    SystemTrayMenu, SystemTrayMenuItem,
 };
 
 const MAIN_WINDOW_NAME: &str = "main";
@@ -18,6 +19,8 @@ const WINDOW_QUIT_MENU_ITEM_ID: &str = "quit";
 const WINDOW_HIDE_TITLE: &str = "Hide";
 const WINDOW_SHOW_TITLE: &str = "Show";
 const WINDOW_QUIT_TITLE: &str = "Quit";
+
+const GLOBAL_SHORTCUT_ACCELERATOR: &str = "F1";
 
 fn toggle_app_visibility(app: &AppHandle) -> Result<()> {
     if let Some(window) = app.get_window(MAIN_WINDOW_NAME) {
@@ -50,8 +53,9 @@ fn main() {
     tauri::Builder::default()
         .system_tray(tray)
         .on_system_tray_event(|app, event| match event {
-            SystemTrayEvent::LeftClick { .. }
-            | SystemTrayEvent::DoubleClick { .. } => toggle_app_visibility(app).unwrap(),
+            SystemTrayEvent::LeftClick { .. } | SystemTrayEvent::DoubleClick { .. } => {
+                toggle_app_visibility(app).unwrap()
+            }
             SystemTrayEvent::MenuItemClick { id, .. } => match id.as_str() {
                 WINDOW_QUIT_MENU_ITEM_ID => {
                     std::process::exit(0);
@@ -71,8 +75,18 @@ fn main() {
         .invoke_handler(tauri::generate_handler![greet])
         .build(tauri::generate_context!())
         .expect("error while building tauri application")
-        .run(|_app_handle, event| match event {
-            tauri::RunEvent::ExitRequested { api, .. } => {
+        .run(|app_handle, event| match event {
+            RunEvent::Ready => {
+                let app_handle = app_handle.clone();
+                app_handle
+                    .global_shortcut_manager()
+                    .register(GLOBAL_SHORTCUT_ACCELERATOR, move || {
+                        println!("global shorcut: {}", GLOBAL_SHORTCUT_ACCELERATOR);
+                        toggle_app_visibility(&app_handle).unwrap();
+                    })
+                    .unwrap();
+            }
+            RunEvent::ExitRequested { api, .. } => {
                 api.prevent_exit();
             }
             _ => {}
