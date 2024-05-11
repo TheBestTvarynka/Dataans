@@ -6,6 +6,9 @@ use crate::profile::Profile;
 
 #[component]
 pub fn App() -> impl IntoView {
+
+    info!("App component");
+
     view! {
         <main class="app">
             <Spaces />
