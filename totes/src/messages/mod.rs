@@ -11,8 +11,10 @@ pub fn Messages() -> impl IntoView {
     view! {
         <div class="messages">
             <Info />
-            <span>"Messages"</span>
-            <Editor />
+            <div class="messages-inner">
+                <span>"Messages"</span>
+                <Editor />
+            </div>
         </div>
     }
 }

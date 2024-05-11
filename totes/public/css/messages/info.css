@@ -1,0 +1,9 @@
+.info {
+    display: inline-flex;
+    background-color: #282e33;
+    color: #ababad;
+    height: 2em;
+    padding: 0.2em;
+    justify-content: flex-start;
+    align-items: center;
+}

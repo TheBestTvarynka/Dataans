@@ -1,0 +1,9 @@
+.tools {
+    height: 2em;
+    padding: 0.2em;
+    background-color: #3d444b;
+    color: #c6c4af;
+    display: inline-flex;
+    justify-content: flex-start;
+    align-items: center;
+}
