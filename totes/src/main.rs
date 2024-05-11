@@ -1,4 +1,7 @@
 mod app;
+mod spaces;
+mod profile;
+mod messages;
 
 use app::*;
 use leptos::*;

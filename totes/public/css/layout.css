@@ -1,0 +1,14 @@
+body {
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+}
+
+.app {
+    display: grid;
+    grid-template-columns: 20% auto 25%;
+    gap: 0;
+    padding: 0;
+    margin: 0;
+    height: 100%;
+}
