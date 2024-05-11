@@ -1,10 +1,14 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+#[macro_use]
+extern crate log;
+
 use tauri::{
     AppHandle, CustomMenuItem, GlobalShortcutManager, Manager, Result, RunEvent, SystemTray, SystemTrayEvent,
     SystemTrayMenu, SystemTrayMenuItem,
 };
+use tauri_plugin_log::LogTarget;
 
 const MAIN_WINDOW_NAME: &str = "main";
 
@@ -21,14 +25,16 @@ fn toggle_app_visibility(app: &AppHandle) -> Result<()> {
         let item_handle = app.tray_handle().get_item(WINDOW_VISIBILITY_MENU_ITEM_ID);
 
         if window.is_visible().unwrap_or(true) {
+            info!("Hide main window");
             window.hide()?;
             item_handle.set_title(WINDOW_SHOW_TITLE)?;
         } else {
+            info!("Show main window");
             window.show()?;
             item_handle.set_title(WINDOW_HIDE_TITLE)?;
         }
     } else {
-        println!("{MAIN_WINDOW_NAME} window not found!");
+        error!("{MAIN_WINDOW_NAME} window not found!");
     }
 
     Ok(())
@@ -66,6 +72,14 @@ fn main() {
             }
             _ => {}
         })
+        .plugin(tauri_plugin_log::Builder::default()
+            .targets([
+                LogTarget::LogDir,
+                LogTarget::Stdout,
+                LogTarget::Webview,
+            ])
+            .build()
+        )
         .build(tauri::generate_context!())
         .expect("error while building tauri application")
         .run(|app_handle, event| match event {
