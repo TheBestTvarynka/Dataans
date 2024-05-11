@@ -21,6 +21,7 @@ pub fn App() -> impl IntoView {
                 " + "
                 <a href="https://github.com/rust-lang/rust-analyzer" target="_blank">"rust-analyzer"</a>
             </p>
+            <span class="tbt">"TheBestTvarynka"</span>
         </main>
     }
 }
