@@ -6,6 +6,7 @@ mod app;
 mod spaces;
 mod profile;
 mod messages;
+mod backend;
 
 use app::*;
 use leptos::*;

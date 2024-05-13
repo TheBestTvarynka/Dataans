@@ -1,18 +1,21 @@
 use leptos::*;
 
+use crate::backend::load_theme;
 use crate::spaces::Spaces;
 use crate::messages::Messages;
 use crate::profile::Profile;
 
 #[component]
 pub fn App() -> impl IntoView {
+    let (theme_css, set_theme_css) = create_signal(String::default());
 
-    info!("App component");
-
-    let theme = format!("--messages_background: {}", "green");
+    spawn_local(async move {
+        let theme = load_theme().await;
+        set_theme_css.set(theme.to_css());
+    });
 
     view! {
-        <main class="app" style=theme>
+        <main class="app" style={move || theme_css.get()}>
             <Spaces />
             <Messages />
             <Profile />
