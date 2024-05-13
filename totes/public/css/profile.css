@@ -1,4 +1,4 @@
 
 .profile {
-    background-color: #282e33;
+    background-color: var(--profile_background);
 }

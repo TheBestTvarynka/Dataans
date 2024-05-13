@@ -1,0 +1,16 @@
+body {
+    --messages_background: #18191d;
+    --messages_border: #18191d;
+
+    --profile_background: #282e33;
+    --spaces_background: #282e33;
+
+    --spaces_tools_background: #3d444b;
+    --spaces_tools_color: #c6c4af;
+
+    --messages_info_background: #282e33;
+    --messages_info_color: #ababad;
+
+    --messages_editor_background: #282e33;
+    --messages_editor_color: #ababad;
+}

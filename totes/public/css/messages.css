@@ -4,9 +4,9 @@
     flex-direction: column;
     gap: 0;
     justify-content: space-between;
-    background-color: #18191d;
-    border-right: 1px solid #18191d;
-    border-left: 1px solid #18191d;
+    background-color: var(--messages_background);
+    border-right: 1px solid var(--messages_border);
+    border-left: 1px solid var(--messages_border);
     height: 100%;
 }
 
