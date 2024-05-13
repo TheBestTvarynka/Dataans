@@ -1,14 +1,14 @@
-messages_background = "red"
-messages_border = "red"
+messages_background = "#74b4e0"
+messages_border = "#74b4e0"
 
-profile_background = "blue"
-spaces_background = "#282e33"
+profile_background = "#ffffff"
+spaces_background = "#ffffff"
 
-spaces_tools_background = "green"
-spaces_tools_color = "#c6c4af"
+spaces_tools_background = "#f1f1f1"
+spaces_tools_color = "#1d1c1c"
 
-messages_info_background = "#282e33"
-messages_info_color = "#ababad"
+messages_info_background = "#ffffff"
+messages_info_color = "#1d1c1c"
 
-messages_editor_background = "#282e33"
-messages_editor_color = "#ababad"
+messages_editor_background = "#ffffff"
+messages_editor_color = "#1d1c1c"
