@@ -7,3 +7,4 @@ repository = "https://github.com/TheBestTvarynka/totes"
 
 [dependencies]
 serde = { version = "1", features = ["derive"] }
+time = { version = "0.3.36", default-features = false, features = ["serde"] }
