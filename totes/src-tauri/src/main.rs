@@ -4,6 +4,8 @@
 #[macro_use]
 extern crate log;
 
+mod config;
+
 use tauri::{
     AppHandle, CustomMenuItem, GlobalShortcutManager, Manager, Result, RunEvent, SystemTray, SystemTrayEvent,
     SystemTrayMenu, SystemTrayMenuItem,
@@ -80,6 +82,9 @@ fn main() {
             ])
             .build()
         )
+        .invoke_handler(tauri::generate_handler![
+            config::theme,
+        ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application")
         .run(|app_handle, event| match event {
