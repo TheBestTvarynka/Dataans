@@ -1,12 +1,11 @@
-
 #[macro_use]
 extern crate log;
 
 mod app;
-mod spaces;
-mod profile;
-mod messages;
 mod backend;
+mod messages;
+mod profile;
+mod spaces;
 
 use app::*;
 use leptos::*;

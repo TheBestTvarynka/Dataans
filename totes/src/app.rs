@@ -1,9 +1,9 @@
 use leptos::*;
 
 use crate::backend::load_theme;
-use crate::spaces::Spaces;
 use crate::messages::Messages;
 use crate::profile::Profile;
+use crate::spaces::Spaces;
 
 #[component]
 pub fn App() -> impl IntoView {

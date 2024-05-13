@@ -10,7 +10,10 @@ pub fn theme() -> Theme {
     let config_data = match read_to_string(config_file_path) {
         Ok(data) => data,
         Err(err) => {
-            error!("Can not read theme config file: {:?}. Filepath: `{}`.", err, config_file_path);
+            error!(
+                "Can not read theme config file: {:?}. Filepath: `{}`.",
+                err, config_file_path
+            );
             return Default::default();
         }
     };
