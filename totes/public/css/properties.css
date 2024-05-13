@@ -1,3 +1,9 @@
+/*
+    The default "theme" or default CSS colors.
+    If the user will not provide a theme.toml or it will be corrupted,
+    then these values will be used.
+*/
+
 body {
     --messages_background: #18191d;
     --messages_border: #18191d;
