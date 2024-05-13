@@ -1,19 +1,22 @@
 [package]
 name = "totes"
-version = "0.0.0"
-description = "A Tauri App"
-authors = ["you"]
+version = "0.1.0"
+description = "t[elegram n]otes"
+authors = ["Pavlo Myroniuk <the.best.tvarynka@gmail.com>"]
 edition = "2021"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+repository = "https://github.com/TheBestTvarynka/totes"
 
 [build-dependencies]
 tauri-build = { version = "1", features = [] }
 
 [dependencies]
-tauri = { version = "1", features = ["shell-open", "system-tray", "global-shortcut"] }
+tauri = { version = "1", features = [ "fs-all", "shell-open", "system-tray", "global-shortcut"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+tauri-plugin-log = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "v1" }
+log = "0.4.21"
+common = { path = "../common" }
+toml = "0.8.12"
 
 [features]
 # This feature is used for production builds or when a dev server is not specified, DO NOT REMOVE!!

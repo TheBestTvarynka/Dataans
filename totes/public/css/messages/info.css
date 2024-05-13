@@ -1,0 +1,9 @@
+.info {
+    display: inline-flex;
+    background-color: var(--messages_info_background);
+    color: var(--messages_info_color);
+    height: 2em;
+    padding: 0.2em;
+    justify-content: flex-start;
+    align-items: center;
+}

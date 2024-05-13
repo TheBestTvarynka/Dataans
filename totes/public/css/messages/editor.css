@@ -1,0 +1,10 @@
+
+.editor {
+    display: inline-flex;
+    background-color: var(--messages_editor_background);
+    color: var(--messages_editor_color);
+    height: 2em;
+    padding: 0.2em;
+    justify-content: flex-start;
+    align-items: center;
+}
