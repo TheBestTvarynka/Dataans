@@ -1,16 +1,16 @@
 
-.messages {
+.notes {
     display: flex;
     flex-direction: column;
     gap: 0;
     justify-content: space-between;
-    background-color: var(--messages_background);
-    border-right: 1px solid var(--messages_border);
-    border-left: 1px solid var(--messages_border);
+    background-color: var(--notes_background_color);
+    border-right: 1px solid var(--notes_border_color);
+    border-left: 1px solid var(--notes_border_color);
     height: 100%;
 }
 
-.messages-inner {
+.notes-inner {
     display: flex;
     flex-direction: column;
     gap: 0;

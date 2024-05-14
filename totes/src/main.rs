@@ -3,7 +3,7 @@ extern crate log;
 
 mod app;
 mod backend;
-mod messages;
+mod notes;
 mod profile;
 mod spaces;
 

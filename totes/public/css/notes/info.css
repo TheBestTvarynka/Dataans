@@ -1,7 +1,7 @@
 .info {
     display: inline-flex;
-    background-color: var(--messages_info_background);
-    color: var(--messages_info_color);
+    background-color: var(--messages_info_background_color);
+    color: var(--messages_info_text_color);
     height: 2em;
     padding: 0.2em;
     justify-content: flex-start;

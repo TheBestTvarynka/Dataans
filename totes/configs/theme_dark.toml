@@ -1,14 +1,14 @@
-messages_background = "#18191d"
-messages_border = "#18191d"
+notes_background_color = "#18191d"
+notes_border_color = "#18191d"
 
-profile_background = "#282e33"
-spaces_background = "#282e33"
+profile_background_color = "#282e33"
+spaces_background_color = "#282e33"
 
-spaces_tools_background = "#3d444b"
-spaces_tools_color = "#c6c4af"
+spaces_tools_background_color = "#3d444b"
+spaces_tools_text_color = "#c6c4af"
 
-messages_info_background = "#282e33"
-messages_info_color = "#ababad"
+messages_info_background_color = "#282e33"
+messages_info_text_color = "#ababad"
 
-messages_editor_background = "#282e33"
-messages_editor_color = "#ababad"
+messages_editor_background_color = "#282e33"
+messages_editor_text_color = "#ababad"

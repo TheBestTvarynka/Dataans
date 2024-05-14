@@ -7,11 +7,11 @@ use self::editor::Editor;
 use self::info::Info;
 
 #[component]
-pub fn Messages() -> impl IntoView {
+pub fn Notes() -> impl IntoView {
     view! {
-        <div class="messages">
+        <div class="notes">
             <Info />
-            <div class="messages-inner">
+            <div class="notes-inner">
                 <span>"Messages"</span>
                 <Editor />
             </div>

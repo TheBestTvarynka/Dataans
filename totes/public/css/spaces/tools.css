@@ -1,8 +1,8 @@
 .tools {
     height: 2em;
     padding: 0.2em;
-    background-color: var(--spaces_tools_background);
-    color: var(--spaces_tools_color);
+    background-color: var(--spaces_tools_background_color);
+    color: var(--spaces_tools_text_color);
     display: inline-flex;
     justify-content: flex-start;
     align-items: center;
