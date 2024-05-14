@@ -15,5 +15,12 @@ pub fn Note<'text>(note: NoteData<'text>) -> impl IntoView {
     });
     debug!("{:?}", md);
 
-    render_md_node(&md)
+    view! {
+        <div class="note-container">
+            {render_md_node(&md)}
+            <div class="note-meta">
+                <span class="note-time">{note.created_at.as_ref().time().to_string()}</span>
+            </div>
+        </div>
+    }
 }

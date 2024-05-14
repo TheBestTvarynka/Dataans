@@ -35,9 +35,11 @@ fn gen_notes() -> Vec<NoteData<'static>> {
         NoteData {
             id: 2.into(),
             text: "what can be better:
-* forget about smth;
-* existing smth can be improved too;
-* read documentation more carefully.
+* forget *about* smth;
+* existing _smth can_ be improved too;
+  * read **documentation more** carefully.
+  * consider [this](https://tbt.qkation.com/about) this blog article.
+* https://tbt.qkation.com/about
 "
             .into(),
             created_at: datetime!(2024-05-014 15:03 UTC).into(),
