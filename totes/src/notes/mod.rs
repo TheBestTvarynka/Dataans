@@ -1,5 +1,6 @@
 pub mod editor;
 mod info;
+mod md_node;
 mod note;
 
 use common::Note as NoteData;
@@ -13,24 +14,24 @@ use self::note::Note;
 // This code will be replaced with real ones.
 fn gen_notes() -> Vec<NoteData<'static>> {
     vec![
-        NoteData {
-            id: 1.into(),
-            text: "write a post about it
-```rust
-pub fn get_or_init<F>(&self, f: F) -> &T
-where
-    F: FnOnce() -> T,
-{
-    match self.get_or_try_init(|| Ok::<T, !>(f())) {
-        Ok(val) => val,
-    }
-}
-```
-https://doc.rust-lang.org/src/std/sync/once_lock.rs.html#246-253
-"
-            .into(),
-            created_at: datetime!(2024-05-01 12:43 UTC).into(),
-        },
+        //         NoteData {
+        //             id: 1.into(),
+        //             text: "write a post about it
+        // ```rust
+        // pub fn get_or_init<F>(&self, f: F) -> &T
+        // where
+        //     F: FnOnce() -> T,
+        // {
+        //     match self.get_or_try_init(|| Ok::<T, !>(f())) {
+        //         Ok(val) => val,
+        //     }
+        // }
+        // ```
+        // https://doc.rust-lang.org/src/std/sync/once_lock.rs.html#246-253
+        // "
+        //             .into(),
+        //             created_at: datetime!(2024-05-01 12:43 UTC).into(),
+        //         },
         NoteData {
             id: 2.into(),
             text: "what can be better:
