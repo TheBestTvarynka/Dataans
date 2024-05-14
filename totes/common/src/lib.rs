@@ -42,6 +42,12 @@ impl From<u32> for Id {
 #[derive(Serialize, Deserialize, Debug, Default, Clone)]
 pub struct MdText<'text>(Cow<'text, str>);
 
+impl From<&'static str> for MdText<'static> {
+    fn from(value: &'static str) -> Self {
+        Self(Cow::Borrowed(value))
+    }
+}
+
 impl<'text> AsRef<str> for MdText<'text> {
     fn as_ref(&self) -> &str {
         self.0.as_ref()
@@ -52,6 +58,12 @@ impl<'text> AsRef<str> for MdText<'text> {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct CreationDate(OffsetDateTime);
 
+impl From<OffsetDateTime> for CreationDate {
+    fn from(value: OffsetDateTime) -> Self {
+        Self(value)
+    }
+}
+
 impl AsRef<OffsetDateTime> for CreationDate {
     fn as_ref(&self) -> &OffsetDateTime {
         &self.0
@@ -60,7 +72,7 @@ impl AsRef<OffsetDateTime> for CreationDate {
 
 /// Represent one note.
 #[derive(Serialize, Deserialize, Debug, Clone)]
-struct Note<'text> {
+pub struct Note<'text> {
     /// Note id.
     pub id: Id,
     /// Note data in MD format.
