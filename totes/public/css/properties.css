@@ -5,18 +5,30 @@
 */
 
 body {
-    --messages_background: #18191d;
-    --messages_border: #18191d;
+    --notes_background_color: #18191d;
+    --notes_border_color: #18191d;
 
-    --profile_background: #282e33;
-    --spaces_background: #282e33;
+    --profile_background_color: #282e33;
+    --spaces_background_color: #282e33;
 
-    --spaces_tools_background: #3d444b;
-    --spaces_tools_color: #c6c4af;
+    --spaces_tools_background_color: #3d444b;
+    --spaces_tools_text_color: #c6c4af;
 
-    --messages_info_background: #282e33;
-    --messages_info_color: #ababad;
+    --messages_info_background_color: #282e33;
+    --messages_info_text_color: #ababad;
 
-    --messages_editor_background: #282e33;
-    --messages_editor_color: #ababad;
+    --messages_editor_background_color: #282e33;
+    --messages_editor_text_color: #ababad;
+
+    --note_background_color: #2a2f33;
+    --note_text_color: #e0e0e7;
+    --note_quote_text_color: #bcbcc2;
+    --note_font_size: 1em;
+    --note_link_color: #35c9a2;
+
+    --spaces_font_size: 1.3em;
+    --space_background_color: #282e33;
+    --space_text_color: #e0e0e7;
+    --space_hover_background_color: #3c4449;
+    --space_selected_background_color: #35c9a2;
 }

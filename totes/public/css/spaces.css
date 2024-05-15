@@ -1,8 +1,8 @@
 
-.spaces {
+.spaces-container {
     display: flex;
     flex-direction: column;
     align-content: flex-start;
     gap: 0;
-    background-color: var(--spaces_background);
+    background-color: var(--spaces_background_color);
 }

@@ -1,9 +1,15 @@
 #![doc = include_str!("../README.md")]
 #![warn(missing_docs)]
 
+/// Contains all note-related structures.
+pub mod note;
+/// Contains all space-related structures.
+pub mod space;
+
 use std::collections::HashMap;
 
 use serde::{Deserialize, Serialize};
+use time::OffsetDateTime;
 
 /// Totes app theme.
 ///
@@ -19,6 +25,25 @@ pub struct Theme(HashMap<String, String>);
 impl Theme {
     /// Converts [Theme] to the CSS string.
     pub fn to_css(&self) -> String {
-        self.0.iter().map(|(key, value)| format!("--{}: {};", key, value)).collect()
+        self.0
+            .iter()
+            .map(|(key, value)| format!("--{}: {};", key, value))
+            .collect()
+    }
+}
+
+/// Date and time when note was created.
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct CreationDate(OffsetDateTime);
+
+impl From<OffsetDateTime> for CreationDate {
+    fn from(value: OffsetDateTime) -> Self {
+        Self(value)
+    }
+}
+
+impl AsRef<OffsetDateTime> for CreationDate {
+    fn as_ref(&self) -> &OffsetDateTime {
+        &self.0
     }
 }

@@ -74,17 +74,12 @@ fn main() {
             }
             _ => {}
         })
-        .plugin(tauri_plugin_log::Builder::default()
-            .targets([
-                LogTarget::LogDir,
-                LogTarget::Stdout,
-                LogTarget::Webview,
-            ])
-            .build()
+        .plugin(
+            tauri_plugin_log::Builder::default()
+                .targets([LogTarget::LogDir, LogTarget::Stdout, LogTarget::Webview])
+                .build(),
         )
-        .invoke_handler(tauri::generate_handler![
-            config::theme,
-        ])
+        .invoke_handler(tauri::generate_handler![config::theme,])
         .build(tauri::generate_context!())
         .expect("error while building tauri application")
         .run(|app_handle, event| match event {

@@ -1,0 +1,66 @@
+
+.note-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.3em;
+    background-color: var(--note_background_color);
+    color: var(--note_text_color);
+    font-size: var(--note_font_size);
+    border-radius: 0.3em;
+    padding: 0.3em;
+    font-family: "Roboto Thin", sans-serif;
+}
+
+.note {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.note .paragraph {
+    margin-block-start: 0.2em;
+    margin-block-end: 0.2em;
+}
+
+.note .list {
+    margin-block-start: 0.2em;
+    margin-block-end: 0.2em;
+}
+
+.note .note-meta {
+    display: inline-flex;
+    justify-content: flex-end;
+}
+
+.note .link {
+    color: var(--note_link_color);
+}
+
+.note .incline-code {
+    font-family: "JetBrains Mono", monospace;
+    cursor: pointer;
+}
+
+.note .quote {
+    padding-left: 0.5em;
+    border-left: 2px solid var(--note_quote_text_color);
+    color: var(--note_quote_text_color);
+}
+
+.note .text {
+    white-space: break-spaces;
+}
+
+.note .br {
+    border: 1px solid var(--note_text_color);
+    width: 100%;
+    height: 0;
+    content: " ";
+    margin-top: 0.2em;
+    margin-bottom: 0.2em;
+}
+
+.note-container .note-time {
+    font-size: calc(var(--note_font_size) - 0.2em);
+}

@@ -1,8 +1,8 @@
-use serde::Serialize;
 use common::Theme;
-use serde_wasm_bindgen::{to_value, from_value};
-use wasm_bindgen::JsValue;
+use serde::Serialize;
+use serde_wasm_bindgen::{from_value, to_value};
 use wasm_bindgen::prelude::wasm_bindgen;
+use wasm_bindgen::JsValue;
 
 #[wasm_bindgen]
 extern "C" {
