@@ -3,7 +3,7 @@ mod info;
 mod md_node;
 mod note;
 
-use common::Note as NoteData;
+use common::note::Note as NoteData;
 use leptos::{view, *};
 use time::macros::datetime;
 

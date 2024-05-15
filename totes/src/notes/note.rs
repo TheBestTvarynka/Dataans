@@ -1,4 +1,4 @@
-use common::Note as NoteData;
+use common::note::Note as NoteData;
 use leptos::*;
 use markdown::mdast::{Node, Text};
 use markdown::ParseOptions;
