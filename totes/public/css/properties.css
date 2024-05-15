@@ -25,4 +25,10 @@ body {
     --note_quote_text_color: #bcbcc2;
     --note_font_size: 1em;
     --note_link_color: #35c9a2;
+
+    --spaces_font_size: 1.3em;
+    --space_background_color: #282e33;
+    --space_text_color: #e0e0e7;
+    --space_hover_background_color: #3c4449;
+    --space_selected_background_color: #35c9a2;
 }

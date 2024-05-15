@@ -24,6 +24,12 @@ impl<'name> From<&'name str> for Name<'name> {
     }
 }
 
+impl<'name> AsRef<str> for Name<'name> {
+    fn as_ref(&self) -> &str {
+        self.0.as_ref()
+    }
+}
+
 /// Represents a space.
 ///
 /// Space - a collection of notes.
