@@ -34,12 +34,32 @@ fn gen_notes() -> Vec<NoteData<'static>> {
         //         },
         NoteData {
             id: 2.into(),
-            text: "what can be better:
+            text: "# Title
+what can be better:
 * forget *about* smth;
-* existing _smth can_ be improved too;
+* existing _smth can_ be `improved too`;
   * read **documentation more** carefully.
-  * consider [this](https://tbt.qkation.com/about) this blog article.
+  * consider [this](https://tbt.qkation.com/about) this ~~blog~~ article.
 * https://tbt.qkation.com/about
+
+---
+
+quote:
+
+> Pheww, it starts looking like some kind of Frankenstein
+> by TheBestTvarynka
+
+## Second title
+
+1. First item
+2. Second item
+3. Third item
+
+### Third title
+
+#### Forth title
+
+another **_list_**:
 "
             .into(),
             created_at: datetime!(2024-05-014 15:03 UTC).into(),

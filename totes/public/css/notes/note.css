@@ -37,6 +37,30 @@
     color: var(--note_link_color);
 }
 
+.note .incline-code {
+    font-family: "JetBrains Mono", monospace;
+    cursor: pointer;
+}
+
+.note .quote {
+    padding-left: 0.5em;
+    border-left: 2px solid var(--note_quote_text_color);
+    color: var(--note_quote_text_color);
+}
+
+.note .text {
+    white-space: break-spaces;
+}
+
+.note .br {
+    border: 1px solid var(--note_text_color);
+    width: 100%;
+    height: 0;
+    content: " ";
+    margin-top: 0.2em;
+    margin-bottom: 0.2em;
+}
+
 .note-container .note-time {
     font-size: calc(var(--note_font_size) - 0.2em);
 }

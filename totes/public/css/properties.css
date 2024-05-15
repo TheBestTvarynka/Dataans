@@ -22,6 +22,7 @@ body {
 
     --note_background_color: #2a2f33;
     --note_text_color: #e0e0e7;
+    --note_quote_text_color: #bcbcc2;
     --note_font_size: 1em;
     --note_link_color: #35c9a2;
 }
