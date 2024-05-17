@@ -1,15 +1,16 @@
 use std::borrow::Cow;
 
 use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 
 use crate::CreationDate;
 
 /// Represent a note ID.
 #[derive(Serialize, Deserialize, Debug, Default, Copy, Clone)]
-pub struct Id(u32);
+pub struct Id(Uuid);
 
-impl From<u32> for Id {
-    fn from(value: u32) -> Self {
+impl From<Uuid> for Id {
+    fn from(value: Uuid) -> Self {
         Self(value)
     }
 }

@@ -1,15 +1,23 @@
 use std::borrow::Cow;
 
 use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 
 use crate::CreationDate;
 
 /// Represent a space ID.
 #[derive(Serialize, Deserialize, Debug, Default, Copy, Clone)]
-pub struct Id(u32);
+pub struct Id(Uuid);
 
-impl From<u32> for Id {
-    fn from(value: u32) -> Self {
+impl Id {
+    /// Returns the inner ID.
+    pub fn inner(&self) -> Uuid {
+        self.0
+    }
+}
+
+impl From<Uuid> for Id {
+    fn from(value: Uuid) -> Self {
         Self(value)
     }
 }
@@ -42,4 +50,20 @@ pub struct Space<'name> {
     /// Creation date.
     pub created_at: CreationDate,
     // TODO(@TheBestTvarynka): implement space avatar image.
+}
+
+/// Data that the app need to update the space.
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct UpdateSpace<'name> {
+    /// Space ID.
+    pub id: Id,
+    /// Space name.
+    pub name: Name<'name>,
+}
+
+/// Data that the app need to delete the space.
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct DeleteSpace {
+    /// Space ID.
+    pub id: Id,
 }
