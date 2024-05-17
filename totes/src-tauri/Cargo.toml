@@ -17,6 +17,11 @@ tauri-plugin-log = { git = "https://github.com/tauri-apps/plugins-workspace", br
 log = "0.4.21"
 common = { path = "../common" }
 toml = "0.8.12"
+polodb_core = "4.4.1"
+# TODO: move to workspace dependencies.
+time = {  version = "0.3.36", features = ["macros"] }
+# TODO: move to workspace dependencies.
+uuid = { version = "1.6.0", features = ["serde", "v4"] }
 
 [features]
 # This feature is used for production builds or when a dev server is not specified, DO NOT REMOVE!!

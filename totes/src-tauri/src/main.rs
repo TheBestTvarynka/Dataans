@@ -5,6 +5,7 @@
 extern crate log;
 
 mod config;
+mod totes;
 
 use tauri::{
     AppHandle, CustomMenuItem, GlobalShortcutManager, Manager, Result, RunEvent, SystemTray, SystemTrayEvent,
@@ -79,6 +80,7 @@ fn main() {
                 .targets([LogTarget::LogDir, LogTarget::Stdout, LogTarget::Webview])
                 .build(),
         )
+        .plugin(totes::init_totes_plugin())
         .invoke_handler(tauri::generate_handler![config::theme,])
         .build(tauri::generate_context!())
         .expect("error while building tauri application")
