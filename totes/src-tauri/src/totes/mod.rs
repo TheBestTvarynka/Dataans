@@ -1,3 +1,4 @@
+use common::TOTES_PLUGIN_NAME;
 use polodb_core::Database;
 use tauri::plugin::{Builder, TauriPlugin};
 use tauri::{Manager, Runtime};
@@ -5,7 +6,7 @@ use tauri::{Manager, Runtime};
 mod note;
 mod space;
 
-const DATABASE_FILEPATH: &str = "totes.db";
+const DATABASE_FILEPATH: &str = "../db/totes.db";
 const SPACES_COLLECTION_NAME: &str = "spaces";
 const NOTES_COLLECTION_NAME: &str = "notes";
 
@@ -23,7 +24,7 @@ impl TotesState {
 }
 
 pub fn init_totes_plugin<R: Runtime>() -> TauriPlugin<R> {
-    Builder::new("totes")
+    Builder::new(TOTES_PLUGIN_NAME)
         .invoke_handler(tauri::generate_handler![
             space::list_spaces,
             space::create_space,
