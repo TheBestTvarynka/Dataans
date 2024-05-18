@@ -94,10 +94,7 @@ pub fn render_md_node(node: &Node) -> HtmlElement<AnyElement> {
             <div class="quote">
                 {quote.children
                     .iter()
-                    .map(|child_node| {
-                        debug!("quote child node: {:?}", child_node);
-                        render_md_node(child_node)
-                    })
+                    .map(|child_node| render_md_node(child_node))
                     .collect::<Vec<_>>()}
             </div>
         }

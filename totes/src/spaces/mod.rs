@@ -3,42 +3,44 @@ mod tools;
 
 use common::space::Space as SpaceData;
 use leptos::*;
-use time::macros::datetime;
+use time::OffsetDateTime;
+use uuid::Uuid;
 
 use self::space::Space;
 use self::tools::Tools;
-
-fn get_spaces() -> Vec<SpaceData<'static>> {
-    vec![
-        SpaceData {
-            id: 1.into(),
-            name: "Q'Kation".into(),
-            created_at: datetime!(2024-05-014 15:03 UTC).into(),
-        },
-        SpaceData {
-            id: 2.into(),
-            name: "Memo".into(),
-            created_at: datetime!(2024-05-014 15:03 UTC).into(),
-        },
-        SpaceData {
-            id: 3.into(),
-            name: "2024 log".into(),
-            created_at: datetime!(2024-05-014 15:03 UTC).into(),
-        },
-    ]
-}
+use crate::backend::spaces::{create_space, list_spaces};
 
 #[component]
 pub fn Spaces() -> impl IntoView {
-    let spaces = get_spaces();
+    let (spaces, set_spaces) = create_signal(Vec::new());
 
     view! {
         <div class="spaces-container">
             <Tools />
             <div class="spaces">
-                {spaces.iter().cloned().map(|space| view! {
+                {move || spaces.get().iter().cloned().map(|space| view! {
                     <Space space={space} />
                 }).collect_view()}
+                <button on:click=move |_| {
+                    spawn_local(async move {
+                        let data = list_spaces().await;
+                        info!("{:?}", data);
+                        set_spaces.set(data.unwrap());
+                    })
+                }>"Load"</button>
+                <button on:click=move |_| {
+                    spawn_local(async move {
+                        let data = create_space(SpaceData {
+                            id: Uuid::new_v4().into(),
+                            name: "tbt_new_created_space".into(),
+                            created_at: OffsetDateTime::now_utc().into(),
+                        }).await;
+                        info!("{:?}", data);
+                        let data = list_spaces().await;
+                        info!("{:?}", data);
+                        set_spaces.set(data.unwrap());
+                    })
+                }>"Create"</button>
             </div>
         </div>
     }

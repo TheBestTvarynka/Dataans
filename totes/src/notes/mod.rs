@@ -6,6 +6,7 @@ mod note;
 use common::note::Note as NoteData;
 use leptos::{view, *};
 use time::macros::datetime;
+use uuid::Uuid;
 
 use self::editor::Editor;
 use self::info::Info;
@@ -33,7 +34,7 @@ fn gen_notes() -> Vec<NoteData<'static>> {
         //             created_at: datetime!(2024-05-01 12:43 UTC).into(),
         //         },
         NoteData {
-            id: 2.into(),
+            id: Uuid::new_v4().into(),
             text: "# Title
 what can be better:
 * forget *about* smth;

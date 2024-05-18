@@ -13,7 +13,6 @@ pub fn Note<'text>(note: NoteData<'text>) -> impl IntoView {
             position: None,
         })
     });
-    debug!("{:?}", md);
 
     view! {
         <div class="note-container">

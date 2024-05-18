@@ -1,3 +1,6 @@
+pub mod notes;
+pub mod spaces;
+
 use common::Theme;
 use serde::Serialize;
 use serde_wasm_bindgen::{from_value, to_value};
@@ -16,7 +19,6 @@ struct EmptyArgs {}
 pub async fn load_theme() -> Theme {
     let args = to_value(&EmptyArgs {}).expect("EmptyArgs serialization to JsValue should not fail.");
     let theme_value = invoke("theme", args).await;
-    trace!("{:?}", theme_value);
 
     from_value(theme_value).expect("Theme object deserialization from JsValue should not fail.")
 }
