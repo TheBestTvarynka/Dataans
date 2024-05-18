@@ -11,6 +11,10 @@ use crate::backend::spaces::list_spaces;
 pub fn Spaces() -> impl IntoView {
     let (spaces, set_spaces) = create_signal(Vec::new());
 
+    spawn_local(async move {
+        set_spaces.set(list_spaces().await.expect("list spaces should not fail"));
+    });
+
     view! {
         <div class="spaces-container">
             <Tools set_spaces />
@@ -18,13 +22,6 @@ pub fn Spaces() -> impl IntoView {
                 {move || spaces.get().iter().cloned().map(|space| view! {
                     <Space space={space} />
                 }).collect_view()}
-                <button on:click=move |_| {
-                    spawn_local(async move {
-                        let data = list_spaces().await;
-                        info!("{:?}", data);
-                        set_spaces.set(data.unwrap());
-                    })
-                }>"Load"</button>
             </div>
         </div>
     }
