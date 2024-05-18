@@ -31,4 +31,14 @@ body {
     --space_text_color: #e0e0e7;
     --space_hover_background_color: #3c4449;
     --space_selected_background_color: #35c9a2;
+
+    --input-border-color: #777783;
+    --input-background-color: #ababad;
+    --input-text-color: #282e33;
+
+    --tools-button-hover: #282e33;
+    --button-cancel-color: #ababad;
+    --button-ok-background-color: #ababad;
+    --button-ok-text-color: #282e33;
+    --button-ok-outline-color: #777783;
 }

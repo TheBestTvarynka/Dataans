@@ -26,6 +26,12 @@ impl From<Uuid> for Id {
 #[derive(Serialize, Deserialize, Debug, Default, Clone)]
 pub struct Name<'name>(Cow<'name, str>);
 
+impl From<String> for Name<'static> {
+    fn from(value: String) -> Self {
+        Self(Cow::Owned(value))
+    }
+}
+
 impl<'name> From<&'name str> for Name<'name> {
     fn from(value: &'name str) -> Self {
         Self(Cow::Borrowed(value))

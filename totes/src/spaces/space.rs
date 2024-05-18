@@ -1,6 +1,7 @@
 use common::space::Space as SpaceData;
 use leptos::*;
 
+#[allow(clippy::needless_lifetimes)]
 #[component]
 pub fn Space<'name>(space: SpaceData<'name>) -> impl IntoView {
     view! {

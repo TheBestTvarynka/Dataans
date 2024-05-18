@@ -12,3 +12,13 @@ body {
     margin: 0;
     height: 100%;
 }
+
+.horizontal {
+    display: flex;
+    flex-direction: row;
+    /*flex-wrap: wrap;*/
+    gap: 0.2em;
+    justify-content: flex-start;
+    align-items: center;
+    width: 100%;
+}

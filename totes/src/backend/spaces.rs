@@ -19,7 +19,7 @@ struct CreateSpaceArgs<'name> {
     space_data: Space<'name>,
 }
 
-pub async fn create_space<'name>(space_data: Space<'name>) -> Result<(), String> {
+pub async fn create_space(space_data: Space<'_>) -> Result<(), String> {
     let args = to_value(&CreateSpaceArgs { space_data }).expect("Space serialization to JsValue should not fail.");
     let result = invoke(&format!("plugin:{}|create_space", TOTES_PLUGIN_NAME), args).await;
     info!("{:?}", result);

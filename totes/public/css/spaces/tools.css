@@ -4,6 +4,77 @@
     background-color: var(--spaces_tools_background_color);
     color: var(--spaces_tools_text_color);
     display: inline-flex;
+    gap: 0.2em;
     justify-content: flex-start;
     align-items: center;
+}
+
+.tool {
+    background-color: transparent;
+    height: 2em;
+    padding: 0.2em;
+    margin: 0;
+    border-radius: 0.2em;
+    border: 1px solid transparent;
+    transition: 0.3s;
+}
+
+.tool:hover {
+    cursor: pointer;
+    transition: 0.3s;
+    background-color: var(--tools-button-hover);
+}
+
+.tool > img {
+    height: 100%;
+    width: auto;
+}
+
+.input {
+    border-radius: 3px;
+    margin: 0;
+    padding: 0.2em;
+    font-size: 0.9em;
+    transition: all 0.4s;
+    border: 3px solid transparent;
+    background: var(--input-background-color);
+    width: inherit;
+    color: var(--input-text-color);
+}
+
+.input:focus {
+    border-color: var(--input-border-color);
+    outline: none;
+}
+
+.button_ok {
+    height: 2em;
+    padding: 0.2em;
+    margin: 0;
+    border-radius: 0.3em;
+    border: 3px solid transparent;
+    transition: 0.3s;
+    background: var(--button-ok-background-color);
+    color: var(--button-ok-text-color);
+}
+
+.button_ok:hover {
+    cursor: pointer;
+    border: 3px solid var(--button-ok-outline-color);
+}
+
+.button_cancel {
+    height: 2em;
+    padding: 0.2em;
+    margin: 0;
+    border: 2px solid transparent;
+    border-radius: 0.2em;
+    transition: 0.3s;
+    background-color: transparent;
+    color: var(--button-cancel-color);
+}
+
+.button_cancel:hover {
+    cursor: pointer;
+    border: 2px solid var(--button-cancel-color);
 }
