@@ -41,4 +41,6 @@ body {
     --button-ok-background-color: #ababad;
     --button-ok-text-color: #282e33;
     --button-ok-outline-color: #777783;
+
+    --tools-panel-height: 2.5em;
 }

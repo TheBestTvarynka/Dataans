@@ -2,8 +2,12 @@
     display: inline-flex;
     background-color: var(--messages_info_background_color);
     color: var(--messages_info_text_color);
-    height: 2em;
+    height: var(--tools-panel-height);
     padding: 0.2em;
     justify-content: flex-start;
     align-items: center;
+}
+
+.info .space-name {
+    font-size: 1.5em;
 }

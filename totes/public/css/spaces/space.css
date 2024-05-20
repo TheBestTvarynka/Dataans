@@ -10,25 +10,28 @@
     display: inline-flex;
     gap: 0.3em;
     padding: 0.3em;
-    color: var(--space_text_color);
-    background-color: var(--space_background_color);
     font-size: var(--spaces_font_size);
     transition: all 0.2s;
 }
 
-/* TODO(@TheBestTvarynka): remove when the spaces functionality is implemented */
-.space:nth-child(2) {
-    background-color: var(--space_selected_background_color);
+.simple-space {
+    color: var(--space_text_color);
+    background-color: var(--space_background_color);
 }
 
-.space:nth-child(2):hover {
-    cursor: pointer;
-    background-color: var(--space_selected_background_color);
-}
-
-.space:hover {
+.simple-space:hover {
     cursor: pointer;
     background-color: var(--space_hover_background_color);
+}
+
+.selected-space {
+    color: var(--space_text_color);
+    background-color: var(--space_selected_background_color);
+}
+
+.selected-space:hover {
+    cursor: pointer;
+    background-color: var(--space_selected_background_color);
 }
 
 .space .space-title {
