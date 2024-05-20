@@ -37,7 +37,9 @@ pub fn update_space(state: State<'_, TotesState>, space_data: UpdateSpace<'stati
                 "id": space_data.id.inner().to_string(),
             },
             doc! {
-                "name": space_data.name.as_ref(),
+                "$set": doc! {
+                    "name": space_data.name.as_ref(),
+                }
             },
         )
         .expect("space insertion should not fail");
