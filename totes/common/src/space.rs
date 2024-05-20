@@ -6,7 +6,7 @@ use uuid::Uuid;
 use crate::CreationDate;
 
 /// Represent a space ID.
-#[derive(Serialize, Deserialize, Debug, Default, Copy, Clone)]
+#[derive(Serialize, Deserialize, Debug, Default, Copy, Clone, Eq, PartialEq)]
 pub struct Id(Uuid);
 
 impl Id {
@@ -23,7 +23,7 @@ impl From<Uuid> for Id {
 }
 
 /// Represents a space name.
-#[derive(Serialize, Deserialize, Debug, Default, Clone)]
+#[derive(Serialize, Deserialize, Debug, Default, Clone, Eq, PartialEq)]
 pub struct Name<'name>(Cow<'name, str>);
 
 impl From<String> for Name<'static> {
@@ -47,7 +47,7 @@ impl<'name> AsRef<str> for Name<'name> {
 /// Represents a space.
 ///
 /// Space - a collection of notes.
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Eq, PartialEq)]
 pub struct Space<'name> {
     /// Space ID.
     pub id: Id,

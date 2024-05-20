@@ -36,7 +36,7 @@ impl Theme {
 }
 
 /// Date and time when note was created.
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Eq, PartialEq)]
 pub struct CreationDate(OffsetDateTime);
 
 impl From<OffsetDateTime> for CreationDate {
