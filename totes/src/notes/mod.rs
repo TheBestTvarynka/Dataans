@@ -4,6 +4,7 @@ mod md_node;
 mod note;
 
 use common::note::Note as NoteData;
+use common::space::Space as SpaceData;
 use leptos::{view, *};
 use time::macros::datetime;
 use uuid::Uuid;
@@ -81,13 +82,27 @@ pub fn Notes() -> impl IntoView {
         |state, space| state.selected_space = Some(space),
     );
 
+    let (_, set_spaces) = create_slice(
+        global_state,
+        |state| state.spaces.clone(),
+        |state, spaces: Vec<SpaceData>| {
+            if let Some(selected_space) = state.selected_space.as_mut() {
+                let selected_space_id = selected_space.id;
+                if let Some(updated_space) = spaces.iter().find(|s| s.id == selected_space_id) {
+                    *selected_space = updated_space.clone();
+                }
+            }
+            state.spaces = spaces;
+        },
+    );
+
     view! {
         <div class="notes-container">
             <Show
                 when=move || current_state.get().is_some()
                 fallback=|| view! { <div /> }
             >
-                <Info current_space={current_state.get().unwrap()} />
+                <Info current_space={current_state.get().unwrap()} set_spaces />
             </Show>
             <div class="notes-inner">
                 <div class="notes">
