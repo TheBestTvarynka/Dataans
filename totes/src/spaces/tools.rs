@@ -6,7 +6,7 @@ use uuid::Uuid;
 use crate::backend::spaces::{create_space, list_spaces};
 
 #[component]
-pub fn Tools(set_spaces: WriteSignal<Vec<Space<'static>>>) -> impl IntoView {
+pub fn Tools(set_spaces: SignalSetter<Vec<Space<'static>>>) -> impl IntoView {
     let (show_input, set_show_input) = create_signal(false);
     let (space_name, set_space_name) = create_signal(String::new());
 

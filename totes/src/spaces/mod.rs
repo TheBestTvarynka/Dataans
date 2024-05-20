@@ -5,11 +5,18 @@ use leptos::*;
 
 use self::space::Space;
 use self::tools::Tools;
+use crate::app::GlobalState;
 use crate::backend::spaces::list_spaces;
 
 #[component]
 pub fn Spaces() -> impl IntoView {
-    let (spaces, set_spaces) = create_signal(Vec::new());
+    let global_state = expect_context::<RwSignal<GlobalState>>();
+
+    let (spaces, set_spaces) = create_slice(
+        global_state,
+        |state| state.spaces.clone(),
+        |state, spaces| state.spaces = spaces,
+    );
 
     spawn_local(async move {
         set_spaces.set(list_spaces().await.expect("list spaces should not fail"));
