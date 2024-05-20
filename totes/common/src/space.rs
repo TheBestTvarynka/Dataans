@@ -1,4 +1,5 @@
 use std::borrow::Cow;
+use std::fmt::Display;
 
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
@@ -29,6 +30,21 @@ pub struct Name<'name>(Cow<'name, str>);
 impl From<String> for Name<'static> {
     fn from(value: String) -> Self {
         Self(Cow::Owned(value))
+    }
+}
+
+impl From<Name<'_>> for String {
+    fn from(value: Name<'_>) -> Self {
+        match value.0 {
+            Cow::Borrowed(s) => s.to_owned(),
+            Cow::Owned(s) => s,
+        }
+    }
+}
+
+impl Display for Name<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.as_ref())
     }
 }
 
