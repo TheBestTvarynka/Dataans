@@ -11,6 +11,7 @@ use uuid::Uuid;
 use self::editor::Editor;
 use self::info::Info;
 use self::note::Note;
+use crate::app::GlobalState;
 
 // This code will be replaced with real ones.
 fn gen_notes() -> Vec<NoteData<'static>> {
@@ -72,9 +73,22 @@ another **_list_**:
 pub fn Notes() -> impl IntoView {
     let notes = gen_notes();
 
+    let global_state = expect_context::<RwSignal<GlobalState>>();
+
+    let (current_state, _) = create_slice(
+        global_state,
+        |state| state.selected_space.clone(),
+        |state, space| state.selected_space = Some(space),
+    );
+
     view! {
         <div class="notes-container">
-            <Info />
+            <Show
+                when=move || current_state.get().is_some()
+                fallback=|| view! { <div /> }
+            >
+                <Info current_space={current_state.get().unwrap()} />
+            </Show>
             <div class="notes-inner">
                 <div class="notes">
                     {notes
@@ -84,7 +98,9 @@ pub fn Notes() -> impl IntoView {
                         .collect::<Vec<_>>()
                     }
                 </div>
-                <Editor />
+                <Show when=move || current_state.get().is_some()>
+                    <Editor />
+                </Show>
             </div>
         </div>
     }

@@ -1,10 +1,11 @@
+use common::space::Space;
 use leptos::*;
 
 #[component]
-pub fn Info() -> impl IntoView {
+pub fn Info(current_space: Space<'static>) -> impl IntoView {
     view! {
         <div class="info">
-            "Info"
+            <span class="space-name">{String::from(current_space.name)}</span>
         </div>
     }
 }
