@@ -43,4 +43,11 @@ body {
     --button-ok-outline-color: #777783;
 
     --tools-panel-height: 2.5em;
+
+    --confirm-background-color: #3c4449;
+    --confirm-text-color: #e0e0e7;
+    --confirm-ok-button-background-color: #35c9a2;
+    --confirm-ok-button-text-color: #e0e0e7;
+    --confirm-cancel-button-background-color: #ababad;
+    --confirm-cancel-button-text-color: #282e33;
 }
