@@ -102,7 +102,7 @@ pub fn Info(current_space: Space<'static>, set_spaces: SignalSetter<Vec<Space<'s
                 <Confirm
                     message={format!("Confirm '{}' space deletion.", current_space.name.as_ref())}
                     on_confirm=move || delete_space()
-                    on_cancel=move || set_show_modal.set(false)
+                    on_cancel=move |_| set_show_modal.set(false)
                 />
             </Show>
         </div>
