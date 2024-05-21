@@ -90,6 +90,8 @@ pub fn Notes() -> impl IntoView {
                 let selected_space_id = selected_space.id;
                 if let Some(updated_space) = spaces.iter().find(|s| s.id == selected_space_id) {
                     *selected_space = updated_space.clone();
+                } else {
+                    state.selected_space = None;
                 }
             }
             state.spaces = spaces;

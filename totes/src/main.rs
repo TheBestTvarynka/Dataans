@@ -5,10 +5,10 @@ extern crate log;
 
 mod app;
 mod backend;
+mod common;
 mod notes;
 mod profile;
 mod spaces;
-mod common;
 
 use app::*;
 use leptos::*;

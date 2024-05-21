@@ -52,7 +52,7 @@ pub fn Tools(set_spaces: SignalSetter<Vec<Space<'static>>>) -> impl IntoView {
                         title="Create space"
                         on:click=move |_| create_space()
                     >
-                        "Ok"
+                        "Create"
                     </button>
                     <button
                         class="button_cancel"

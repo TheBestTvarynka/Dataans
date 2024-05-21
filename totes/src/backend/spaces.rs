@@ -1,4 +1,4 @@
-use common::space::{Space, UpdateSpace};
+use common::space::{DeleteSpace, Space, UpdateSpace};
 use common::TOTES_PLUGIN_NAME;
 use serde::{Deserialize, Serialize};
 use serde_wasm_bindgen::{from_value, to_value};
@@ -37,6 +37,21 @@ pub async fn update_space(space_data: UpdateSpace<'_>) -> Result<(), String> {
     let args =
         to_value(&UpdateSpaceArgs { space_data }).expect("UpdateSpace serialization to JsValue should not fail.");
     let result = invoke(&format!("plugin:{}|update_space", TOTES_PLUGIN_NAME), args).await;
+    info!("{:?}", result);
+
+    Ok(())
+}
+
+#[derive(Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct DeleteSpaceArgs {
+    space_data: DeleteSpace,
+}
+
+pub async fn delete_space(space_data: DeleteSpace) -> Result<(), String> {
+    let args =
+        to_value(&DeleteSpaceArgs { space_data }).expect("DeleteSpace serialization to JsValue should not fail.");
+    let result = invoke(&format!("plugin:{}|delete_space", TOTES_PLUGIN_NAME), args).await;
     info!("{:?}", result);
 
     Ok(())

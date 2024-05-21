@@ -1,13 +1,13 @@
-use common::space::{Space, UpdateSpace};
+use common::space::{DeleteSpace, Space, UpdateSpace};
 use leptos::*;
 
-use crate::backend::spaces::{list_spaces, update_space};
+use crate::backend::spaces::{delete_space, list_spaces, update_space};
 use crate::common::Confirm;
 
 #[component]
 pub fn Info(current_space: Space<'static>, set_spaces: SignalSetter<Vec<Space<'static>>>) -> impl IntoView {
     let (show_input, set_show_input) = create_signal(false);
-    let (show_modal, set_show_modal) = create_signal(true);
+    let (show_modal, set_show_modal) = create_signal(false);
     let (space_name, set_space_name) = create_signal(current_space.name.to_string());
 
     let update_space = move || {
@@ -19,6 +19,16 @@ pub fn Info(current_space: Space<'static>, set_spaces: SignalSetter<Vec<Space<'s
                 .expect("space updating should not fail");
             set_spaces.set(list_spaces().await.expect("list spaces should not fail"));
             set_show_input.set(false);
+        });
+    };
+
+    let delete_space = move || {
+        let id = current_space.id;
+        spawn_local(async move {
+            delete_space(DeleteSpace { id })
+                .await
+                .expect("space deleting should not fail");
+            set_spaces.set(list_spaces().await.expect("list spaces should not fail"));
         });
     };
 
@@ -58,7 +68,7 @@ pub fn Info(current_space: Space<'static>, set_spaces: SignalSetter<Vec<Space<'s
                                 class="button_ok"
                                 on:click=move |_| update_space()
                             >
-                                "Ok"
+                                "Update"
                             </button>
                             <button
                                 class="button_cancel"
@@ -90,8 +100,8 @@ pub fn Info(current_space: Space<'static>, set_spaces: SignalSetter<Vec<Space<'s
             </div>
             <Show when=move || show_modal.get()>
                 <Confirm
-                    message={format!("Confirm {} space deletion.", current_space.name.as_ref())}
-                    on_confirm=move || set_show_modal.set(false)
+                    message={format!("Confirm '{}' space deletion.", current_space.name.as_ref())}
+                    on_confirm=move || delete_space()
                     on_cancel=move || set_show_modal.set(false)
                 />
             </Show>
