@@ -8,7 +8,7 @@ pub fn render_md_node(node: &Node) -> HtmlElement<AnyElement> {
             <div class="note">
                 {root.children
                     .iter()
-                    .map(|child_node| render_md_node(child_node))
+                    .map(render_md_node)
                     .collect::<Vec<_>>()}
             </div>
         }
@@ -17,18 +17,14 @@ pub fn render_md_node(node: &Node) -> HtmlElement<AnyElement> {
             <p class="paragraph">
                 {paragraph.children
                     .iter()
-                    .map(|child_node| render_md_node(child_node))
+                    .map(render_md_node)
                     .collect::<Vec<_>>()}
             </p>
         }
         .into_any(),
         Node::ThematicBreak(_) => view! { <br class="br" /> }.into_any(),
         Node::Heading(heading) => {
-            let inner = heading
-                .children
-                .iter()
-                .map(|child| render_md_node(child))
-                .collect::<Vec<_>>();
+            let inner = heading.children.iter().map(render_md_node).collect::<Vec<_>>();
             match heading.depth {
                 1 => view! {
                     <h1>{inner}</h1>
@@ -67,7 +63,7 @@ pub fn render_md_node(node: &Node) -> HtmlElement<AnyElement> {
             <s>
                 {delete.children
                     .iter()
-                    .map(|child_node| render_md_node(child_node))
+                    .map(render_md_node)
                     .collect::<Vec<_>>()}
             </s>
         }
@@ -76,7 +72,7 @@ pub fn render_md_node(node: &Node) -> HtmlElement<AnyElement> {
             <em>
                 {emphasis.children
                     .iter()
-                    .map(|child_node| render_md_node(child_node))
+                    .map(render_md_node)
                     .collect::<Vec<_>>()}
             </em>
         }
@@ -85,7 +81,7 @@ pub fn render_md_node(node: &Node) -> HtmlElement<AnyElement> {
             <b>
                 {strong.children
                     .iter()
-                    .map(|child_node| render_md_node(child_node))
+                    .map(render_md_node)
                     .collect::<Vec<_>>()}
             </b>
         }
@@ -94,10 +90,7 @@ pub fn render_md_node(node: &Node) -> HtmlElement<AnyElement> {
             <div class="quote">
                 {quote.children
                     .iter()
-                    .map(|child_node| {
-                        debug!("quote child node: {:?}", child_node);
-                        render_md_node(child_node)
-                    })
+                    .map(render_md_node)
                     .collect::<Vec<_>>()}
             </div>
         }
@@ -106,7 +99,7 @@ pub fn render_md_node(node: &Node) -> HtmlElement<AnyElement> {
             <a class="link" href={&link.url} target="popup">
                 {link.children
                     .iter()
-                    .map(|child_node| render_md_node(child_node))
+                    .map(render_md_node)
                     .collect::<Vec<_>>()}
             </a>
         }
@@ -117,7 +110,7 @@ pub fn render_md_node(node: &Node) -> HtmlElement<AnyElement> {
                     <ol class="list" start={list.start.unwrap_or(1)}>
                         {list.children
                             .iter()
-                            .map(|list_item| render_md_node(list_item))
+                            .map(render_md_node)
                             .collect::<Vec<_>>()}
                     </ol>
                 }
@@ -127,7 +120,7 @@ pub fn render_md_node(node: &Node) -> HtmlElement<AnyElement> {
                     <ul class="list">
                         {list.children
                             .iter()
-                            .map(|list_item| render_md_node(list_item))
+                            .map(render_md_node)
                             .collect::<Vec<_>>()}
                     </ul>
                 }
@@ -138,7 +131,7 @@ pub fn render_md_node(node: &Node) -> HtmlElement<AnyElement> {
             <li>
                 {list_item.children
                     .iter()
-                    .map(|node| render_md_node(node))
+                    .map(render_md_node)
                     .collect_view()}
             </li>
         }

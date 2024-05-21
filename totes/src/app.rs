@@ -1,9 +1,18 @@
+use common::note::Note;
+use common::space::Space;
 use leptos::*;
 
 use crate::backend::load_theme;
 use crate::notes::Notes;
 use crate::profile::Profile;
 use crate::spaces::Spaces;
+
+#[derive(Debug, Clone, Default)]
+pub struct GlobalState {
+    pub spaces: Vec<Space<'static>>,
+    pub notes: Vec<Note<'static>>,
+    pub selected_space: Option<Space<'static>>,
+}
 
 #[component]
 pub fn App() -> impl IntoView {
@@ -13,6 +22,8 @@ pub fn App() -> impl IntoView {
         let theme = load_theme().await;
         set_theme_css.set(theme.to_css());
     });
+
+    provide_context(create_rw_signal(GlobalState::default()));
 
     view! {
         <main class="app" style={move || theme_css.get()}>

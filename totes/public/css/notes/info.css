@@ -2,8 +2,13 @@
     display: inline-flex;
     background-color: var(--messages_info_background_color);
     color: var(--messages_info_text_color);
-    height: 2em;
-    padding: 0.2em;
-    justify-content: flex-start;
+    height: var(--tools-panel-height);
+    padding: 0.2em 0.4em 0.2em 0.4em;
+    justify-content: space-between;
     align-items: center;
+    /*width: 100%;*/
+}
+
+.info .space-name {
+    font-size: 1.5em;
 }

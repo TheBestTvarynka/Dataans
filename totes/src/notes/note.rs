@@ -5,6 +5,7 @@ use markdown::ParseOptions;
 
 use crate::notes::md_node::render_md_node;
 
+#[allow(clippy::needless_lifetimes)]
 #[component]
 pub fn Note<'text>(note: NoteData<'text>) -> impl IntoView {
     let md = markdown::to_mdast(note.text.as_ref(), &ParseOptions::gfm()).unwrap_or_else(|_| {
@@ -13,7 +14,6 @@ pub fn Note<'text>(note: NoteData<'text>) -> impl IntoView {
             position: None,
         })
     });
-    debug!("{:?}", md);
 
     view! {
         <div class="note-container">

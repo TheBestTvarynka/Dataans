@@ -4,12 +4,15 @@ mod md_node;
 mod note;
 
 use common::note::Note as NoteData;
+use common::space::Space as SpaceData;
 use leptos::{view, *};
 use time::macros::datetime;
+use uuid::Uuid;
 
 use self::editor::Editor;
 use self::info::Info;
 use self::note::Note;
+use crate::app::GlobalState;
 
 // This code will be replaced with real ones.
 fn gen_notes() -> Vec<NoteData<'static>> {
@@ -33,7 +36,7 @@ fn gen_notes() -> Vec<NoteData<'static>> {
         //             created_at: datetime!(2024-05-01 12:43 UTC).into(),
         //         },
         NoteData {
-            id: 2.into(),
+            id: Uuid::new_v4().into(),
             text: "# Title
 what can be better:
 * forget *about* smth;
@@ -71,9 +74,38 @@ another **_list_**:
 pub fn Notes() -> impl IntoView {
     let notes = gen_notes();
 
+    let global_state = expect_context::<RwSignal<GlobalState>>();
+
+    let (current_state, _) = create_slice(
+        global_state,
+        |state| state.selected_space.clone(),
+        |state, space| state.selected_space = Some(space),
+    );
+
+    let (_, set_spaces) = create_slice(
+        global_state,
+        |state| state.spaces.clone(),
+        |state, spaces: Vec<SpaceData>| {
+            if let Some(selected_space) = state.selected_space.as_mut() {
+                let selected_space_id = selected_space.id;
+                if let Some(updated_space) = spaces.iter().find(|s| s.id == selected_space_id) {
+                    *selected_space = updated_space.clone();
+                } else {
+                    state.selected_space = None;
+                }
+            }
+            state.spaces = spaces;
+        },
+    );
+
     view! {
         <div class="notes-container">
-            <Info />
+            <Show
+                when=move || current_state.get().is_some()
+                fallback=|| view! { <div /> }
+            >
+                <Info current_space={current_state.get().unwrap()} set_spaces />
+            </Show>
             <div class="notes-inner">
                 <div class="notes">
                     {notes
@@ -83,7 +115,9 @@ pub fn Notes() -> impl IntoView {
                         .collect::<Vec<_>>()
                     }
                 </div>
-                <Editor />
+                <Show when=move || current_state.get().is_some()>
+                    <Editor />
+                </Show>
             </div>
         </div>
     }

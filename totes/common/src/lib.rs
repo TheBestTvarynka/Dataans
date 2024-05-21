@@ -11,6 +11,9 @@ use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
 use time::OffsetDateTime;
 
+/// Name of the custom tauri plugin.
+pub const TOTES_PLUGIN_NAME: &str = "totes";
+
 /// Totes app theme.
 ///
 /// The theme is just a collection of names and values. Every name
@@ -33,7 +36,7 @@ impl Theme {
 }
 
 /// Date and time when note was created.
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Eq, PartialEq)]
 pub struct CreationDate(OffsetDateTime);
 
 impl From<OffsetDateTime> for CreationDate {

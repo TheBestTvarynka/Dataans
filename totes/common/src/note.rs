@@ -1,21 +1,22 @@
 use std::borrow::Cow;
 
 use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 
 use crate::CreationDate;
 
 /// Represent a note ID.
-#[derive(Serialize, Deserialize, Debug, Default, Copy, Clone)]
-pub struct Id(u32);
+#[derive(Serialize, Deserialize, Debug, Default, Copy, Clone, Eq, PartialEq)]
+pub struct Id(Uuid);
 
-impl From<u32> for Id {
-    fn from(value: u32) -> Self {
+impl From<Uuid> for Id {
+    fn from(value: Uuid) -> Self {
         Self(value)
     }
 }
 
 /// Represent a note text.
-#[derive(Serialize, Deserialize, Debug, Default, Clone)]
+#[derive(Serialize, Deserialize, Debug, Default, Clone, Eq, PartialEq)]
 pub struct MdText<'text>(Cow<'text, str>);
 
 impl<'text> From<&'text str> for MdText<'text> {
@@ -31,7 +32,7 @@ impl<'text> AsRef<str> for MdText<'text> {
 }
 
 /// Represent one note.
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Eq, PartialEq)]
 pub struct Note<'text> {
     /// Note id.
     pub id: Id,

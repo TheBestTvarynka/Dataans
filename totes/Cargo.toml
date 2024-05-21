@@ -17,7 +17,8 @@ log = "0.4.21"
 wasm-logger = "0.2.0"
 common = { path = "./common" }
 markdown = { version = "1.0.0-alpha.17", features = ["log"]}
-time = {  version = "0.3.36", features = ["macros"] }
+time = {  version = "0.3.36", features = ["macros", "wasm-bindgen"] }
+uuid = { version = "1.6.1", features = ["v4"] }
 
 [workspace]
 members = ["common", "src-tauri"]
