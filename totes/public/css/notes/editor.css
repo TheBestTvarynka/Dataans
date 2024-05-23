@@ -5,6 +5,7 @@
     color: var(--messages_editor_text_color);
     height: 2em;
     padding: 0.2em;
+    gap: 0.2em;
     justify-content: flex-start;
     align-items: center;
 }
