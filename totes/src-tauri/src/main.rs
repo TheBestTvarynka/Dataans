@@ -21,6 +21,7 @@ const WINDOW_HIDE_TITLE: &str = "Hide";
 const WINDOW_SHOW_TITLE: &str = "Show";
 const WINDOW_QUIT_TITLE: &str = "Quit";
 
+// TODO: make it configurable.
 const GLOBAL_SHORTCUT_ACCELERATOR: &str = "F1";
 
 fn toggle_app_visibility(app: &AppHandle) -> Result<()> {
@@ -90,7 +91,7 @@ fn main() {
                 app_handle
                     .global_shortcut_manager()
                     .register(GLOBAL_SHORTCUT_ACCELERATOR, move || {
-                        println!("global shorcut: {}", GLOBAL_SHORTCUT_ACCELERATOR);
+                        info!("global shortcut: {}", GLOBAL_SHORTCUT_ACCELERATOR);
                         toggle_app_visibility(&app_handle).unwrap();
                     })
                     .unwrap();
