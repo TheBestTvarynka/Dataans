@@ -30,9 +30,8 @@ pub fn Editor(space_id: SpaceId, set_notes: SignalSetter<Vec<Note<'static>>>) ->
     };
 
     let key_down = move |key| {
-        info!("key: {}", key);
         if key == "Enter" {
-            create_note()
+            create_note();
         }
     };
 
@@ -44,7 +43,8 @@ pub fn Editor(space_id: SpaceId, set_notes: SignalSetter<Vec<Note<'static>>>) ->
                 class="input"
                 on:input=move |ev| set_note.set(event_target_value(&ev))
                 on:keydown=move |ev| key_down(ev.key())
-                prop.value=note
+                prop.value=move || note.get()
+                value=move || note.get()
             />
             <button on:click=move |_| create_note()>
                 "Send"
