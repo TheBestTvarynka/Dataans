@@ -62,5 +62,6 @@
 }
 
 .note-container .note-time {
-    font-size: calc(var(--note_font_size) - 0.2em);
+    font-size: calc(var(--note_font_size) - 0.3em);
+    color: var(--note-time-label-text-color);
 }

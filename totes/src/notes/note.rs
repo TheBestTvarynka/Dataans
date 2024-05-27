@@ -2,6 +2,7 @@ use common::note::Note as NoteData;
 use leptos::*;
 use markdown::mdast::{Node, Text};
 use markdown::ParseOptions;
+use time::OffsetDateTime;
 
 use crate::notes::md_node::render_md_node;
 
@@ -19,8 +20,12 @@ pub fn Note<'text>(note: NoteData<'text>) -> impl IntoView {
         <div class="note-container">
             {render_md_node(&md)}
             <div class="note-meta">
-                <span class="note-time">{note.created_at.as_ref().time().to_string()}</span>
+                <span class="note-time">{format_date(note.created_at.as_ref())}</span>
             </div>
         </div>
     }
+}
+
+fn format_date(date: &OffsetDateTime) -> String {
+    format!("{}:{} {}/{}/{}", date.hour(), date.minute(), date.day(), date.month(), date.year())
 }

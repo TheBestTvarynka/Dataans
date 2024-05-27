@@ -4,7 +4,7 @@ notes_border_color = "#18191d"
 profile_background_color = "#282e33"
 spaces_background_color = "#282e33"
 
-spaces_tools_background_color = "#3d444b"
+spaces_tools_background_color = "#282e33"
 spaces_tools_text_color = "#c6c4af"
 
 messages_info_background_color = "#282e33"
