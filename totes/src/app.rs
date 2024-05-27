@@ -29,7 +29,7 @@ pub fn App() -> impl IntoView {
         <main class="app" style={move || theme_css.get()}>
             <Spaces />
             <Notes />
-            <Profile />
+            // <Profile />
         </main>
     }
 }

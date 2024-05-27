@@ -3,6 +3,7 @@
     background-color: var(--messages_info_background_color);
     color: var(--messages_info_text_color);
     height: var(--tools-panel-height);
+    border-bottom: 1px solid var(--notes_border_color);
     padding: 0.2em 0.4em 0.2em 0.4em;
     justify-content: space-between;
     align-items: center;
