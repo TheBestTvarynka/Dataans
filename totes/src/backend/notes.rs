@@ -1,4 +1,4 @@
-use common::note::Note;
+use common::note::{Id as NoteId, Note};
 use common::space::Id as SpaceId;
 use common::TOTES_PLUGIN_NAME;
 use serde::{Deserialize, Serialize};
@@ -29,6 +29,20 @@ struct CreateNoteArgs<'text> {
 pub async fn create_note(note: Note<'_>) -> Result<(), String> {
     let args = to_value(&CreateNoteArgs { note }).expect("CreateNoteArgs serialization to JsValue should not fail.");
     let result = invoke(&format!("plugin:{}|create_note", TOTES_PLUGIN_NAME), args).await;
+    info!("{:?}", result);
+
+    Ok(())
+}
+
+#[derive(Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct DeleteNoteArgs {
+    pub note_id: NoteId,
+}
+
+pub async fn delete_note(note_id: NoteId) -> Result<(), String> {
+    let args = to_value(&DeleteNoteArgs { note_id }).expect("DeleteNoteArgs serialization to JsValue should not fail.");
+    let result = invoke(&format!("plugin:{}|delete_note", TOTES_PLUGIN_NAME), args).await;
     info!("{:?}", result);
 
     Ok(())

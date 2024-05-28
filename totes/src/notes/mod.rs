@@ -67,7 +67,7 @@ pub fn Notes() -> impl IntoView {
                         .iter()
                         .rev()
                         .cloned()
-                        .map(|note_data| view! { <Note note=note_data /> })
+                        .map(|note| view! { <Note note set_notes /> })
                         .collect::<Vec<_>>()
                     }
                 </div>

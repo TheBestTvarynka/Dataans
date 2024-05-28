@@ -10,6 +10,13 @@ use crate::CreationDate;
 #[derive(Serialize, Deserialize, Debug, Default, Copy, Clone, Eq, PartialEq)]
 pub struct Id(Uuid);
 
+impl Id {
+    /// Returns the inner ID.
+    pub fn inner(&self) -> Uuid {
+        self.0
+    }
+}
+
 impl From<Uuid> for Id {
     fn from(value: Uuid) -> Self {
         Self(value)
