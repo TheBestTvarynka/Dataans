@@ -32,6 +32,7 @@ pub fn init_totes_plugin<R: Runtime>() -> TauriPlugin<R> {
             space::delete_space,
             note::list_notes,
             note::create_note,
+            note::delete_note,
         ])
         .setup(|app_handle| {
             app_handle.manage(TotesState::init());
