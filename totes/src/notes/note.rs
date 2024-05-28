@@ -18,10 +18,26 @@ pub fn Note<'text>(note: NoteData<'text>) -> impl IntoView {
 
     view! {
         <div class="note-container">
-            {render_md_node(&md)}
             <div class="note-meta">
-                <span class="note-time">{format_date(note.created_at.as_ref())}</span>
+                <div class="horizontal note-tools">
+                    <button
+                        class="tool"
+                        title="Edit note"
+                    >
+                        <img alt="change space name" src="/public/icons/edit-space.svg" />
+                    </button>
+                    <button
+                        class="tool"
+                        title="Delete note"
+                    >
+                        <img alt="delete space" src="/public/icons/delete-space.png" />
+                    </button>
+                </div>
+                <div class="center-span">
+                    <span class="note-time">{format_date(note.created_at.as_ref())}</span>
+                </div>
             </div>
+            {render_md_node(&md)}
         </div>
     }
 }
