@@ -58,3 +58,12 @@ pub struct Note<'text> {
     pub space_id: SpaceId,
     // TODO(@TheBestTvarynka): implement attached files, photos, update time etc.
 }
+
+/// Represent note to update.
+#[derive(Serialize, Deserialize, Debug, Clone, Eq, PartialEq)]
+pub struct UpdateNote<'text> {
+    /// Note id.
+    pub id: Id,
+    /// Updated note text.
+    pub text: MdText<'text>,
+}

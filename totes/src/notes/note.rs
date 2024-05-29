@@ -1,17 +1,19 @@
-use common::note::Note as NoteData;
+use common::note::{Note as NoteData, UpdateNote};
 use leptos::*;
 use markdown::mdast::{Node, Text};
 use markdown::ParseOptions;
 use time::OffsetDateTime;
 
-use crate::backend::notes::{delete_note, list_notes};
+use crate::backend::notes::{delete_note, list_notes, update_note};
 use crate::common::Confirm;
 use crate::notes::md_node::render_md_node;
 
 #[allow(clippy::needless_lifetimes)]
 #[component]
-pub fn Note<'text>(note: NoteData<'text>, set_notes: SignalSetter<Vec<NoteData<'static>>>) -> impl IntoView {
+pub fn Note(note: NoteData<'static>, set_notes: SignalSetter<Vec<NoteData<'static>>>) -> impl IntoView {
     let (show_modal, set_show_modal) = create_signal(false);
+    let (edit_mode, set_edit_mode) = create_signal(false);
+    let (updated_note_text, set_updated_note_text) = create_signal(note.text.as_ref().to_owned());
 
     let md = markdown::to_mdast(note.text.as_ref(), &ParseOptions::gfm()).unwrap_or_else(|_| {
         Node::Text(Text {
@@ -29,6 +31,27 @@ pub fn Note<'text>(note: NoteData<'text>, set_notes: SignalSetter<Vec<NoteData<'
         });
     };
 
+    let update_note = move || {
+        let text = updated_note_text.get();
+        spawn_local(async move {
+            update_note(UpdateNote {
+                id: note_id,
+                text: text.into(),
+            })
+            .await
+            .expect("note updating should not fail");
+            set_notes.set(list_notes(space_id).await.expect("Notes listing should not fail"));
+        });
+    };
+
+    let key_down = move |key| {
+        if key == "Enter" {
+            update_note();
+        } else if key == "Escape" {
+            set_edit_mode.set(false);
+        }
+    };
+
     view! {
         <div class="note-container">
             <div class="note-meta">
@@ -36,6 +59,7 @@ pub fn Note<'text>(note: NoteData<'text>, set_notes: SignalSetter<Vec<NoteData<'
                     <button
                         class="tool"
                         title="Edit note"
+                        on:click=move |_| set_edit_mode.set(true)
                     >
                         <img alt="change space name" src="/public/icons/edit-space.svg" />
                     </button>
@@ -51,7 +75,36 @@ pub fn Note<'text>(note: NoteData<'text>, set_notes: SignalSetter<Vec<NoteData<'
                     <span class="note-time">{format_date(note.created_at.as_ref())}</span>
                 </div>
             </div>
-            {render_md_node(&md)}
+            {move || if edit_mode.get() {
+                view! {
+                    <div class="vertical">
+                        <textarea
+                            placeholder="New note text here..."
+                            prop:value={updated_note_text}
+                            on:input=move |ev| set_updated_note_text.set(event_target_value(&ev))
+                            on:keydown=move |ev| key_down(ev.key())
+                        />
+                        <div class="horizontal">
+                            <button
+                                class="tool"
+                                title="Discard changed"
+                                on:click=move |_| set_edit_mode.set(false)
+                            >
+                                <img alt="discard" src="/public/icons/cancel.png" />
+                            </button>
+                            <button
+                                class="tool"
+                                title="Save changes"
+                                on:click=move |_| update_note()
+                            >
+                                <img alt="save" src="/public/icons/accept.png" />
+                            </button>
+                        </div>
+                    </div>
+                }.into_any()
+            } else {
+                render_md_node(&md)
+            }}
             <Show when=move || show_modal.get()>
                 <Confirm
                     message={"Confirm note deletion.".to_owned()}
@@ -65,9 +118,10 @@ pub fn Note<'text>(note: NoteData<'text>, set_notes: SignalSetter<Vec<NoteData<'
 
 fn format_date(date: &OffsetDateTime) -> String {
     format!(
-        "{}:{} {}/{}/{}",
+        "{:02}:{:02}:{:02} {:02}/{}/{:04}",
         date.hour(),
         date.minute(),
+        date.second(),
         date.day(),
         date.month(),
         date.year()
