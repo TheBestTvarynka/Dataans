@@ -1,4 +1,4 @@
-use common::note::{Id as NoteId, Note};
+use common::note::{Id as NoteId, Note, UpdateNote};
 use common::space::Id as SpaceId;
 use polodb_core::bson::doc;
 use tauri::State;
@@ -27,6 +27,26 @@ pub fn create_note(state: State<'_, TotesState>, note: Note<'static>) -> Result<
     let collection = state.db.collection::<Note<'static>>(NOTES_COLLECTION_NAME);
 
     collection.insert_one(note).expect("Note insertion should not fail");
+
+    Ok(())
+}
+
+#[tauri::command]
+pub fn update_note(state: State<'_, TotesState>, note_data: UpdateNote<'_>) -> Result<(), String> {
+    let collection = state.db.collection::<Note<'static>>(NOTES_COLLECTION_NAME);
+
+    let _ = collection
+        .update_one(
+            doc! {
+                "id": note_data.id.inner().to_string(),
+            },
+            doc! {
+                "$set": doc! {
+                    "text": note_data.text.as_ref(),
+                }
+            },
+        )
+        .expect("Note updating should not fail");
 
     Ok(())
 }
