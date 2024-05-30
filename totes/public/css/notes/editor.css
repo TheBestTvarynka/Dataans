@@ -1,11 +1,40 @@
 
-.editor {
+.editor-container {
     display: inline-flex;
     background-color: var(--messages_editor_background_color);
     color: var(--messages_editor_text_color);
-    height: 2em;
-    padding: 0.2em;
-    gap: 0.2em;
     justify-content: flex-start;
     align-items: center;
+}
+
+.editor-input {
+    margin: 0;
+    width: inherit;
+    font-size: 0.9em;
+    flex-grow: 1;
+    position: relative;
+    padding: 0.6em;
+}
+
+.editor-input .editor-text {
+    white-space: pre-wrap;
+    color: transparent;
+    line-height: 1;
+    padding-bottom: 0.3em;
+}
+
+.editor-input .editor-text-textarea {
+    background-color: var(--messages_editor_background_color);
+    color: var(--note_text_color);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: calc(100% - 1.3em);
+    height: calc(100% - 1.3em);
+    padding: 0.5em;
+    border: none;
+    outline: none;
+    resize: none;
+    overflow: hidden;
+    line-height: 1.43;
 }

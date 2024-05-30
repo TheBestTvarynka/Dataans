@@ -31,21 +31,24 @@ pub fn Editor(space_id: SpaceId, set_notes: SignalSetter<Vec<Note<'static>>>) ->
 
     let key_down = move |key| {
         if key == "Enter" {
-            create_note();
+            // create_note();
         }
     };
 
     view! {
-        <div class="editor">
-            <input
-                type="text"
-                placeholder="Type a note..."
-                class="input"
-                on:input=move |ev| set_note.set(event_target_value(&ev))
-                on:keydown=move |ev| key_down(ev.key())
-                prop.value=move || note.get()
-                value=move || note.get()
-            />
+        <div class="editor-container">
+            <div class="editor-input">
+                <span class="editor-text">{move || format!("{} ", note.get())}</span>
+                <textarea
+                    type="text"
+                    placeholder="Type a note..."
+                    class="editor-text-textarea"
+                    on:input=move |ev| set_note.set(event_target_value(&ev))
+                    on:keydown=move |ev| key_down(ev.key())
+                    prop.value=move || note.get()
+                    value=move || note.get()
+                />
+            </div>
             <button on:click=move |_| create_note()>
                 "Send"
             </button>

@@ -17,6 +17,7 @@
     justify-content: flex-end;
     overflow-y: auto;
     scroll-behavior: smooth;
+    flex-grow: 1;
 }
 
 .notes {
