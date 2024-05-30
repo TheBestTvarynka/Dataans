@@ -5,6 +5,7 @@
     color: var(--messages_editor_text_color);
     justify-content: flex-start;
     align-items: center;
+    padding-right: 0.2em;
 }
 
 .editor-input {
@@ -21,6 +22,7 @@
     color: transparent;
     line-height: 1;
     padding-bottom: 0.3em;
+    word-break: break-word;
 }
 
 .editor-input .editor-text-textarea {

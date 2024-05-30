@@ -49,8 +49,8 @@ pub fn Editor(space_id: SpaceId, set_notes: SignalSetter<Vec<Note<'static>>>) ->
                     value=move || note.get()
                 />
             </div>
-            <button on:click=move |_| create_note()>
-                "Send"
+            <button on:click=move |_| create_note() title="Create note" class="tool">
+                <img alt="create note" src="/public/icons/create-note.png" />
             </button>
         </div>
     }
