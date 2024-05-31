@@ -30,9 +30,13 @@ pub fn Editor(space_id: SpaceId, set_notes: SignalSetter<Vec<Note<'static>>>) ->
         });
     };
 
+    let key_down = move |_key| {
+        //
+    };
+
     view! {
         <div class="editor-container">
-            <TextArea text={note} set_text=move |t| set_note.set(t) />
+            <TextArea text={note} set_text=move |t| set_note.set(t) key_down />
             <button on:click=move |_| create_note() title="Create note" class="create-note-button tool">
                 <img alt="create note" src="/public/icons/create-note.png" />
             </button>

@@ -1,11 +1,12 @@
 use common::note::{Note as NoteData, UpdateNote};
 use leptos::*;
+use leptos::web_sys::KeyboardEvent;
 use markdown::mdast::{Node, Text};
 use markdown::ParseOptions;
 use time::OffsetDateTime;
 
 use crate::backend::notes::{delete_note, list_notes, update_note};
-use crate::common::Confirm;
+use crate::common::{Confirm, TextArea};
 use crate::notes::md_node::render_md_node;
 
 #[allow(clippy::needless_lifetimes)]
@@ -44,7 +45,8 @@ pub fn Note(note: NoteData<'static>, set_notes: SignalSetter<Vec<NoteData<'stati
         });
     };
 
-    let key_down = move |key| {
+    let key_down = move |key: KeyboardEvent| {
+        let key = key.key();
         if key == "Enter" {
             update_note();
         } else if key == "Escape" {
@@ -78,12 +80,7 @@ pub fn Note(note: NoteData<'static>, set_notes: SignalSetter<Vec<NoteData<'stati
             {move || if edit_mode.get() {
                 view! {
                     <div class="vertical">
-                        <textarea
-                            placeholder="New note text here..."
-                            prop:value={updated_note_text}
-                            on:input=move |ev| set_updated_note_text.set(event_target_value(&ev))
-                            on:keydown=move |ev| key_down(ev.key())
-                        />
+                        <TextArea text={updated_note_text} set_text=move |t| set_updated_note_text.set(t) key_down />
                         <div class="horizontal">
                             <button
                                 class="tool"

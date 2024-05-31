@@ -30,7 +30,6 @@ body {
     gap: 0.2em;
     justify-content: flex-start;
     align-items: center;
-    width: 100%;
 }
 
 .center-span {
