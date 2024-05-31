@@ -1,6 +1,6 @@
 use common::note::{Note as NoteData, UpdateNote};
-use leptos::*;
 use leptos::web_sys::KeyboardEvent;
+use leptos::*;
 use markdown::mdast::{Node, Text};
 use markdown::ParseOptions;
 use time::OffsetDateTime;

@@ -15,6 +15,8 @@
     display: flex;
     flex-direction: column;
     gap: 0;
+    justify-content: flex-start;
+    width: 100%;
 }
 
 .note .paragraph {
@@ -41,6 +43,14 @@
 .note .incline-code {
     font-family: "JetBrains Mono", monospace;
     cursor: pointer;
+}
+
+.note .incline-code:hover {
+    background-color: #3C675B;
+}
+
+.note .incline-code:active {
+    background-color: var(--note_link_color);
 }
 
 .note .quote {

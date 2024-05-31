@@ -1,5 +1,5 @@
-use leptos::*;
 use leptos::web_sys::KeyboardEvent;
+use leptos::*;
 
 #[component]
 pub fn TextArea(
