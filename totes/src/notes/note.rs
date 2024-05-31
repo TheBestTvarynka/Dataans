@@ -55,6 +55,9 @@ pub fn Note(note: NoteData<'static>, set_notes: SignalSetter<Vec<NoteData<'stati
     view! {
         <div class="note-container">
             <div class="note-meta">
+                <div class="center-span">
+                    <span class="note-time">{format_date(note.created_at.as_ref())}</span>
+                </div>
                 <div class="horizontal note-tools">
                     <button
                         class="tool"
@@ -70,9 +73,6 @@ pub fn Note(note: NoteData<'static>, set_notes: SignalSetter<Vec<NoteData<'stati
                     >
                         <img alt="delete space" src="/public/icons/delete-space.png" />
                     </button>
-                </div>
-                <div class="center-span">
-                    <span class="note-time">{format_date(note.created_at.as_ref())}</span>
                 </div>
             </div>
             {move || if edit_mode.get() {

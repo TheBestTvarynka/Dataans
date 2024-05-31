@@ -5,6 +5,7 @@ use time::OffsetDateTime;
 use uuid::Uuid;
 
 use crate::backend::notes::{create_note, list_notes};
+use crate::common::TextArea;
 
 #[component]
 pub fn Editor(space_id: SpaceId, set_notes: SignalSetter<Vec<Note<'static>>>) -> impl IntoView {
@@ -29,27 +30,10 @@ pub fn Editor(space_id: SpaceId, set_notes: SignalSetter<Vec<Note<'static>>>) ->
         });
     };
 
-    let key_down = move |key| {
-        if key == "Enter" {
-            // create_note();
-        }
-    };
-
     view! {
         <div class="editor-container">
-            <div class="editor-input">
-                <span class="editor-text">{move || format!("{} ", note.get())}</span>
-                <textarea
-                    type="text"
-                    placeholder="Type a note..."
-                    class="editor-text-textarea"
-                    on:input=move |ev| set_note.set(event_target_value(&ev))
-                    on:keydown=move |ev| key_down(ev.key())
-                    prop.value=move || note.get()
-                    value=move || note.get()
-                />
-            </div>
-            <button on:click=move |_| create_note() title="Create note" class="tool">
+            <TextArea text={note} set_text=move |t| set_note.set(t) />
+            <button on:click=move |_| create_note() title="Create note" class="create-note-button tool">
                 <img alt="create note" src="/public/icons/create-note.png" />
             </button>
         </div>
