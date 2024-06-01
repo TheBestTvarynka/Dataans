@@ -5,7 +5,6 @@
     font-size: 0.9em;
     flex-grow: 1;
     position: relative;
-    padding: 0.6em;
 }
 
 .resizable-textarea .resizable-textarea-text {
@@ -14,6 +13,10 @@
     line-height: 1;
     padding-bottom: 0.3em;
     word-break: break-word;
+}
+
+.resizable-textarea .resizable-textarea-text-container {
+    padding: 0.7em;
 }
 
 .resizable-textarea .resizable-textarea-textarea {
@@ -28,6 +31,5 @@
     border: none;
     outline: none;
     resize: none;
-    overflow: hidden;
     line-height: 1.43;
 }

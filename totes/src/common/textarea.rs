@@ -9,7 +9,9 @@ pub fn TextArea(
 ) -> impl IntoView {
     view! {
         <div class="resizable-textarea">
-            <span class="resizable-textarea-text">{move || format!("{} ", text.get())}</span>
+            <div class="resizable-textarea-text-container">
+                <span class="resizable-textarea-text">{move || format!("{} ", text.get())}</span>
+            </div>
             <textarea
                 type="text"
                 placeholder="Type a note..."
