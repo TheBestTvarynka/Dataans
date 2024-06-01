@@ -3,11 +3,19 @@ use std::borrow::Cow;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
+use crate::space::Id as SpaceId;
 use crate::CreationDate;
 
 /// Represent a note ID.
 #[derive(Serialize, Deserialize, Debug, Default, Copy, Clone, Eq, PartialEq)]
 pub struct Id(Uuid);
+
+impl Id {
+    /// Returns the inner ID.
+    pub fn inner(&self) -> Uuid {
+        self.0
+    }
+}
 
 impl From<Uuid> for Id {
     fn from(value: Uuid) -> Self {
@@ -18,6 +26,12 @@ impl From<Uuid> for Id {
 /// Represent a note text.
 #[derive(Serialize, Deserialize, Debug, Default, Clone, Eq, PartialEq)]
 pub struct MdText<'text>(Cow<'text, str>);
+
+impl From<String> for MdText<'static> {
+    fn from(value: String) -> Self {
+        Self(Cow::Owned(value))
+    }
+}
 
 impl<'text> From<&'text str> for MdText<'text> {
     fn from(value: &'text str) -> Self {
@@ -40,5 +54,16 @@ pub struct Note<'text> {
     pub text: MdText<'text>,
     /// Creation date.
     pub created_at: CreationDate,
+    /// Space ID this note belongs.
+    pub space_id: SpaceId,
     // TODO(@TheBestTvarynka): implement attached files, photos, update time etc.
+}
+
+/// Represent note to update.
+#[derive(Serialize, Deserialize, Debug, Clone, Eq, PartialEq)]
+pub struct UpdateNote<'text> {
+    /// Note id.
+    pub id: Id,
+    /// Updated note text.
+    pub text: MdText<'text>,
 }

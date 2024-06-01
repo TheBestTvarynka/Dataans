@@ -11,13 +11,14 @@ body {
     --profile_background_color: #282e33;
     --spaces_background_color: #282e33;
 
-    --spaces_tools_background_color: #3d444b;
+    --spaces_tools_background_color: #282e33;
+    --spaces_tools_border_color: #c6c4af;
     --spaces_tools_text_color: #c6c4af;
 
     --messages_info_background_color: #282e33;
     --messages_info_text_color: #ababad;
 
-    --messages_editor_background_color: #282e33;
+    --messages_editor_background_color: #2d4042;
     --messages_editor_text_color: #ababad;
 
     --note_background_color: #2a2f33;
@@ -25,6 +26,7 @@ body {
     --note_quote_text_color: #bcbcc2;
     --note_font_size: 1em;
     --note_link_color: #35c9a2;
+    --note-time-label-text-color: #b0bbb5;
 
     --spaces_font_size: 1.3em;
     --space_background_color: #282e33;
@@ -42,7 +44,7 @@ body {
     --button-ok-text-color: #282e33;
     --button-ok-outline-color: #777783;
 
-    --tools-panel-height: 2.5em;
+    --tools-panel-height: 40px;
 
     --confirm-background-color: #3c4449;
     --confirm-text-color: #e0e0e7;

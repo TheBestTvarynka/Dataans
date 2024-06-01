@@ -1,10 +1,13 @@
 
-.editor {
+.editor-container {
     display: inline-flex;
     background-color: var(--messages_editor_background_color);
     color: var(--messages_editor_text_color);
-    height: 2em;
-    padding: 0.2em;
     justify-content: flex-start;
-    align-items: center;
+    align-items: flex-end;
+    padding-right: 0.2em;
+}
+
+.create-note-button {
+    margin-bottom: 0.26em;
 }

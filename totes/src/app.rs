@@ -4,7 +4,7 @@ use leptos::*;
 
 use crate::backend::load_theme;
 use crate::notes::Notes;
-use crate::profile::Profile;
+// use crate::profile::Profile;
 use crate::spaces::Spaces;
 
 #[derive(Debug, Clone, Default)]
@@ -29,7 +29,7 @@ pub fn App() -> impl IntoView {
         <main class="app" style={move || theme_css.get()}>
             <Spaces />
             <Notes />
-            <Profile />
+            // <Profile />
         </main>
     }
 }

@@ -7,7 +7,7 @@
     background-color: var(--notes_background_color);
     border-right: 1px solid var(--notes_border_color);
     border-left: 1px solid var(--notes_border_color);
-    height: 100%;
+    max-height: 100vh;
 }
 
 .notes-inner {
@@ -15,12 +15,17 @@
     flex-direction: column;
     gap: 0;
     justify-content: flex-end;
+    overflow-y: auto;
+    scroll-behavior: smooth;
+    flex-grow: 1;
 }
 
 .notes {
     display: flex;
-    flex-direction: column;
+    flex-direction: column-reverse;
     align-items: flex-start;
     gap: 0.3em;
     padding: 0.3em;
+    overflow-y: auto;
+    scroll-behavior: smooth;
 }

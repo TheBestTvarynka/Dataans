@@ -57,7 +57,19 @@ pub fn render_md_node(node: &Node) -> HtmlElement<AnyElement> {
                 .into_any(),
             }
         }
-        Node::InlineCode(code) => view! { <span class="incline-code">{&code.value}</span> }.into_any(),
+        Node::InlineCode(code) => {
+            let code_value = code.value.clone();
+            view! {
+                <span class="incline-code" on:click=move |_| {
+                    if let Some(clipboard) = window().navigator().clipboard() {
+                        let _ = clipboard.write_text(&code_value);
+                    } else {
+                        error!("clipboard is not defined.")
+                    }
+                }>{&code.value}</span>
+            }
+            .into_any()
+        }
         Node::Text(text) => view! { <span class="text">{&text.value}</span> }.into_any(),
         Node::Delete(delete) => view! {
             <s>
