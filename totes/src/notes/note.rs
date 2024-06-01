@@ -60,7 +60,7 @@ pub fn Note(note: NoteData<'static>, set_notes: SignalSetter<Vec<NoteData<'stati
                 <div class="center-span">
                     <span class="note-time">{format_date(note.created_at.as_ref())}</span>
                 </div>
-                <div class="horizontal note-tools">
+                <div class="note-tools">
                     <button
                         class="tool"
                         title="Edit note"

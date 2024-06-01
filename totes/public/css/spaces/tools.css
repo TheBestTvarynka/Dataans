@@ -16,7 +16,7 @@
     padding: 0.2em;
     border-radius: 0.2em;
     border: 1px solid transparent;
-    transition: 0.3s;
+    transition: 0.1s;
 }
 
 .tool:hover {

@@ -79,6 +79,13 @@
     text-wrap: nowrap;
 }
 
+.note-tools {
+    display: inline-flex;
+    gap: 0.2em;
+    justify-content: flex-start;
+    align-items: center;
+}
+
 .note-meta .note-tools {
     visibility: hidden;
 }
