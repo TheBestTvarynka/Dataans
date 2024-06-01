@@ -3,6 +3,7 @@ use common::space::Id as SpaceId;
 use leptos::*;
 use time::OffsetDateTime;
 use uuid::Uuid;
+use web_sys::KeyboardEvent;
 
 use crate::backend::notes::{create_note, list_notes};
 use crate::common::TextArea;
@@ -30,8 +31,10 @@ pub fn Editor(space_id: SpaceId, set_notes: SignalSetter<Vec<Note<'static>>>) ->
         });
     };
 
-    let key_down = move |_key| {
-        //
+    let key_down = move |key: KeyboardEvent| {
+        if key.key() == "Enter" && !key.shift_key() {
+            create_note();
+        }
     };
 
     view! {

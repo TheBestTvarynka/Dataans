@@ -46,10 +46,9 @@ pub fn Note(note: NoteData<'static>, set_notes: SignalSetter<Vec<NoteData<'stati
     };
 
     let key_down = move |key: KeyboardEvent| {
-        let key = key.key();
-        if key == "Enter" {
-            // update_note();
-        } else if key == "Escape" {
+        if key.key() == "Enter" && !key.shift_key() {
+            update_note();
+        } else if key.key() == "Escape" {
             set_edit_mode.set(false);
         }
     };
