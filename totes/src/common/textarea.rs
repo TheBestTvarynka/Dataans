@@ -18,7 +18,7 @@ pub fn TextArea(
                 class="resizable-textarea-textarea"
                 on:input=move |ev| set_text.call(event_target_value(&ev))
                 on:keydown=move |ev| key_down.call(ev)
-                prop.value=move || text.get()
+                prop:value=move || text.get()
             >
                 {text.get_untracked()}
             </textarea>
