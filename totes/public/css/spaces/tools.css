@@ -39,7 +39,7 @@
     transition: all 0.4s;
     border: 3px solid transparent;
     background: var(--input-background-color);
-    width: inherit;
+    /*width: inherit;*/
     color: var(--input-text-color);
 }
 

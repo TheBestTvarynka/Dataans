@@ -17,9 +17,21 @@
         "all": false,
         "open": true
       },
+      "protocol": {
+        "asset": true,
+        "assetScope": [
+          "$APPCACHE/**",
+          "$RESOURCE/**",
+          "$APPDATA/**"
+        ]
+      },
       "fs": {
         "all": true,
-        "scope": ["$HOME/.config/totes/*"],
+        "scope": [
+          "$HOME/.config/totes/*",
+          "$APPCACHE/**",
+          "$RESOURCE/**"
+        ],
         "readFile": true,
         "writeFile": true,
         "readDir": true,
@@ -39,7 +51,7 @@
       }
     ],
     "security": {
-      "csp": null
+      "csp": "default-src 'self'; img-src 'self' asset: http://asset.localhost"
     },
     "bundle": {
       "active": true,

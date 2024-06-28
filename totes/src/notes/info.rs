@@ -1,26 +1,14 @@
-use common::space::{DeleteSpace, Space, UpdateSpace};
+use common::space::{DeleteSpace, OwnedSpace};
 use leptos::*;
 
-use crate::backend::spaces::{delete_space, list_spaces, update_space};
-use crate::common::Confirm;
+use crate::backend::spaces::{delete_space, list_spaces};
+use crate::common::{Confirm, Modal};
+use crate::spaces::space_form::SpaceForm;
 
 #[component]
-pub fn Info(current_space: Space<'static>, set_spaces: SignalSetter<Vec<Space<'static>>>) -> impl IntoView {
-    let (show_input, set_show_input) = create_signal(false);
+pub fn Info(current_space: OwnedSpace, set_spaces: SignalSetter<Vec<OwnedSpace>>) -> impl IntoView {
+    let (show_edit_modal, set_show_edit_modal) = create_signal(false);
     let (show_modal, set_show_modal) = create_signal(false);
-    let (space_name, set_space_name) = create_signal(current_space.name.to_string());
-
-    let update_space = move || {
-        let id = current_space.id;
-        let name = space_name.get();
-        spawn_local(async move {
-            update_space(UpdateSpace { id, name: name.into() })
-                .await
-                .expect("space updating should not fail");
-            set_spaces.set(list_spaces().await.expect("list spaces should not fail"));
-            set_show_input.set(false);
-        });
-    };
 
     let delete_space = move || {
         let id = current_space.id;
@@ -32,71 +20,29 @@ pub fn Info(current_space: Space<'static>, set_spaces: SignalSetter<Vec<Space<'s
         });
     };
 
-    let key_down = move |key| {
-        if key == "Enter" {
-            update_space();
-        } else if key == "Escape" {
-            set_show_input.set(false);
-        }
-    };
-
     let current_space_name = current_space.name.to_string();
+    let space = Some(current_space.clone());
 
     view! {
         <div class="info">
-            {move || match show_input.get() {
-                true => view! {
-                    <input
-                        type="text"
-                        placeholder="Space name"
-                        class="input"
-                        on:input=move |ev| set_space_name.set(event_target_value(&ev))
-                        on:keydown=move |ev| key_down(ev.key())
-                        prop.value=space_name
-                        value=space_name
-                    />
-                }.into_any(),
-                false => view! {
-                    <span class="space-name">{current_space_name.clone()}</span>
-                }.into_any(),
-            }}
+            <span class="space-name">{current_space_name.clone()}</span>
             <div>
-                {move || match show_input.get() {
-                    true => view! {
-                        <div class="horizontal">
-                            <button
-                                class="button_ok"
-                                on:click=move |_| update_space()
-                            >
-                                "Update"
-                            </button>
-                            <button
-                                class="button_cancel"
-                                on:click=move |_| set_show_input.set(false)
-                            >
-                                "Cancel"
-                            </button>
-                        </div>
-                    }.into_any(),
-                    false => view! {
-                        <div class="horizontal">
-                            <button
-                                class="tool"
-                                title="Change space name"
-                                on:click=move |_| set_show_input.set(true)
-                            >
-                                <img alt="change space name" src="/public/icons/edit-space.svg" />
-                            </button>
-                            <button
-                                class="tool"
-                                title="Delete space"
-                                on:click=move |_| set_show_modal.set(true)
-                            >
-                                <img alt="delete space" src="/public/icons/delete-space.png" />
-                            </button>
-                        </div>
-                    }.into_any(),
-                }}
+                <div class="horizontal">
+                    <button
+                        class="tool"
+                        title="Edit space info"
+                        on:click=move |_| set_show_edit_modal.set(true)
+                    >
+                        <img alt="change space name" src="/public/icons/edit-space.svg" />
+                    </button>
+                    <button
+                        class="tool"
+                        title="Delete space"
+                        on:click=move |_| set_show_modal.set(true)
+                    >
+                        <img alt="delete space" src="/public/icons/delete-space.png" />
+                    </button>
+                </div>
             </div>
             <Show when=move || show_modal.get()>
                 <Confirm
@@ -105,6 +51,18 @@ pub fn Info(current_space: Space<'static>, set_spaces: SignalSetter<Vec<Space<'s
                     on_cancel=move |_| set_show_modal.set(false)
                 />
             </Show>
+            <Show when=move || show_edit_modal.get()>{
+                let space = space.clone();
+                view! {
+                    <Modal>
+                        <SpaceForm
+                            space
+                            on_cancel=move |_| set_show_edit_modal.set(false)
+                            set_spaces
+                        />
+                    </Modal>
+                }
+            }</Show>
         </div>
     }
 }

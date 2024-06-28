@@ -45,3 +45,40 @@
     height: 2em;
     width: auto;
 }
+
+.create-space-window {
+    display: flex;
+    flex-direction: column;
+    padding: 1em;
+    gap: 0.4em;
+    width: 30%;
+    background-color: var(--spaces_background_color);
+    border-radius: 0.5em;
+}
+
+.create-space-title {
+    font-size: 1.5em;
+}
+
+.create-space-buttons {
+    display: flex;
+    flex-direction: row;
+    gap: 0.2em;
+    justify-content: flex-end;
+    align-items: center;
+    width: 100%;
+}
+
+.create-space-avatar {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3em;
+    justify-content: center;
+    align-items: center;
+}
+
+.create-space-avatar-img {
+    border-radius: 0.5em;
+    height: 4em;
+    width: 4em;
+}

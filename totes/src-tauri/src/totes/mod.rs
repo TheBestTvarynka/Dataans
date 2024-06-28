@@ -56,7 +56,7 @@ mod tests {
     fn seed_database() {
         let db = Database::open_file(DATABASE_FILEPATH).expect("Database opening should not fail.");
 
-        let spaces = db.collection::<Space<'static>>(NOTES_COLLECTION_NAME);
+        let spaces = db.collection::<OwnedSpace>(NOTES_COLLECTION_NAME);
         spaces.drop().expect("Can not drop spaces collection");
         let notes = db.collection::<Note>(NOTES_COLLECTION_NAME);
         notes.drop().expect("Can not drop notes collection");
@@ -66,7 +66,7 @@ mod tests {
         db.create_collection(NOTES_COLLECTION_NAME)
             .expect("notes collection creation should not fail.");
 
-        let spaces = db.collection::<Space<'static>>(NOTES_COLLECTION_NAME);
+        let spaces = db.collection::<OwnedSpace>(NOTES_COLLECTION_NAME);
         spaces
             .insert_many(vec![
                 Space {
