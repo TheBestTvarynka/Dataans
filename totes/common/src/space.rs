@@ -43,7 +43,7 @@ impl From<Name<'_>> for String {
 }
 
 impl Display for Name<'_> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.as_ref())
     }
 }
@@ -109,6 +109,8 @@ pub struct UpdateSpace<'name> {
     pub id: Id,
     /// Space name.
     pub name: Name<'name>,
+    /// Space avatar.
+    pub avatar: Avatar<'static>,
 }
 
 /// Data that the app need to delete the space.

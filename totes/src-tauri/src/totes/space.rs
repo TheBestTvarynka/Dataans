@@ -39,6 +39,7 @@ pub fn update_space(state: State<'_, TotesState>, space_data: UpdateSpace<'stati
             doc! {
                 "$set": doc! {
                     "name": space_data.name.as_ref(),
+                    "avatar": space_data.avatar.as_ref(),
                 }
             },
         )
