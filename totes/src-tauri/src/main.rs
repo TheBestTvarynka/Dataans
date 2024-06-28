@@ -84,7 +84,11 @@ fn main() {
                 .build(),
         )
         .plugin(totes::init_totes_plugin())
-        .invoke_handler(tauri::generate_handler![config::theme, image::image_path,])
+        .invoke_handler(tauri::generate_handler![
+            config::theme,
+            image::image_path,
+            image::gen_random_avatar
+        ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application")
         .run(|app_handle, event| match event {
