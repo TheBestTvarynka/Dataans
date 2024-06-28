@@ -2,11 +2,11 @@ use common::space::OwnedSpace;
 use leptos::*;
 
 use crate::common::Modal;
-use crate::spaces::create_space::CreateSpace;
+use crate::spaces::space_form::SpaceForm;
 
 #[component]
 pub fn Tools(set_spaces: SignalSetter<Vec<OwnedSpace>>) -> impl IntoView {
-    let (show_modal, set_show_modal) = create_signal(true);
+    let (show_modal, set_show_modal) = create_signal(false);
 
     view! {
         <div class="tools">
@@ -15,7 +15,8 @@ pub fn Tools(set_spaces: SignalSetter<Vec<OwnedSpace>>) -> impl IntoView {
             </button>
             <Show when=move || show_modal.get()>
                 <Modal>
-                    <CreateSpace
+                    <SpaceForm
+                        space=None
                         on_cancel=move |_| set_show_modal.set(false)
                         set_spaces
                     />

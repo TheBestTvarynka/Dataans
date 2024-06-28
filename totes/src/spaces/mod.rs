@@ -1,5 +1,5 @@
-mod create_space;
 mod space;
+pub mod space_form;
 mod tools;
 
 use common::space::OwnedSpace;
