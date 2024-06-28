@@ -7,6 +7,7 @@ use leptos::*;
 use self::space::Space;
 use self::tools::Tools;
 use crate::app::GlobalState;
+use crate::backend::image_path;
 use crate::backend::notes::list_notes;
 use crate::backend::spaces::list_spaces;
 
@@ -37,6 +38,11 @@ pub fn Spaces() -> impl IntoView {
         });
     };
 
+    let (path, set_path) = create_signal(String::new());
+    spawn_local(async move {
+        set_path.set(image_path("2024-06-09_21-28.png".into()).await);
+    });
+
     spawn_local(async move {
         set_spaces.set(list_spaces().await.expect("list spaces should not fail"));
     });
@@ -49,6 +55,7 @@ pub fn Spaces() -> impl IntoView {
                     let selected = selected_space.get().as_ref().map(|selected| selected.id == space.id).unwrap_or_default();
                     view! { <Space space set_selected_space selected /> }
                 }).collect_view()}
+                <img src={move || path} alt="avatar_img" />
             </div>
         </div>
     }
