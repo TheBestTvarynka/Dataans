@@ -1,5 +1,5 @@
 use std::borrow::Cow;
-use std::fmt::Display;
+use std::fmt::{Display, Formatter};
 
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
@@ -60,19 +60,47 @@ impl<'name> AsRef<str> for Name<'name> {
     }
 }
 
+/// Represents space avatar file name.
+///
+/// Example: `461d7188-062a-4514-bece-3577624d0ee8.png`.
+#[derive(Serialize, Deserialize, Debug, Default, Clone, Eq, PartialEq)]
+pub struct Avatar<'avatar>(Cow<'avatar, str>);
+
+impl From<String> for Avatar<'static> {
+    fn from(value: String) -> Self {
+        Self(Cow::Owned(value))
+    }
+}
+
+impl Display for Avatar<'_> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_str(self.0.as_ref())
+    }
+}
+
+impl<'name> AsRef<str> for Avatar<'name> {
+    fn as_ref(&self) -> &str {
+        self.0.as_ref()
+    }
+}
+
 /// Represents a space.
 ///
 /// Space - a collection of notes.
 #[derive(Serialize, Deserialize, Debug, Clone, Eq, PartialEq)]
-pub struct Space<'name> {
+pub struct Space<'name, 'avatar> {
     /// Space ID.
     pub id: Id,
     /// Space name.
     pub name: Name<'name>,
     /// Creation date.
     pub created_at: CreationDate,
-    // TODO(@TheBestTvarynka): implement space avatar image.
+    /// Avatar image name.
+    pub avatar: Avatar<'avatar>,
 }
+
+/// Owned version of [Space].
+pub type OwnedSpace = Space<'static, 'static>;
 
 /// Data that the app need to update the space.
 #[derive(Serialize, Deserialize, Debug, Clone)]
