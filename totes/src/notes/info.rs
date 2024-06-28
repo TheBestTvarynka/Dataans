@@ -1,11 +1,11 @@
-use common::space::{DeleteSpace, Space, UpdateSpace};
+use common::space::{DeleteSpace, OwnedSpace, UpdateSpace};
 use leptos::*;
 
 use crate::backend::spaces::{delete_space, list_spaces, update_space};
 use crate::common::Confirm;
 
 #[component]
-pub fn Info(current_space: Space<'static>, set_spaces: SignalSetter<Vec<Space<'static>>>) -> impl IntoView {
+pub fn Info(current_space: OwnedSpace, set_spaces: SignalSetter<Vec<OwnedSpace>>) -> impl IntoView {
     let (show_input, set_show_input) = create_signal(false);
     let (show_modal, set_show_modal) = create_signal(false);
     let (space_name, set_space_name) = create_signal(current_space.name.to_string());

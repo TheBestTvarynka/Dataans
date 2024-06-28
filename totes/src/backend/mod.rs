@@ -27,20 +27,20 @@ pub async fn load_theme() -> Theme {
     from_value(theme_value).expect("Theme object deserialization from JsValue should not fail.")
 }
 
-#[derive(Serialize)]
-#[serde(rename_all = "camelCase")]
-struct ImageName {
-    image_name: String,
-}
-
-pub async fn image_path(image_name: String) -> String {
-    let args = to_value(&ImageName { image_name }).expect("ImageName serialization to JsValue should not fail.");
-    let image_path = invoke("image_path", args).await;
-
-    let image_path: String =
-        from_value(image_path).expect("Theme object deserialization from JsValue should not fail.");
-    convert_file_src(image_path)
-}
+// #[derive(Serialize)]
+// #[serde(rename_all = "camelCase")]
+// struct ImageName {
+//     image_name: String,
+// }
+//
+// pub async fn image_path(image_name: String) -> String {
+//     let args = to_value(&ImageName { image_name }).expect("ImageName serialization to JsValue should not fail.");
+//     let image_path = invoke("image_path", args).await;
+//
+//     let image_path: String =
+//         from_value(image_path).expect("Theme object deserialization from JsValue should not fail.");
+//     convert_file_src(image_path)
+// }
 
 pub async fn gen_avatar() -> String {
     let args = to_value(&EmptyArgs {}).expect("EmptyArgs serialization to JsValue should not fail.");

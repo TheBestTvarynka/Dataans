@@ -1,14 +1,11 @@
-use common::space::Space;
+use common::space::OwnedSpace;
 use leptos::*;
-use time::OffsetDateTime;
-use uuid::Uuid;
 
-use crate::backend::spaces::{create_space, list_spaces};
 use crate::common::Modal;
 use crate::spaces::create_space::CreateSpace;
 
 #[component]
-pub fn Tools(set_spaces: SignalSetter<Vec<Space<'static>>>) -> impl IntoView {
+pub fn Tools(set_spaces: SignalSetter<Vec<OwnedSpace>>) -> impl IntoView {
     let (show_modal, set_show_modal) = create_signal(true);
 
     view! {

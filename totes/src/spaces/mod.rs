@@ -2,7 +2,7 @@ mod create_space;
 mod space;
 mod tools;
 
-use common::space::Space as SpaceData;
+use common::space::OwnedSpace;
 use leptos::*;
 
 use self::space::Space;
@@ -30,7 +30,7 @@ pub fn Spaces() -> impl IntoView {
         |state| state.notes.clone(),
         |state, notes| state.notes = notes,
     );
-    let set_selected_space = move |space: SpaceData<'static>| {
+    let set_selected_space = move |space: OwnedSpace| {
         let space_id = space.id;
         set_selected_space.set(space);
         spawn_local(async move {

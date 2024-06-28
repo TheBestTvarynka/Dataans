@@ -1,11 +1,11 @@
-use common::space::{DeleteSpace, Space, UpdateSpace};
+use common::space::{DeleteSpace, OwnedSpace, Space, UpdateSpace};
 use common::TOTES_PLUGIN_NAME;
 use serde::{Deserialize, Serialize};
 use serde_wasm_bindgen::{from_value, to_value};
 
 use crate::backend::{invoke, EmptyArgs};
 
-pub async fn list_spaces() -> Result<Vec<Space<'static>>, String> {
+pub async fn list_spaces() -> Result<Vec<OwnedSpace>, String> {
     let args = to_value(&EmptyArgs {}).expect("EmptyArgs serialization to JsValue should not fail.");
     let spaces = invoke(&format!("plugin:{}|list_spaces", TOTES_PLUGIN_NAME), args).await;
     info!("{:?}", spaces);
@@ -15,11 +15,12 @@ pub async fn list_spaces() -> Result<Vec<Space<'static>>, String> {
 
 #[derive(Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-struct CreateSpaceArgs<'name> {
-    space_data: Space<'name>,
+struct CreateSpaceArgs<'name, 'avatar> {
+    space_data: Space<'name, 'avatar>,
 }
 
-pub async fn create_space(space_data: Space<'_>) -> Result<(), String> {
+pub async fn create_space(space_data: Space<'_, '_>) -> Result<(), String> {
+    debug!("Creating space: {:?}", space_data);
     let args = to_value(&CreateSpaceArgs { space_data }).expect("Space serialization to JsValue should not fail.");
     let result = invoke(&format!("plugin:{}|create_space", TOTES_PLUGIN_NAME), args).await;
     info!("{:?}", result);

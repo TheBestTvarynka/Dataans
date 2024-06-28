@@ -1,5 +1,5 @@
 use common::note::Note;
-use common::space::Space;
+use common::space::OwnedSpace;
 use leptos::*;
 
 use crate::backend::load_theme;
@@ -9,9 +9,9 @@ use crate::spaces::Spaces;
 
 #[derive(Debug, Clone, Default)]
 pub struct GlobalState {
-    pub spaces: Vec<Space<'static>>,
+    pub spaces: Vec<OwnedSpace>,
     pub notes: Vec<Note<'static>>,
-    pub selected_space: Option<Space<'static>>,
+    pub selected_space: Option<OwnedSpace>,
 }
 
 #[component]
