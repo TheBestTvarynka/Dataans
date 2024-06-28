@@ -9,13 +9,13 @@ pub fn TextArea(
 ) -> impl IntoView {
     view! {
         <div class="resizable-textarea">
-            <div class="resizable-textarea-text-container">
-                <span class="resizable-textarea-text">{move || format!("{}\n ", text.get())}</span>
-            </div>
             <textarea
                 type="text"
                 placeholder="Type a note..."
                 class="resizable-textarea-textarea"
+                // WARN: This CSS property is experimental.
+                // https://developer.mozilla.org/en-US/docs/Web/CSS/field-sizing#browser_compatibility
+                style="field-sizing: content"
                 on:input=move |ev| set_text.call(event_target_value(&ev))
                 on:keydown=move |ev| key_down.call(ev)
                 prop:value=move || text.get()
