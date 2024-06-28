@@ -5,8 +5,8 @@
 extern crate log;
 
 mod config;
-mod totes;
 mod image;
+mod totes;
 
 use tauri::{
     AppHandle, CustomMenuItem, GlobalShortcutManager, Manager, Result, RunEvent, SystemTray, SystemTrayEvent,
@@ -84,10 +84,7 @@ fn main() {
                 .build(),
         )
         .plugin(totes::init_totes_plugin())
-        .invoke_handler(tauri::generate_handler![
-            config::theme,
-            image::image_path,
-        ])
+        .invoke_handler(tauri::generate_handler![config::theme, image::image_path,])
         .build(tauri::generate_context!())
         .expect("error while building tauri application")
         .run(|app_handle, event| match event {
