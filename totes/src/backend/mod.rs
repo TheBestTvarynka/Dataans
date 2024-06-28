@@ -38,6 +38,7 @@ pub async fn image_path(image_name: String) -> String {
     let image_path = invoke("image_path", args).await;
     info!("{:?}", image_path);
 
-    let image_path: String = from_value(image_path).expect("Theme object deserialization from JsValue should not fail.");
+    let image_path: String =
+        from_value(image_path).expect("Theme object deserialization from JsValue should not fail.");
     convert_file_src(image_path)
 }

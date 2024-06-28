@@ -10,7 +10,6 @@ where
     Confirm: Fn() -> () + 'static,
 {
     let key_down = move |key| {
-        info!("key down: {}", key);
         if key == "Escape" {
             on_cancel.call(());
         }
