@@ -78,7 +78,7 @@
 }
 
 .create-space-avatar-img {
-    border-radius: 50%;
-    height: 5em;
-    width: 5em;
+    border-radius: 0.5em;
+    height: 4em;
+    width: 4em;
 }

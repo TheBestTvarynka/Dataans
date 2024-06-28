@@ -6,6 +6,7 @@ use leptos::{
 use time::OffsetDateTime;
 use uuid::Uuid;
 
+use crate::backend::gen_avatar;
 use crate::backend::spaces::{create_space, list_spaces};
 
 #[component]
@@ -14,6 +15,13 @@ pub fn CreateSpace(
     set_spaces: SignalSetter<Vec<Space<'static>>>,
 ) -> impl IntoView {
     let (space_name, set_space_name) = create_signal(String::new());
+    let (avatar_path, set_avatar_path) = create_signal("/public/default_space_avatar.png".to_string());
+
+    let generate_avatar = move || {
+        spawn_local(async move {
+            set_avatar_path.set(gen_avatar().await);
+        });
+    };
 
     let create_space = move || {
         let name = space_name.get();
@@ -42,9 +50,9 @@ pub fn CreateSpace(
         <div class="create-space-window">
             <span class="create-space-title">"Create space"</span>
             <div class="create-space-avatar">
-                <img class="create-space-avatar-img" src="/public/default_space_avatar.png" />
+                <img class="create-space-avatar-img" src=move || avatar_path />
                 <div style="align-self: center">
-                    <button class="tool" title="Regenerate avatar">
+                    <button class="tool" title="Regenerate avatar" on:click=move |_| generate_avatar()>
                         <img alt="regenerate-avatar" src="/public/icons/refresh.svg" />
                     </button>
                 </div>
