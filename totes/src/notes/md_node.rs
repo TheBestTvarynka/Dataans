@@ -148,6 +148,10 @@ pub fn render_md_node(node: &Node) -> HtmlElement<AnyElement> {
             </li>
         }
         .into_any(),
+        Node::Image(image) => view! {
+            <img src=image.url.clone() alt=image.alt.clone() />
+        }
+        .into_any(),
         v => view! { <span>{format!("{:?} is not supported", v)}</span> }.into_any(),
     }
 }
