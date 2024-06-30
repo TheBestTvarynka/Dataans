@@ -11,6 +11,8 @@ pub fn TextArea(
     #[prop(into)] set_text: Callback<String, ()>,
     #[prop(into)] key_down: Callback<KeyboardEvent, ()>,
 ) -> impl IntoView {
+    let (disabled, set_disabled) = create_signal(false);
+
     let paste_handler = move |e: leptos::ev::Event| {
         e.prevent_default();
 
@@ -21,7 +23,6 @@ pub fn TextArea(
             let items = clipboard_data.items();
             for index in 0..items.length() {
                 let item = items.get(index).expect("DataTransferItem should present");
-                debug!("{} `{}`", item.kind(), item.type_());
 
                 if item.kind() == "file" && item.type_().starts_with("image/") {
                     if let Some(file) = item.get_as_file().expect("get_as_fail should not fail") {
@@ -29,7 +30,7 @@ pub fn TextArea(
                         let file_name = file.name();
                         let mut text = text.get();
 
-                        info!("started file reading: {:?}", file);
+                        set_disabled.set(true);
                         spawn_local(async move {
                             let image_raw_data = wasm_bindgen_futures::JsFuture::from(image_raw_data.array_buffer())
                                 .await
@@ -48,6 +49,8 @@ pub fn TextArea(
                             text.push_str(&path);
                             text.push_str(")\n");
                             set_text.call(text);
+
+                            set_disabled.set(false);
                         });
                     } else {
                         warn!("No file :(");
@@ -70,6 +73,7 @@ pub fn TextArea(
                 on:keydown=move |ev| key_down.call(ev)
                 on:paste=paste_handler
                 prop:value=move || text.get()
+                disabled=move || disabled.get()
             >
                 {text.get_untracked()}
             </textarea>
