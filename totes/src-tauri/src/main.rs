@@ -86,7 +86,8 @@ fn main() {
         .plugin(totes::init_totes_plugin())
         .invoke_handler(tauri::generate_handler![
             config::theme,
-            image::image_path,
+            // image::image_path,
+            image::save_image,
             image::gen_random_avatar
         ])
         .build(tauri::generate_context!())
