@@ -79,7 +79,7 @@ pub fn Note(note: NoteData<'static>, set_notes: SignalSetter<Vec<NoteData<'stati
             {move || if edit_mode.get() {
                 view! {
                     <div class="vertical">
-                        <TextArea text={updated_note_text} set_text=move |t| set_updated_note_text.set(t) key_down />
+                        <TextArea id=note.id.to_string() text=updated_note_text set_text=move |t| set_updated_note_text.set(t) key_down />
                         <div class="horizontal">
                             <button
                                 class="tool"

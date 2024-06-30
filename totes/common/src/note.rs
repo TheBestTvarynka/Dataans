@@ -1,4 +1,5 @@
 use std::borrow::Cow;
+use std::fmt::Display;
 
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
@@ -20,6 +21,12 @@ impl Id {
 impl From<Uuid> for Id {
     fn from(value: Uuid) -> Self {
         Self(value)
+    }
+}
+
+impl Display for Id {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(&self.0.to_string())
     }
 }
 

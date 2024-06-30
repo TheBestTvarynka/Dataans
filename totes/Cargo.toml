@@ -19,7 +19,7 @@ common = { path = "./common" }
 markdown = { version = "1.0.0-alpha.17", features = ["log"]}
 time = {  version = "0.3.36", features = ["macros", "wasm-bindgen"] }
 uuid = { version = "1.6.1", features = ["v4"] }
-web-sys = { version = "0.3.69", features = ["Clipboard", "Navigator", "ClipboardEvent", "DataTransfer", "DataTransferItem", "DataTransferItemList", "File", "Blob"] }
+web-sys = { version = "0.3.69", features = ["Clipboard", "Navigator", "ClipboardEvent", "DataTransfer", "DataTransferItem", "DataTransferItemList", "File", "Blob", "Document", "Element", "HtmlTextAreaElement"] }
 
 [workspace]
 members = ["common", "src-tauri"]

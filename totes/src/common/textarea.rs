@@ -7,12 +7,14 @@ use crate::backend::save_image;
 
 #[component]
 pub fn TextArea(
+    id: String,
     text: ReadSignal<String>,
     #[prop(into)] set_text: Callback<String, ()>,
     #[prop(into)] key_down: Callback<KeyboardEvent, ()>,
 ) -> impl IntoView {
     let (disabled, set_disabled) = create_signal(false);
 
+    let elem_id = id.clone();
     let paste_handler = move |e: leptos::ev::Event| {
         e.prevent_default();
 
@@ -29,6 +31,7 @@ pub fn TextArea(
                         let image_raw_data = file.slice().expect("File reading should not fail");
                         let file_name = file.name();
                         let mut text = text.get();
+                        let id = elem_id.clone();
 
                         set_disabled.set(true);
                         spawn_local(async move {
@@ -45,11 +48,22 @@ pub fn TextArea(
                             image_raw_data.copy_to(image_bytes.as_mut_slice());
 
                             let path = save_image(&file_name, &image_bytes).await;
-                            text.push_str("\n![](");
-                            text.push_str(&path);
-                            text.push_str(")\n");
-                            set_text.call(text);
 
+                            let text_area = document().get_element_by_id(&id).expect("Dom element should present");
+                            let text_area = text_area
+                                .dyn_into::<web_sys::HtmlTextAreaElement>()
+                                .expect("Element should be textarea");
+
+                            if let Some(start) = text_area.selection_start().expect("selection start error") {
+                                let start = start as usize;
+                                text = format!("{}\n![]({}){}", &text[0..start], &path, &text[start..]);
+                            } else {
+                                text.push_str("\n![](");
+                                text.push_str(&path);
+                                text.push_str(")");
+                            }
+
+                            set_text.call(text);
                             set_disabled.set(false);
                         });
                     } else {
@@ -63,6 +77,7 @@ pub fn TextArea(
     view! {
         <div class="resizable-textarea">
             <textarea
+                id=id.clone()
                 type="text"
                 placeholder="Type a note..."
                 class="resizable-textarea-textarea"
