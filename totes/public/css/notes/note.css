@@ -93,3 +93,16 @@
 .note-meta:hover .note-tools {
     visibility: visible;
 }
+
+.table-cell {
+    padding: 0.2em;
+}
+
+.table-header {
+    font-weight: bold;
+}
+
+.table, .table-cell, .table-header {
+  border: 2px solid var(--note-table-border-color);
+  border-collapse: collapse;
+}

@@ -16,8 +16,6 @@ pub fn TextArea(
 
     let elem_id = id.clone();
     let paste_handler = move |e: leptos::ev::Event| {
-        e.prevent_default();
-
         let ev = e
             .dyn_into::<web_sys::ClipboardEvent>()
             .expect("Event -> ClipboardEvent should not fail");
@@ -28,6 +26,8 @@ pub fn TextArea(
 
                 if item.kind() == "file" && item.type_().starts_with("image/") {
                     if let Some(file) = item.get_as_file().expect("get_as_fail should not fail") {
+                        ev.prevent_default();
+
                         let image_raw_data = file.slice().expect("File reading should not fail");
                         let file_name = file.name();
                         let mut text = text.get();
