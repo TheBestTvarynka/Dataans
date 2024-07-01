@@ -17,8 +17,7 @@ pub fn Space(
     let space_data = space.clone();
 
     view! {
-        <div class={class} on:click=move |_| set_selected_space.call(space_data.clone())>
-            // TODO(@TheBestTvarynka): implement space avatar image.
+        <div class=class on:click=move |_| set_selected_space.call(space_data.clone())>
             <img class="space-avatar" alt="space avatar image" src=space.avatar.to_string() />
             <span class="space-title">{space.name.as_ref().to_string()}</span>
         </div>

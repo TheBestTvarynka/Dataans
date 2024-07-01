@@ -26,7 +26,7 @@ pub fn App() -> impl IntoView {
     provide_context(create_rw_signal(GlobalState::default()));
 
     view! {
-        <main class="app" style={move || theme_css.get()}>
+        <main class="app" style=move || theme_css.get()>
             <Spaces />
             <Notes />
             // <Profile />

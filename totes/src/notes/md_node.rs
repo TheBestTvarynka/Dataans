@@ -108,7 +108,7 @@ pub fn render_md_node(node: &Node) -> HtmlElement<AnyElement> {
         }
         .into_any(),
         Node::Link(link) => view! {
-            <a class="link" href={&link.url} target="popup">
+            <a class="link" href=&link.url target="popup">
                 {link.children
                     .iter()
                     .map(render_md_node)
@@ -119,7 +119,7 @@ pub fn render_md_node(node: &Node) -> HtmlElement<AnyElement> {
         Node::List(list) => {
             if list.ordered {
                 view! {
-                    <ol class="list" start={list.start.unwrap_or(1)}>
+                    <ol class="list" start=list.start.unwrap_or(1)>
                         {list.children
                             .iter()
                             .map(render_md_node)
