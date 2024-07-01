@@ -58,7 +58,7 @@ pub fn TextArea(
                                 let start = start as usize;
                                 text = format!("{}\n![]({}){}", &text[0..start], &path, &text[start..]);
                             } else {
-                                text.push_str("\n![](");
+                                text.push_str(" ![](");
                                 text.push_str(&path);
                                 text.push_str(")");
                             }

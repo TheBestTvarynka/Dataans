@@ -8,7 +8,7 @@
     font-size: var(--note_font_size);
     border-radius: 0.3em;
     padding: 0.3em;
-    font-family: "Roboto Thin", sans-serif;
+    font-family: "Noto Sans", system-ui;
 }
 
 .note {
