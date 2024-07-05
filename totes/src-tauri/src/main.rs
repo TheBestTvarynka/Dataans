@@ -5,6 +5,7 @@
 extern crate log;
 
 mod config;
+mod file;
 mod image;
 mod totes;
 
@@ -23,6 +24,7 @@ const WINDOW_SHOW_TITLE: &str = "Show";
 const WINDOW_QUIT_TITLE: &str = "Quit";
 
 const IMAGES_FOLDER: &str = "images";
+const FILES_FOLDER: &str = "files";
 // TODO: make it configurable.
 const GLOBAL_SHORTCUT_ACCELERATOR: &str = "F1";
 
@@ -86,9 +88,9 @@ fn main() {
         .plugin(totes::init_totes_plugin())
         .invoke_handler(tauri::generate_handler![
             config::theme,
-            // image::image_path,
             image::save_image,
-            image::gen_random_avatar
+            image::gen_random_avatar,
+            file::upload_file
         ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application")
