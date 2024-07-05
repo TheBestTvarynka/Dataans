@@ -1,5 +1,6 @@
 use std::borrow::Cow;
 use std::fmt::Display;
+use std::path::PathBuf;
 
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
@@ -50,6 +51,15 @@ impl<'text> AsRef<str> for MdText<'text> {
     fn as_ref(&self) -> &str {
         self.0.as_ref()
     }
+}
+
+/// Represents an uploaded file.
+#[derive(Serialize, Deserialize, Debug, Clone, Eq, PartialEq)]
+pub struct File {
+    /// The original file name.
+    pub name: String,
+    /// Full path to the file in the local file system.
+    pub path: PathBuf,
 }
 
 /// Represent one note.

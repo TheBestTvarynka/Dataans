@@ -13,7 +13,7 @@ use crate::common::TextArea;
 #[component]
 pub fn Editor(space_id: SpaceId, set_notes: SignalSetter<Vec<Note<'static>>>) -> impl IntoView {
     let (note, set_note) = create_signal(String::new());
-    let (files, set_files) = create_signal(Vec::new());
+    let (files, set_files) = create_signal(vec![]);
 
     let create_note = move || {
         let note_text = note.get();
@@ -49,13 +49,20 @@ pub fn Editor(space_id: SpaceId, set_notes: SignalSetter<Vec<Note<'static>>>) ->
                     let blob = file.slice().expect("File reading should not fail");
                     let name = file.name();
 
-                    upload_file(blob, name)
+                    async { (name.clone(), upload_file(blob, name).await) }
                 })
                 .collect::<Vec<_>>();
 
             let files = futures::future::join_all(files);
             spawn_local(async move {
-                let files = files.await;
+                let files = files
+                    .await
+                    .into_iter()
+                    .map(|(name, path)| common::note::File {
+                        name,
+                        path: path.into(),
+                    })
+                    .collect();
                 set_files.set(files);
             });
         };
@@ -64,14 +71,26 @@ pub fn Editor(space_id: SpaceId, set_notes: SignalSetter<Vec<Note<'static>>>) ->
     view! {
         <div class="editor-container">
             <TextArea id="create_note".to_owned() text=note set_text=move |t| set_note.set(t) key_down />
-            <div>
+            <div class="editor-meta">
+                <div class="editor-files-container">
+                    {move || files
+                        .get()
+                        .iter()
+                        .map(|file| view! {
+                            <div class="editor-files-file">
+                                <img src="/public/icons/file.png" alt="" />
+                                <span>{file.name.clone()}</span>
+                            </div>
+                        })
+                        .collect_view()
+                    }
+                </div>
                 <button class="tool">
                     <label for="note-files">
                         <img alt="attach file" src="/public/icons/attachment.png" />
                     </label>
                 </button>
                 <input id="note-files" type="file" multiple=true style="display: none" on:input=move |ev| handle_files_upload(ev) />
-                <span>{move || format!("{:?}", files.get())}</span>
                 <button on:click=move |_| create_note() title="Create note" class="tool">
                     <img alt="create note" src="/public/icons/create-note.png" />
                 </button>

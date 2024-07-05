@@ -1,9 +1,37 @@
 
 .editor-container {
-    display: inline-flex;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
     background-color: var(--messages_editor_background_color);
     color: var(--messages_editor_text_color);
     justify-content: flex-start;
     align-items: center;
-    padding-right: 0.2em;
+    width: 100%;
+}
+
+.editor-meta {
+    width: calc(100% - 0.6em);
+    padding: 0.3em;
+    display: flex;
+    gap: 0.2em;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.editor-files-container {
+    display: flex;
+    gap: 0.2em;
+    flex-wrap: wrap;
+    flex-grow: 1;
+}
+
+.editor-files-file {
+    padding: 0.2em;
+    border-radius: 0.2em;
+    background-color: var(--editor-file-background-color);
+    display: inline-flex;
+    gap: 0.1em;
+    justify-content: flex-start;
+    align-items: center;
 }

@@ -30,6 +30,8 @@ body {
     --note-table-border-color: #444c56;
     --note-inline-background-color: #2d4042;
 
+    --editor-file-background-color: #2a2f33;
+
     --spaces_font_size: 1.3em;
     --space_background_color: #282e33;
     --space_text_color: #e0e0e7;
