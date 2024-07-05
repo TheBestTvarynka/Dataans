@@ -31,9 +31,13 @@
     border-color: var(--spaces_tools_border_color);
 }
 
-.tool > img {
+.tool img {
     height: 100%;
     width: auto;
+}
+
+.tool img:hover {
+    cursor: pointer;
 }
 
 .input {

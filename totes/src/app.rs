@@ -7,12 +7,23 @@ use crate::notes::Notes;
 // use crate::profile::Profile;
 use crate::spaces::Spaces;
 
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone)]
 pub struct GlobalState {
     pub spaces: Vec<OwnedSpace>,
     pub notes: Vec<Note<'static>>,
     pub selected_space: Option<OwnedSpace>,
     pub minimize_spaces: bool,
+}
+
+impl Default for GlobalState {
+    fn default() -> Self {
+        Self {
+            spaces: Default::default(),
+            notes: Default::default(),
+            selected_space: Default::default(),
+            minimize_spaces: true,
+        }
+    }
 }
 
 #[component]

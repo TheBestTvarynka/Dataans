@@ -43,10 +43,11 @@
 .note .incline-code {
     font-family: "JetBrains Mono", monospace;
     cursor: pointer;
+    background-color: #2d4042;
 }
 
 .note .incline-code:hover {
-    background-color: #3C675B;
+    background-color: var(--note-inline-background-color);
 }
 
 .note .incline-code:active {

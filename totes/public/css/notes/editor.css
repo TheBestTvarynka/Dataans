@@ -4,10 +4,6 @@
     background-color: var(--messages_editor_background_color);
     color: var(--messages_editor_text_color);
     justify-content: flex-start;
-    align-items: flex-end;
+    align-items: center;
     padding-right: 0.2em;
-}
-
-.create-note-button {
-    margin-bottom: 0.26em;
 }
