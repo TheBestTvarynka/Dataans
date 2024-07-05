@@ -8,25 +8,31 @@ use wasm_bindgen::JsCast;
 use web_sys::{Blob, HtmlInputElement, KeyboardEvent};
 
 use crate::backend::notes::{create_note, list_notes};
-use crate::common::TextArea;
+use crate::common::{Files, TextArea};
 
 #[component]
 pub fn Editor(space_id: SpaceId, set_notes: SignalSetter<Vec<Note<'static>>>) -> impl IntoView {
     let (note, set_note) = create_signal(String::new());
-    let (files, set_files) = create_signal(vec![]);
+    let (files, set_files) = create_signal(Vec::new());
 
     let create_note = move || {
         let note_text = note.get();
         if note_text.trim().is_empty() {
             return;
         }
+
         set_note.set(String::new());
+
+        let files = files.get();
+        set_files.set(Vec::new());
+
         spawn_local(async move {
             create_note(Note {
                 id: Uuid::new_v4().into(),
                 text: note_text.trim().into(),
                 created_at: OffsetDateTime::now_utc().into(),
                 space_id,
+                files,
             })
             .await
             .expect("Note creating should not fail.");
@@ -72,19 +78,7 @@ pub fn Editor(space_id: SpaceId, set_notes: SignalSetter<Vec<Note<'static>>>) ->
         <div class="editor-container">
             <TextArea id="create_note".to_owned() text=note set_text=move |t| set_note.set(t) key_down />
             <div class="editor-meta">
-                <div class="editor-files-container">
-                    {move || files
-                        .get()
-                        .iter()
-                        .map(|file| view! {
-                            <div class="editor-files-file">
-                                <img src="/public/icons/file.png" alt="" />
-                                <span>{file.name.clone()}</span>
-                            </div>
-                        })
-                        .collect_view()
-                    }
-                </div>
+                {move || view!{ <Files files=files.get() /> }}
                 <button class="tool">
                     <label for="note-files">
                         <img alt="attach file" src="/public/icons/attachment.png" />

@@ -6,7 +6,7 @@ use markdown::ParseOptions;
 use time::OffsetDateTime;
 
 use crate::backend::notes::{delete_note, list_notes, update_note};
-use crate::common::{Confirm, TextArea};
+use crate::common::{Confirm, Files, TextArea};
 use crate::notes::md_node::render_md_node;
 
 #[allow(clippy::needless_lifetimes)]
@@ -101,6 +101,7 @@ pub fn Note(note: NoteData<'static>, set_notes: SignalSetter<Vec<NoteData<'stati
             } else {
                 render_md_node(&md)
             }}
+            <Files files={note.files} />
             <Show when=move || show_modal.get()>
                 <Confirm
                     message="Confirm note deletion.".to_owned()

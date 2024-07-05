@@ -73,6 +73,8 @@ pub struct Note<'text> {
     pub created_at: CreationDate,
     /// Space ID this note belongs.
     pub space_id: SpaceId,
+    /// Attached files.
+    pub files: Vec<File>,
     // TODO(@TheBestTvarynka): implement attached files, photos, update time etc.
 }
 
