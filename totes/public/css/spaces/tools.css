@@ -1,13 +1,18 @@
 .tools {
-    height: var(--tools-panel-height);
+    /* height: var(--tools-panel-height); */
     padding: 0.2em;
     background-color: var(--spaces_tools_background_color);
     border-bottom: 1px solid var(--notes_border_color);
     color: var(--spaces_tools_text_color);
-    display: inline-flex;
+    display: flex;
     gap: 0.2em;
-    justify-content: flex-start;
+    justify-content: space-between;
     align-items: center;
+}
+
+.tools-vertical {
+    flex-direction: column;
+    justify-content: flex-start;
 }
 
 .tool {

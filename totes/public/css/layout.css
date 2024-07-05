@@ -10,8 +10,7 @@ body {
 }
 
 .app {
-    display: grid;
-    grid-template-columns: 20% auto;
+    display: flex;
     gap: 0;
     padding: 0;
     margin: 0;

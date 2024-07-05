@@ -37,6 +37,11 @@ pub fn Spaces() -> impl IntoView {
             set_notes.set(list_notes(space_id).await.expect("Notes listing should not fail"));
         });
     };
+    let (spaces_minimized, set_spaces_minimized) = create_slice(
+        global_state,
+        |state| state.minimize_spaces,
+        |state, minimized| state.minimize_spaces = minimized,
+    );
 
     spawn_local(async move {
         set_spaces.set(list_spaces().await.expect("list spaces should not fail"));
@@ -44,11 +49,11 @@ pub fn Spaces() -> impl IntoView {
 
     view! {
         <div class="spaces-container">
-            <Tools set_spaces />
+            <Tools set_spaces spaces_minimized set_spaces_minimized />
             <div class="spaces">
                 {move || spaces.get().iter().cloned().map(|space| {
                     let selected = selected_space.get().as_ref().map(|selected| selected.id == space.id).unwrap_or_default();
-                    view! { <Space space set_selected_space selected /> }
+                    view! { <Space space set_selected_space selected minimized={spaces_minimized} /> }
                 }).collect_view()}
             </div>
         </div>

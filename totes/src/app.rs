@@ -12,6 +12,7 @@ pub struct GlobalState {
     pub spaces: Vec<OwnedSpace>,
     pub notes: Vec<Note<'static>>,
     pub selected_space: Option<OwnedSpace>,
+    pub minimize_spaces: bool,
 }
 
 #[component]
