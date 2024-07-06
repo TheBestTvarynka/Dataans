@@ -1,10 +1,11 @@
-use common::note::{Note as NoteData, UpdateNote};
+use common::note::{Note as NoteData, UpdateNote, File};
 use leptos::web_sys::KeyboardEvent;
 use leptos::*;
 use markdown::mdast::{Node, Text};
 use markdown::ParseOptions;
 use time::OffsetDateTime;
 
+use crate::backend::file::remove_file;
 use crate::backend::notes::{delete_note, list_notes, update_note};
 use crate::common::{Confirm, Files, TextArea};
 use crate::notes::md_node::render_md_node;
@@ -14,7 +15,8 @@ use crate::notes::md_node::render_md_node;
 pub fn Note(note: NoteData<'static>, set_notes: SignalSetter<Vec<NoteData<'static>>>) -> impl IntoView {
     let (show_modal, set_show_modal) = create_signal(false);
     let (edit_mode, set_edit_mode) = create_signal(false);
-    let (updated_note_text, set_updated_note_text) = create_signal(note.text.as_ref().to_owned());
+    let (updated_note_text, set_updated_note_text) = create_signal(note.text.to_string());
+    let (updated_files, set_updated_files) = create_signal(note.files.clone());
 
     let md = markdown::to_mdast(note.text.as_ref(), &ParseOptions::gfm()).unwrap_or_else(|_| {
         Node::Text(Text {
@@ -34,10 +36,35 @@ pub fn Note(note: NoteData<'static>, set_notes: SignalSetter<Vec<NoteData<'stati
 
     let update_note = move || {
         let text = updated_note_text.get();
+        let files = updated_files.get();
+
         spawn_local(async move {
             update_note(UpdateNote {
                 id: note_id,
                 text: text.into(),
+                files,
+            })
+            .await
+            .expect("note updating should not fail");
+            set_notes.set(list_notes(space_id).await.expect("Notes listing should not fail"));
+        });
+    };
+
+    let remove_file = move |file: File| {
+        let text = updated_note_text.get();
+        let mut files = updated_files.get();
+        let id = file.id;
+
+        spawn_local(async move {
+            remove_file(&file.path).await;
+
+            files.retain(|file| file.id != id);
+            set_updated_files.set(files.clone());
+
+            crate::backend::notes::update_note(UpdateNote {
+                id: note_id,
+                text: text.into(),
+                files,
             })
             .await
             .expect("note updating should not fail");
@@ -101,7 +128,7 @@ pub fn Note(note: NoteData<'static>, set_notes: SignalSetter<Vec<NoteData<'stati
             } else {
                 render_md_node(&md)
             }}
-            <Files files={note.files} remove_file=|_| {} />
+            <Files files={note.files} remove_file />
             <Show when=move || show_modal.get()>
                 <Confirm
                     message="Confirm note deletion.".to_owned()
