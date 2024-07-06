@@ -1,5 +1,5 @@
-use std::path::PathBuf;
 use std::fs::read_to_string;
+use std::path::PathBuf;
 
 use common::Theme;
 
@@ -26,8 +26,15 @@ pub fn theme() -> Theme {
 }
 
 #[tauri::command]
+pub fn reveal(path: PathBuf) {
+    info!("Revealing the file: {:?}", path);
+
+    info!("{:?}", opener::reveal(&path));
+}
+
+#[tauri::command]
 pub fn open(path: PathBuf) {
-    info!("opening file: {:?}", path);
+    info!("Opening the file: {:?}", path);
 
     info!("{:?}", opener::open(&path));
 }
