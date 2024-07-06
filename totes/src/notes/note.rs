@@ -143,14 +143,14 @@ pub fn Note(note: NoteData<'static>, set_notes: SignalSetter<Vec<NoteData<'stati
                             </button>
                             <Attachment id=note_id.to_string() files=updated_files set_files=move |files| set_updated_files.set(files) />
                         </div>
-                        {move || view! { <Files files=updated_files.get() remove_file={remove_file_locally} /> }}
+                        {move || view! { <Files files=updated_files.get() remove_file={remove_file_locally} edit_mode=true /> }}
                     </div>
                 }.into_any()
             } else {
                 view !{
                     <div class="vertical">
                         {render_md_node(&md)}
-                        {move || view! { <Files files=updated_files.get() remove_file /> }}
+                        {move || view! { <Files files=updated_files.get() remove_file edit_mode=false /> }}
                     </div>
                 }.into_any()
             }}

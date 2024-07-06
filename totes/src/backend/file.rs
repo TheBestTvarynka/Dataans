@@ -38,3 +38,8 @@ pub async fn open(path: &Path) {
     let args = to_value(&FilePath { path }).expect("FilePath serialization to JsValue should not fail.");
     let _ = invoke("open", args).await;
 }
+
+pub async fn reveal(path: &Path) {
+    let args = to_value(&FilePath { path }).expect("FilePath serialization to JsValue should not fail.");
+    let _ = invoke("reveal", args).await;
+}
