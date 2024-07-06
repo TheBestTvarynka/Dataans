@@ -43,6 +43,7 @@ pub fn update_note(state: State<'_, TotesState>, note_data: UpdateNote<'_>) -> R
             doc! {
                 "$set": doc! {
                     "text": note_data.text.as_ref(),
+                    "files": &note_data.files,
                 }
             },
         )
