@@ -35,3 +35,24 @@
     justify-content: flex-start;
     align-items: center;
 }
+
+.files-file:hover .files-file-icon {
+    display: none;
+}
+
+.files-file .files-file-icon {
+    height: 1.2em;
+}
+
+.files-file:hover .files-file-cancel {
+    display: inline-block;
+}
+
+.files-file .files-file-cancel {
+    height: 1.2em;
+    display: none;
+}
+
+.files-file-cancel:hover {
+    cursor: pointer;
+}

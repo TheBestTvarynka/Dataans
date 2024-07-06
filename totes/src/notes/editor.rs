@@ -1,4 +1,4 @@
-use common::note::Note;
+use common::note::{File, Note};
 use common::space::Id as SpaceId;
 use js_sys::{ArrayBuffer, Uint8Array};
 use leptos::*;
@@ -7,6 +7,7 @@ use uuid::Uuid;
 use wasm_bindgen::JsCast;
 use web_sys::{Blob, HtmlInputElement, KeyboardEvent};
 
+use crate::backend::file::remove_file;
 use crate::backend::notes::{create_note, list_notes};
 use crate::common::{Files, TextArea};
 
@@ -48,14 +49,17 @@ pub fn Editor(space_id: SpaceId, set_notes: SignalSetter<Vec<Note<'static>>>) ->
 
     let handle_files_upload = move |ev: leptos::ev::Event| {
         let input: HtmlInputElement = ev.target().unwrap().unchecked_into();
+        let mut attached_files = files.get();
+
         if let Some(files) = input.files() {
             let files = (0..files.length())
                 .map(|index| {
                     let file = files.get(index).unwrap();
                     let blob = file.slice().expect("File reading should not fail");
                     let name = file.name();
+                    let id = Uuid::new_v4();
 
-                    async { (name.clone(), upload_file(blob, name).await) }
+                    async move { (name.clone(), id, upload_file(blob, name, id).await) }
                 })
                 .collect::<Vec<_>>();
 
@@ -64,21 +68,33 @@ pub fn Editor(space_id: SpaceId, set_notes: SignalSetter<Vec<Note<'static>>>) ->
                 let files = files
                     .await
                     .into_iter()
-                    .map(|(name, path)| common::note::File {
+                    .map(|(name, id, path)| File {
+                        id,
                         name,
                         path: path.into(),
                     })
-                    .collect();
-                set_files.set(files);
+                    .collect::<Vec<_>>();
+                attached_files.extend_from_slice(&files);
+                set_files.set(attached_files);
             });
         };
+    };
+
+    let remove_file = move |File { id, name: _, path }| {
+        let mut files = files.get();
+        spawn_local(async move {
+            remove_file(&path).await;
+
+            files.retain(|file| file.id != id);
+            set_files.set(files);
+        });
     };
 
     view! {
         <div class="editor-container">
             <TextArea id="create_note".to_owned() text=note set_text=move |t| set_note.set(t) key_down />
             <div class="editor-meta">
-                {move || view!{ <Files files=files.get() /> }}
+                {move || view!{ <Files files=files.get() remove_file /> }}
                 <button class="tool">
                     <label for="note-files">
                         <img alt="attach file" src="/public/icons/attachment.png" />
@@ -94,7 +110,7 @@ pub fn Editor(space_id: SpaceId, set_notes: SignalSetter<Vec<Note<'static>>>) ->
 }
 
 // Returns path to the uploaded file.
-async fn upload_file(blob: Blob, name: String) -> String {
+async fn upload_file(blob: Blob, name: String, id: Uuid) -> String {
     let file_raw_data = wasm_bindgen_futures::JsFuture::from(blob.array_buffer())
         .await
         .expect("File reading should not fail");
@@ -107,5 +123,5 @@ async fn upload_file(blob: Blob, name: String) -> String {
     let mut file_bytes = vec![0; file_raw_data.length() as usize];
     file_raw_data.copy_to(file_bytes.as_mut_slice());
 
-    crate::backend::file::upload_file(&name, &file_bytes).await
+    crate::backend::file::upload_file(id, &name, &file_bytes).await
 }

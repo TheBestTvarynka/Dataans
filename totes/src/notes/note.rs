@@ -101,7 +101,7 @@ pub fn Note(note: NoteData<'static>, set_notes: SignalSetter<Vec<NoteData<'stati
             } else {
                 render_md_node(&md)
             }}
-            <Files files={note.files} />
+            <Files files={note.files} remove_file=|_| {} />
             <Show when=move || show_modal.get()>
                 <Confirm
                     message="Confirm note deletion.".to_owned()
