@@ -1,3 +1,4 @@
+use std::path::PathBuf;
 use std::fs::read_to_string;
 
 use common::Theme;
@@ -22,4 +23,11 @@ pub fn theme() -> Theme {
         error!("Can not paste theme config: {:?}", err);
         Default::default()
     })
+}
+
+#[tauri::command]
+pub fn open(path: PathBuf) {
+    info!("opening file: {:?}", path);
+
+    info!("{:?}", opener::open(&path));
 }

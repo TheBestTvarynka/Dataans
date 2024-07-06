@@ -8,7 +8,7 @@ use crate::FILES_FOLDER;
 
 #[tauri::command]
 pub fn upload_file(app_handle: AppHandle, id: Uuid, name: String, data: Vec<u8>) -> PathBuf {
-    let file_name = format!("{}_{}", name, id);
+    let file_name = format!("{}_{}", id, name);
 
     let file_path = app_handle
         .path_resolver()

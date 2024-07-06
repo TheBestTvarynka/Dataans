@@ -33,3 +33,8 @@ pub async fn remove_file(path: &Path) {
     let args = to_value(&FilePath { path }).expect("FilePath serialization to JsValue should not fail.");
     let _ = invoke("remove_file", args).await;
 }
+
+pub async fn open(path: &Path) {
+    let args = to_value(&FilePath { path }).expect("FilePath serialization to JsValue should not fail.");
+    let _ = invoke("open", args).await;
+}
