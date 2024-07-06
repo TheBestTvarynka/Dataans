@@ -46,7 +46,7 @@ pub fn Info(current_space: OwnedSpace, set_spaces: SignalSetter<Vec<OwnedSpace>>
             </div>
             <Show when=move || show_modal.get()>
                 <Confirm
-                    message={format!("Confirm '{}' space deletion.", current_space.name.as_ref())}
+                    message=format!("Confirm '{}' space deletion.", current_space.name.as_ref())
                     on_confirm=move || delete_space()
                     on_cancel=move |_| set_show_modal.set(false)
                 />

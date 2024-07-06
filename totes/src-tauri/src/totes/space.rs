@@ -1,4 +1,4 @@
-use common::space::{DeleteSpace, OwnedSpace, Space, UpdateSpace};
+use common::space::{DeleteSpace, OwnedSpace, UpdateSpace};
 use polodb_core::bson::doc;
 use tauri::State;
 

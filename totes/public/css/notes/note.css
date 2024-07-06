@@ -8,7 +8,7 @@
     font-size: var(--note_font_size);
     border-radius: 0.3em;
     padding: 0.3em;
-    font-family: "Roboto Thin", sans-serif;
+    font-family: "Noto Sans", system-ui;
 }
 
 .note {
@@ -43,10 +43,11 @@
 .note .incline-code {
     font-family: "JetBrains Mono", monospace;
     cursor: pointer;
+    background-color: #2d4042;
 }
 
 .note .incline-code:hover {
-    background-color: #3C675B;
+    background-color: var(--note-inline-background-color);
 }
 
 .note .incline-code:active {
@@ -92,4 +93,17 @@
 
 .note-meta:hover .note-tools {
     visibility: visible;
+}
+
+.table-cell {
+    padding: 0.2em;
+}
+
+.table-header {
+    font-weight: bold;
+}
+
+.table, .table-cell, .table-header {
+  border: 2px solid var(--note-table-border-color);
+  border-collapse: collapse;
 }

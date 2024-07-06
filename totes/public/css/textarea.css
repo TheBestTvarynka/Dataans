@@ -4,15 +4,6 @@
     width: inherit;
     font-size: 0.9em;
     flex-grow: 1;
-    position: relative;
-}
-
-.resizable-textarea .resizable-textarea-text {
-    white-space: pre-wrap;
-    color: transparent;
-    line-height: 1;
-    padding-bottom: 0.3em;
-    word-break: break-word;
 }
 
 .resizable-textarea .resizable-textarea-text-container {
@@ -22,14 +13,9 @@
 .resizable-textarea .resizable-textarea-textarea {
     background-color: var(--messages_editor_background_color);
     color: var(--note_text_color);
-    position: absolute;
-    top: 0;
-    left: 0;
     width: calc(100% - 1.3em);
-    height: calc(100% - 1.3em);
     padding: 0.5em;
     border: none;
     outline: none;
     resize: none;
-    line-height: 1.43;
 }

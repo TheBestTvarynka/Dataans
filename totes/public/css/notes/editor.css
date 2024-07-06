@@ -1,13 +1,58 @@
 
 .editor-container {
-    display: inline-flex;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
     background-color: var(--messages_editor_background_color);
     color: var(--messages_editor_text_color);
     justify-content: flex-start;
-    align-items: flex-end;
-    padding-right: 0.2em;
+    align-items: center;
+    width: 100%;
 }
 
-.create-note-button {
-    margin-bottom: 0.26em;
+.editor-meta {
+    width: calc(100% - 0.6em);
+    padding: 0.3em;
+    display: flex;
+    gap: 0.2em;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.files-container {
+    display: flex;
+    gap: 0.2em;
+    flex-wrap: wrap;
+    flex-grow: 1;
+}
+
+.files-file {
+    padding: 0.2em;
+    border-radius: 0.2em;
+    background-color: var(--editor-file-background-color);
+    display: inline-flex;
+    gap: 0.1em;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+.files-file:hover .files-file-icon {
+    display: none;
+}
+
+.files-file .files-file-icon {
+    height: 1.2em;
+}
+
+.files-file:hover .files-file-cancel {
+    display: inline-block;
+}
+
+.files-file .files-file-cancel {
+    height: 1.2em;
+    display: none;
+}
+
+.files-file-cancel:hover {
+    cursor: pointer;
 }

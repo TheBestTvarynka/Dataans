@@ -1,3 +1,4 @@
+use std::fs;
 use std::path::PathBuf;
 
 use tauri::AppHandle;
@@ -6,14 +7,17 @@ use uuid::Uuid;
 use crate::IMAGES_FOLDER;
 
 #[tauri::command]
-pub fn image_path(app_handle: AppHandle, image_name: String) -> PathBuf {
+pub fn save_image(app_handle: AppHandle, image_name: String, image_data: Vec<u8>) -> PathBuf {
+    let image_name = format!("{}_{}", Uuid::new_v4(), image_name);
+
     let image_path = app_handle
         .path_resolver()
         .app_data_dir()
         .unwrap_or_default()
         .join(IMAGES_FOLDER)
         .join(image_name);
-    info!("Image path: {:?}", image_path);
+
+    fs::write(&image_path, image_data).expect("Image data writing into the file should not fail");
 
     image_path
 }

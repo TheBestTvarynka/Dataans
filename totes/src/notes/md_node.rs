@@ -108,7 +108,7 @@ pub fn render_md_node(node: &Node) -> HtmlElement<AnyElement> {
         }
         .into_any(),
         Node::Link(link) => view! {
-            <a class="link" href={&link.url} target="popup">
+            <a class="link" href=&link.url target="popup">
                 {link.children
                     .iter()
                     .map(render_md_node)
@@ -119,7 +119,7 @@ pub fn render_md_node(node: &Node) -> HtmlElement<AnyElement> {
         Node::List(list) => {
             if list.ordered {
                 view! {
-                    <ol class="list" start={list.start.unwrap_or(1)}>
+                    <ol class="list" start=list.start.unwrap_or(1)>
                         {list.children
                             .iter()
                             .map(render_md_node)
@@ -146,6 +146,57 @@ pub fn render_md_node(node: &Node) -> HtmlElement<AnyElement> {
                     .map(render_md_node)
                     .collect_view()}
             </li>
+        }
+        .into_any(),
+        Node::Image(image) => view! {
+            <img src=image.url.clone() alt=image.alt.clone() />
+        }
+        .into_any(),
+        Node::Table(table) => view! {
+            <table class="table">
+                {
+                    if let Node::TableRow(header_row) = table.children.first().unwrap() {
+                        view! {
+                            <tr class="table-header">
+                                {header_row.children
+                                    .iter()
+                                    .map(render_md_node)
+                                    .collect_view()}
+                            </tr>
+                        }
+                        .into_any()
+                    } else {
+                        view! {
+                            <span>"The first Table children should be TableRow"</span>
+                        }
+                        .into_any()
+                    }
+                }
+                {
+                    table.children[1..]
+                        .iter()
+                        .map(render_md_node)
+                        .collect_view()
+                }
+            </table>
+        }
+        .into_any(),
+        Node::TableRow(row) => view! {
+            <tr class="table-row">
+                {row.children
+                    .iter()
+                    .map(render_md_node)
+                    .collect_view()}
+            </tr>
+        }
+        .into_any(),
+        Node::TableCell(cell) => view! {
+            <td class="table-cell">
+                {cell.children
+                    .iter()
+                    .map(render_md_node)
+                    .collect_view()}
+            </td>
         }
         .into_any(),
         v => view! { <span>{format!("{:?} is not supported", v)}</span> }.into_any(),

@@ -27,6 +27,10 @@ body {
     --note_font_size: 1em;
     --note_link_color: #35c9a2;
     --note-time-label-text-color: #b0bbb5;
+    --note-table-border-color: #444c56;
+    --note-inline-background-color: #2d4042;
+
+    --editor-file-background-color: #463546;
 
     --spaces_font_size: 1.3em;
     --space_background_color: #282e33;

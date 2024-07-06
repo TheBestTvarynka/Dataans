@@ -58,7 +58,7 @@ pub fn Notes() -> impl IntoView {
                 when=move || current_space.get().is_some()
                 fallback=|| view! { <div /> }
             >
-                <Info current_space={current_space.get().unwrap()} set_spaces />
+                <Info current_space=current_space.get().unwrap() set_spaces />
             </Show>
             <div class="notes-inner">
                 <div class="notes">
@@ -72,7 +72,7 @@ pub fn Notes() -> impl IntoView {
                     }
                 </div>
                 <Show when=move || current_space.get().is_some()>
-                    <Editor space_id={current_space.get().as_ref().unwrap().id} set_notes />
+                    <Editor space_id=current_space.get().as_ref().unwrap().id set_notes />
                 </Show>
             </div>
         </div>
