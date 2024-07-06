@@ -1,4 +1,4 @@
-use common::note::{Note as NoteData, UpdateNote, File};
+use common::note::{File, Note as NoteData, UpdateNote};
 use leptos::web_sys::KeyboardEvent;
 use leptos::*;
 use markdown::mdast::{Node, Text};
@@ -7,7 +7,7 @@ use time::OffsetDateTime;
 
 use crate::backend::file::remove_file;
 use crate::backend::notes::{delete_note, list_notes, update_note};
-use crate::common::{Confirm, Files, TextArea};
+use crate::common::{Attachment, Confirm, Files, TextArea};
 use crate::notes::md_node::render_md_node;
 
 #[allow(clippy::needless_lifetimes)]
@@ -72,14 +72,6 @@ pub fn Note(note: NoteData<'static>, set_notes: SignalSetter<Vec<NoteData<'stati
         });
     };
 
-    let key_down = move |key: KeyboardEvent| {
-        if key.key() == "Enter" && !key.shift_key() {
-            update_note();
-        } else if key.key() == "Escape" {
-            set_edit_mode.set(false);
-        }
-    };
-
     view! {
         <div class="note-container">
             <div class="note-meta">
@@ -92,26 +84,47 @@ pub fn Note(note: NoteData<'static>, set_notes: SignalSetter<Vec<NoteData<'stati
                         title="Edit note"
                         on:click=move |_| set_edit_mode.set(true)
                     >
-                        <img alt="change space name" src="/public/icons/edit-space.svg" />
+                        <img alt="edit note" src="/public/icons/edit-space.svg" />
                     </button>
                     <button
                         class="tool"
                         title="Delete note"
                         on:click=move |_| set_show_modal.set(true)
                     >
-                        <img alt="delete space" src="/public/icons/delete-space.png" />
+                        <img alt="delete note" src="/public/icons/delete-space.png" />
                     </button>
                 </div>
             </div>
             {move || if edit_mode.get() {
+                let note_files = note.files.clone();
+                let key_down = move |key: KeyboardEvent| {
+                    if key.key() == "Enter" && !key.shift_key() {
+                        update_note();
+                    } else if key.key() == "Escape" {
+                        set_updated_files.set(note_files.clone());
+                        set_edit_mode.set(false);
+                    }
+                };
+
+                let note_files = note.files.clone();
+                let cancel = move |_| {
+                    set_updated_files.set(note_files.clone());
+                    set_edit_mode.set(false);
+                };
+
                 view! {
                     <div class="vertical">
-                        <TextArea id=note.id.to_string() text=updated_note_text set_text=move |t| set_updated_note_text.set(t) key_down />
+                        <TextArea
+                            id=note.id.to_string()
+                            text=updated_note_text
+                            set_text=move |t| set_updated_note_text.set(t)
+                            key_down
+                        />
                         <div class="horizontal">
                             <button
                                 class="tool"
                                 title="Discard changed"
-                                on:click=move |_| set_edit_mode.set(false)
+                                on:click=cancel
                             >
                                 <img alt="discard" src="/public/icons/cancel.png" />
                             </button>
@@ -122,13 +135,14 @@ pub fn Note(note: NoteData<'static>, set_notes: SignalSetter<Vec<NoteData<'stati
                             >
                                 <img alt="save" src="/public/icons/accept.png" />
                             </button>
+                            <Attachment id=note_id.to_string() files=updated_files set_files=move |files| set_updated_files.set(files) />
                         </div>
                     </div>
                 }.into_any()
             } else {
                 render_md_node(&md)
             }}
-            <Files files={note.files} remove_file />
+            {move || view! { <Files files={updated_files.get()} remove_file /> }}
             <Show when=move || show_modal.get()>
                 <Confirm
                     message="Confirm note deletion.".to_owned()
