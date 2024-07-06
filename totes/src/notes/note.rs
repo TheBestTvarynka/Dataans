@@ -10,7 +10,6 @@ use crate::backend::notes::{delete_note, list_notes, update_note};
 use crate::common::{Attachment, Confirm, Files, TextArea};
 use crate::notes::md_node::render_md_node;
 
-#[allow(clippy::needless_lifetimes)]
 #[component]
 pub fn Note(note: NoteData<'static>, set_notes: SignalSetter<Vec<NoteData<'static>>>) -> impl IntoView {
     let (show_modal, set_show_modal) = create_signal(false);
@@ -48,6 +47,13 @@ pub fn Note(note: NoteData<'static>, set_notes: SignalSetter<Vec<NoteData<'stati
             .expect("note updating should not fail");
             set_notes.set(list_notes(space_id).await.expect("Notes listing should not fail"));
         });
+    };
+
+    let remove_file_locally = move |file: File| {
+        let id = file.id;
+        let mut files = updated_files.get();
+        files.retain(|file| file.id != id);
+        set_updated_files.set(files.clone());
     };
 
     let remove_file = move |file: File| {
@@ -137,12 +143,17 @@ pub fn Note(note: NoteData<'static>, set_notes: SignalSetter<Vec<NoteData<'stati
                             </button>
                             <Attachment id=note_id.to_string() files=updated_files set_files=move |files| set_updated_files.set(files) />
                         </div>
+                        {move || view! { <Files files=updated_files.get() remove_file={remove_file_locally} /> }}
                     </div>
                 }.into_any()
             } else {
-                render_md_node(&md)
+                view !{
+                    <div class="vertical">
+                        {render_md_node(&md)}
+                        {move || view! { <Files files=updated_files.get() remove_file /> }}
+                    </div>
+                }.into_any()
             }}
-            {move || view! { <Files files={updated_files.get()} remove_file /> }}
             <Show when=move || show_modal.get()>
                 <Confirm
                     message="Confirm note deletion.".to_owned()
