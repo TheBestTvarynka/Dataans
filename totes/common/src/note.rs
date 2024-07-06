@@ -56,6 +56,8 @@ impl<'text> AsRef<str> for MdText<'text> {
 /// Represents an uploaded file.
 #[derive(Serialize, Deserialize, Debug, Clone, Eq, PartialEq)]
 pub struct File {
+    /// The unique file id.
+    pub id: Uuid,
     /// The original file name.
     pub name: String,
     /// Full path to the file in the local file system.

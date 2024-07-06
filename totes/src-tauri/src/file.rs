@@ -7,8 +7,8 @@ use uuid::Uuid;
 use crate::FILES_FOLDER;
 
 #[tauri::command]
-pub fn upload_file(app_handle: AppHandle, name: String, data: Vec<u8>) -> PathBuf {
-    let file_name = format!("{}_{}", name, Uuid::new_v4());
+pub fn upload_file(app_handle: AppHandle, id: Uuid, name: String, data: Vec<u8>) -> PathBuf {
+    let file_name = format!("{}_{}", name, id);
 
     let file_path = app_handle
         .path_resolver()
@@ -20,4 +20,9 @@ pub fn upload_file(app_handle: AppHandle, name: String, data: Vec<u8>) -> PathBu
     fs::write(&file_path, data).expect("Image data writing into the file should not fail");
 
     file_path
+}
+
+#[tauri::command]
+pub fn remove_file(path: PathBuf) {
+    fs::remove_file(path).expect("File removing should not fail")
 }

@@ -90,7 +90,8 @@ fn main() {
             config::theme,
             image::save_image,
             image::gen_random_avatar,
-            file::upload_file
+            file::upload_file,
+            file::remove_file
         ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application")
