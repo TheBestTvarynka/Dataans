@@ -1,6 +1,9 @@
 use leptos::html::AnyElement;
 use leptos::*;
 use markdown::mdast::Node;
+use syntect::highlighting::ThemeSet;
+use syntect::html::highlighted_html_for_string;
+use syntect::parsing::SyntaxSet;
 
 pub fn render_md_node(node: &Node) -> HtmlElement<AnyElement> {
     match node {
@@ -200,23 +203,32 @@ pub fn render_md_node(node: &Node) -> HtmlElement<AnyElement> {
         }
         .into_any(),
         Node::Code(code) => {
-            use syntect::html::highlighted_html_for_string;
-            use syntect::parsing::SyntaxSet;
-            use syntect::highlighting::ThemeSet;
+            let lang = code.lang.as_deref().unwrap_or("txt");
 
-            let ss = SyntaxSet::load_defaults_newlines();
-            let sr_rs = ss.find_syntax_by_name("Rust").unwrap();
+            let syntaxes = SyntaxSet::load_defaults_newlines();
+            let syntax = if let Some(syntax) = syntaxes.find_syntax_by_name(lang) {
+                syntax
+            } else if let Some(syntax) = syntaxes.find_syntax_by_extension(lang) {
+                syntax
+            } else {
+                syntaxes
+                    .find_syntax_by_extension("txt")
+                    .expect("The default plain text syntax should present.")
+            };
 
-            let ts = ThemeSet::load_defaults();
-            let html_rs = highlighted_html_for_string(
-                &code.value,
-                &ss,
-                sr_rs,
-                &ts.themes["Solarized (dark)"]
-            ).expect("Rust :(");
+            let themes = ThemeSet::load_defaults();
+            let html_rs =
+                highlighted_html_for_string(&code.value, &syntaxes, syntax, &themes.themes["Solarized (dark)"])
+                    .expect("Code HTML generation should not fail.");
 
             view! {
-                <div class="code-block-wrapper" inner_html=html_rs />
+                <div class="note-code-block">
+                    <div class="note-code-block-meta">
+                        <i>{code.lang.clone().unwrap_or_else(|| String::from("Text Plain"))}</i>
+                        <button>"Copy"</button>
+                    </div>
+                    <div class="code-block-wrapper" inner_html=html_rs />
+                </div>
             }
             .into_any()
         }
