@@ -221,11 +221,19 @@ pub fn render_md_node(node: &Node) -> HtmlElement<AnyElement> {
                 highlighted_html_for_string(&code.value, &syntaxes, syntax, &themes.themes["Solarized (dark)"])
                     .expect("Code HTML generation should not fail.");
 
+            let code_value = code.value.clone();
+
             view! {
                 <div class="note-code-block">
                     <div class="note-code-block-meta">
                         <i>{code.lang.clone().unwrap_or_else(|| String::from("Text Plain"))}</i>
-                        <button>"Copy"</button>
+                        <button on:click=move |_| {
+                            if let Some(clipboard) = window().navigator().clipboard() {
+                                let _ = clipboard.write_text(&code_value);
+                            } else {
+                                error!("clipboard is not defined.")
+                            }
+                        }>"Copy"</button>
                     </div>
                     <div class="code-block-wrapper" inner_html=html_rs />
                 </div>
