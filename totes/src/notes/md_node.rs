@@ -199,6 +199,30 @@ pub fn render_md_node(node: &Node) -> HtmlElement<AnyElement> {
             </td>
         }
         .into_any(),
+        Node::Code(code) => {
+            use syntect::html::{ClassStyle, ClassedHTMLGenerator};
+            use syntect::parsing::SyntaxSet;
+            use syntect::util::LinesWithEndings;
+
+            let ss = SyntaxSet::load_defaults_newlines();
+            // debug!("{:?}", ss);
+            debug!("{}", &code.value);
+            let sr_rs = ss.find_syntax_by_name("Rust").unwrap();
+            let mut rs_html_generator = ClassedHTMLGenerator::new_with_class_style(sr_rs, &ss, ClassStyle::Spaced);
+            for line in LinesWithEndings::from(&code.value) {
+                rs_html_generator
+                    .parse_html_for_line_which_includes_newline(line)
+                    .unwrap();
+            }
+            let html_rs = rs_html_generator.finalize();
+
+            debug!("code html: {:?}", html_rs);
+
+            view! {
+                <div inner_html=html_rs />
+            }
+            .into_any()
+        }
         v => view! { <span>{format!("{:?} is not supported", v)}</span> }.into_any(),
     }
 }
