@@ -1,6 +1,9 @@
 use leptos::html::AnyElement;
 use leptos::*;
 use markdown::mdast::Node;
+use syntect::highlighting::ThemeSet;
+use syntect::html::highlighted_html_for_string;
+use syntect::parsing::SyntaxSet;
 
 pub fn render_md_node(node: &Node) -> HtmlElement<AnyElement> {
     match node {
@@ -199,6 +202,44 @@ pub fn render_md_node(node: &Node) -> HtmlElement<AnyElement> {
             </td>
         }
         .into_any(),
+        Node::Code(code) => {
+            let lang = code.lang.as_deref().unwrap_or("txt");
+
+            let syntaxes = SyntaxSet::load_defaults_newlines();
+            let syntax = if let Some(syntax) = syntaxes.find_syntax_by_name(lang) {
+                syntax
+            } else if let Some(syntax) = syntaxes.find_syntax_by_extension(lang) {
+                syntax
+            } else {
+                syntaxes
+                    .find_syntax_by_extension("txt")
+                    .expect("The default plain text syntax should present.")
+            };
+
+            let themes = ThemeSet::load_defaults();
+            let html_rs =
+                highlighted_html_for_string(&code.value, &syntaxes, syntax, &themes.themes["Solarized (dark)"])
+                    .expect("Code HTML generation should not fail.");
+
+            let code_value = code.value.clone();
+
+            view! {
+                <div class="note-code-block">
+                    <div class="note-code-block-meta">
+                        <i>{code.lang.clone().unwrap_or_else(|| String::from("Text Plain"))}</i>
+                        <button on:click=move |_| {
+                            if let Some(clipboard) = window().navigator().clipboard() {
+                                let _ = clipboard.write_text(&code_value);
+                            } else {
+                                error!("clipboard is not defined.")
+                            }
+                        }>"Copy"</button>
+                    </div>
+                    <div class="code-block-wrapper" inner_html=html_rs />
+                </div>
+            }
+            .into_any()
+        }
         v => view! { <span>{format!("{:?} is not supported", v)}</span> }.into_any(),
     }
 }

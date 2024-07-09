@@ -107,3 +107,39 @@
   border: 2px solid var(--note-table-border-color);
   border-collapse: collapse;
 }
+
+.note .code-block-wrapper > pre {
+    margin: 0;
+    padding: 0.3em;
+}
+
+.note .note-code-block {
+    background-color: var(--note-code-block-background-color);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0;
+    border-radius: 0.2em;
+}
+
+.note .note-code-block .note-code-block-meta {
+    width: calc(100% - 0.4em);
+    padding: 0.2em;
+    display: inline-flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.note .note-code-block .note-code-block-meta button {
+    font-size: 0.8em;
+    background-color: transparent;
+    border: 2px solid transparent;
+    border-radius: 0.2em;
+    color: var(--note_text_color);
+}
+
+.note .note-code-block .note-code-block-meta button:hover {
+    cursor: pointer;
+    border: 2px solid var(--note_text_color);
+    transition: 0.1s;
+}
