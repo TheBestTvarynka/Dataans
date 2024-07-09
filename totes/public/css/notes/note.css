@@ -107,3 +107,7 @@
   border: 2px solid var(--note-table-border-color);
   border-collapse: collapse;
 }
+
+.note .code-block-wrapper > pre {
+    margin: 0;
+}

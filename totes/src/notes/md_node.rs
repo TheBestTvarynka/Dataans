@@ -200,26 +200,23 @@ pub fn render_md_node(node: &Node) -> HtmlElement<AnyElement> {
         }
         .into_any(),
         Node::Code(code) => {
-            use syntect::html::{ClassStyle, ClassedHTMLGenerator};
+            use syntect::html::highlighted_html_for_string;
             use syntect::parsing::SyntaxSet;
-            use syntect::util::LinesWithEndings;
+            use syntect::highlighting::ThemeSet;
 
             let ss = SyntaxSet::load_defaults_newlines();
-            // debug!("{:?}", ss);
-            debug!("{}", &code.value);
             let sr_rs = ss.find_syntax_by_name("Rust").unwrap();
-            let mut rs_html_generator = ClassedHTMLGenerator::new_with_class_style(sr_rs, &ss, ClassStyle::Spaced);
-            for line in LinesWithEndings::from(&code.value) {
-                rs_html_generator
-                    .parse_html_for_line_which_includes_newline(line)
-                    .unwrap();
-            }
-            let html_rs = rs_html_generator.finalize();
 
-            debug!("code html: {:?}", html_rs);
+            let ts = ThemeSet::load_defaults();
+            let html_rs = highlighted_html_for_string(
+                &code.value,
+                &ss,
+                sr_rs,
+                &ts.themes["Solarized (dark)"]
+            ).expect("Rust :(");
 
             view! {
-                <div inner_html=html_rs />
+                <div class="code-block-wrapper" inner_html=html_rs />
             }
             .into_any()
         }
