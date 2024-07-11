@@ -15,7 +15,6 @@ struct ListNotesArgs {
 pub async fn list_notes(space_id: SpaceId) -> Result<Vec<Note<'static>>, String> {
     let args = to_value(&ListNotesArgs { space_id }).expect("ListNotesArgs serialization to JsValue should not fail.");
     let notes = invoke(&format!("plugin:{}|list_notes", TOTES_PLUGIN_NAME), args).await;
-    info!("{:?}", notes);
 
     Ok(from_value(notes).expect("Notes list deserialization from JsValue should not fail."))
 }
@@ -28,8 +27,7 @@ struct CreateNoteArgs<'text> {
 
 pub async fn create_note(note: Note<'_>) -> Result<(), String> {
     let args = to_value(&CreateNoteArgs { note }).expect("CreateNoteArgs serialization to JsValue should not fail.");
-    let result = invoke(&format!("plugin:{}|create_note", TOTES_PLUGIN_NAME), args).await;
-    info!("{:?}", result);
+    let _ = invoke(&format!("plugin:{}|create_note", TOTES_PLUGIN_NAME), args).await;
 
     Ok(())
 }
@@ -43,8 +41,7 @@ struct UpdateNoteArgs<'text> {
 pub async fn update_note(note_data: UpdateNote<'_>) -> Result<(), String> {
     let args =
         to_value(&UpdateNoteArgs { note_data }).expect("UpdateNoteArgs serialization to JsValue should not fail.");
-    let result = invoke(&format!("plugin:{}|update_note", TOTES_PLUGIN_NAME), args).await;
-    info!("{:?}", result);
+    let _ = invoke(&format!("plugin:{}|update_note", TOTES_PLUGIN_NAME), args).await;
 
     Ok(())
 }
@@ -57,8 +54,7 @@ struct DeleteNoteArgs {
 
 pub async fn delete_note(note_id: NoteId) -> Result<(), String> {
     let args = to_value(&DeleteNoteArgs { note_id }).expect("DeleteNoteArgs serialization to JsValue should not fail.");
-    let result = invoke(&format!("plugin:{}|delete_note", TOTES_PLUGIN_NAME), args).await;
-    info!("{:?}", result);
+    let _ = invoke(&format!("plugin:{}|delete_note", TOTES_PLUGIN_NAME), args).await;
 
     Ok(())
 }
