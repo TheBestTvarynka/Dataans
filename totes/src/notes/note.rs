@@ -6,14 +6,12 @@ use markdown::ParseOptions;
 use time::OffsetDateTime;
 
 use crate::backend::file::remove_file;
-use crate::backend::notes::list_notes;
 use crate::common::{Attachment, Confirm, Files, TextArea};
 use crate::notes::md_node::render_md_node;
 
 #[component]
 pub fn Note(
     note: NoteData<'static>,
-    set_notes: SignalSetter<Vec<NoteData<'static>>>,
     delete_note: SignalSetter<NoteId>,
     update_note: SignalSetter<UpdateNote<'static>>,
 ) -> impl IntoView {
@@ -30,7 +28,6 @@ pub fn Note(
     });
 
     let note_id = note.id;
-    let space_id = note.space_id;
     let delete_note = move || {
         spawn_local(async move {
             crate::backend::notes::delete_note(note_id)
@@ -40,7 +37,7 @@ pub fn Note(
         });
     };
 
-    let update_note = move || {
+    let update_note_fn = move || {
         let text = updated_note_text.get();
         let files = updated_files.get();
 
@@ -54,7 +51,6 @@ pub fn Note(
                 .await
                 .expect("note updating should not fail");
             update_note.set(new_note);
-            // set_notes.set(list_notes(space_id).await.expect("Notes listing should not fail"));
         });
     };
 
@@ -76,14 +72,15 @@ pub fn Note(
             files.retain(|file| file.id != id);
             set_updated_files.set(files.clone());
 
-            crate::backend::notes::update_note(UpdateNote {
+            let new_note = UpdateNote {
                 id: note_id,
                 text: text.into(),
                 files,
-            })
-            .await
-            .expect("note updating should not fail");
-            set_notes.set(list_notes(space_id).await.expect("Notes listing should not fail"));
+            };
+            crate::backend::notes::update_note(new_note.clone())
+                .await
+                .expect("note updating should not fail");
+            update_note.set(new_note);
         });
     };
 
@@ -114,7 +111,7 @@ pub fn Note(
                 let note_files = note.files.clone();
                 let key_down = move |key: KeyboardEvent| {
                     if key.key() == "Enter" && !key.shift_key() {
-                        update_note();
+                        update_note_fn();
                     } else if key.key() == "Escape" {
                         set_updated_files.set(note_files.clone());
                         set_edit_mode.set(false);
@@ -146,7 +143,7 @@ pub fn Note(
                             <button
                                 class="tool"
                                 title="Save changes"
-                                on:click=move |_| update_note()
+                                on:click=move |_| update_note_fn()
                             >
                                 <img alt="save" src="/public/icons/accept.png" />
                             </button>

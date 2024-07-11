@@ -51,6 +51,8 @@ pub fn Notes() -> impl IntoView {
         |state, note_id| state.notes.retain(|note| note.id != note_id),
     );
 
+    let (_, create_note) = create_slice(global_state, |_state| (), |state, new_note| state.notes.push(new_note));
+
     let (_, update_note) = create_slice(
         global_state,
         |_state| (),
@@ -85,12 +87,12 @@ pub fn Notes() -> impl IntoView {
                         .iter()
                         .rev()
                         .cloned()
-                        .map(|note| view! { <Note note set_notes delete_note update_note /> })
+                        .map(|note| view! { <Note note delete_note update_note /> })
                         .collect::<Vec<_>>()
                     }
                 </div>
                 <Show when=move || current_space.get().is_some()>
-                    <Editor space_id=current_space.get().as_ref().unwrap().id set_notes />
+                    <Editor space_id=current_space.get().as_ref().unwrap().id create_note />
                 </Show>
             </div>
         </div>
