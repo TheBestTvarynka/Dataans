@@ -6,7 +6,7 @@ use markdown::ParseOptions;
 use time::OffsetDateTime;
 
 use crate::backend::file::remove_file;
-use crate::backend::notes::{list_notes, update_note};
+use crate::backend::notes::list_notes;
 use crate::common::{Attachment, Confirm, Files, TextArea};
 use crate::notes::md_node::render_md_node;
 
@@ -15,6 +15,7 @@ pub fn Note(
     note: NoteData<'static>,
     set_notes: SignalSetter<Vec<NoteData<'static>>>,
     delete_note: SignalSetter<NoteId>,
+    update_note: SignalSetter<UpdateNote<'static>>,
 ) -> impl IntoView {
     let (show_modal, set_show_modal) = create_signal(false);
     let (edit_mode, set_edit_mode) = create_signal(false);
@@ -36,7 +37,6 @@ pub fn Note(
                 .await
                 .expect("note deletion should not fail");
             delete_note.set(note_id);
-            // set_notes.set(list_notes(space_id).await.expect("Notes listing should not fail"));
         });
     };
 
@@ -45,14 +45,16 @@ pub fn Note(
         let files = updated_files.get();
 
         spawn_local(async move {
-            update_note(UpdateNote {
+            let new_note = UpdateNote {
                 id: note_id,
                 text: text.into(),
                 files,
-            })
-            .await
-            .expect("note updating should not fail");
-            set_notes.set(list_notes(space_id).await.expect("Notes listing should not fail"));
+            };
+            crate::backend::notes::update_note(new_note.clone())
+                .await
+                .expect("note updating should not fail");
+            update_note.set(new_note);
+            // set_notes.set(list_notes(space_id).await.expect("Notes listing should not fail"));
         });
     };
 

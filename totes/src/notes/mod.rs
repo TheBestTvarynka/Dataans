@@ -3,6 +3,7 @@ mod info;
 mod md_node;
 mod note;
 
+use common::note::UpdateNote;
 use common::space::Space as SpaceData;
 use leptos::*;
 
@@ -50,6 +51,17 @@ pub fn Notes() -> impl IntoView {
         |state, note_id| state.notes.retain(|note| note.id != note_id),
     );
 
+    let (_, update_note) = create_slice(
+        global_state,
+        |_state| (),
+        |state, new_note: UpdateNote<'static>| {
+            if let Some(note) = state.notes.iter_mut().find(|note| note.id == new_note.id) {
+                note.text = new_note.text;
+                note.files = new_note.files;
+            }
+        },
+    );
+
     let _ = move || {
         if let Some(space) = current_space.get() {
             spawn_local(async move {
@@ -73,7 +85,7 @@ pub fn Notes() -> impl IntoView {
                         .iter()
                         .rev()
                         .cloned()
-                        .map(|note| view! { <Note note set_notes delete_note /> })
+                        .map(|note| view! { <Note note set_notes delete_note update_note /> })
                         .collect::<Vec<_>>()
                     }
                 </div>
