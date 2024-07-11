@@ -24,7 +24,7 @@ pub fn Notes() -> impl IntoView {
 
     let (_, set_spaces) = create_slice(
         global_state,
-        |state| state.spaces.clone(),
+        |_state| (),
         |state, spaces: Vec<SpaceData>| {
             if let Some(selected_space) = state.selected_space.as_mut() {
                 let selected_space_id = selected_space.id;
@@ -42,6 +42,12 @@ pub fn Notes() -> impl IntoView {
         global_state,
         |state| state.notes.clone(),
         |state, notes| state.notes = notes,
+    );
+
+    let (_, delete_note) = create_slice(
+        global_state,
+        |_state| (),
+        |state, note_id| state.notes.retain(|note| note.id != note_id),
     );
 
     let _ = move || {
@@ -67,7 +73,7 @@ pub fn Notes() -> impl IntoView {
                         .iter()
                         .rev()
                         .cloned()
-                        .map(|note| view! { <Note note set_notes /> })
+                        .map(|note| view! { <Note note set_notes delete_note /> })
                         .collect::<Vec<_>>()
                     }
                 </div>

@@ -1,4 +1,4 @@
-use common::note::{File, Note as NoteData, UpdateNote};
+use common::note::{File, Id as NoteId, Note as NoteData, UpdateNote};
 use leptos::web_sys::KeyboardEvent;
 use leptos::*;
 use markdown::mdast::{Node, Text};
@@ -6,12 +6,16 @@ use markdown::ParseOptions;
 use time::OffsetDateTime;
 
 use crate::backend::file::remove_file;
-use crate::backend::notes::{delete_note, list_notes, update_note};
+use crate::backend::notes::{list_notes, update_note};
 use crate::common::{Attachment, Confirm, Files, TextArea};
 use crate::notes::md_node::render_md_node;
 
 #[component]
-pub fn Note(note: NoteData<'static>, set_notes: SignalSetter<Vec<NoteData<'static>>>) -> impl IntoView {
+pub fn Note(
+    note: NoteData<'static>,
+    set_notes: SignalSetter<Vec<NoteData<'static>>>,
+    delete_note: SignalSetter<NoteId>,
+) -> impl IntoView {
     let (show_modal, set_show_modal) = create_signal(false);
     let (edit_mode, set_edit_mode) = create_signal(false);
     let (updated_note_text, set_updated_note_text) = create_signal(note.text.to_string());
@@ -28,8 +32,11 @@ pub fn Note(note: NoteData<'static>, set_notes: SignalSetter<Vec<NoteData<'stati
     let space_id = note.space_id;
     let delete_note = move || {
         spawn_local(async move {
-            delete_note(note_id).await.expect("note deletion should not fail");
-            set_notes.set(list_notes(space_id).await.expect("Notes listing should not fail"));
+            crate::backend::notes::delete_note(note_id)
+                .await
+                .expect("note deletion should not fail");
+            delete_note.set(note_id);
+            // set_notes.set(list_notes(space_id).await.expect("Notes listing should not fail"));
         });
     };
 
