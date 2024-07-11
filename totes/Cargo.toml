@@ -16,12 +16,30 @@ console_error_panic_hook = "0.1.7"
 log = "0.4.21"
 wasm-logger = "0.2.0"
 common = { path = "./common" }
-markdown = { version = "1.0.0-alpha.17", features = ["log"]}
-time = {  version = "0.3.36", features = ["macros", "wasm-bindgen"] }
+markdown = { version = "1.0.0-alpha.17", features = ["log"] }
+time = { version = "0.3.36", features = ["macros", "wasm-bindgen"] }
 uuid = { version = "1.6.1", features = ["v4"] }
-web-sys = { version = "0.3.69", features = ["Clipboard", "Navigator", "ClipboardEvent", "DataTransfer", "DataTransferItem", "DataTransferItemList", "File", "Blob", "Document", "Element", "HtmlTextAreaElement", "FileList", "HtmlInputElement"] }
+web-sys = { version = "0.3.69", features = [
+    "Clipboard",
+    "Navigator",
+    "ClipboardEvent",
+    "DataTransfer",
+    "DataTransferItem",
+    "DataTransferItemList",
+    "File",
+    "Blob",
+    "Document",
+    "Element",
+    "HtmlTextAreaElement",
+    "FileList",
+    "HtmlInputElement",
+    "HtmlElement",
+] }
 futures = { version = "0.3.30", features = ["std", "alloc"] }
-syntect = { version = "5.2.0", default-features = false, features = ["default-fancy", "metadata"] }
+syntect = { version = "5.2.0", default-features = false, features = [
+    "default-fancy",
+    "metadata",
+] }
 
 [workspace]
 members = ["common", "src-tauri"]

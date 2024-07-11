@@ -19,7 +19,6 @@ pub async fn upload_file(id: Uuid, name: &str, data: &[u8]) -> String {
     let file_path = invoke("upload_file", args).await;
 
     let file_path: String = from_value(file_path).expect("Path object deserialization from JsValue should not fail.");
-    // convert_file_src(file_path)
     file_path
 }
 

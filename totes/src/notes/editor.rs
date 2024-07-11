@@ -6,11 +6,10 @@ use uuid::Uuid;
 use web_sys::KeyboardEvent;
 
 use crate::backend::file::remove_file;
-use crate::backend::notes::{create_note, list_notes};
 use crate::common::{Attachment, Files, TextArea};
 
 #[component]
-pub fn Editor(space_id: SpaceId, set_notes: SignalSetter<Vec<Note<'static>>>) -> impl IntoView {
+pub fn Editor(space_id: SpaceId, #[prop(into)] create_note: Callback<Note<'static>, ()>) -> impl IntoView {
     let (note, set_note) = create_signal(String::new());
     let (files, set_files) = create_signal(Vec::new());
 
@@ -26,16 +25,17 @@ pub fn Editor(space_id: SpaceId, set_notes: SignalSetter<Vec<Note<'static>>>) ->
         set_files.set(Vec::new());
 
         spawn_local(async move {
-            create_note(Note {
+            let new_note = Note {
                 id: Uuid::new_v4().into(),
-                text: note_text.trim().into(),
+                text: note_text.trim().to_string().into(),
                 created_at: OffsetDateTime::now_utc().into(),
                 space_id,
                 files,
-            })
-            .await
-            .expect("Note creating should not fail.");
-            set_notes.set(list_notes(space_id).await.expect("Note listing should not fail"));
+            };
+            crate::backend::notes::create_note(new_note.clone())
+                .await
+                .expect("Note creating should not fail.");
+            create_note.call(new_note);
         });
     };
 

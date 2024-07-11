@@ -4,7 +4,7 @@ use std::path::PathBuf;
 use tauri::AppHandle;
 use uuid::Uuid;
 
-use crate::FILES_FOLDER;
+use crate::FILES_DIR;
 
 #[tauri::command]
 pub fn upload_file(app_handle: AppHandle, id: Uuid, name: String, data: Vec<u8>) -> PathBuf {
@@ -14,7 +14,7 @@ pub fn upload_file(app_handle: AppHandle, id: Uuid, name: String, data: Vec<u8>)
         .path_resolver()
         .app_data_dir()
         .unwrap_or_default()
-        .join(FILES_FOLDER)
+        .join(FILES_DIR)
         .join(file_name);
 
     fs::write(&file_path, data).expect("Image data writing into the file should not fail");
