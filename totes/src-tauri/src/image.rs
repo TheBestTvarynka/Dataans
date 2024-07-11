@@ -4,7 +4,7 @@ use std::path::PathBuf;
 use tauri::AppHandle;
 use uuid::Uuid;
 
-use crate::IMAGES_FOLDER;
+use crate::IMAGED_DIR;
 
 #[tauri::command]
 pub fn save_image(app_handle: AppHandle, image_name: String, image_data: Vec<u8>) -> PathBuf {
@@ -14,7 +14,7 @@ pub fn save_image(app_handle: AppHandle, image_name: String, image_data: Vec<u8>
         .path_resolver()
         .app_data_dir()
         .unwrap_or_default()
-        .join(IMAGES_FOLDER)
+        .join(IMAGED_DIR)
         .join(image_name);
 
     fs::write(&image_path, image_data).expect("Image data writing into the file should not fail");
@@ -31,7 +31,7 @@ pub fn gen_random_avatar(app_handle: AppHandle) -> PathBuf {
         .path_resolver()
         .app_data_dir()
         .unwrap_or_default()
-        .join(IMAGES_FOLDER)
+        .join(IMAGED_DIR)
         .join(avatar_name);
     avatar.save(&avatar_path).expect("Avatar image saving should not fail");
 

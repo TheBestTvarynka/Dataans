@@ -1,12 +1,16 @@
+use std::fs;
+use std::path::PathBuf;
+
 use common::TOTES_PLUGIN_NAME;
 use polodb_core::Database;
 use tauri::plugin::{Builder, TauriPlugin};
 use tauri::{Manager, Runtime};
 
+use crate::{FILES_DIR, IMAGED_DIR};
+
 mod note;
 mod space;
 
-const DATABASE_FILEPATH: &str = "../db/totes.db";
 const SPACES_COLLECTION_NAME: &str = "spaces";
 const NOTES_COLLECTION_NAME: &str = "notes";
 
@@ -15,10 +19,11 @@ pub struct TotesState {
 }
 
 impl TotesState {
-    pub fn init() -> Self {
-        // TODO(@TheBestTvarynka): implement database filepath detection.
+    pub fn init(db_dr: PathBuf) -> Self {
+        let db_dr = db_dr.join("totes.db");
+
         Self {
-            db: Database::open_file(DATABASE_FILEPATH).expect("Database opening should not fail."),
+            db: Database::open_file(db_dr).expect("Database opening should not fail."),
         }
     }
 }
@@ -36,7 +41,42 @@ pub fn init_totes_plugin<R: Runtime>() -> TauriPlugin<R> {
             note::delete_note,
         ])
         .setup(|app_handle| {
-            app_handle.manage(TotesState::init());
+            let app_data = app_handle.path_resolver().app_data_dir().unwrap_or_default();
+            let db_dir = app_data.join("db");
+            let files_dir = app_data.join(FILES_DIR);
+            let images_dir = app_data.join(IMAGED_DIR);
+
+            if !db_dir.exists() {
+                match fs::create_dir(&db_dir) {
+                    Ok(()) => info!("Successfully created totes database directory: {:?}", db_dir),
+                    Err(err) => error!(
+                        "Filed to create totes database directory: {:?}. Path: {:?}",
+                        err, db_dir
+                    ),
+                }
+            }
+
+            if !files_dir.exists() {
+                match fs::create_dir(&files_dir) {
+                    Ok(()) => info!("Successfully created totes files directory: {:?}", files_dir),
+                    Err(err) => error!(
+                        "Filed to create totes files directory: {:?}. Path: {:?}",
+                        err, files_dir
+                    ),
+                }
+            }
+
+            if !images_dir.exists() {
+                match fs::create_dir(&images_dir) {
+                    Ok(()) => info!("Successfully created totes images directory: {:?}", images_dir),
+                    Err(err) => error!(
+                        "Filed to create totes images directory: {:?}. Path: {:?}",
+                        err, images_dir
+                    ),
+                }
+            }
+
+            app_handle.manage(TotesState::init(db_dir));
             Ok(())
         })
         .build()

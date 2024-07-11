@@ -23,8 +23,8 @@ const WINDOW_HIDE_TITLE: &str = "Hide";
 const WINDOW_SHOW_TITLE: &str = "Show";
 const WINDOW_QUIT_TITLE: &str = "Quit";
 
-const IMAGES_FOLDER: &str = "images";
-const FILES_FOLDER: &str = "files";
+const IMAGED_DIR: &str = "images";
+const FILES_DIR: &str = "files";
 // TODO: make it configurable.
 const GLOBAL_SHORTCUT_ACCELERATOR: &str = "F1";
 
