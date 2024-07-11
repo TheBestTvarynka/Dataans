@@ -9,7 +9,7 @@ use crate::backend::file::remove_file;
 use crate::common::{Attachment, Files, TextArea};
 
 #[component]
-pub fn Editor(space_id: SpaceId, create_note: SignalSetter<Note<'static>>) -> impl IntoView {
+pub fn Editor(space_id: SpaceId, #[prop(into)] create_note: Callback<Note<'static>, ()>) -> impl IntoView {
     let (note, set_note) = create_signal(String::new());
     let (files, set_files) = create_signal(Vec::new());
 
@@ -35,7 +35,7 @@ pub fn Editor(space_id: SpaceId, create_note: SignalSetter<Note<'static>>) -> im
             crate::backend::notes::create_note(new_note.clone())
                 .await
                 .expect("Note creating should not fail.");
-            create_note.set(new_note);
+            create_note.call(new_note);
         });
     };
 

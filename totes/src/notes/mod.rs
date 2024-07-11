@@ -6,6 +6,7 @@ mod note;
 use common::note::UpdateNote;
 use common::space::Space as SpaceData;
 use leptos::*;
+use wasm_bindgen::JsCast;
 
 use self::editor::Editor;
 use self::info::Info;
@@ -17,11 +18,7 @@ use crate::backend::notes::list_notes;
 pub fn Notes() -> impl IntoView {
     let global_state = expect_context::<RwSignal<GlobalState>>();
 
-    let (current_space, _) = create_slice(
-        global_state,
-        |state| state.selected_space.clone(),
-        |state, space| state.selected_space = Some(space),
-    );
+    let (current_space, _) = create_slice(global_state, |state| state.selected_space.clone(), |_, _: ()| ());
 
     let (_, set_spaces) = create_slice(
         global_state,
@@ -53,6 +50,18 @@ pub fn Notes() -> impl IntoView {
 
     let (_, create_note) = create_slice(global_state, |_state| (), |state, new_note| state.notes.push(new_note));
 
+    let create_note = move |note| {
+        create_note.set(note);
+        if let Some(notes_div) = document().get_element_by_id("notes") {
+            let notes = notes_div
+                .dyn_into::<web_sys::HtmlElement>()
+                .expect("Expected HtmlElement");
+            notes.set_scroll_top(notes.scroll_height());
+        } else {
+            warn!("notes component is not present.");
+        }
+    };
+
     let (_, update_note) = create_slice(
         global_state,
         |_state| (),
@@ -81,7 +90,7 @@ pub fn Notes() -> impl IntoView {
                 <Info current_space=current_space.get().unwrap() set_spaces />
             </Show>
             <div class="notes-inner">
-                <div class="notes">
+                <div class="notes" id="notes">
                     {move || notes
                         .get()
                         .iter()
