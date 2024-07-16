@@ -25,6 +25,7 @@ const WINDOW_QUIT_TITLE: &str = "Quit";
 
 const IMAGED_DIR: &str = "images";
 const FILES_DIR: &str = "files";
+const CONFIGS_DIR: &str = "configs";
 // TODO: make it configurable.
 const GLOBAL_SHORTCUT_ACCELERATOR: &str = "F1";
 
@@ -88,6 +89,7 @@ fn main() {
         .plugin(totes::init_totes_plugin())
         .invoke_handler(tauri::generate_handler![
             config::theme,
+            config::config,
             config::open,
             config::reveal,
             image::save_image,

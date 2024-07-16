@@ -6,7 +6,7 @@ use polodb_core::Database;
 use tauri::plugin::{Builder, TauriPlugin};
 use tauri::{Manager, Runtime};
 
-use crate::{FILES_DIR, IMAGED_DIR};
+use crate::{CONFIGS_DIR, FILES_DIR, IMAGED_DIR};
 
 mod note;
 mod space;
@@ -45,6 +45,7 @@ pub fn init_totes_plugin<R: Runtime>() -> TauriPlugin<R> {
             let db_dir = app_data.join("db");
             let files_dir = app_data.join(FILES_DIR);
             let images_dir = app_data.join(IMAGED_DIR);
+            let configs_dir = app_data.join(CONFIGS_DIR);
 
             if !db_dir.exists() {
                 match fs::create_dir(&db_dir) {
@@ -72,6 +73,16 @@ pub fn init_totes_plugin<R: Runtime>() -> TauriPlugin<R> {
                     Err(err) => error!(
                         "Filed to create totes images directory: {:?}. Path: {:?}",
                         err, images_dir
+                    ),
+                }
+            }
+
+            if !configs_dir.exists() {
+                match fs::create_dir(&configs_dir) {
+                    Ok(()) => info!("Successfully created totes configs directory: {:?}", configs_dir),
+                    Err(err) => error!(
+                        "Filed to create totes configs directory: {:?}. Path: {:?}",
+                        err, configs_dir
                     ),
                 }
             }
