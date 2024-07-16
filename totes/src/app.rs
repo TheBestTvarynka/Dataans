@@ -1,6 +1,7 @@
 use common::note::Note;
 use common::space::OwnedSpace;
 use leptos::*;
+use leptos_hotkeys::{provide_hotkeys_context, scopes, HotkeysContext};
 
 use crate::backend::load_theme;
 use crate::notes::Notes;
@@ -30,6 +31,10 @@ impl Default for GlobalState {
 pub fn App() -> impl IntoView {
     let (theme_css, set_theme_css) = create_signal(String::default());
 
+    // provide_hotkeys_context();
+    let main_ref = create_node_ref::<html::Main>();
+    let HotkeysContext { .. } = provide_hotkeys_context(main_ref, false, scopes!());
+
     spawn_local(async move {
         let theme = load_theme().await;
         set_theme_css.set(theme.to_css());
@@ -38,7 +43,7 @@ pub fn App() -> impl IntoView {
     provide_context(create_rw_signal(GlobalState::default()));
 
     view! {
-        <main class="app" style=move || theme_css.get()>
+        <main class="app" style=move || theme_css.get() _ref=main_ref>
             <Spaces />
             <Notes />
             // <Profile />

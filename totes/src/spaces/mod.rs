@@ -4,6 +4,7 @@ mod tools;
 
 use common::space::OwnedSpace;
 use leptos::*;
+use leptos_hotkeys::use_hotkeys;
 
 use self::space::Space;
 use self::tools::Tools;
@@ -42,6 +43,11 @@ pub fn Spaces() -> impl IntoView {
         |state| state.minimize_spaces,
         |state, minimized| state.minimize_spaces = minimized,
     );
+
+    use_hotkeys!(("ControlLeft+keyS") => move |_| {
+        logging::log!("toggle spaces bar");
+        set_spaces_minimized.set(!spaces_minimized.get());
+    });
 
     spawn_local(async move {
         set_spaces.set(list_spaces().await.expect("list spaces should not fail"));
