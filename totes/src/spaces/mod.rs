@@ -45,7 +45,6 @@ pub fn Spaces() -> impl IntoView {
     );
 
     use_hotkeys!(("ControlLeft+keyS") => move |_| {
-        logging::log!("toggle spaces bar");
         set_spaces_minimized.set(!spaces_minimized.get());
     });
 

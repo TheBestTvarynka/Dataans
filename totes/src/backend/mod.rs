@@ -2,7 +2,7 @@ pub mod file;
 pub mod notes;
 pub mod spaces;
 
-use common::Theme;
+use common::{Config, Theme};
 use serde::Serialize;
 use serde_wasm_bindgen::{from_value, to_value};
 use wasm_bindgen::prelude::wasm_bindgen;
@@ -33,6 +33,13 @@ pub async fn load_theme() -> Theme {
     let theme_value = invoke("theme", args).await;
 
     from_value(theme_value).expect("Theme object deserialization from JsValue should not fail.")
+}
+
+pub async fn load_config() -> Config {
+    let args = to_value(&EmptyArgs {}).expect("EmptyArgs serialization to JsValue should not fail.");
+    let theme_value = invoke("config", args).await;
+
+    from_value(theme_value).expect("Config object deserialization from JsValue should not fail.")
 }
 
 #[derive(Serialize)]
