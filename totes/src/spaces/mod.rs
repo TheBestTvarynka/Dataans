@@ -16,8 +16,8 @@ use crate::backend::spaces::list_spaces;
 #[component]
 pub fn Spaces() -> impl IntoView {
     let global_state = expect_context::<RwSignal<GlobalState>>();
-    let config = expect_context::<RwSignal<Config>>();
 
+    let config = expect_context::<RwSignal<Config>>();
     let (key_bindings, _) = create_slice(config, |config| config.key_bindings.clone(), |_config, _: ()| {});
 
     let (spaces, set_spaces) = create_slice(

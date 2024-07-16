@@ -57,10 +57,17 @@ pub struct KeyBindings {
     /// Toggle spaces bar.
     #[serde(default = "toggle_spaces_bar")]
     pub toggle_spaces_bar: String,
+    /// Create space.
+    #[serde(default = "create_space")]
+    pub create_space: String,
 }
 
 fn toggle_spaces_bar() -> String {
     "ControlLeft+keyS".into()
+}
+
+fn create_space() -> String {
+    "ControlLeft+keyN".into()
 }
 
 /// Represents app configuration.
