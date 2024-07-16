@@ -36,20 +36,36 @@ impl Theme {
 }
 
 /// Represents all possible appearance configuration options.
-#[derive(Serialize, Deserialize, Debug, Default, Clone)]
+#[derive(Serialize, Deserialize, Debug, Default, Clone, Eq, PartialEq)]
+#[serde(rename_all = "kebab-case")]
 pub struct Appearance {
     /// Path to the theme file.
     ///
     /// Example: `theme_dark.toml`, `my_custom/dark.toml`.
+    #[serde(default = "theme")]
     pub theme: PathBuf,
 }
 
+fn theme() -> PathBuf {
+    PathBuf::from("theme_dark.toml")
+}
+
 /// Represents all defined keybindings.
-#[derive(Serialize, Deserialize, Debug, Default, Clone)]
-pub struct KeyBindings(HashMap<String, String>);
+#[derive(Serialize, Deserialize, Debug, Default, Clone, Eq, PartialEq)]
+#[serde(rename_all = "kebab-case")]
+pub struct KeyBindings {
+    /// Toggle spaces bar.
+    #[serde(default = "toggle_spaces_bar")]
+    pub toggle_spaces_bar: String,
+}
+
+fn toggle_spaces_bar() -> String {
+    "ControlLeft+keyS".into()
+}
 
 /// Represents app configuration.
-#[derive(Serialize, Deserialize, Debug, Default, Clone)]
+#[derive(Serialize, Deserialize, Debug, Default, Clone, Eq, PartialEq)]
+#[serde(rename_all = "kebab-case")]
 pub struct Config {
     /// Defined key bindings.
     pub key_bindings: KeyBindings,
