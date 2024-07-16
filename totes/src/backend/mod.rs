@@ -2,6 +2,8 @@ pub mod file;
 pub mod notes;
 pub mod spaces;
 
+use std::path::Path;
+
 use common::{Config, Theme};
 use serde::Serialize;
 use serde_wasm_bindgen::{from_value, to_value};
@@ -26,14 +28,20 @@ extern "C" {
 }
 
 #[derive(Serialize)]
-struct EmptyArgs {}
+#[serde(rename_all = "camelCase")]
+struct ThemeFilepath<'path> {
+    file_path: &'path Path,
+}
 
-pub async fn load_theme() -> Theme {
-    let args = to_value(&EmptyArgs {}).expect("EmptyArgs serialization to JsValue should not fail.");
+pub async fn load_theme(file_path: &Path) -> Theme {
+    let args = to_value(&ThemeFilepath { file_path }).expect("EmptyArgs serialization to JsValue should not fail.");
     let theme_value = invoke("theme", args).await;
 
     from_value(theme_value).expect("Theme object deserialization from JsValue should not fail.")
 }
+
+#[derive(Serialize)]
+struct EmptyArgs {}
 
 pub async fn load_config() -> Config {
     let args = to_value(&EmptyArgs {}).expect("EmptyArgs serialization to JsValue should not fail.");

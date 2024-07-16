@@ -3,8 +3,9 @@ pub mod space_form;
 mod tools;
 
 use common::space::OwnedSpace;
+use common::Config;
 use leptos::*;
-use leptos_hotkeys::use_hotkeys;
+use leptos_hotkeys::{use_hotkeys, use_hotkeys_scoped};
 
 use self::space::Space;
 use self::tools::Tools;
@@ -15,6 +16,9 @@ use crate::backend::spaces::list_spaces;
 #[component]
 pub fn Spaces() -> impl IntoView {
     let global_state = expect_context::<RwSignal<GlobalState>>();
+    let config = expect_context::<RwSignal<Config>>();
+
+    let (key_bindings, _) = create_slice(config, |config| config.key_bindings.clone(), |_config, _: ()| {});
 
     let (spaces, set_spaces) = create_slice(
         global_state,
@@ -44,16 +48,23 @@ pub fn Spaces() -> impl IntoView {
         |state, minimized| state.minimize_spaces = minimized,
     );
 
-    use_hotkeys!(("ControlLeft+keyS") => move |_| {
-        set_spaces_minimized.set(!spaces_minimized.get());
-    });
-
     spawn_local(async move {
         set_spaces.set(list_spaces().await.expect("list spaces should not fail"));
     });
 
     view! {
         <div class="spaces-container">
+            {move || {
+                let key_bindings = key_bindings.get();
+
+                use_hotkeys!((key_bindings.toggle_spaces_bar) => move |_| {
+                    set_spaces_minimized.set(!spaces_minimized.get());
+                });
+
+                view! {
+                    <div style="display: none" />
+                }
+            }}
             <Tools set_spaces spaces_minimized set_spaces_minimized />
             <div class="spaces">
                 {move || spaces.get().iter().cloned().map(|space| {

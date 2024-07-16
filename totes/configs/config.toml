@@ -1,5 +1,5 @@
 [key-bindings]
-toggle-spaces-bar = "ControlLeft+keyS"
+toggle-spaces-bar = "ControlLeft+keyW"
 
 [appearance]
 theme = "theme_dark.toml"
