@@ -6,7 +6,7 @@ pub mod note;
 /// Contains all space-related structures.
 pub mod space;
 
-use std::collections::HashMap;
+use std::{collections::HashMap, path::PathBuf};
 
 use serde::{Deserialize, Serialize};
 use time::OffsetDateTime;
@@ -33,6 +33,28 @@ impl Theme {
             .map(|(key, value)| format!("--{}: {};", key, value))
             .collect()
     }
+}
+
+/// Represents all possible appearance configuration options.
+#[derive(Serialize, Deserialize, Debug, Default, Clone)]
+pub struct Appearance {
+    /// Path to the theme file.
+    ///
+    /// Example: `theme_dark.toml`, `my_custom/dark.toml`.
+    pub theme: PathBuf,
+}
+
+/// Represents all defined keybindings.
+#[derive(Serialize, Deserialize, Debug, Default, Clone)]
+pub struct KeyBindings(HashMap<String, String>);
+
+/// Represents app configuration.
+#[derive(Serialize, Deserialize, Debug, Default, Clone)]
+pub struct Config {
+    /// Defined key bindings.
+    pub key_bindings: KeyBindings,
+    /// Appearance configuration options.
+    pub appearance: Appearance,
 }
 
 /// Date and time when note was created.
