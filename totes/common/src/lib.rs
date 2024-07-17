@@ -6,7 +6,8 @@ pub mod note;
 /// Contains all space-related structures.
 pub mod space;
 
-use std::{collections::HashMap, path::PathBuf};
+use std::collections::HashMap;
+use std::path::PathBuf;
 
 use serde::{Deserialize, Serialize};
 use time::OffsetDateTime;

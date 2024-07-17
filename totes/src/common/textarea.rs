@@ -74,6 +74,55 @@ pub fn TextArea(
         }
     };
 
+    let elem_id = id.clone();
+    let text_editing_keybindings = move |event: KeyboardEvent| {
+        let text = text.get();
+        if let Some(format_fn) = get_text_format_fn(event) {
+            let text_area = document()
+                .get_element_by_id(&elem_id)
+                .expect("Dom element should present");
+            let text_area = text_area
+                .dyn_into::<web_sys::HtmlTextAreaElement>()
+                .expect("Element should be textarea");
+
+            let (text, selection) = match (
+                text_area.selection_start().ok().flatten(),
+                text_area.selection_end().ok().flatten(),
+            ) {
+                (Some(start), Some(end)) => {
+                    let pre_text = text.chars().take(start as usize).collect::<String>();
+                    let link_text = text
+                        .chars()
+                        .skip(start as usize)
+                        .take((end - start) as usize)
+                        .collect::<String>();
+                    let after_text = text.chars().skip(end as usize).collect::<String>();
+
+                    format_fn(pre_text, link_text, after_text, start)
+                }
+                (Some(position), None) | (None, Some(position)) => {
+                    let pre_text = text.chars().take(position as usize).collect::<String>();
+                    let after_text = text.chars().skip(position as usize).collect::<String>();
+
+                    format_fn(pre_text, String::new(), after_text, position)
+                }
+                (None, None) => {
+                    warn!("Empty text selection");
+                    (text, None)
+                }
+            };
+            set_text.call(text);
+            if let Some((selection_start, selection_end)) = selection {
+                if let Err(err) = text_area.set_selection_start(Some(selection_start)) {
+                    error!("{:?}", err);
+                }
+                if let Err(err) = text_area.set_selection_end(Some(selection_end)) {
+                    error!("{:?}", err);
+                }
+            }
+        }
+    };
+
     view! {
         <div class="resizable-textarea">
             <textarea
@@ -85,7 +134,10 @@ pub fn TextArea(
                 // https://developer.mozilla.org/en-US/docs/Web/CSS/field-sizing#browser_compatibility
                 style="field-sizing: content"
                 on:input=move |ev| set_text.call(event_target_value(&ev))
-                on:keydown=move |ev| key_down.call(ev)
+                on:keydown=move |ev| {
+                    key_down.call(ev.clone());
+                    text_editing_keybindings(ev);
+                }
                 on:paste=paste_handler
                 prop:value=move || text.get()
                 disabled=move || disabled.get()
@@ -93,5 +145,45 @@ pub fn TextArea(
                 {text.get_untracked()}
             </textarea>
         </div>
+    }
+}
+
+fn get_text_format_fn(
+    event: KeyboardEvent,
+) -> Option<&'static dyn Fn(String, String, String, u32) -> (String, Option<(u32, u32)>)> {
+    if event.ctrl_key() && event.key() == "k" {
+        Some(&move |pre_text, selected_text, after_text, start| {
+            let selection_start = start + selected_text.len() as u32 + 3 /* "[](" */;
+            (
+                format!("{}[{}](url){}", pre_text, selected_text, after_text),
+                Some((selection_start, selection_start + 3 /* "url" */)),
+            )
+        })
+    } else if event.ctrl_key() && event.key() == "b" {
+        Some(&move |pre_text, selected_text, after_text, start| {
+            let selection = start + 2 /* "**" */ + selected_text.len() as u32 + 2 /* "**" */;
+            (
+                format!("{}**{}**{}", pre_text, selected_text, after_text),
+                Some((selection, selection)),
+            )
+        })
+    } else if event.ctrl_key() && event.key() == "i" {
+        Some(&move |pre_text, selected_text, after_text, start| {
+            let selection = start + 1 /* "*" */ + selected_text.len() as u32 + 1 /* "*" */;
+            (
+                format!("{}*{}*{}", pre_text, selected_text, after_text),
+                Some((selection, selection)),
+            )
+        })
+    } else if event.ctrl_key() && event.shift_key() && event.key() == "M" {
+        Some(&move |pre_text, selected_text, after_text, start| {
+            let selection = start + 1 /* "`" */ + selected_text.len() as u32 + 1 /* "`" */;
+            (
+                format!("{}`{}`{}", pre_text, selected_text, after_text),
+                Some((selection, selection)),
+            )
+        })
+    } else {
+        None
     }
 }
