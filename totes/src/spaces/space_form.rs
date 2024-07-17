@@ -1,13 +1,16 @@
 use common::space::{OwnedSpace, Space, UpdateSpace};
 use leptos::{
     component, create_signal, event_target_value, spawn_local, view, Callable, Callback, IntoView, SignalGet,
-    SignalSet, SignalSetter,
+    SignalSet, SignalSetter
 };
+use leptos_hotkeys::use_hotkeys;
 use time::OffsetDateTime;
 use uuid::Uuid;
 
 use crate::backend::gen_avatar;
 use crate::backend::spaces::{create_space, list_spaces, update_space};
+
+const INPUT_ELEM_ID: &str = "space-form";
 
 #[component]
 pub fn SpaceForm(
@@ -70,8 +73,11 @@ pub fn SpaceForm(
         }
     };
 
+    use_hotkeys!(("Escape") => move |_| on_cancel.call(()));
+    use_hotkeys!(("Enter") => move |_| create_space());
+
     view! {
-        <div class="create-space-window">
+        <div class="create-space-window" on:load=move |_| info!("on_load")>
             {if space.is_some() {
                 view! { <span class="create-space-title">"Update space"</span> }
             } else {
@@ -86,6 +92,7 @@ pub fn SpaceForm(
                 </div>
             </div>
             <input
+                id=INPUT_ELEM_ID
                 type="text"
                 placeholder="Space name"
                 class="input"
