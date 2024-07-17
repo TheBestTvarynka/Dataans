@@ -65,7 +65,7 @@ pub fn Info(current_space: OwnedSpace, set_spaces: SignalSetter<Vec<OwnedSpace>>
             <Show when=move || show_delete_modal.get()>
                 <Confirm
                     message=format!("Confirm '{}' space deletion.", current_space.name.as_ref())
-                    on_confirm=move || delete_space()
+                    on_confirm=move |_| delete_space()
                     on_cancel=move |_| set_show_delete_modal.set(false)
                 />
             </Show>

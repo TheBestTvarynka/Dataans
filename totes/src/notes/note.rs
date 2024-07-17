@@ -163,7 +163,7 @@ pub fn Note(
             <Show when=move || show_modal.get()>
                 <Confirm
                     message="Confirm note deletion.".to_owned()
-                    on_confirm=move || delete_note()
+                    on_confirm=move |_| delete_note()
                     on_cancel=move |_| set_show_modal.set(false)
                 />
             </Show>
