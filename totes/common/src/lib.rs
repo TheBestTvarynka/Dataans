@@ -64,6 +64,9 @@ pub struct KeyBindings {
     /// Edit current space.
     #[serde(default = "edit_current_space")]
     pub edit_current_space: String,
+    /// Delete current space.
+    #[serde(default = "delete_current_space")]
+    pub delete_current_space: String,
 }
 
 fn toggle_spaces_bar() -> String {
@@ -75,6 +78,10 @@ fn create_space() -> String {
 }
 
 fn edit_current_space() -> String {
+    "ControlLeft+keyE".into()
+}
+
+fn delete_current_space() -> String {
     "ControlLeft+keyE".into()
 }
 

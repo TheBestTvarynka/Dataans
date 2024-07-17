@@ -37,6 +37,10 @@ pub fn Info(current_space: OwnedSpace, set_spaces: SignalSetter<Vec<OwnedSpace>>
                     set_show_edit_modal.set(true);
                 });
 
+                use_hotkeys!((key_bindings.delete_current_space) => move |_| {
+                    set_show_delete_modal.set(true);
+                });
+
                 view! {}
             }}
             <span class="space-name">{current_space_name.clone()}</span>
