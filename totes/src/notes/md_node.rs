@@ -203,43 +203,63 @@ pub fn render_md_node(node: &Node) -> HtmlElement<AnyElement> {
         }
         .into_any(),
         Node::Code(code) => {
-            let lang = code.lang.as_deref().unwrap_or("txt");
-
-            let syntaxes = SyntaxSet::load_defaults_newlines();
-            let syntax = if let Some(syntax) = syntaxes.find_syntax_by_name(lang) {
-                syntax
-            } else if let Some(syntax) = syntaxes.find_syntax_by_extension(lang) {
-                syntax
-            } else {
-                syntaxes
-                    .find_syntax_by_extension("txt")
-                    .expect("The default plain text syntax should present.")
-            };
-
-            let themes = ThemeSet::load_defaults();
-            let html_rs =
-                highlighted_html_for_string(&code.value, &syntaxes, syntax, &themes.themes["Solarized (dark)"])
-                    .expect("Code HTML generation should not fail.");
-
-            let code_value = code.value.clone();
-
+            let lang = code.lang.clone().unwrap_or_else(|| String::from("txt"));
             view! {
-                <div class="note-code-block">
-                    <div class="note-code-block-meta">
-                        <i>{code.lang.clone().unwrap_or_else(|| String::from("Text Plain"))}</i>
-                        <button on:click=move |_| {
-                            if let Some(clipboard) = window().navigator().clipboard() {
-                                let _ = clipboard.write_text(&code_value);
-                            } else {
-                                error!("clipboard is not defined.")
-                            }
-                        }>"Copy"</button>
-                    </div>
-                    <div class="code-block-wrapper" inner_html=html_rs />
+                <div>
+                    <CodeBlock code={code.value.clone()} lang/>
                 </div>
             }
             .into_any()
         }
         v => view! { <span>{format!("{:?} is not supported", v)}</span> }.into_any(),
+    }
+}
+
+#[component]
+fn CodeBlock(code: String, lang: String) -> impl IntoView {
+    let (inner_html, set_inner_html) = create_signal(String::new());
+
+    let language = lang.clone();
+    let code_value = code.clone();
+    spawn_local(async move {
+        let syntaxes = SyntaxSet::load_defaults_newlines();
+        let syntax = if let Some(syntax) = syntaxes.find_syntax_by_name(&language) {
+            syntax
+        } else if let Some(syntax) = syntaxes.find_syntax_by_extension(&language) {
+            syntax
+        } else {
+            syntaxes
+                .find_syntax_by_extension("txt")
+                .expect("The default plain text syntax should present.")
+        };
+
+        let themes = ThemeSet::load_defaults();
+        let html_rs = highlighted_html_for_string(&code_value, &syntaxes, syntax, &themes.themes["Solarized (dark)"])
+            .expect("Code HTML generation should not fail.");
+
+        set_inner_html.set(html_rs);
+    });
+
+    let code_value = code.clone();
+
+    view! {
+        <div class="note-code-block">
+            <div class="note-code-block-meta">
+                <i>{lang}</i>
+                <button on:click=move |_| {
+                    if let Some(clipboard) = window().navigator().clipboard() {
+                        let _ = clipboard.write_text(&code_value);
+                    } else {
+                        error!("clipboard is not defined.")
+                    }
+                }>"Copy"</button>
+            </div>
+            <Show
+                when=move || !inner_html.get().is_empty()
+                fallback=move || view! { <span>"Parsing code...."</span> }
+            >
+                <div class="code-block-wrapper" inner_html=move || inner_html.get() />
+            </Show>
+        </div>
     }
 }

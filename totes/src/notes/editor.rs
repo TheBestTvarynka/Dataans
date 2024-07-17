@@ -61,13 +61,17 @@ pub fn Editor(space_id: SpaceId, #[prop(into)] create_note: Callback<Note<'stati
 
     view! {
         <div class="editor-container">
-            <TextArea id="create_note".to_owned() text=note set_text=move |t| set_note.set(t) key_down />
+            <div class="horizontal">
+                <TextArea id="create_note".to_owned() text=note set_text=move |t| set_note.set(t) key_down />
+                <div style="display: inline-flex; align-items: center; padding: 0.3em; align-self: flex-end;">
+                    <Attachment id="new-note-files".to_string() files set_files=handle_files />
+                    <button on:click=move |_| create_note() title="Create note" class="tool">
+                        <img alt="create note" src="/public/icons/create-note.png" />
+                    </button>
+                </div>
+            </div>
             <div class="editor-meta">
                 {move || view!{ <Files files=files.get() remove_file edit_mode=true /> }}
-                <Attachment id="new-note-files".to_string() files set_files=handle_files />
-                <button on:click=move |_| create_note() title="Create note" class="tool">
-                    <img alt="create note" src="/public/icons/create-note.png" />
-                </button>
             </div>
         </div>
     }
