@@ -58,6 +58,7 @@
     padding-left: 0.5em;
     border-left: 2px solid var(--note_quote_text_color);
     color: var(--note_quote_text_color);
+    font-size: 0.85em;
 }
 
 .note .text {
