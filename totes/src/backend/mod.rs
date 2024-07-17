@@ -11,14 +11,15 @@ use wasm_bindgen::prelude::wasm_bindgen;
 use wasm_bindgen::JsValue;
 
 fn convert_file_src(image_path: impl AsRef<str>) -> String {
-    #[cfg(target_os = "windows")]
-    {
-        format!("https://asset.localhost/{}", image_path.as_ref())
-    }
-    #[cfg(not(target_os = "windows"))]
-    {
-        format!("asset://localhost/{}", image_path.as_ref())
-    }
+    // TODO: proper file src creation
+    // #[cfg(target_os = "windows")]
+    // {
+    format!("https://asset.localhost/{}", image_path.as_ref())
+    // }
+    // #[cfg(not(target_os = "windows"))]
+    // {
+    //     format!("asset://localhost/{}", image_path.as_ref())
+    // }
 }
 
 #[wasm_bindgen]

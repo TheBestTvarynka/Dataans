@@ -61,9 +61,7 @@ pub fn Spaces() -> impl IntoView {
                     set_spaces_minimized.set(!spaces_minimized.get());
                 });
 
-                view! {
-                    <div style="display: none" />
-                }
+                view! {}
             }}
             <Tools set_spaces spaces_minimized set_spaces_minimized />
             <div class="spaces">

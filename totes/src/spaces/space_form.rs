@@ -72,7 +72,11 @@ pub fn SpaceForm(
 
     view! {
         <div class="create-space-window">
-            <span class="create-space-title">"Create space"</span>
+            {if space.is_some() {
+                view! { <span class="create-space-title">"Update space"</span> }
+            } else {
+                view! { <span class="create-space-title">"Create space"</span> }
+            }}
             <div class="create-space-avatar">
                 <img class="create-space-avatar-img" src=move || avatar_path />
                 <div style="align-self: center">
