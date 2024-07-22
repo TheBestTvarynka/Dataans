@@ -99,6 +99,19 @@ fn delete_current_space() -> String {
     "ControlLeft+keyE".into()
 }
 
+/// App configuration.
+#[derive(Serialize, Deserialize, Debug, Default, Clone, Eq, PartialEq)]
+#[serde(rename_all = "kebab-case")]
+pub struct App {
+    /// App toggle: show/hide app.
+    #[serde(default = "app_toggle")]
+    pub app_toggle: String,
+}
+
+fn app_toggle() -> String {
+    "F1".into()
+}
+
 /// Represents app configuration.
 #[derive(Serialize, Deserialize, Debug, Default, Clone, Eq, PartialEq)]
 #[serde(rename_all = "kebab-case")]
@@ -107,6 +120,8 @@ pub struct Config {
     pub key_bindings: KeyBindings,
     /// Appearance configuration options.
     pub appearance: Appearance,
+    /// App configuration.
+    pub app: App,
 }
 
 /// Date and time when note was created.

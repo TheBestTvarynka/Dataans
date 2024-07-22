@@ -26,8 +26,6 @@ const WINDOW_QUIT_TITLE: &str = "Quit";
 const IMAGED_DIR: &str = "images";
 const FILES_DIR: &str = "files";
 const CONFIGS_DIR: &str = "configs";
-// TODO: make it configurable.
-const GLOBAL_SHORTCUT_ACCELERATOR: &str = "F1";
 
 fn toggle_app_visibility(app: &AppHandle) -> Result<()> {
     if let Some(window) = app.get_window(MAIN_WINDOW_NAME) {
@@ -102,10 +100,10 @@ fn main() {
         .run(|app_handle, event| match event {
             RunEvent::Ready => {
                 let app_handle = app_handle.clone();
+                let app_toggle = crate::config::load_config_inner(&app_handle).app.app_toggle;
                 app_handle
                     .global_shortcut_manager()
-                    .register(GLOBAL_SHORTCUT_ACCELERATOR, move || {
-                        info!("global shortcut: {}", GLOBAL_SHORTCUT_ACCELERATOR);
+                    .register(&app_toggle, move || {
                         toggle_app_visibility(&app_handle).unwrap();
                     })
                     .unwrap();

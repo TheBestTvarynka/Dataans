@@ -6,8 +6,7 @@ use tauri::AppHandle;
 
 use super::CONFIGS_DIR;
 
-#[tauri::command]
-pub fn config(app_handle: AppHandle) -> Config {
+pub fn load_config_inner(app_handle: &AppHandle) -> Config {
     let configs_dir = app_handle
         .path_resolver()
         .app_config_dir()
@@ -32,6 +31,11 @@ pub fn config(app_handle: AppHandle) -> Config {
         error!("Can not parse config: {:?}", err);
         Default::default()
     })
+}
+
+#[tauri::command]
+pub fn config(app_handle: AppHandle) -> Config {
+    load_config_inner(&app_handle)
 }
 
 #[tauri::command]
