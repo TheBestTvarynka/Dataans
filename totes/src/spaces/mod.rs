@@ -47,6 +47,44 @@ pub fn Spaces() -> impl IntoView {
         |state| state.minimize_spaces,
         |state, minimized| state.minimize_spaces = minimized,
     );
+    let select_next_space = move || {
+        if let Some(selected_space) = selected_space.get() {
+            let spaces = spaces.get();
+            let selected_space_index = spaces
+                .iter()
+                .position(|s| s.id == selected_space.id)
+                .expect("selected space should present in loaded spaces");
+            set_selected_space(
+                spaces
+                    .get(if selected_space_index + 1 == spaces.len() {
+                        0
+                    } else {
+                        selected_space_index + 1
+                    })
+                    .expect("valid space index")
+                    .clone(),
+            );
+        }
+    };
+    let select_prev_space = move || {
+        if let Some(selected_space) = selected_space.get() {
+            let spaces = spaces.get();
+            let selected_space_index = spaces
+                .iter()
+                .position(|s| s.id == selected_space.id)
+                .expect("selected space should present in loaded spaces");
+            set_selected_space(
+                spaces
+                    .get(if selected_space_index == 0 {
+                        spaces.len() - 1
+                    } else {
+                        selected_space_index - 1
+                    })
+                    .expect("valid space index")
+                    .clone(),
+            );
+        }
+    };
 
     spawn_local(async move {
         set_spaces.set(list_spaces().await.expect("list spaces should not fail"));
@@ -60,6 +98,9 @@ pub fn Spaces() -> impl IntoView {
                 use_hotkeys!((key_bindings.toggle_spaces_bar) => move |_| {
                     set_spaces_minimized.set(!spaces_minimized.get());
                 });
+
+                use_hotkeys!(("AltLeft+Digit1") => move |_| select_prev_space());
+                use_hotkeys!(("AltLeft+Digit2") => move |_| select_next_space());
 
                 view! {}
             }}

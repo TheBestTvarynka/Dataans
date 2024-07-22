@@ -1,7 +1,7 @@
 use common::space::{OwnedSpace, Space, UpdateSpace};
 use leptos::{
     component, create_signal, event_target_value, spawn_local, view, Callable, Callback, IntoView, SignalGet,
-    SignalSet, SignalSetter
+    SignalSet, SignalSetter,
 };
 use leptos_hotkeys::use_hotkeys;
 use time::OffsetDateTime;
