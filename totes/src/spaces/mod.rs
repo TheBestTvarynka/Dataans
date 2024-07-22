@@ -99,8 +99,8 @@ pub fn Spaces() -> impl IntoView {
                     set_spaces_minimized.set(!spaces_minimized.get());
                 });
 
-                use_hotkeys!(("AltLeft+Digit1") => move |_| select_prev_space());
-                use_hotkeys!(("AltLeft+Digit2") => move |_| select_next_space());
+                use_hotkeys!((key_bindings.select_prev_space) => move |_| select_prev_space());
+                use_hotkeys!((key_bindings.select_next_space) => move |_| select_next_space());
 
                 view! {}
             }}

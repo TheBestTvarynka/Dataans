@@ -67,6 +67,20 @@ pub struct KeyBindings {
     /// Delete current space.
     #[serde(default = "delete_current_space")]
     pub delete_current_space: String,
+    /// Select previous space
+    #[serde(default = "select_next_space")]
+    pub select_next_space: String,
+    /// Select next space
+    #[serde(default = "select_prev_space")]
+    pub select_prev_space: String,
+}
+
+fn select_next_space() -> String {
+    "AltLeft+Digit2".into()
+}
+
+fn select_prev_space() -> String {
+    "AltLeft+Digit2".into()
 }
 
 fn toggle_spaces_bar() -> String {
