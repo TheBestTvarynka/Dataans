@@ -1,0 +1,6 @@
+[key-bindings]
+toggle-spaces-bar = "ControlLeft+keyS"
+create-space = "ControlLeft+keyN"
+
+[appearance]
+theme = "theme_dark.toml"

@@ -7,6 +7,7 @@ repository = "https://github.com/TheBestTvarynka/totes"
 
 [dependencies]
 leptos = { version = "0.6", features = ["csr"] }
+leptos_hotkeys = "0.2.2"
 wasm-bindgen = { version = "0.2" }
 wasm-bindgen-futures = "0.4"
 js-sys = "0.3"

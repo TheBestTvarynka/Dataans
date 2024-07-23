@@ -2,21 +2,24 @@ pub mod file;
 pub mod notes;
 pub mod spaces;
 
-use common::Theme;
+use std::path::Path;
+
+use common::{Config, Theme};
 use serde::Serialize;
 use serde_wasm_bindgen::{from_value, to_value};
 use wasm_bindgen::prelude::wasm_bindgen;
 use wasm_bindgen::JsValue;
 
 fn convert_file_src(image_path: impl AsRef<str>) -> String {
-    #[cfg(target_os = "windows")]
-    {
-        format!("https://asset.localhost/{}", image_path.as_ref())
-    }
-    #[cfg(not(target_os = "windows"))]
-    {
-        format!("asset://localhost/{}", image_path.as_ref())
-    }
+    // TODO: proper file src creation
+    // #[cfg(target_os = "windows")]
+    // {
+    format!("https://asset.localhost/{}", image_path.as_ref())
+    // }
+    // #[cfg(not(target_os = "windows"))]
+    // {
+    //     format!("asset://localhost/{}", image_path.as_ref())
+    // }
 }
 
 #[wasm_bindgen]
@@ -26,13 +29,26 @@ extern "C" {
 }
 
 #[derive(Serialize)]
-struct EmptyArgs {}
+#[serde(rename_all = "camelCase")]
+struct ThemeFilepath<'path> {
+    file_path: &'path Path,
+}
 
-pub async fn load_theme() -> Theme {
-    let args = to_value(&EmptyArgs {}).expect("EmptyArgs serialization to JsValue should not fail.");
+pub async fn load_theme(file_path: &Path) -> Theme {
+    let args = to_value(&ThemeFilepath { file_path }).expect("EmptyArgs serialization to JsValue should not fail.");
     let theme_value = invoke("theme", args).await;
 
     from_value(theme_value).expect("Theme object deserialization from JsValue should not fail.")
+}
+
+#[derive(Serialize)]
+struct EmptyArgs {}
+
+pub async fn load_config() -> Config {
+    let args = to_value(&EmptyArgs {}).expect("EmptyArgs serialization to JsValue should not fail.");
+    let theme_value = invoke("config", args).await;
+
+    from_value(theme_value).expect("Config object deserialization from JsValue should not fail.")
 }
 
 #[derive(Serialize)]

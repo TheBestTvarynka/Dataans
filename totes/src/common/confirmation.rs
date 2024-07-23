@@ -1,14 +1,15 @@
 use leptos::*;
+use leptos_hotkeys::use_hotkeys;
 
 #[component]
-pub fn Confirm<Confirm>(
+pub fn Confirm(
     message: String,
-    on_confirm: Confirm,
+    #[prop(into)] on_confirm: Callback<(), ()>,
     #[prop(into)] on_cancel: Callback<(), ()>,
-) -> impl IntoView
-where
-    Confirm: Fn() -> () + 'static,
-{
+) -> impl IntoView {
+    use_hotkeys!(("Escape") => move |_| on_cancel.call(()));
+    use_hotkeys!(("Enter") => move |_| on_confirm.call(()));
+
     let key_down = move |key| {
         if key == "Escape" {
             on_cancel.call(());
@@ -28,10 +29,11 @@ where
                     <button on:click=move |_| on_cancel.call(()) class="confirm-action-button confirm-cancel-button">
                         "Cancel"
                     </button>
-                    <button on:click=move |_| on_confirm() class="confirm-action-button confirm-ok-button">
+                    <button on:click=move |_| on_confirm.call(()) class="confirm-action-button confirm-ok-button">
                         "Confirm"
                     </button>
                 </div>
+                <span style="font-size: 0.65em; width: 100%">"(`Esc` to cancel. `Enter` to confirm)"</span>
             </div>
         </div>
     }
