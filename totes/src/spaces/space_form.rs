@@ -84,7 +84,7 @@ pub fn SpaceForm(
                 view! { <span class="create-space-title">"Create space"</span> }
             }}
             <div class="create-space-avatar">
-                <img class="create-space-avatar-img" src=move || avatar_path />
+                <img class="create-space-avatar-img" src=avatar_path />
                 <div style="align-self: center">
                     <button class="tool" title="Regenerate avatar" on:click=move |_| generate_avatar()>
                         <img alt="regenerate-avatar" src="/public/icons/refresh.svg" />
