@@ -3,9 +3,13 @@
 Table of content:
 
 - [totes](#totes)
+  - [Motivation](#motivation)
+  - [Features](#features)
   - [Development](#development)
+  - [Meta](#meta)
+  - [Contributing](#contributing)
 
-## totes
+# totes
 
 > _Why **totes**?_
 
@@ -34,7 +38,7 @@ cargo tauri dev
 
 Distributed under the [MIT](https://github.com/TheBestTvarynka/crypto-helper/blob/main/LICENSE) license.
 
-### Contributing
+## Contributing
 
 Feel free to contribute.
 
