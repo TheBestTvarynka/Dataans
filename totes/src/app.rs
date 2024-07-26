@@ -30,16 +30,13 @@ impl Default for GlobalState {
 
 #[component]
 pub fn App() -> impl IntoView {
-    provide_context(create_rw_signal(Config::default()));
     provide_context(create_rw_signal(GlobalState::default()));
 
     let (theme_css, set_theme_css) = create_signal(String::default());
+    let (config, set_config) = create_signal(Config::default());
 
     let main_ref = create_node_ref::<html::Main>();
     let HotkeysContext { .. } = provide_hotkeys_context(main_ref, false, scopes!());
-
-    let config = expect_context::<RwSignal<Config>>();
-    let (_, set_config) = create_slice(config, |_config| (), |config, new_config| *config = new_config);
 
     spawn_local(async move {
         let config = load_config().await;
@@ -53,8 +50,8 @@ pub fn App() -> impl IntoView {
 
     view! {
         <main class="app" style=move || theme_css.get() _ref=main_ref>
-            <Spaces />
-            <Notes />
+            {move || view! { <Spaces config=config.get() /> }}
+            {move || view! { <Notes config=config.get() /> }}
             // <Profile />
         </main>
     }

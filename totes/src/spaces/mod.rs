@@ -14,11 +14,8 @@ use crate::backend::notes::list_notes;
 use crate::backend::spaces::list_spaces;
 
 #[component]
-pub fn Spaces() -> impl IntoView {
+pub fn Spaces(config: Config) -> impl IntoView {
     let global_state = expect_context::<RwSignal<GlobalState>>();
-
-    let config = expect_context::<RwSignal<Config>>();
-    let (key_bindings, _) = create_slice(config, |config| config.key_bindings.clone(), |_config, _: ()| {});
 
     let (spaces, set_spaces) = create_slice(
         global_state,
@@ -90,21 +87,18 @@ pub fn Spaces() -> impl IntoView {
         set_spaces.set(list_spaces().await.expect("list spaces should not fail"));
     });
 
+    let key_bindings = config.key_bindings.clone();
+
+    use_hotkeys!((key_bindings.toggle_spaces_bar) => move |_| {
+        set_spaces_minimized.set(!spaces_minimized.get());
+    });
+
+    use_hotkeys!((key_bindings.select_prev_space) => move |_| select_prev_space());
+    use_hotkeys!((key_bindings.select_next_space) => move |_| select_next_space());
+
     view! {
         <div class="spaces-container">
-            {move || {
-                let key_bindings = key_bindings.get();
-
-                use_hotkeys!((key_bindings.toggle_spaces_bar) => move |_| {
-                    set_spaces_minimized.set(!spaces_minimized.get());
-                });
-
-                use_hotkeys!((key_bindings.select_prev_space) => move |_| select_prev_space());
-                use_hotkeys!((key_bindings.select_next_space) => move |_| select_next_space());
-
-                view! {}
-            }}
-            <Tools set_spaces spaces_minimized set_spaces_minimized />
+            <Tools set_spaces spaces_minimized set_spaces_minimized config />
             <div class="spaces">
                 {move || spaces.get().iter().cloned().map(|space| {
                     let selected = selected_space.get().as_ref().map(|selected| selected.id == space.id).unwrap_or_default();

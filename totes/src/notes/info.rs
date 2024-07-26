@@ -8,10 +8,7 @@ use crate::common::{Confirm, Modal};
 use crate::spaces::space_form::SpaceForm;
 
 #[component]
-pub fn Info(current_space: OwnedSpace, set_spaces: SignalSetter<Vec<OwnedSpace>>) -> impl IntoView {
-    let config = expect_context::<RwSignal<Config>>();
-    let (key_bindings, _) = create_slice(config, |config| config.key_bindings.clone(), |_config, _: ()| {});
-
+pub fn Info(current_space: OwnedSpace, set_spaces: SignalSetter<Vec<OwnedSpace>>, config: Config) -> impl IntoView {
     let (show_edit_modal, set_show_edit_modal) = create_signal(false);
     let (show_delete_modal, set_show_delete_modal) = create_signal(false);
 
@@ -28,21 +25,18 @@ pub fn Info(current_space: OwnedSpace, set_spaces: SignalSetter<Vec<OwnedSpace>>
     let current_space_name = current_space.name.to_string();
     let space = Some(current_space.clone());
 
+    let key_bindings = config.key_bindings;
+
+    use_hotkeys!((key_bindings.edit_current_space) => move |_| {
+        set_show_edit_modal.set(true);
+    });
+
+    use_hotkeys!((key_bindings.delete_current_space) => move |_| {
+        set_show_delete_modal.set(true);
+    });
+
     view! {
         <div class="info">
-            {move || {
-                let key_bindings = key_bindings.get();
-
-                use_hotkeys!((key_bindings.edit_current_space) => move |_| {
-                    set_show_edit_modal.set(true);
-                });
-
-                use_hotkeys!((key_bindings.delete_current_space) => move |_| {
-                    set_show_delete_modal.set(true);
-                });
-
-                view! {}
-            }}
             <span class="space-name">{current_space_name.clone()}</span>
             <div>
                 <div class="horizontal">

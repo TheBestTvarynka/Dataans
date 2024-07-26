@@ -3,6 +3,7 @@ mod info;
 mod md_node;
 mod note;
 
+use common::Config;
 use common::note::UpdateNote;
 use common::space::Space as SpaceData;
 use leptos::*;
@@ -15,7 +16,7 @@ use crate::app::GlobalState;
 use crate::backend::notes::list_notes;
 
 #[component]
-pub fn Notes() -> impl IntoView {
+pub fn Notes(config: Config) -> impl IntoView {
     let global_state = expect_context::<RwSignal<GlobalState>>();
 
     let (current_space, _) = create_slice(global_state, |state| state.selected_space.clone(), |_, _: ()| ());
@@ -87,7 +88,7 @@ pub fn Notes() -> impl IntoView {
                 when=move || current_space.get().is_some()
                 fallback=|| view! { <div /> }
             >
-                <Info current_space=current_space.get().unwrap() set_spaces />
+                <Info current_space=current_space.get().unwrap() set_spaces config={config.clone()} />
             </Show>
             <div class="notes-inner">
                 <div class="notes" id="notes">
