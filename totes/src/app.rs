@@ -6,7 +6,6 @@ use leptos_hotkeys::{provide_hotkeys_context, scopes, HotkeysContext};
 
 use crate::backend::{load_config, load_theme};
 use crate::notes::Notes;
-// use crate::profile::Profile;
 use crate::spaces::Spaces;
 
 #[derive(Debug, Clone)]
@@ -52,7 +51,6 @@ pub fn App() -> impl IntoView {
         <main class="app" style=move || theme_css.get() _ref=main_ref>
             {move || view! { <Spaces config=config.get() /> }}
             {move || view! { <Notes config=config.get() /> }}
-            // <Profile />
         </main>
     }
 }
