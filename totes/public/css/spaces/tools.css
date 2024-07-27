@@ -1,10 +1,10 @@
 .tools {
-    /* height: var(--tools-panel-height); */
-    padding: 0.2em;
+    min-height: var(--tools-panel-height);
     background-color: var(--spaces_tools_background_color);
     border-bottom: 1px solid var(--notes_border_color);
     color: var(--spaces_tools_text_color);
     display: flex;
+    padding: 0 0.2em 0 0.2em;
     gap: 0.2em;
     justify-content: space-between;
     align-items: center;
