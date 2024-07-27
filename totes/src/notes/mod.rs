@@ -3,9 +3,9 @@ mod info;
 mod md_node;
 mod note;
 
-use common::Config;
 use common::note::UpdateNote;
 use common::space::Space as SpaceData;
+use common::Config;
 use leptos::*;
 use wasm_bindgen::JsCast;
 

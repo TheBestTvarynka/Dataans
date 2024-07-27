@@ -14,17 +14,15 @@ use crate::backend::notes::list_notes;
 use crate::backend::spaces::list_spaces;
 
 #[component]
-pub fn Spaces(config: Config) -> impl IntoView {
+pub fn Spaces(
+    config: Config,
+    spaces: Signal<Vec<OwnedSpace>>,
+    set_spaces: SignalSetter<Vec<OwnedSpace>>,
+) -> impl IntoView {
     let global_state = expect_context::<RwSignal<GlobalState>>();
 
-    let (spaces, set_spaces) = create_slice(
-        global_state,
-        |state| state.spaces.clone(),
-        |state, spaces| state.spaces = spaces,
-    );
-
-    let loaded_spaces = create_resource(|| (), |_| async {
-        list_spaces().await.expect("loaded spaces")
+    spawn_local(async move {
+        set_spaces.set(list_spaces().await.expect("loaded spaces"));
     });
 
     let (selected_space, set_selected_space) = create_slice(
@@ -104,20 +102,10 @@ pub fn Spaces(config: Config) -> impl IntoView {
     view! {
         <div class="spaces-container">
             <Tools set_spaces spaces_minimized set_spaces_minimized config />
-            <Suspense fallback=move || view! {<span>"..."</span> }>
-                <div class="spaces">
-                    <ErrorBoundary fallback=|_| {view! {<span>"error"</span>}}>
-                        {move || loaded_spaces.read().map(|spaces| {
-                            // Is this even good? Is there any better approach?
-                            set_spaces.set(spaces.clone());
-                            spaces.into_iter().map(|space| {
-                                let selected = selected_space.get().as_ref().map(|selected| selected.id == space.id).unwrap_or_default();
-                                view! { <Space space set_selected_space selected minimized={spaces_minimized} /> }
-                            }).collect_view()
-                        })}
-                    </ErrorBoundary>
-                </div>
-            </Suspense>
+            {move || spaces.get().into_iter().map(|space| {
+                let selected = selected_space.get().as_ref().map(|selected| selected.id == space.id).unwrap_or_default();
+                view! { <Space space set_selected_space selected minimized={spaces_minimized} /> }
+            }).collect_view()}
         </div>
     }
 }

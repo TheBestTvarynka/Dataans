@@ -47,9 +47,17 @@ pub fn App() -> impl IntoView {
         set_theme_css.set(theme.to_css());
     });
 
+    let global_state = expect_context::<RwSignal<GlobalState>>();
+
+    let (spaces, set_spaces) = create_slice(
+        global_state,
+        |state| state.spaces.clone(),
+        |state, spaces| state.spaces = spaces,
+    );
+
     view! {
         <main class="app" style=move || theme_css.get() _ref=main_ref>
-            {move || view! { <Spaces config=config.get() /> }}
+            {move || view! { <Spaces config=config.get() spaces set_spaces /> }}
             {move || view! { <Notes config=config.get() /> }}
         </main>
     }
