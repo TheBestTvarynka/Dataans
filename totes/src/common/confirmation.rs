@@ -10,17 +10,10 @@ pub fn Confirm(
     use_hotkeys!(("Escape") => move |_| on_cancel.call(()));
     use_hotkeys!(("Enter") => move |_| on_confirm.call(()));
 
-    let key_down = move |key| {
-        if key == "Escape" {
-            on_cancel.call(());
-        }
-    };
-
     view! {
         <div
             name="confirm-page-background"
             class="confirm-page"
-            on:keydown=move |ev| key_down(ev.key())
             tabindex=0
         >
             <div class="confirm-window">
