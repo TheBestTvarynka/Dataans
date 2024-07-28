@@ -19,7 +19,7 @@ pub fn Tools(
         if spaces_minimized.get() {
             "tools tools-vertical"
         } else {
-            "tools"
+            "tools tools-expanded"
         }
     };
 

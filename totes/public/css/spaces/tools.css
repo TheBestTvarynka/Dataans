@@ -1,5 +1,4 @@
 .tools {
-    min-height: var(--tools-panel-height);
     background-color: var(--spaces_tools_background_color);
     border-bottom: 1px solid var(--notes_border_color);
     color: var(--spaces_tools_text_color);
@@ -8,6 +7,10 @@
     gap: 0.2em;
     justify-content: space-between;
     align-items: center;
+}
+
+.tools-expanded {
+    min-height: var(--tools-panel-height);
 }
 
 .tools-vertical {
