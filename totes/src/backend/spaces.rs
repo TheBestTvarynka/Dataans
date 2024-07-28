@@ -22,7 +22,6 @@ pub async fn create_space(space_data: Space<'_, '_>) -> Result<(), String> {
     debug!("Creating space: {:?}", space_data);
     let args = to_value(&CreateSpaceArgs { space_data }).expect("Space serialization to JsValue should not fail.");
     let _ = invoke(&format!("plugin:{}|create_space", TOTES_PLUGIN_NAME), args).await;
-    info!("Space has been created!");
 
     Ok(())
 }

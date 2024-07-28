@@ -23,12 +23,14 @@ pub fn SpaceForm(
             .unwrap_or_else(|| "/public/default_space_avatar.png".to_string()),
     );
 
-    let generate_avatar = create_action(move |_: &()| async move {
-        set_avatar_path.set(gen_avatar().await);
-    });
+    let generate_avatar = move || {
+        spawn_local(async move {
+            set_avatar_path.set(gen_avatar().await);
+        });
+    };
 
     let id = space.as_ref().map(|s| s.id);
-    let create_space = create_action(move |_: &()| {
+    let create_space = move || {
         let name = space_name.get();
         let avatar = avatar_path.get();
 
@@ -53,15 +55,15 @@ pub fn SpaceForm(
             }
         };
 
-        async move {
+        spawn_local(async move {
             action.await;
             set_spaces.set(list_spaces().await.expect("list spaces should not fail"));
             on_cancel.call(());
-        }
-    });
+        });
+    };
 
     use_hotkeys!(("Escape") => move |_| on_cancel.call(()));
-    use_hotkeys!(("Enter") => move |_| create_space.dispatch(()));
+    use_hotkeys!(("Enter") => move |_| create_space());
 
     view! {
         <div class="create-space-window" on:load=move |_| info!("on_load")>
@@ -73,7 +75,7 @@ pub fn SpaceForm(
             <div class="create-space-avatar">
                 <img class="create-space-avatar-img" src=avatar_path />
                 <div style="align-self: center">
-                    <button class="tool" title="Regenerate avatar" on:click=move |_| generate_avatar.dispatch(())>
+                    <button class="tool" title="Regenerate avatar" on:click=move |_| generate_avatar()>
                         <img alt="regenerate-avatar" src="/public/icons/refresh.svg" />
                     </button>
                 </div>
@@ -97,7 +99,7 @@ pub fn SpaceForm(
                 <button
                     class="button_ok"
                     title="Create space"
-                    on:click=move |_| create_space.dispatch(())
+                    on:click=move |_| create_space()
                 >
                     {if space.is_some() { "Update" } else { "Create" }}
                 </button>

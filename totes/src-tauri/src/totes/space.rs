@@ -12,21 +12,17 @@ pub async fn list_spaces(state: State<'_, TotesState>) -> Result<Vec<OwnedSpace>
     for space in collection.find(None).expect("Spaces querying should not fail.") {
         spaces.push(space.unwrap());
     }
-    info!("spaces: {:?}", spaces);
 
     Ok(spaces)
 }
 
 #[tauri::command]
 pub fn create_space(state: State<'_, TotesState>, space_data: OwnedSpace) -> Result<(), String> {
-    info!("Started space creation... {:?}", space_data);
     let collection = state.db.collection::<OwnedSpace>(SPACES_COLLECTION_NAME);
 
     collection
         .insert_one(space_data)
         .expect("space insertion should not fail");
-
-    info!("Space created!");
 
     Ok(())
 }

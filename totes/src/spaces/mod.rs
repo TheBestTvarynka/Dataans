@@ -30,13 +30,11 @@ pub fn Spaces(
         |state| state.selected_space.clone(),
         |state, space| state.selected_space = Some(space),
     );
-
     let (_, set_notes) = create_slice(
         global_state,
         |state| state.notes.clone(),
         |state, notes| state.notes = notes,
     );
-
     let set_selected_space = move |space: OwnedSpace| {
         let space_id = space.id;
         set_selected_space.set(space);
@@ -44,13 +42,11 @@ pub fn Spaces(
             set_notes.set(list_notes(space_id).await.expect("Notes listing should not fail"));
         });
     };
-
     let (spaces_minimized, set_spaces_minimized) = create_slice(
         global_state,
         |state| state.minimize_spaces,
         |state, minimized| state.minimize_spaces = minimized,
     );
-
     let select_next_space = move || {
         if let Some(selected_space) = selected_space.get() {
             let spaces = spaces.get();
