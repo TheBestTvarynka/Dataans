@@ -8,4 +8,5 @@
     height: 100vh;
     max-width: 30%;
     overflow-y: auto;
+    overflow-x: clip;
 }
