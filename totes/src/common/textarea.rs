@@ -19,6 +19,9 @@ pub fn TextArea(
         let ev = e
             .dyn_into::<web_sys::ClipboardEvent>()
             .expect("Event -> ClipboardEvent should not fail");
+        // NOTE: This code may not work on Linux. Image pasting from clipboard is a big problem for the current software industry.
+        // webkit: Can't paste image data (like image/png) from the clipboard in WebKit browsers
+        // https://bugs.webkit.org/show_bug.cgi?id=218519
         if let Some(clipboard_data) = ev.clipboard_data() {
             let items = clipboard_data.items();
             for index in 0..items.length() {
