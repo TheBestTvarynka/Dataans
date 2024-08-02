@@ -50,27 +50,20 @@ pub async fn load_config() -> Config {
     from_value(theme_value).expect("Config object deserialization from JsValue should not fail.")
 }
 
-#[derive(Serialize)]
-#[serde(rename_all = "camelCase")]
-struct ImageData<'name, 'data> {
-    image_name: &'name str,
-    image_data: &'data [u8],
-}
-
-pub async fn save_image(image_name: &str, image_data: &[u8]) -> String {
-    let args =
-        to_value(&ImageData { image_name, image_data }).expect("ImageData serialization to JsValue should not fail.");
-    let image_path = invoke("save_image", args).await;
-
-    let image_path: String = from_value(image_path).expect("Path object deserialization from JsValue should not fail.");
-    convert_file_src(image_path)
-}
-
 pub async fn gen_avatar() -> String {
     let args = to_value(&EmptyArgs {}).expect("EmptyArgs serialization to JsValue should not fail.");
     let image_path = invoke("gen_random_avatar", args).await;
 
     let image_path: String =
-        from_value(image_path).expect("Theme object deserialization from JsValue should not fail.");
+        from_value(image_path).expect("PathBuf object deserialization from JsValue should not fail.");
+    convert_file_src(image_path)
+}
+
+pub async fn load_clipboard_image() -> String {
+    let args = to_value(&EmptyArgs {}).expect("EmptyArgs serialization to JsValue should not fail.");
+    let image_path = invoke("handle_clipboard_image", args).await;
+
+    let image_path: String =
+        from_value(image_path).expect("PathBuf object deserialization from JsValue should not fail.");
     convert_file_src(image_path)
 }
