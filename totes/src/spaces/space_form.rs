@@ -33,6 +33,7 @@ pub fn SpaceForm(
     let create_space = move || {
         let name = space_name.get();
         let avatar = avatar_path.get();
+        on_cancel.call(());
 
         let action = async move {
             if let Some(id) = id {
@@ -58,7 +59,6 @@ pub fn SpaceForm(
         spawn_local(async move {
             action.await;
             set_spaces.set(list_spaces().await.expect("list spaces should not fail"));
-            on_cancel.call(());
         });
     };
 
