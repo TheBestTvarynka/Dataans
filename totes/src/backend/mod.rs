@@ -21,6 +21,17 @@ fn convert_file_src(image_path: impl AsRef<str>) -> String {
     }
 }
 
+pub fn convert_file_url(image_path: impl AsRef<str>) -> String {
+    #[cfg(windows_is_host_os)]
+    {
+        image_path.as_ref()[24..].to_owned()
+    }
+    #[cfg(not(windows_is_host_os))]
+    {
+        image_path.as_ref()[18..].to_owned()
+    }
+}
+
 #[wasm_bindgen]
 extern "C" {
     #[wasm_bindgen(js_namespace = ["window", "__TAURI__", "tauri"])]

@@ -1,9 +1,14 @@
+use std::path::Path;
+
 use leptos::html::AnyElement;
 use leptos::*;
 use markdown::mdast::Node;
 use syntect::highlighting::ThemeSet;
 use syntect::html::highlighted_html_for_string;
 use syntect::parsing::SyntaxSet;
+
+use crate::backend::convert_file_url;
+use crate::backend::file::open;
 
 pub fn render_md_node(node: &Node) -> HtmlElement<AnyElement> {
     match node {
@@ -151,8 +156,19 @@ pub fn render_md_node(node: &Node) -> HtmlElement<AnyElement> {
             </li>
         }
         .into_any(),
-        Node::Image(image) => view! {
-            <img src=image.url.clone() alt=image.alt.clone() />
+        Node::Image(image) => {
+            let image_path = image.url.clone();
+            let open_image = move |_| {
+                let path = image_path.clone();
+                info!("open_image");
+                spawn_local(async move {
+                    info!("spawn open_image");
+                    open(Path::new(&convert_file_url(path))).await;
+                })
+            };
+            view! {
+                <img src=image.url.clone() alt=image.alt.clone() class="note-image" on:click=open_image />
+            }
         }
         .into_any(),
         Node::Table(table) => view! {
