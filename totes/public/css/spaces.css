@@ -7,6 +7,13 @@
     background-color: var(--spaces_background_color);
     height: 100vh;
     max-width: 30%;
+}
+
+.spaces-scroll-area {
     overflow-y: auto;
     overflow-x: clip;
+    display: flex;
+    flex-direction: column;
+    align-content: flex-start;
+    gap: 0;
 }
