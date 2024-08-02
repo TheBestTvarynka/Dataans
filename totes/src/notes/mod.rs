@@ -48,6 +48,15 @@ pub fn Notes(config: Config) -> impl IntoView {
         |_state| (),
         |state, note_id| state.notes.retain(|note| note.id != note_id),
     );
+    let (_, delete_state_space) = create_slice(
+        global_state,
+        |_state| (),
+        |state, space_id| {
+            state.notes.clear();
+            state.selected_space = None;
+            state.spaces.retain(|space| space.id != space_id);
+        },
+    );
 
     let (_, create_note) = create_slice(global_state, |_state| (), |state, new_note| state.notes.push(new_note));
 
@@ -88,7 +97,7 @@ pub fn Notes(config: Config) -> impl IntoView {
                 when=move || current_space.get().is_some()
                 fallback=|| view! { <div /> }
             >
-                <Info current_space=current_space.get().unwrap() set_spaces config={config.clone()} />
+                <Info current_space=current_space.get().unwrap() set_spaces delete_state_space config={config.clone()} />
             </Show>
             <div class="notes-inner">
                 <div class="notes" id="notes">
