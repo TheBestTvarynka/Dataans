@@ -5,6 +5,7 @@ mod note;
 
 use common::note::UpdateNote;
 use common::space::Space as SpaceData;
+use common::Config;
 use leptos::*;
 use wasm_bindgen::JsCast;
 
@@ -15,7 +16,7 @@ use crate::app::GlobalState;
 use crate::backend::notes::list_notes;
 
 #[component]
-pub fn Notes() -> impl IntoView {
+pub fn Notes(config: Config) -> impl IntoView {
     let global_state = expect_context::<RwSignal<GlobalState>>();
 
     let (current_space, _) = create_slice(global_state, |state| state.selected_space.clone(), |_, _: ()| ());
@@ -46,6 +47,15 @@ pub fn Notes() -> impl IntoView {
         global_state,
         |_state| (),
         |state, note_id| state.notes.retain(|note| note.id != note_id),
+    );
+    let (_, delete_state_space) = create_slice(
+        global_state,
+        |_state| (),
+        |state, space_id| {
+            state.notes.clear();
+            state.selected_space = None;
+            state.spaces.retain(|space| space.id != space_id);
+        },
     );
 
     let (_, create_note) = create_slice(global_state, |_state| (), |state, new_note| state.notes.push(new_note));
@@ -87,7 +97,7 @@ pub fn Notes() -> impl IntoView {
                 when=move || current_space.get().is_some()
                 fallback=|| view! { <div /> }
             >
-                <Info current_space=current_space.get().unwrap() set_spaces />
+                <Info current_space=current_space.get().unwrap() set_spaces delete_state_space config={config.clone()} />
             </Show>
             <div class="notes-inner">
                 <div class="notes" id="notes">

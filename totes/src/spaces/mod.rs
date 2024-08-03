@@ -14,17 +14,17 @@ use crate::backend::notes::list_notes;
 use crate::backend::spaces::list_spaces;
 
 #[component]
-pub fn Spaces() -> impl IntoView {
+pub fn Spaces(
+    config: Config,
+    spaces: Signal<Vec<OwnedSpace>>,
+    set_spaces: SignalSetter<Vec<OwnedSpace>>,
+) -> impl IntoView {
     let global_state = expect_context::<RwSignal<GlobalState>>();
 
-    let config = expect_context::<RwSignal<Config>>();
-    let (key_bindings, _) = create_slice(config, |config| config.key_bindings.clone(), |_config, _: ()| {});
+    spawn_local(async move {
+        set_spaces.set(list_spaces().await.expect("loaded spaces"));
+    });
 
-    let (spaces, set_spaces) = create_slice(
-        global_state,
-        |state| state.spaces.clone(),
-        |state, spaces| state.spaces = spaces,
-    );
     let (selected_space, set_selected_space) = create_slice(
         global_state,
         |state| state.selected_space.clone(),
@@ -86,27 +86,20 @@ pub fn Spaces() -> impl IntoView {
         }
     };
 
-    spawn_local(async move {
-        set_spaces.set(list_spaces().await.expect("list spaces should not fail"));
+    let key_bindings = config.key_bindings.clone();
+
+    use_hotkeys!((key_bindings.toggle_spaces_bar) => move |_| {
+        set_spaces_minimized.set(!spaces_minimized.get());
     });
+
+    use_hotkeys!((key_bindings.select_prev_space) => move |_| select_prev_space());
+    use_hotkeys!((key_bindings.select_next_space) => move |_| select_next_space());
 
     view! {
         <div class="spaces-container">
-            {move || {
-                let key_bindings = key_bindings.get();
-
-                use_hotkeys!((key_bindings.toggle_spaces_bar) => move |_| {
-                    set_spaces_minimized.set(!spaces_minimized.get());
-                });
-
-                use_hotkeys!((key_bindings.select_prev_space) => move |_| select_prev_space());
-                use_hotkeys!((key_bindings.select_next_space) => move |_| select_next_space());
-
-                view! {}
-            }}
-            <Tools set_spaces spaces_minimized set_spaces_minimized />
-            <div class="spaces">
-                {move || spaces.get().iter().cloned().map(|space| {
+            <Tools set_spaces spaces_minimized set_spaces_minimized config />
+            <div class="spaces-scroll-area">
+                {move || spaces.get().into_iter().map(|space| {
                     let selected = selected_space.get().as_ref().map(|selected| selected.id == space.id).unwrap_or_default();
                     view! { <Space space set_selected_space selected minimized={spaces_minimized} /> }
                 }).collect_view()}

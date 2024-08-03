@@ -38,6 +38,8 @@
 
 .space .space-title {
     align-self: center;
+    width: 100%;
+    text-overflow: ellipsis;
 }
 
 .space .space-avatar {

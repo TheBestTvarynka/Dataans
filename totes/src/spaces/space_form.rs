@@ -1,8 +1,5 @@
 use common::space::{OwnedSpace, Space, UpdateSpace};
-use leptos::{
-    component, create_signal, event_target_value, spawn_local, view, Callable, Callback, IntoView, SignalGet,
-    SignalSet, SignalSetter,
-};
+use leptos::*;
 use leptos_hotkeys::use_hotkeys;
 use time::OffsetDateTime;
 use uuid::Uuid;
@@ -36,6 +33,7 @@ pub fn SpaceForm(
     let create_space = move || {
         let name = space_name.get();
         let avatar = avatar_path.get();
+        on_cancel.call(());
 
         let action = async move {
             if let Some(id) = id {
@@ -61,16 +59,7 @@ pub fn SpaceForm(
         spawn_local(async move {
             action.await;
             set_spaces.set(list_spaces().await.expect("list spaces should not fail"));
-            on_cancel.call(());
         });
-    };
-
-    let key_down = move |key| {
-        if key == "Enter" {
-            create_space();
-        } else if key == "Escape" {
-            on_cancel.call(());
-        }
     };
 
     use_hotkeys!(("Escape") => move |_| on_cancel.call(()));
@@ -84,7 +73,7 @@ pub fn SpaceForm(
                 view! { <span class="create-space-title">"Create space"</span> }
             }}
             <div class="create-space-avatar">
-                <img class="create-space-avatar-img" src=move || avatar_path />
+                <img class="create-space-avatar-img" src=avatar_path />
                 <div style="align-self: center">
                     <button class="tool" title="Regenerate avatar" on:click=move |_| generate_avatar()>
                         <img alt="regenerate-avatar" src="/public/icons/refresh.svg" />
@@ -97,7 +86,6 @@ pub fn SpaceForm(
                 placeholder="Space name"
                 class="input"
                 on:input=move |ev| set_space_name.set(event_target_value(&ev))
-                on:keydown=move |ev| key_down(ev.key())
                 prop:value=space_name
             />
             <div class="create-space-buttons">

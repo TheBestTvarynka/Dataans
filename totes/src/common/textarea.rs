@@ -1,9 +1,8 @@
-use js_sys::{ArrayBuffer, Uint8Array};
 use leptos::web_sys::KeyboardEvent;
 use leptos::*;
 use wasm_bindgen::JsCast;
 
-use crate::backend::save_image;
+use crate::backend::load_clipboard_image;
 
 #[component]
 pub fn TextArea(
@@ -20,57 +19,43 @@ pub fn TextArea(
             .dyn_into::<web_sys::ClipboardEvent>()
             .expect("Event -> ClipboardEvent should not fail");
         if let Some(clipboard_data) = ev.clipboard_data() {
-            let items = clipboard_data.items();
-            for index in 0..items.length() {
-                let item = items.get(index).expect("DataTransferItem should present");
+            let types = clipboard_data.types();
+            let len = types.length();
+            if (0..len).any(|type_index| {
+                let ty = types
+                    .get(type_index)
+                    .as_string()
+                    .expect("MIME type JsValue should be string");
+                ty.to_ascii_lowercase().contains("files")
+            }) {
+                ev.prevent_default();
+                let mut text = text.get();
+                let id = elem_id.clone();
+                spawn_local(async move {
+                    let image_path = load_clipboard_image().await;
 
-                if item.kind() == "file" && item.type_().starts_with("image/") {
-                    if let Some(file) = item.get_as_file().expect("get_as_fail should not fail") {
-                        ev.prevent_default();
+                    let text_area = document().get_element_by_id(&id).expect("Dom element should present");
+                    let text_area = text_area
+                        .dyn_into::<web_sys::HtmlTextAreaElement>()
+                        .expect("Element should be textarea");
 
-                        let image_raw_data = file.slice().expect("File reading should not fail");
-                        let file_name = file.name();
-                        let mut text = text.get();
-                        let id = elem_id.clone();
-
-                        set_disabled.set(true);
-                        spawn_local(async move {
-                            let image_raw_data = wasm_bindgen_futures::JsFuture::from(image_raw_data.array_buffer())
-                                .await
-                                .expect("File reading should not fail");
-
-                            let image_raw_data = image_raw_data
-                                .dyn_into::<ArrayBuffer>()
-                                .expect("Expected an ArrayBuffer");
-                            let image_raw_data = Uint8Array::new(&image_raw_data);
-
-                            let mut image_bytes = vec![0; image_raw_data.length() as usize];
-                            image_raw_data.copy_to(image_bytes.as_mut_slice());
-
-                            let path = save_image(&file_name, &image_bytes).await;
-
-                            let text_area = document().get_element_by_id(&id).expect("Dom element should present");
-                            let text_area = text_area
-                                .dyn_into::<web_sys::HtmlTextAreaElement>()
-                                .expect("Element should be textarea");
-
-                            if let Some(start) = text_area.selection_start().expect("selection start error") {
-                                let start = start as usize;
-                                text = format!("{}\n![]({}){}", &text[0..start], &path, &text[start..]);
-                            } else {
-                                text.push_str(" ![](");
-                                text.push_str(&path);
-                                text.push_str(")");
-                            }
-
-                            set_text.call(text);
-                            set_disabled.set(false);
-                        });
+                    if let Some(start) = text_area.selection_start().expect("selection start error") {
+                        let start = start as usize;
+                        text = format!("{} ![]({}){}", &text[0..start], &image_path, &text[start..]);
                     } else {
-                        warn!("No file :(");
+                        text.push_str("![](");
+                        text.push_str(&image_path);
+                        text.push_str(")");
                     }
-                }
+
+                    set_text.call(text);
+                    set_disabled.set(false);
+                });
+            } else {
+                info!("No images to upload.");
             }
+        } else {
+            info!("No clipboard data.");
         }
     };
 

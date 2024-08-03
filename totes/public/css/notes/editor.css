@@ -11,8 +11,7 @@
 }
 
 .editor-meta {
-    width: calc(100% - 0.6em);
-    padding: 0.3em;
+    width: 100%;
     display: flex;
     gap: 0.2em;
     justify-content: flex-end;
@@ -28,6 +27,8 @@
 
 .files-file {
     padding: 0.2em;
+    margin: 0.15em;
+    font-size: 0.9em;
     border-radius: 0.2em;
     background-color: var(--editor-file-background-color);
     display: inline-flex;

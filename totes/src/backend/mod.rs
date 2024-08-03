@@ -11,15 +11,25 @@ use wasm_bindgen::prelude::wasm_bindgen;
 use wasm_bindgen::JsValue;
 
 fn convert_file_src(image_path: impl AsRef<str>) -> String {
-    // TODO: proper file src creation
-    // #[cfg(target_os = "windows")]
-    // {
-    format!("https://asset.localhost/{}", image_path.as_ref())
-    // }
-    // #[cfg(not(target_os = "windows"))]
-    // {
-    //     format!("asset://localhost/{}", image_path.as_ref())
-    // }
+    #[cfg(windows_is_host_os)]
+    {
+        format!("https://asset.localhost/{}", image_path.as_ref())
+    }
+    #[cfg(not(windows_is_host_os))]
+    {
+        format!("asset://localhost/{}", image_path.as_ref())
+    }
+}
+
+pub fn convert_file_url(image_path: impl AsRef<str>) -> String {
+    #[cfg(windows_is_host_os)]
+    {
+        image_path.as_ref()[24..].to_owned()
+    }
+    #[cfg(not(windows_is_host_os))]
+    {
+        image_path.as_ref()[18..].to_owned()
+    }
 }
 
 #[wasm_bindgen]
@@ -51,27 +61,20 @@ pub async fn load_config() -> Config {
     from_value(theme_value).expect("Config object deserialization from JsValue should not fail.")
 }
 
-#[derive(Serialize)]
-#[serde(rename_all = "camelCase")]
-struct ImageData<'name, 'data> {
-    image_name: &'name str,
-    image_data: &'data [u8],
-}
-
-pub async fn save_image(image_name: &str, image_data: &[u8]) -> String {
-    let args =
-        to_value(&ImageData { image_name, image_data }).expect("ImageData serialization to JsValue should not fail.");
-    let image_path = invoke("save_image", args).await;
-
-    let image_path: String = from_value(image_path).expect("Path object deserialization from JsValue should not fail.");
-    convert_file_src(image_path)
-}
-
 pub async fn gen_avatar() -> String {
     let args = to_value(&EmptyArgs {}).expect("EmptyArgs serialization to JsValue should not fail.");
     let image_path = invoke("gen_random_avatar", args).await;
 
     let image_path: String =
-        from_value(image_path).expect("Theme object deserialization from JsValue should not fail.");
+        from_value(image_path).expect("PathBuf object deserialization from JsValue should not fail.");
+    convert_file_src(image_path)
+}
+
+pub async fn load_clipboard_image() -> String {
+    let args = to_value(&EmptyArgs {}).expect("EmptyArgs serialization to JsValue should not fail.");
+    let image_path = invoke("handle_clipboard_image", args).await;
+
+    let image_path: String =
+        from_value(image_path).expect("PathBuf object deserialization from JsValue should not fail.");
     convert_file_src(image_path)
 }

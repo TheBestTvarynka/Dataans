@@ -7,20 +7,20 @@ repository = "https://github.com/TheBestTvarynka/totes"
 
 [dependencies]
 leptos = { version = "0.6", features = ["csr"] }
-leptos_hotkeys = "0.2.2"
+leptos_hotkeys = "0.2"
 wasm-bindgen = { version = "0.2" }
 wasm-bindgen-futures = "0.4"
 js-sys = "0.3"
 serde = { version = "1", features = ["derive"] }
 serde-wasm-bindgen = "0.6"
-console_error_panic_hook = "0.1.7"
-log = "0.4.21"
-wasm-logger = "0.2.0"
+console_error_panic_hook = "0.1"
+log = "0.4"
+wasm-logger = "0.2"
 common = { path = "./common" }
 markdown = { version = "1.0.0-alpha.17", features = ["log"] }
-time = { version = "0.3.36", features = ["macros", "wasm-bindgen"] }
-uuid = { version = "1.6.1", features = ["v4"] }
-web-sys = { version = "0.3.69", features = [
+time = { version = "0.3", features = ["macros", "wasm-bindgen"] }
+uuid = { version = "1.10", features = ["v4"] }
+web-sys = { version = "0.3", features = [
     "Clipboard",
     "Navigator",
     "ClipboardEvent",
@@ -36,8 +36,8 @@ web-sys = { version = "0.3.69", features = [
     "HtmlInputElement",
     "HtmlElement",
 ] }
-futures = { version = "0.3.30", features = ["std", "alloc"] }
-syntect = { version = "5.2.0", default-features = false, features = [
+futures = { version = "0.3", features = ["std", "alloc"] }
+syntect = { version = "5.2", default-features = false, features = [
     "default-fancy",
     "metadata",
 ] }

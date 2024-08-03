@@ -1,17 +1,19 @@
-use common::space::{DeleteSpace, OwnedSpace};
+use common::space::{DeleteSpace, Id as SpaceId, OwnedSpace};
 use common::Config;
 use leptos::*;
 use leptos_hotkeys::{use_hotkeys, use_hotkeys_scoped};
 
-use crate::backend::spaces::{delete_space, list_spaces};
+use crate::backend::spaces::delete_space;
 use crate::common::{Confirm, Modal};
 use crate::spaces::space_form::SpaceForm;
 
 #[component]
-pub fn Info(current_space: OwnedSpace, set_spaces: SignalSetter<Vec<OwnedSpace>>) -> impl IntoView {
-    let config = expect_context::<RwSignal<Config>>();
-    let (key_bindings, _) = create_slice(config, |config| config.key_bindings.clone(), |_config, _: ()| {});
-
+pub fn Info(
+    current_space: OwnedSpace,
+    set_spaces: SignalSetter<Vec<OwnedSpace>>,
+    delete_state_space: SignalSetter<SpaceId>,
+    config: Config,
+) -> impl IntoView {
     let (show_edit_modal, set_show_edit_modal) = create_signal(false);
     let (show_delete_modal, set_show_delete_modal) = create_signal(false);
 
@@ -21,28 +23,25 @@ pub fn Info(current_space: OwnedSpace, set_spaces: SignalSetter<Vec<OwnedSpace>>
             delete_space(DeleteSpace { id })
                 .await
                 .expect("space deleting should not fail");
-            set_spaces.set(list_spaces().await.expect("list spaces should not fail"));
+            delete_state_space.set(id);
         });
     };
 
     let current_space_name = current_space.name.to_string();
     let space = Some(current_space.clone());
 
+    let key_bindings = config.key_bindings;
+
+    use_hotkeys!((key_bindings.edit_current_space) => move |_| {
+        set_show_edit_modal.set(true);
+    });
+
+    use_hotkeys!((key_bindings.delete_current_space) => move |_| {
+        set_show_delete_modal.set(true);
+    });
+
     view! {
         <div class="info">
-            {move || {
-                let key_bindings = key_bindings.get();
-
-                use_hotkeys!((key_bindings.edit_current_space) => move |_| {
-                    set_show_edit_modal.set(true);
-                });
-
-                use_hotkeys!((key_bindings.delete_current_space) => move |_| {
-                    set_show_delete_modal.set(true);
-                });
-
-                view! {}
-            }}
             <span class="space-name">{current_space_name.clone()}</span>
             <div>
                 <div class="horizontal">

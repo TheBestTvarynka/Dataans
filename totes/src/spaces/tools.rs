@@ -11,31 +11,26 @@ pub fn Tools(
     set_spaces: SignalSetter<Vec<OwnedSpace>>,
     spaces_minimized: Signal<bool>,
     set_spaces_minimized: SignalSetter<bool>,
+    config: Config,
 ) -> impl IntoView {
-    let config = expect_context::<RwSignal<Config>>();
-    let (key_bindings, _) = create_slice(config, |config| config.key_bindings.clone(), |_config, _: ()| {});
-
     let (show_modal, set_show_modal) = create_signal(false);
 
     let class = move || {
         if spaces_minimized.get() {
             "tools tools-vertical"
         } else {
-            "tools"
+            "tools tools-expanded"
         }
     };
 
+    let key_bindings = config.key_bindings;
+
+    use_hotkeys!((key_bindings.create_space) => move |_| {
+        set_show_modal.set(true);
+    });
+
     view! {
         <div class={class}>
-            {move || {
-                let key_bindings = key_bindings.get();
-
-                use_hotkeys!((key_bindings.create_space) => move |_| {
-                    set_show_modal.set(true);
-                });
-
-                view! {}
-            }}
             <button class="tool" title="Add a new space" on:click=move |_| set_show_modal.set(true)>
                 <img alt="add-space" src="/public/icons/add-space-1.png" />
             </button>

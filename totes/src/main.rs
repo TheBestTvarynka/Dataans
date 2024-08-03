@@ -7,7 +7,6 @@ mod app;
 mod backend;
 mod common;
 mod notes;
-mod profile;
 mod spaces;
 
 use app::*;

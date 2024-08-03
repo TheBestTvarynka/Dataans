@@ -90,8 +90,8 @@ fn main() {
             config::config,
             config::open,
             config::reveal,
-            image::save_image,
             image::gen_random_avatar,
+            image::handle_clipboard_image,
             file::upload_file,
             file::remove_file
         ])

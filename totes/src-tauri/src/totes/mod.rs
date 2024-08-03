@@ -19,11 +19,11 @@ pub struct TotesState {
 }
 
 impl TotesState {
-    pub fn init(db_dr: PathBuf) -> Self {
-        let db_dr = db_dr.join("totes.db");
+    pub fn init(db_dir: PathBuf) -> Self {
+        let db_file = db_dir.join("totes.db");
 
         Self {
-            db: Database::open_file(db_dr).expect("Database opening should not fail."),
+            db: Database::open_file(db_file).expect("Database opening should not fail."),
         }
     }
 }

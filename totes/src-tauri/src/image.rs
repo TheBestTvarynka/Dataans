@@ -1,26 +1,11 @@
-use std::fs;
 use std::path::PathBuf;
 
+use arboard::Clipboard;
+use image::{ImageBuffer, Rgba};
 use tauri::AppHandle;
 use uuid::Uuid;
 
 use crate::IMAGED_DIR;
-
-#[tauri::command]
-pub fn save_image(app_handle: AppHandle, image_name: String, image_data: Vec<u8>) -> PathBuf {
-    let image_name = format!("{}_{}", Uuid::new_v4(), image_name);
-
-    let image_path = app_handle
-        .path_resolver()
-        .app_data_dir()
-        .unwrap_or_default()
-        .join(IMAGED_DIR)
-        .join(image_name);
-
-    fs::write(&image_path, image_data).expect("Image data writing into the file should not fail");
-
-    image_path
-}
 
 #[tauri::command]
 pub fn gen_random_avatar(app_handle: AppHandle) -> PathBuf {
@@ -38,4 +23,27 @@ pub fn gen_random_avatar(app_handle: AppHandle) -> PathBuf {
     info!("Avatar image path: {:?}", avatar_path);
 
     avatar_path
+}
+
+#[tauri::command]
+pub fn handle_clipboard_image(app_handle: AppHandle) -> PathBuf {
+    let mut clipboard = Clipboard::new().expect("Initialized Clipboard object");
+    let image_data = clipboard.get_image().expect("Image data");
+
+    let image_path = app_handle
+        .path_resolver()
+        .app_data_dir()
+        .unwrap_or_default()
+        .join(IMAGED_DIR)
+        .join(format!("{}.png", Uuid::new_v4()));
+
+    let img: ImageBuffer<Rgba<u8>, _> = ImageBuffer::from_raw(
+        image_data.width.try_into().unwrap(),
+        image_data.height.try_into().unwrap(),
+        image_data.bytes.as_ref(),
+    )
+    .expect("ImageBuffer object");
+    img.save(&image_path).expect("Clipboard image saving should not fail");
+
+    image_path
 }

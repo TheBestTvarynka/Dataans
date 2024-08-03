@@ -1,4 +1,3 @@
-
 .note-container {
     display: flex;
     flex-direction: column;
@@ -104,9 +103,11 @@
     font-weight: bold;
 }
 
-.table, .table-cell, .table-header {
-  border: 2px solid var(--note-table-border-color);
-  border-collapse: collapse;
+.table,
+.table-cell,
+.table-header {
+    border: 2px solid var(--note-table-border-color);
+    border-collapse: collapse;
 }
 
 .note .code-block-wrapper > pre {
@@ -144,4 +145,13 @@
     cursor: pointer;
     border: 2px solid var(--note_text_color);
     transition: 0.1s;
+}
+
+.note .note-image {
+    max-width: 100%;
+    height: auto;
+}
+
+.note .note-image:hover {
+    cursor: pointer;
 }
