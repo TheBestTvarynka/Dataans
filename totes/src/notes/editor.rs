@@ -41,6 +41,7 @@ pub fn Editor(space_id: SpaceId, #[prop(into)] create_note: Callback<Note<'stati
 
     let key_down = move |key: KeyboardEvent| {
         if key.key() == "Enter" && !key.shift_key() {
+            key.prevent_default();
             create_note();
         }
     };

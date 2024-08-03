@@ -160,9 +160,7 @@ pub fn render_md_node(node: &Node) -> HtmlElement<AnyElement> {
             let image_path = image.url.clone();
             let open_image = move |_| {
                 let path = image_path.clone();
-                info!("open_image");
                 spawn_local(async move {
-                    info!("spawn open_image");
                     open(Path::new(&convert_file_url(path))).await;
                 })
             };
