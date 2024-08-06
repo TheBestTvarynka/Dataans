@@ -2,13 +2,13 @@
   "build": {
     "beforeDevCommand": "trunk serve",
     "beforeBuildCommand": "trunk build",
-    "devPath": "http://localhost:1420",
+    "devPath": "http://0.0.0.0:3000",
     "distDir": "../dist",
     "withGlobalTauri": true
   },
   "package": {
     "productName": "totes",
-    "version": "0.0.0"
+    "version": "0.1.0"
   },
   "tauri": {
     "allowlist": {
@@ -19,19 +19,11 @@
       },
       "protocol": {
         "asset": true,
-        "assetScope": [
-          "$APPCACHE/**",
-          "$RESOURCE/**",
-          "$APPDATA/**"
-        ]
+        "assetScope": ["$APPCACHE/**", "$RESOURCE/**", "$APPDATA/**"]
       },
       "fs": {
         "all": true,
-        "scope": [
-          "$HOME/.config/totes/*",
-          "$APPCACHE/**",
-          "$RESOURCE/**"
-        ],
+        "scope": ["$HOME/.config/totes/*", "$APPCACHE/**", "$RESOURCE/**"],
         "readFile": true,
         "writeFile": true,
         "readDir": true,
@@ -51,19 +43,13 @@
       }
     ],
     "security": {
-      "csp": "default-src 'self'; img-src 'self' asset: http://asset.localhost"
+      "csp": "default-src 'self'; script-src 'wasm-unsafe-eval'; style-src 'unsafe-inline'; font-src 'https://fonts.gstatic.com/'; img-src 'unsafe-inline' asset: http://asset.localhost  tauri://localhost"
     },
     "bundle": {
       "active": true,
       "targets": "all",
       "identifier": "com.tbt.totes",
-      "icon": [
-        "icons/32x32.png",
-        "icons/128x128.png",
-        "icons/128x128@2x.png",
-        "icons/icon.icns",
-        "icons/icon.ico"
-      ]
+      "icon": ["icons/32x32.png", "icons/128x128.png", "icons/128x128@2x.png", "icons/icon.icns", "icons/icon.ico"]
     },
     "systemTray": {
       "iconPath": "icons/icon.png",
