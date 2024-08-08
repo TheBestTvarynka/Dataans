@@ -3,12 +3,9 @@ use std::path::Path;
 use leptos::html::AnyElement;
 use leptos::*;
 use markdown::mdast::Node;
-use syntect::highlighting::ThemeSet;
-use syntect::html::highlighted_html_for_string;
-use syntect::parsing::SyntaxSet;
 
-use crate::backend::convert_file_url;
 use crate::backend::file::open;
+use crate::backend::{convert_file_url, parse_code};
 
 pub fn render_md_node(node: &Node) -> HtmlElement<AnyElement> {
     match node {
@@ -231,28 +228,16 @@ pub fn render_md_node(node: &Node) -> HtmlElement<AnyElement> {
 
 #[component]
 fn CodeBlock(code: String, lang: String) -> impl IntoView {
-    let (inner_html, set_inner_html) = create_signal(String::new());
-
     let language = lang.clone();
     let code_value = code.clone();
-    spawn_local(async move {
-        let syntaxes = SyntaxSet::load_defaults_newlines();
-        let syntax = if let Some(syntax) = syntaxes.find_syntax_by_name(&language) {
-            syntax
-        } else if let Some(syntax) = syntaxes.find_syntax_by_extension(&language) {
-            syntax
-        } else {
-            syntaxes
-                .find_syntax_by_extension("txt")
-                .expect("The default plain text syntax should present.")
-        };
-
-        let themes = ThemeSet::load_defaults();
-        let html_rs = highlighted_html_for_string(&code_value, &syntaxes, syntax, &themes.themes["Solarized (dark)"])
-            .expect("Code HTML generation should not fail.");
-
-        set_inner_html.set(html_rs);
-    });
+    let highlighted_code = create_resource(
+        || (),
+        move |_| {
+            let code_value = code_value.clone();
+            let lang = language.clone();
+            async move { parse_code(&lang, &code_value).await }
+        },
+    );
 
     let code_value = code.clone();
 
@@ -268,12 +253,14 @@ fn CodeBlock(code: String, lang: String) -> impl IntoView {
                     }
                 }>"Copy"</button>
             </div>
-            <Show
-                when=move || !inner_html.get().is_empty()
+            <Suspense
                 fallback=move || view! { <span>"Parsing code...."</span> }
             >
-                <div class="code-block-wrapper" inner_html=move || inner_html.get() />
-            </Show>
+                {move || highlighted_code.get()
+                    .map(|inner_html| view! {
+                        <div class="code-block-wrapper" inner_html={inner_html} />
+                    })}
+            </Suspense>
         </div>
     }
 }
