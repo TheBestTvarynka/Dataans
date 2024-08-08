@@ -4,6 +4,7 @@
 #[macro_use]
 extern crate log;
 
+mod code_block;
 mod config;
 mod file;
 mod image;
@@ -93,7 +94,8 @@ fn main() {
             image::gen_random_avatar,
             image::handle_clipboard_image,
             file::upload_file,
-            file::remove_file
+            file::remove_file,
+            code_block::parse_code
         ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application")

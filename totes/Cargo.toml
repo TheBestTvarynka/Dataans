@@ -37,10 +37,6 @@ web-sys = { version = "0.3", features = [
     "HtmlElement",
 ] }
 futures = { version = "0.3", features = ["std", "alloc"] }
-syntect = { version = "5.2", default-features = false, features = [
-    "default-fancy",
-    "metadata",
-] }
 
 [workspace]
 members = ["common", "src-tauri"]

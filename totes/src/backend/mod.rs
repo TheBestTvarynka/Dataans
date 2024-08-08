@@ -78,3 +78,18 @@ pub async fn load_clipboard_image() -> String {
         from_value(image_path).expect("PathBuf object deserialization from JsValue should not fail.");
     convert_file_src(image_path)
 }
+
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct ParseCodeArgs<'lang, 'code> {
+    lang: &'lang str,
+    code: &'code str,
+}
+
+pub async fn parse_code(lang: &str, code: &str) -> String {
+    let args =
+        to_value(&ParseCodeArgs { lang, code }).expect("ParseCodeArgs serialization to JsValue should not fail.");
+    let html = invoke("parse_code", args).await;
+
+    from_value(html).expect("String object deserialization from JsValue should not fail.")
+}

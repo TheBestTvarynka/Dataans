@@ -32,6 +32,10 @@ avatar_generator = { git = "https://gitlab.com/dataans/tools.git", rev = "0a3f1c
 opener = { version = "0.7", features = ["reveal"] }
 image = "0.25"
 arboard = "3.4"
+syntect = { version = "5.2", default-features = false, features = [
+    "default-fancy",
+    "metadata",
+] }
 
 [features]
 # This feature is used for production builds or when a dev server is not specified, DO NOT REMOVE!!
