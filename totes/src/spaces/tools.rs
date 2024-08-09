@@ -2,6 +2,7 @@ use common::space::OwnedSpace;
 use common::Config;
 use leptos::*;
 use leptos_hotkeys::{use_hotkeys, use_hotkeys_scoped};
+use wasm_bindgen::JsCast;
 
 use crate::common::Modal;
 use crate::spaces::space_form::SpaceForm;
@@ -29,6 +30,20 @@ pub fn Tools(
 
     use_hotkeys!((key_bindings.create_space) => move |_| {
         set_show_modal.set(true);
+    });
+
+    use_hotkeys!((key_bindings.find_note) => move |_| {
+        if spaces_minimized.get() {
+            set_spaces_minimized.set(false);
+        }
+        if let Some(search_input) = document().get_element_by_id(SEARCH_NOTE_INPUT_ID) {
+            let search_input = search_input
+                .dyn_into::<web_sys::HtmlElement>()
+                .expect("Expected HtmlElement");
+            let _res = search_input.focus();
+        } else {
+            warn!("Search input element not found (id = '{}')", SEARCH_NOTE_INPUT_ID);
+        }
     });
 
     view! {

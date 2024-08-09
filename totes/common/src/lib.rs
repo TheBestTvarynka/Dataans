@@ -67,12 +67,19 @@ pub struct KeyBindings {
     /// Delete current space.
     #[serde(default = "delete_current_space")]
     pub delete_current_space: String,
-    /// Select previous space
+    /// Select previous space.
     #[serde(default = "select_next_space")]
     pub select_next_space: String,
-    /// Select next space
+    /// Select next space.
     #[serde(default = "select_prev_space")]
     pub select_prev_space: String,
+    /// Find note.
+    #[serde(default = "find_note")]
+    pub find_note: String,
+}
+
+fn find_note() -> String {
+    "ControlLeft+keyF".into()
 }
 
 fn select_next_space() -> String {
