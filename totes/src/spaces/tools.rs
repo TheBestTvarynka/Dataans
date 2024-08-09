@@ -19,7 +19,7 @@ pub fn Tools(
         if spaces_minimized.get() {
             "tools tools-vertical"
         } else {
-            "tools tools-expanded"
+            "tools"
         }
     };
 
@@ -31,9 +31,11 @@ pub fn Tools(
 
     view! {
         <div class={class}>
-            <button class="tool" title="Add a new space" on:click=move |_| set_show_modal.set(true)>
-                <img alt="add-space" src="/public/icons/add-space-1.png" />
-            </button>
+            <Show when=move || !spaces_minimized.get()>
+                <button class="tool" title="Add a new space" on:click=move |_| set_show_modal.set(true)>
+                    <img alt="add-space" src="/public/icons/add-space-1.png" />
+                </button>
+            </Show>
             <button class="tool" title="Minimize spaces panel" on:click=move |_| set_spaces_minimized.set(!spaces_minimized.get())>
                 {move || if spaces_minimized.get() {
                     view! {
