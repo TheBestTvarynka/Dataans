@@ -6,6 +6,8 @@ use leptos_hotkeys::{use_hotkeys, use_hotkeys_scoped};
 use crate::common::Modal;
 use crate::spaces::space_form::SpaceForm;
 
+const SEARCH_NOTE_INPUT_ID: &str = "search-note-input";
+
 #[component]
 pub fn Tools(
     set_spaces: SignalSetter<Vec<OwnedSpace>>,
@@ -36,6 +38,19 @@ pub fn Tools(
                     <img alt="add-space" src="/public/icons/add-space-1.png" />
                 </button>
             </Show>
+            <input
+                id=SEARCH_NOTE_INPUT_ID
+                type="text"
+                placeholder="Search note..."
+                class="input"
+                style=move || if spaces_minimized.get() {
+                    "display: none; flex-grow: 1"
+                } else {
+                    "flex-grow: 1"
+                }
+                // on:input=move |ev| set_space_name.set(event_target_value(&ev))
+                // prop:value=space_name
+            />
             <button class="tool" title="Minimize spaces panel" on:click=move |_| set_spaces_minimized.set(!spaces_minimized.get())>
                 {move || if spaces_minimized.get() {
                     view! {
