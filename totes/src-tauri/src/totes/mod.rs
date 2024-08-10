@@ -39,8 +39,8 @@ pub fn init_totes_plugin<R: Runtime>() -> TauriPlugin<R> {
             note::create_note,
             note::update_note,
             note::delete_note,
-            note::search_note_in_space,
-            note::search_note,
+            note::search_notes_in_space,
+            note::search_notes,
         ])
         .setup(|app_handle| {
             let app_data = app_handle.path_resolver().app_data_dir().unwrap_or_default();

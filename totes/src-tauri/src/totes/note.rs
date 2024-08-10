@@ -66,7 +66,7 @@ pub fn delete_note(state: State<'_, TotesState>, note_id: NoteId) -> Result<(), 
 }
 
 #[tauri::command]
-pub fn search_note_in_space(
+pub fn search_notes_in_space(
     state: State<'_, TotesState>,
     query: String,
     space_id: SpaceId,
@@ -90,7 +90,7 @@ pub fn search_note_in_space(
 }
 
 #[tauri::command]
-pub fn search_note(state: State<'_, TotesState>, query: String) -> Result<Vec<Note>, String> {
+pub fn searchs_note(state: State<'_, TotesState>, query: String) -> Result<Vec<Note>, String> {
     let collection = state.db.collection::<Note<'static>>(NOTES_COLLECTION_NAME);
 
     let mut notes = Vec::new();
