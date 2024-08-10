@@ -76,6 +76,13 @@ pub struct KeyBindings {
     /// Find note.
     #[serde(default = "find_note")]
     pub find_note: String,
+    /// Find note in the selected space.
+    #[serde(default = "find_note_in_selected_space")]
+    pub find_note_in_selected_space: String,
+}
+
+fn find_note_in_selected_space() -> String {
+    "ControlLeft+keyM".into()
 }
 
 fn find_note() -> String {

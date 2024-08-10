@@ -6,6 +6,7 @@ use wasm_bindgen::JsCast;
 
 use crate::common::Modal;
 use crate::spaces::space_form::SpaceForm;
+use crate::{FindNoteData, FindNoteMode};
 
 const SEARCH_NOTE_INPUT_ID: &str = "search-note-input";
 
@@ -14,6 +15,7 @@ pub fn Tools(
     set_spaces: SignalSetter<Vec<OwnedSpace>>,
     spaces_minimized: Signal<bool>,
     set_spaces_minimized: SignalSetter<bool>,
+    set_find_node_mode: SignalSetter<FindNoteMode>,
     config: Config,
 ) -> impl IntoView {
     let (show_modal, set_show_modal) = create_signal(false);
@@ -36,6 +38,7 @@ pub fn Tools(
         if spaces_minimized.get() {
             set_spaces_minimized.set(false);
         }
+        set_find_node_mode.set(FindNoteMode::FindNote(FindNoteData::default()));
         if let Some(search_input) = document().get_element_by_id(SEARCH_NOTE_INPUT_ID) {
             let search_input = search_input
                 .dyn_into::<web_sys::HtmlElement>()

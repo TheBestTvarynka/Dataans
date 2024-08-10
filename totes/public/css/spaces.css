@@ -6,7 +6,7 @@
     gap: 0;
     background-color: var(--spaces_background_color);
     height: 100vh;
-    max-width: 30%;
+    max-width: 25%;
 }
 
 .spaces-scroll-area {

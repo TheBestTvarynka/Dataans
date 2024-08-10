@@ -6,12 +6,15 @@ use leptos_hotkeys::{use_hotkeys, use_hotkeys_scoped};
 use crate::backend::spaces::delete_space;
 use crate::common::{Confirm, Modal};
 use crate::spaces::space_form::SpaceForm;
+use crate::{FindNoteData, FindNoteMode};
 
 #[component]
 pub fn Info(
     current_space: OwnedSpace,
     set_spaces: SignalSetter<Vec<OwnedSpace>>,
     delete_state_space: SignalSetter<SpaceId>,
+    set_find_node_mode: SignalSetter<FindNoteMode>,
+    set_spaces_minimized: SignalSetter<bool>,
     config: Config,
 ) -> impl IntoView {
     let (show_edit_modal, set_show_edit_modal) = create_signal(false);
@@ -28,7 +31,6 @@ pub fn Info(
     };
 
     let current_space_name = current_space.name.to_string();
-    let space = Some(current_space.clone());
 
     let key_bindings = config.key_bindings;
 
@@ -40,11 +42,36 @@ pub fn Info(
         set_show_delete_modal.set(true);
     });
 
+    let space = current_space.clone();
+    use_hotkeys!((key_bindings.find_note_in_selected_space) => move |_| {
+        set_spaces_minimized.set(false);
+        set_find_node_mode.set(FindNoteMode::FindNote(FindNoteData {
+            space: Some(space.clone()),
+            query: Default::default(),
+        }));
+    });
+
+    let space = Some(current_space.clone());
+    let find_in_space = current_space.clone();
+
     view! {
         <div class="info">
             <span class="space-name">{current_space_name.clone()}</span>
             <div>
                 <div class="horizontal">
+                    <button
+                        class="tool"
+                        title="Find note"
+                        on:click=move |_| {
+                            set_spaces_minimized.set(false);
+                            set_find_node_mode.set(FindNoteMode::FindNote(FindNoteData {
+                                space: Some(find_in_space.clone()),
+                                query: Default::default(),
+                            }));
+                        }
+                    >
+                        <img alt="find note" src="/public/icons/search.svg" />
+                    </button>
                     <button
                         class="tool"
                         title="Edit space info"

@@ -12,6 +12,7 @@ use self::tools::Tools;
 use crate::app::GlobalState;
 use crate::backend::notes::list_notes;
 use crate::backend::spaces::list_spaces;
+use crate::FindNoteMode;
 
 #[component]
 pub fn Spaces(
@@ -30,10 +31,11 @@ pub fn Spaces(
         |state| state.selected_space.clone(),
         |state, space| state.selected_space = Some(space),
     );
-    let (_, set_notes) = create_slice(
+    let (_, set_notes) = create_slice(global_state, |_state| (), |state, notes| state.notes = notes);
+    let (find_note_mode, set_find_node_mode) = create_slice(
         global_state,
-        |state| state.notes.clone(),
-        |state, notes| state.notes = notes,
+        |state| state.find_note_mode.clone(),
+        |state, find_note_mode| state.find_note_mode = find_note_mode,
     );
     let set_selected_space = move |space: OwnedSpace| {
         let space_id = space.id;
@@ -97,12 +99,30 @@ pub fn Spaces(
 
     view! {
         <div class="spaces-container">
-            <Tools set_spaces spaces_minimized set_spaces_minimized config />
+            <Tools set_spaces spaces_minimized set_spaces_minimized set_find_node_mode config />
             <div class="spaces-scroll-area">
-                {move || spaces.get().into_iter().map(|space| {
-                    let selected = selected_space.get().as_ref().map(|selected| selected.id == space.id).unwrap_or_default();
-                    view! { <Space space set_selected_space selected minimized={spaces_minimized} /> }
-                }).collect_view()}
+                {move || match find_note_mode.get() {
+                    FindNoteMode::None => spaces.get().into_iter().map(|space| {
+                        let selected = selected_space.get().as_ref().map(|selected| selected.id == space.id).unwrap_or_default();
+                        view! { <Space space set_selected_space selected minimized={spaces_minimized} /> }
+                    }).collect_view(),
+                    FindNoteMode::FindNote(find_note) => {
+                        use_hotkeys!(("Escape") => move |_| set_find_node_mode.set(FindNoteMode::None));
+                        let mut elems = Vec::new();
+                        elems.push(if let Some(space) = find_note.space {
+                            view! {
+                                <div class="note-search-options">
+                                    <span class="note-search-label">"Search notes in:"</span>
+                                    <Space space set_selected_space selected=true minimized={spaces_minimized} />
+                                </div>
+                            }.into_any()
+                        } else {
+                            view! { <div /> }.into_any()
+                        });
+                        elems.push(view! { <span>"Found notes will appear here"</span> }.into_any());
+                        elems.into_iter().collect_view()
+                    },
+                }}
             </div>
         </div>
     }

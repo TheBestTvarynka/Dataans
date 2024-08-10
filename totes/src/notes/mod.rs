@@ -37,6 +37,18 @@ pub fn Notes(config: Config) -> impl IntoView {
         },
     );
 
+    let (_, set_find_node_mode) = create_slice(
+        global_state,
+        |_state| (),
+        |state, find_note_mode| state.find_note_mode = find_note_mode,
+    );
+
+    let (_, set_spaces_minimized) = create_slice(
+        global_state,
+        |state| state.minimize_spaces,
+        |state, minimized| state.minimize_spaces = minimized,
+    );
+
     let (notes, set_notes) = create_slice(
         global_state,
         |state| state.notes.clone(),
@@ -97,7 +109,14 @@ pub fn Notes(config: Config) -> impl IntoView {
                 when=move || current_space.get().is_some()
                 fallback=|| view! { <div /> }
             >
-                <Info current_space=current_space.get().unwrap() set_spaces delete_state_space config={config.clone()} />
+                <Info
+                    current_space=current_space.get().unwrap()
+                    set_spaces
+                    delete_state_space
+                    set_find_node_mode
+                    set_spaces_minimized
+                    config={config.clone()}
+                />
             </Show>
             <div class="notes-inner">
                 <div class="notes" id="notes">

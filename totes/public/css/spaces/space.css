@@ -84,3 +84,14 @@
     height: 4em;
     width: 4em;
 }
+
+.note-search-options {
+    display: flex;
+    flex-direction: column;
+}
+
+.note-search-label {
+    background-color: var(--search-note-label-background-color);
+    color: var(--search-note-label-text-color);
+    padding: 0 0.2em 0 0.2em;
+}

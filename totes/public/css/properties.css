@@ -57,4 +57,7 @@ body {
     --confirm-ok-button-text-color: #e0e0e7;
     --confirm-cancel-button-background-color: #ababad;
     --confirm-cancel-button-text-color: #282e33;
+
+    --search-note-label-background-color: #ababad;
+    --search-note-label-text-color: #282e33;
 }

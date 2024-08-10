@@ -3,6 +3,7 @@
     border-bottom: 1px solid var(--notes_border_color);
     color: var(--spaces_tools_text_color);
     display: flex;
+    flex-wrap: wrap;
     padding: 0 0.2em 0 0.2em;
     justify-content: space-between;
     align-items: center;
