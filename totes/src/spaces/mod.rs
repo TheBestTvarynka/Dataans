@@ -1,6 +1,6 @@
 mod space;
 pub mod space_form;
-mod tools;
+pub mod tools;
 
 use common::space::OwnedSpace;
 use common::Config;

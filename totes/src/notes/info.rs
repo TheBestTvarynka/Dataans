@@ -6,15 +6,13 @@ use leptos_hotkeys::{use_hotkeys, use_hotkeys_scoped};
 use crate::backend::spaces::delete_space;
 use crate::common::{Confirm, Modal};
 use crate::spaces::space_form::SpaceForm;
-use crate::{FindNoteData, FindNoteMode};
 
 #[component]
 pub fn Info(
     current_space: OwnedSpace,
     set_spaces: SignalSetter<Vec<OwnedSpace>>,
     delete_state_space: SignalSetter<SpaceId>,
-    set_find_node_mode: SignalSetter<FindNoteMode>,
-    set_spaces_minimized: SignalSetter<bool>,
+    #[prop(into)] toggle_note_search: Callback<(), ()>,
     config: Config,
 ) -> impl IntoView {
     let (show_edit_modal, set_show_edit_modal) = create_signal(false);
@@ -42,17 +40,9 @@ pub fn Info(
         set_show_delete_modal.set(true);
     });
 
-    let space = current_space.clone();
-    use_hotkeys!((key_bindings.find_note_in_selected_space) => move |_| {
-        set_spaces_minimized.set(false);
-        set_find_node_mode.set(FindNoteMode::FindNote(FindNoteData {
-            space: Some(space.clone()),
-            query: Default::default(),
-        }));
-    });
+    use_hotkeys!((key_bindings.find_note_in_selected_space) => move |_| toggle_note_search.call(()));
 
     let space = Some(current_space.clone());
-    let find_in_space = current_space.clone();
 
     view! {
         <div class="info">
@@ -62,13 +52,7 @@ pub fn Info(
                     <button
                         class="tool"
                         title="Find note"
-                        on:click=move |_| {
-                            set_spaces_minimized.set(false);
-                            set_find_node_mode.set(FindNoteMode::FindNote(FindNoteData {
-                                space: Some(find_in_space.clone()),
-                                query: Default::default(),
-                            }));
-                        }
+                        on:click=move |_| toggle_note_search.call(())
                     >
                         <img alt="find note" src="/public/icons/search.svg" />
                     </button>

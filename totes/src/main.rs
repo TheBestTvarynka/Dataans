@@ -8,6 +8,7 @@ mod backend;
 mod common;
 mod notes;
 mod spaces;
+mod utils;
 
 use app::*;
 use leptos::*;

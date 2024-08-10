@@ -2,13 +2,13 @@ use common::space::OwnedSpace;
 use common::Config;
 use leptos::*;
 use leptos_hotkeys::{use_hotkeys, use_hotkeys_scoped};
-use wasm_bindgen::JsCast;
 
 use crate::common::Modal;
 use crate::spaces::space_form::SpaceForm;
+use crate::utils::focus_element;
 use crate::{FindNoteData, FindNoteMode};
 
-const SEARCH_NOTE_INPUT_ID: &str = "search-note-input";
+pub const SEARCH_NOTE_INPUT_ID: &str = "search-note-input";
 
 #[component]
 pub fn Tools(
@@ -39,14 +39,7 @@ pub fn Tools(
             set_spaces_minimized.set(false);
         }
         set_find_node_mode.set(FindNoteMode::FindNote(FindNoteData::default()));
-        if let Some(search_input) = document().get_element_by_id(SEARCH_NOTE_INPUT_ID) {
-            let search_input = search_input
-                .dyn_into::<web_sys::HtmlElement>()
-                .expect("Expected HtmlElement");
-            let _res = search_input.focus();
-        } else {
-            warn!("Search input element not found (id = '{}')", SEARCH_NOTE_INPUT_ID);
-        }
+        focus_element(SEARCH_NOTE_INPUT_ID);
     });
 
     view! {

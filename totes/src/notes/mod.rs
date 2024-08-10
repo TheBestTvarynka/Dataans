@@ -14,6 +14,9 @@ use self::info::Info;
 use self::note::Note;
 use crate::app::GlobalState;
 use crate::backend::notes::list_notes;
+use crate::spaces::tools::SEARCH_NOTE_INPUT_ID;
+use crate::utils::focus_element;
+use crate::{FindNoteData, FindNoteMode};
 
 #[component]
 pub fn Notes(config: Config) -> impl IntoView {
@@ -113,8 +116,14 @@ pub fn Notes(config: Config) -> impl IntoView {
                     current_space=current_space.get().unwrap()
                     set_spaces
                     delete_state_space
-                    set_find_node_mode
-                    set_spaces_minimized
+                    toggle_note_search=move |_| {
+                        set_spaces_minimized.set(false);
+                        set_find_node_mode.set(FindNoteMode::FindNote(FindNoteData {
+                            space: Some(current_space.get().unwrap()),
+                            query: Default::default(),
+                        }));
+                        focus_element(SEARCH_NOTE_INPUT_ID);
+                    }
                     config={config.clone()}
                 />
             </Show>
