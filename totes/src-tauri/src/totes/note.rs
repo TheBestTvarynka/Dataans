@@ -64,3 +64,42 @@ pub fn delete_note(state: State<'_, TotesState>, note_id: NoteId) -> Result<(), 
 
     Ok(())
 }
+
+#[tauri::command]
+pub fn search_note_in_space(
+    state: State<'_, TotesState>,
+    query: String,
+    space_id: SpaceId,
+) -> Result<Vec<Note>, String> {
+    let collection = state.db.collection::<Note<'static>>(NOTES_COLLECTION_NAME);
+
+    let mut notes = Vec::new();
+    for note in collection
+        .find(doc! {
+            "space_id": space_id.inner().to_string(),
+        })
+        .expect("Space notes querying should not fail")
+    {
+        let note = note.expect("Note parsing should not fail.");
+        if note.text.as_ref().contains(&query) {
+            notes.push(note);
+        }
+    }
+
+    Ok(notes)
+}
+
+#[tauri::command]
+pub fn search_note(state: State<'_, TotesState>, query: String) -> Result<Vec<Note>, String> {
+    let collection = state.db.collection::<Note<'static>>(NOTES_COLLECTION_NAME);
+
+    let mut notes = Vec::new();
+    for note in collection.find(None).expect("Notes querying should not fail") {
+        let note = note.expect("Note parsing should not fail.");
+        if note.text.as_ref().contains(&query) {
+            notes.push(note);
+        }
+    }
+
+    Ok(notes)
+}
