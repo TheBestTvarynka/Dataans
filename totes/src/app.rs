@@ -9,16 +9,18 @@ use crate::notes::Notes;
 use crate::spaces::Spaces;
 
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
-pub struct FindNoteData {
-    pub space: Option<OwnedSpace>,
-    pub query: String,
-}
-
-#[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub enum FindNoteMode {
     #[default]
     None,
-    FindNote(FindNoteData),
+    FindNote {
+        space: Option<OwnedSpace>,
+    },
+}
+
+impl FindNoteMode {
+    pub fn is_find_mode(&self) -> bool {
+        matches!(self, FindNoteMode::FindNote { .. })
+    }
 }
 
 #[derive(Debug, Clone)]

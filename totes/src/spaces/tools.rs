@@ -6,7 +6,7 @@ use leptos_hotkeys::{use_hotkeys, use_hotkeys_scoped};
 use crate::common::Modal;
 use crate::spaces::space_form::SpaceForm;
 use crate::utils::focus_element;
-use crate::{FindNoteData, FindNoteMode};
+use crate::FindNoteMode;
 
 pub const SEARCH_NOTE_INPUT_ID: &str = "search-note-input";
 
@@ -16,6 +16,7 @@ pub fn Tools(
     spaces_minimized: Signal<bool>,
     set_spaces_minimized: SignalSetter<bool>,
     set_find_node_mode: SignalSetter<FindNoteMode>,
+    set_query: SignalSetter<String>,
     config: Config,
 ) -> impl IntoView {
     let (show_modal, set_show_modal) = create_signal(false);
@@ -38,7 +39,7 @@ pub fn Tools(
         if spaces_minimized.get() {
             set_spaces_minimized.set(false);
         }
-        set_find_node_mode.set(FindNoteMode::FindNote(FindNoteData::default()));
+        set_find_node_mode.set(FindNoteMode::FindNote { space: None });
         focus_element(SEARCH_NOTE_INPUT_ID);
     });
 
@@ -59,7 +60,7 @@ pub fn Tools(
                 } else {
                     "flex-grow: 1"
                 }
-                // on:input=move |ev| set_space_name.set(event_target_value(&ev))
+                on:input=move |ev| set_query.set(event_target_value(&ev))
                 // prop:value=space_name
             />
             <button class="tool" title="Minimize spaces panel" on:click=move |_| set_spaces_minimized.set(!spaces_minimized.get())>

@@ -10,7 +10,7 @@ use leptos_hotkeys::{use_hotkeys, use_hotkeys_scoped};
 use self::space::Space;
 use self::tools::Tools;
 use crate::app::GlobalState;
-use crate::backend::notes::list_notes;
+use crate::backend::notes::{list_notes, search_notes, search_notes_in_space};
 use crate::backend::spaces::list_spaces;
 use crate::FindNoteMode;
 
@@ -97,19 +97,46 @@ pub fn Spaces(
     use_hotkeys!((key_bindings.select_prev_space) => move |_| select_prev_space());
     use_hotkeys!((key_bindings.select_next_space) => move |_| select_next_space());
 
+    let (query, set_query) = create_signal(String::new());
+
+    let found_notes = create_resource(
+        move || (query.get(), find_note_mode.get()),
+        move |(query, find_note_mode)| async move {
+            match find_note_mode {
+                FindNoteMode::None => vec![],
+                FindNoteMode::FindNote { space: Some(space) } => {
+                    if query.is_empty() {
+                        vec![]
+                    } else {
+                        search_notes_in_space(space.id, &query)
+                            .await
+                            .expect("Notes searching should not fail")
+                    }
+                }
+                FindNoteMode::FindNote { space: None } => {
+                    if query.is_empty() {
+                        vec![]
+                    } else {
+                        search_notes(&query).await.expect("Notes searching should not fail")
+                    }
+                }
+            }
+        },
+    );
+
     view! {
         <div class="spaces-container">
-            <Tools set_spaces spaces_minimized set_spaces_minimized set_find_node_mode config />
+            <Tools set_spaces spaces_minimized set_spaces_minimized set_find_node_mode set_query=set_query.into() config />
             <div class="spaces-scroll-area">
                 {move || match find_note_mode.get() {
                     FindNoteMode::None => spaces.get().into_iter().map(|space| {
                         let selected = selected_space.get().as_ref().map(|selected| selected.id == space.id).unwrap_or_default();
                         view! { <Space space set_selected_space selected minimized={spaces_minimized} /> }
                     }).collect_view(),
-                    FindNoteMode::FindNote(find_note) => {
+                    FindNoteMode::FindNote { space } => {
                         use_hotkeys!(("Escape") => move |_| set_find_node_mode.set(FindNoteMode::None));
                         let mut elems = Vec::new();
-                        elems.push(if let Some(space) = find_note.space {
+                        elems.push(if let Some(space) = space {
                             view! {
                                 <div class="note-search-options">
                                     <span class="note-search-label">"Search notes in:"</span>
@@ -119,9 +146,20 @@ pub fn Spaces(
                         } else {
                             view! { <div /> }.into_any()
                         });
-                        elems.push(view! { <span>"Found notes will appear here"</span> }.into_any());
                         elems.into_iter().collect_view()
                     },
+                }}
+                {move || if find_note_mode.get().is_find_mode() { view! {
+                    <Suspense
+                        fallback=move || view! { <span>"Loading notes..."</span> }
+                    >
+                        {move || found_notes.get()
+                            .map(|notes| notes.into_iter().map(|note| view! {
+                                <span>{note.text.to_string()}</span>
+                            }).collect_view())}
+                    </Suspense>
+                }} else {
+                    view! {}.into_view()
                 }}
             </div>
         </div>
