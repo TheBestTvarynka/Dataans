@@ -2,6 +2,7 @@ pub mod editor;
 mod info;
 mod md_node;
 mod note;
+pub mod note_preview;
 
 use common::note::UpdateNote;
 use common::space::Space as SpaceData;

@@ -12,6 +12,7 @@ use self::tools::Tools;
 use crate::app::GlobalState;
 use crate::backend::notes::{list_notes, search_notes, search_notes_in_space};
 use crate::backend::spaces::list_spaces;
+use crate::notes::note_preview::NotePreview;
 use crate::FindNoteMode;
 
 #[component]
@@ -154,8 +155,12 @@ pub fn Spaces(
                         fallback=move || view! { <span>"Loading notes..."</span> }
                     >
                         {move || found_notes.get()
+                            .map(|notes| view! {
+                                <span class="note-search-label">{format!("Found {} notes:", notes.len())}</span>
+                            })}
+                        {move || found_notes.get()
                             .map(|notes| notes.into_iter().map(|note| view! {
-                                <span>{note.text.to_string()}</span>
+                                <NotePreview note minimized={spaces_minimized} />
                             }).collect_view())}
                     </Suspense>
                 }} else {
