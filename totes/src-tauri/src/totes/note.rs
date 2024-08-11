@@ -90,7 +90,7 @@ pub fn search_notes_in_space(
 }
 
 #[tauri::command]
-pub fn searchs_note(state: State<'_, TotesState>, query: String) -> Result<Vec<Note>, String> {
+pub fn search_notes(state: State<'_, TotesState>, query: String) -> Result<Vec<Note>, String> {
     let collection = state.db.collection::<Note<'static>>(NOTES_COLLECTION_NAME);
 
     let mut notes = Vec::new();
