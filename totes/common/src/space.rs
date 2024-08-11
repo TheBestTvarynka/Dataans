@@ -7,7 +7,7 @@ use uuid::Uuid;
 use crate::CreationDate;
 
 /// Represent a space ID.
-#[derive(Serialize, Deserialize, Debug, Default, Copy, Clone, Eq, PartialEq)]
+#[derive(Serialize, Deserialize, Debug, Default, Copy, Clone, Eq, PartialEq, Hash)]
 pub struct Id(Uuid);
 
 impl Id {

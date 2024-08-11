@@ -1,9 +1,11 @@
-use common::note::{Id as NoteId, Note, UpdateNote};
-use common::space::Id as SpaceId;
+use std::collections::HashMap;
+
+use common::note::{Id as NoteId, Note, NoteFull, NoteFullOwned, UpdateNote};
+use common::space::{Id as SpaceId, OwnedSpace};
 use polodb_core::bson::doc;
 use tauri::State;
 
-use crate::totes::{TotesState, NOTES_COLLECTION_NAME};
+use crate::totes::{TotesState, NOTES_COLLECTION_NAME, SPACES_COLLECTION_NAME};
 
 #[tauri::command]
 pub fn list_notes(state: State<'_, TotesState>, space_id: SpaceId) -> Result<Vec<Note>, String> {
@@ -70,11 +72,12 @@ pub fn search_notes_in_space(
     state: State<'_, TotesState>,
     query: String,
     space_id: SpaceId,
-) -> Result<Vec<Note>, String> {
-    let collection = state.db.collection::<Note<'static>>(NOTES_COLLECTION_NAME);
+) -> Result<Vec<NoteFullOwned>, String> {
+    let notes_collection = state.db.collection::<Note<'static>>(NOTES_COLLECTION_NAME);
+    let spaces_collection = state.db.collection::<OwnedSpace>(SPACES_COLLECTION_NAME);
 
     let mut notes = Vec::new();
-    for note in collection
+    for note in notes_collection
         .find(doc! {
             "space_id": space_id.inner().to_string(),
         })
@@ -82,7 +85,20 @@ pub fn search_notes_in_space(
     {
         let note = note.expect("Note parsing should not fail.");
         if note.text.as_ref().contains(&query) {
-            notes.push(note);
+            let space = spaces_collection
+                .find_one(doc! {
+                    "id": note.space_id.inner().to_string(),
+                })
+                .expect("Space querying should not fail.")
+                .expect("Note space should exist.");
+
+            notes.push(NoteFull {
+                id: note.id,
+                text: note.text,
+                created_at: note.created_at,
+                space,
+                files: note.files,
+            });
         }
     }
 
@@ -90,14 +106,36 @@ pub fn search_notes_in_space(
 }
 
 #[tauri::command]
-pub fn search_notes(state: State<'_, TotesState>, query: String) -> Result<Vec<Note>, String> {
+pub fn search_notes(state: State<'_, TotesState>, query: String) -> Result<Vec<NoteFullOwned>, String> {
     let collection = state.db.collection::<Note<'static>>(NOTES_COLLECTION_NAME);
+    let spaces_collection = state.db.collection::<OwnedSpace>(SPACES_COLLECTION_NAME);
 
+    let mut spaces = HashMap::<SpaceId, OwnedSpace>::new();
     let mut notes = Vec::new();
+
     for note in collection.find(None).expect("Notes querying should not fail") {
         let note = note.expect("Note parsing should not fail.");
         if note.text.as_ref().contains(&query) {
-            notes.push(note);
+            let space = if let Some(space) = spaces.get(&note.space_id) {
+                space.clone()
+            } else {
+                let space = spaces_collection
+                    .find_one(doc! {
+                        "id": note.space_id.inner().to_string(),
+                    })
+                    .expect("Space notes querying should not fail")
+                    .expect("Note space should exist.");
+                spaces.insert(note.space_id, space.clone());
+                space
+            };
+
+            notes.push(NoteFull {
+                id: note.id,
+                text: note.text,
+                created_at: note.created_at,
+                space,
+                files: note.files,
+            });
         }
     }
 
