@@ -71,7 +71,7 @@ pub fn Spaces(
                 FindNoteMode::FindNote { space } => {
                     use_hotkeys!(("Escape") => move |_| set_find_node_mode.set(FindNoteMode::None));
                     view! {
-                        <FoundNotesList query search_in_space={space} spaces_minimized />
+                        <FoundNotesList config={config.clone()} query search_in_space={space} spaces_minimized />
                     }
                 },
             }}
