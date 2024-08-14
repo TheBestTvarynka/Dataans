@@ -2,6 +2,7 @@ use common::space::OwnedSpace;
 use common::Config;
 use leptos::*;
 use leptos_hotkeys::{use_hotkeys, use_hotkeys_scoped};
+use web_sys::KeyboardEvent;
 
 use crate::common::Modal;
 use crate::spaces::space_form::SpaceForm;
@@ -43,6 +44,13 @@ pub fn Tools(
         focus_element(SEARCH_NOTE_INPUT_ID);
     });
 
+    let key_down = move |key: KeyboardEvent| {
+        if key.key() == "Enter" {
+            key.prevent_default();
+            set_find_node_mode.set(FindNoteMode::FindNote { space: None });
+        }
+    };
+
     view! {
         <div class={class}>
             <Show when=move || !spaces_minimized.get()>
@@ -61,6 +69,7 @@ pub fn Tools(
                     "flex-grow: 1"
                 }
                 on:input=move |ev| set_query.set(event_target_value(&ev))
+                on:keydown=key_down
                 // prop:value=space_name
             />
             <button class="tool" title="Toggle panel" on:click=move |_| set_spaces_minimized.set(!spaces_minimized.get())>
