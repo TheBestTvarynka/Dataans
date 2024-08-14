@@ -4,7 +4,8 @@
     color: var(--spaces_tools_text_color);
     display: flex;
     flex-wrap: wrap;
-    padding: 0 0.2em 0 0.2em;
+    padding: 0.2em;
+    gap: 0.2em;
     justify-content: space-between;
     align-items: center;
     min-height: var(--tools-panel-height);

@@ -63,7 +63,7 @@ pub fn Tools(
                 on:input=move |ev| set_query.set(event_target_value(&ev))
                 // prop:value=space_name
             />
-            <button class="tool" title="Minimize spaces panel" on:click=move |_| set_spaces_minimized.set(!spaces_minimized.get())>
+            <button class="tool" title="Toggle panel" on:click=move |_| set_spaces_minimized.set(!spaces_minimized.get())>
                 {move || if spaces_minimized.get() {
                     view! {
                         <img alt="maximize-spaces" src="/public/icons/side-right.png" />
