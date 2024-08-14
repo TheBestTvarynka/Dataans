@@ -68,11 +68,11 @@ pub struct KeyBindings {
     #[serde(default = "delete_current_space")]
     pub delete_current_space: String,
     /// Select previous space.
-    #[serde(default = "select_next_space")]
-    pub select_next_space: String,
+    #[serde(default = "select_next_list_item")]
+    pub select_next_list_item: String,
     /// Select next space.
-    #[serde(default = "select_prev_space")]
-    pub select_prev_space: String,
+    #[serde(default = "select_prev_list_item")]
+    pub select_prev_list_item: String,
     /// Find note.
     #[serde(default = "find_note")]
     pub find_note: String,
@@ -89,11 +89,11 @@ fn find_note() -> String {
     "ControlLeft+keyF".into()
 }
 
-fn select_next_space() -> String {
+fn select_next_list_item() -> String {
     "AltLeft+Digit2".into()
 }
 
-fn select_prev_space() -> String {
+fn select_prev_list_item() -> String {
     "AltLeft+Digit2".into()
 }
 

@@ -54,8 +54,8 @@ pub fn SpacesList(
 
     let key_bindings = config.key_bindings.clone();
 
-    use_hotkeys!((key_bindings.select_prev_space) => move |_| select_prev_space());
-    use_hotkeys!((key_bindings.select_next_space) => move |_| select_next_space());
+    use_hotkeys!((key_bindings.select_prev_list_item) => move |_| select_prev_space());
+    use_hotkeys!((key_bindings.select_next_list_item) => move |_| select_next_space());
 
     view! {
         <div class="spaces-scroll-area">
