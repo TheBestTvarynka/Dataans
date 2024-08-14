@@ -62,4 +62,5 @@ body {
     --search-note-label-text-color: #282e33;
     --note-preview-space-name-color: #e0e0e7;
     --note-preview-note-text-color: #ababad;
+    --note-preview-selected-note-background-color: #678da6;
 }

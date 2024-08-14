@@ -12,6 +12,8 @@ pub fn FoundNotesList(
     search_in_space: Option<OwnedSpace>,
     spaces_minimized: Signal<bool>,
 ) -> impl IntoView {
+    let (selected_note, set_selected_note) = create_signal(None);
+
     let space = search_in_space.clone();
     let found_notes = create_resource(
         move || query.get(),
@@ -51,9 +53,17 @@ pub fn FoundNotesList(
                         <span class="note-search-label">{format!("Found {} notes:", notes.len())}</span>
                     })}
                 {move || found_notes.get()
-                    .map(|notes| notes.into_iter().map(|note| view! {
-                        <NotePreview note minimized={spaces_minimized} />
-                    }).collect_view())}
+                    .map(|notes| notes.into_iter().map(|note| {
+                        let is_selected = selected_note.get().map(|id| id == note.id).unwrap_or_default();
+                        view! {
+                            <NotePreview
+                                note
+                                minimized=spaces_minimized
+                                selected=is_selected
+                                set_selected_note=move |id| set_selected_note.set(Some(id)) />
+                        }
+                    }).collect_view())
+                }
             </Suspense>
         </div>
     }
