@@ -83,13 +83,22 @@ pub fn FoundNotesList(
 
     view! {
         <div class="spaces-scroll-area">
-            {if let Some(space) = search_in_space {
-                view! {
-                    <div class="note-search-options">
-                        <span class="note-search-label">"Search notes in:"</span>
-                        <Space space set_selected_space=|_| {} selected=true minimized={spaces_minimized} />
-                    </div>
-                }.into_view()
+            {move || if let Some(space) = search_in_space.clone() {
+                if spaces_minimized.get() {
+                    view! {
+                        <div class="note-search-options">
+                            <span class="note-search-label">"in:"</span>
+                            <Space space set_selected_space=|_| {} selected=true minimized={spaces_minimized} />
+                        </div>
+                    }.into_view()
+                } else {
+                    view! {
+                        <div class="note-search-options">
+                            <span class="note-search-label">"Search notes in:"</span>
+                            <Space space set_selected_space=|_| {} selected=true minimized={spaces_minimized} />
+                        </div>
+                    }.into_view()
+                }
             } else {
                 view! {}.into_view()
             }}
@@ -97,8 +106,14 @@ pub fn FoundNotesList(
                 fallback=move || view! { <span>"Loading notes..."</span> }
             >
                 {move || found_notes.get()
-                    .map(|notes| view! {
-                        <span class="note-search-label">{format!("Found {} notes:", notes.len())}</span>
+                    .map(|notes| if spaces_minimized.get() {
+                        view! {
+                            <span class="note-search-label">{format!("{}", notes.len())}</span>
+                        }
+                    } else {
+                        view! {
+                            <span class="note-search-label">{format!("Found {} notes:", notes.len())}</span>
+                        }
                     })}
                 {move || found_notes.get()
                     .map(|notes| notes.into_iter().map(|note| {
