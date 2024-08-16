@@ -1,3 +1,4 @@
+use common::note::Id as NoteId;
 use common::space::OwnedSpace;
 use common::Config;
 use leptos::*;
@@ -13,6 +14,7 @@ pub fn FoundNotesList(
     #[prop(into)] query: Signal<String>,
     search_in_space: Option<OwnedSpace>,
     spaces_minimized: Signal<bool>,
+    #[prop(into)] focus_note: Callback<(NoteId, OwnedSpace), ()>,
 ) -> impl IntoView {
     let (selected_note, set_selected_note) = create_signal(None);
 
@@ -118,12 +120,17 @@ pub fn FoundNotesList(
                 {move || found_notes.get()
                     .map(|notes| notes.into_iter().map(|note| {
                         let is_selected = selected_note.get().map(|id| id == note.id).unwrap_or_default();
+                        let note_id = note.id;
+                        let space = note.space.clone();
                         view! {
                             <NotePreview
                                 note
                                 minimized=spaces_minimized
                                 selected=is_selected
-                                set_selected_note=move |id| set_selected_note.set(Some(id)) />
+                                set_selected_note=move |id| {
+                                    set_selected_note.set(Some(id));
+                                    focus_note.call((note_id, space.clone()));
+                                }/>
                         }
                     }).collect_view())
                 }

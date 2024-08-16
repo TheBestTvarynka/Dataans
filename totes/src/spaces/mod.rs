@@ -4,6 +4,7 @@ pub mod space_form;
 mod spaces_list;
 pub mod tools;
 
+use common::note::Id as NoteId;
 use common::space::OwnedSpace;
 use common::Config;
 use leptos::*;
@@ -16,6 +17,7 @@ use self::tools::Tools;
 use crate::app::GlobalState;
 use crate::backend::notes::list_notes;
 use crate::backend::spaces::list_spaces;
+use crate::utils::focus_element;
 use crate::FindNoteMode;
 
 #[component]
@@ -30,7 +32,7 @@ pub fn Spaces(
         set_spaces.set(list_spaces().await.expect("loaded spaces"));
     });
 
-    let (selected_space, set_selected_space) = create_slice(
+    let (selected_space, set_selected_space_s) = create_slice(
         global_state,
         |state| state.selected_space.clone(),
         |state, space| state.selected_space = Some(space),
@@ -43,9 +45,17 @@ pub fn Spaces(
     );
     let set_selected_space = move |space: OwnedSpace| {
         let space_id = space.id;
-        set_selected_space.set(space);
+        set_selected_space_s.set(space);
         spawn_local(async move {
             set_notes.set(list_notes(space_id).await.expect("Notes listing should not fail"));
+        });
+    };
+    let focus_note = move |(note_id, space): (NoteId, OwnedSpace)| {
+        let space_id = space.id;
+        set_selected_space_s.set(space);
+        spawn_local(async move {
+            set_notes.set(list_notes(space_id).await.expect("Notes listing should not fail"));
+            focus_element(note_id.to_string());
         });
     };
     let (spaces_minimized, set_spaces_minimized) = create_slice(
@@ -71,7 +81,7 @@ pub fn Spaces(
                 FindNoteMode::FindNote { space } => {
                     use_hotkeys!(("Escape") => move |_| set_find_node_mode.set(FindNoteMode::None));
                     view! {
-                        <FoundNotesList config={config.clone()} query search_in_space={space} spaces_minimized />
+                        <FoundNotesList config={config.clone()} query search_in_space={space} spaces_minimized focus_note />
                     }
                 },
             }}
