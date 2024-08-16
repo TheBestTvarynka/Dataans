@@ -52,8 +52,7 @@
         "y": 0,
         "closable": false,
         "maximized": true,
-        "alwaysOnTop": true,
-        "skipTaskbar": true
+        "alwaysOnTop": true
       }
     ],
     "security": {

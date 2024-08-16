@@ -85,12 +85,21 @@ pub fn search_notes_in_space(
     {
         let note = note.expect("Note parsing should not fail.");
         if note.text.as_ref().contains(&query) {
-            let space = spaces_collection
+            let space = if let Some(space) = spaces_collection
                 .find_one(doc! {
                     "id": note.space_id.inner().to_string(),
                 })
-                .expect("Space querying should not fail.")
-                .expect("Note space should exist.");
+                .expect("Space notes querying should not fail")
+            {
+                space
+            } else {
+                warn!(
+                    "Space(id={}) does not exist. Skipping this note(id={})...",
+                    note.space_id.inner().to_string(),
+                    note.id.to_string()
+                );
+                continue;
+            };
 
             notes.push(NoteFull {
                 id: note.id,
@@ -119,13 +128,22 @@ pub fn search_notes(state: State<'_, TotesState>, query: String) -> Result<Vec<N
             let space = if let Some(space) = spaces.get(&note.space_id) {
                 space.clone()
             } else {
-                let space = spaces_collection
+                let space = if let Some(space) = spaces_collection
                     .find_one(doc! {
                         "id": note.space_id.inner().to_string(),
                     })
                     .expect("Space notes querying should not fail")
-                    .expect("Note space should exist.");
-                spaces.insert(note.space_id, space.clone());
+                {
+                    spaces.insert(note.space_id, space.clone());
+                    space
+                } else {
+                    warn!(
+                        "Space(id={}) does not exist. Skipping this note(id={})...",
+                        note.space_id.inner().to_string(),
+                        note.id.to_string()
+                    );
+                    continue;
+                };
                 space
             };
 
