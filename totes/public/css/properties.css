@@ -63,4 +63,6 @@ body {
     --note-preview-space-name-color: #e0e0e7;
     --note-preview-note-text-color: #ababad;
     --note-preview-selected-note-background-color: #678da6;
+
+    --note-focus-border-color: #678da6;
 }

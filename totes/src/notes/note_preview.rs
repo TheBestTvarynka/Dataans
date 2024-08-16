@@ -1,6 +1,8 @@
 use common::note::{Id as NoteId, NoteFullOwned};
 use leptos::*;
 
+use crate::utils::focus_element;
+
 #[component]
 pub fn NotePreview(
     note: NoteFullOwned,
@@ -17,7 +19,10 @@ pub fn NotePreview(
     let note_id = note.id;
 
     view! {
-        <div class=class on:click=move |_| set_selected_note.call(note_id)>
+        <div class=class on:click=move |_| {
+            set_selected_note.call(note_id);
+            focus_element(note_id.to_string());
+        }>
             <img class="note-preview-image" alt="space avatar image" src=note.space.avatar.to_string() />
             <Show when=move || !minimized.get()>
                 <div class="vertical">
