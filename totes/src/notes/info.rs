@@ -12,6 +12,7 @@ pub fn Info(
     current_space: OwnedSpace,
     set_spaces: SignalSetter<Vec<OwnedSpace>>,
     delete_state_space: SignalSetter<SpaceId>,
+    #[prop(into)] toggle_note_search: Callback<(), ()>,
     config: Config,
 ) -> impl IntoView {
     let (show_edit_modal, set_show_edit_modal) = create_signal(false);
@@ -28,7 +29,6 @@ pub fn Info(
     };
 
     let current_space_name = current_space.name.to_string();
-    let space = Some(current_space.clone());
 
     let key_bindings = config.key_bindings;
 
@@ -40,11 +40,22 @@ pub fn Info(
         set_show_delete_modal.set(true);
     });
 
+    use_hotkeys!((key_bindings.find_note_in_selected_space) => move |_| toggle_note_search.call(()));
+
+    let space = Some(current_space.clone());
+
     view! {
         <div class="info">
             <span class="space-name">{current_space_name.clone()}</span>
             <div>
                 <div class="horizontal">
+                    <button
+                        class="tool"
+                        title="Find note"
+                        on:click=move |_| toggle_note_search.call(())
+                    >
+                        <img alt="find note" src="/public/icons/search.svg" />
+                    </button>
                     <button
                         class="tool"
                         title="Edit space info"

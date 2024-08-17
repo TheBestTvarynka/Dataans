@@ -8,12 +8,28 @@ use crate::backend::{load_config, load_theme};
 use crate::notes::Notes;
 use crate::spaces::Spaces;
 
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub enum FindNoteMode {
+    #[default]
+    None,
+    FindNote {
+        space: Option<OwnedSpace>,
+    },
+}
+
+impl FindNoteMode {
+    pub fn is_find_mode(&self) -> bool {
+        matches!(self, FindNoteMode::FindNote { .. })
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct GlobalState {
     pub spaces: Vec<OwnedSpace>,
     pub notes: Vec<Note<'static>>,
     pub selected_space: Option<OwnedSpace>,
     pub minimize_spaces: bool,
+    pub find_note_mode: FindNoteMode,
 }
 
 impl Default for GlobalState {
@@ -23,6 +39,7 @@ impl Default for GlobalState {
             notes: Default::default(),
             selected_space: Default::default(),
             minimize_spaces: true,
+            find_note_mode: Default::default(),
         }
     }
 }

@@ -57,4 +57,12 @@ body {
     --confirm-ok-button-text-color: #e0e0e7;
     --confirm-cancel-button-background-color: #ababad;
     --confirm-cancel-button-text-color: #282e33;
+
+    --search-note-label-background-color: #ababad;
+    --search-note-label-text-color: #282e33;
+    --note-preview-space-name-color: #e0e0e7;
+    --note-preview-note-text-color: #ababad;
+    --note-preview-selected-note-background-color: #678da6;
+
+    --note-focus-border-color: #678da6;
 }

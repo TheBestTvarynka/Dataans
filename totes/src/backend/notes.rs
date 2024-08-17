@@ -1,4 +1,4 @@
-use common::note::{Id as NoteId, Note, UpdateNote};
+use common::note::{Id as NoteId, Note, NoteFullOwned, UpdateNote};
 use common::space::Id as SpaceId;
 use common::TOTES_PLUGIN_NAME;
 use serde::{Deserialize, Serialize};
@@ -57,4 +57,32 @@ pub async fn delete_note(note_id: NoteId) -> Result<(), String> {
     let _ = invoke(&format!("plugin:{}|delete_note", TOTES_PLUGIN_NAME), args).await;
 
     Ok(())
+}
+
+#[derive(Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct SearchNotesInSpaceArgs<'query> {
+    pub space_id: SpaceId,
+    pub query: &'query str,
+}
+
+pub async fn search_notes_in_space(space_id: SpaceId, query: &str) -> Result<Vec<NoteFullOwned>, String> {
+    let args = to_value(&SearchNotesInSpaceArgs { space_id, query })
+        .expect("SearchNotesInSpaceArgs serialization to JsValue should not fail.");
+    let notes = invoke(&format!("plugin:{}|search_notes_in_space", TOTES_PLUGIN_NAME), args).await;
+
+    Ok(from_value(notes).expect("Notes list deserialization from JsValue should not fail."))
+}
+
+#[derive(Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct SearchNotesArgs<'query> {
+    pub query: &'query str,
+}
+
+pub async fn search_notes(query: &str) -> Result<Vec<NoteFullOwned>, String> {
+    let args = to_value(&SearchNotesArgs { query }).expect("SearchNotesArgs serialization to JsValue should not fail.");
+    let notes = invoke(&format!("plugin:{}|search_notes", TOTES_PLUGIN_NAME), args).await;
+
+    Ok(from_value(notes).expect("Notes list deserialization from JsValue should not fail."))
 }

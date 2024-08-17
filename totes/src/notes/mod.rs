@@ -2,6 +2,7 @@ pub mod editor;
 mod info;
 mod md_node;
 mod note;
+pub mod note_preview;
 
 use common::note::UpdateNote;
 use common::space::Space as SpaceData;
@@ -14,6 +15,9 @@ use self::info::Info;
 use self::note::Note;
 use crate::app::GlobalState;
 use crate::backend::notes::list_notes;
+use crate::spaces::tools::SEARCH_NOTE_INPUT_ID;
+use crate::utils::focus_element;
+use crate::FindNoteMode;
 
 #[component]
 pub fn Notes(config: Config) -> impl IntoView {
@@ -35,6 +39,18 @@ pub fn Notes(config: Config) -> impl IntoView {
             }
             state.spaces = spaces;
         },
+    );
+
+    let (_, set_find_node_mode) = create_slice(
+        global_state,
+        |_state| (),
+        |state, find_note_mode| state.find_note_mode = find_note_mode,
+    );
+
+    let (_, set_spaces_minimized) = create_slice(
+        global_state,
+        |state| state.minimize_spaces,
+        |state, minimized| state.minimize_spaces = minimized,
     );
 
     let (notes, set_notes) = create_slice(
@@ -97,7 +113,19 @@ pub fn Notes(config: Config) -> impl IntoView {
                 when=move || current_space.get().is_some()
                 fallback=|| view! { <div /> }
             >
-                <Info current_space=current_space.get().unwrap() set_spaces delete_state_space config={config.clone()} />
+                <Info
+                    current_space=current_space.get().unwrap()
+                    set_spaces
+                    delete_state_space
+                    toggle_note_search=move |_| {
+                        set_spaces_minimized.set(false);
+                        set_find_node_mode.set(FindNoteMode::FindNote {
+                            space: Some(current_space.get().unwrap()),
+                        });
+                        focus_element(SEARCH_NOTE_INPUT_ID);
+                    }
+                    config={config.clone()}
+                />
             </Show>
             <div class="notes-inner">
                 <div class="notes" id="notes">

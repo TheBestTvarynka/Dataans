@@ -6,7 +6,7 @@ use bson::Bson;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use crate::space::Id as SpaceId;
+use crate::space::{Id as SpaceId, Space};
 use crate::CreationDate;
 
 /// Represent a note ID.
@@ -90,8 +90,26 @@ pub struct Note<'text> {
     pub space_id: SpaceId,
     /// Attached files.
     pub files: Vec<File>,
-    // TODO(@TheBestTvarynka): implement attached files, photos, update time etc.
+    // TODO(@TheBestTvarynka): implement update time etc.
 }
+
+/// Represent one note.
+#[derive(Serialize, Deserialize, Debug, Clone, Eq, PartialEq)]
+pub struct NoteFull<'text, 'space_name, 'space_avatar> {
+    /// Note id.
+    pub id: Id,
+    /// Note data in MD format.
+    pub text: MdText<'text>,
+    /// Creation date.
+    pub created_at: CreationDate,
+    /// Space ID this note belongs.
+    pub space: Space<'space_name, 'space_avatar>,
+    /// Attached files.
+    pub files: Vec<File>,
+}
+
+/// Owned version of the [NoteFull] type.
+pub type NoteFullOwned = NoteFull<'static, 'static, 'static>;
 
 /// Represent note to update.
 #[derive(Serialize, Deserialize, Debug, Clone, Eq, PartialEq)]

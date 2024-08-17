@@ -1,0 +1,43 @@
+.note-preview {
+    display: inline-flex;
+    gap: 0.3em;
+    padding: 0.2em;
+    transition: all 0.2s;
+    align-items: center;
+    justify-content: center;
+}
+
+.note-preview:hover {
+    cursor: pointer;
+    background-color: var(--space_hover_background_color);
+}
+
+.note-preview-selected {
+    background-color: var(--note-preview-selected-note-background-color);
+}
+
+.note-preview-selected:hover {
+    background-color: var(--note-preview-selected-note-background-color);
+}
+
+.note-preview .note-preview-image {
+    border-radius: 0.4em;
+    height: 2em;
+    width: auto;
+}
+
+.note-preview-space-name {
+    align-self: flex-start;
+    width: 100%;
+    text-overflow: ellipsis;
+    text-align: left;
+    color: var(--note-preview-space-name-color);
+}
+
+.note-preview-note-text {
+    width: 100%;
+    font-size: 0.7em;
+    align-self: flex-start;
+    text-align: left;
+    color: var(--note-preview-note-text-color);
+}
