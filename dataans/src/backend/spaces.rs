@@ -21,7 +21,7 @@ struct CreateSpaceArgs<'name, 'avatar> {
 pub async fn create_space(space_data: Space<'_, '_>) -> Result<(), String> {
     debug!("Creating space: {:?}", space_data);
     let args = to_value(&CreateSpaceArgs { space_data }).expect("Space serialization to JsValue should not fail.");
-    let _ = invoke(&format!("plugin:{}|create_space",), args).await;
+    let _ = invoke(&format!("plugin:{}|create_space", APP_PLUGIN_NAME), args).await;
 
     Ok(())
 }

@@ -2,19 +2,18 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 #[macro_use]
-extern crate log;
+extern crate tracing;
 
 mod code_block;
 mod config;
+mod dataans;
 mod file;
 mod image;
-mod dataans;
 
 use tauri::{
     AppHandle, CustomMenuItem, GlobalShortcutManager, Manager, Result, RunEvent, SystemTray, SystemTrayEvent,
     SystemTrayMenu, SystemTrayMenuItem,
 };
-use tauri_plugin_log::LogTarget;
 
 const MAIN_WINDOW_NAME: &str = "main";
 
@@ -48,7 +47,23 @@ fn toggle_app_visibility(app: &AppHandle) -> Result<()> {
     Ok(())
 }
 
+fn init_tracing() {
+    use std::io;
+
+    use tracing_subscriber::prelude::*;
+    use tracing_subscriber::EnvFilter;
+
+    let fmt_layer = tracing_subscriber::fmt::layer().pretty().with_writer(io::stdout);
+
+    tracing_subscriber::registry()
+        .with(fmt_layer)
+        .with(EnvFilter::from_default_env())
+        .init();
+}
+
 fn main() {
+    init_tracing();
+
     let quit = CustomMenuItem::new(WINDOW_QUIT_MENU_ITEM_ID.to_string(), WINDOW_QUIT_TITLE);
     let hide = CustomMenuItem::new(WINDOW_VISIBILITY_MENU_ITEM_ID.to_string(), WINDOW_HIDE_TITLE);
     let tray_menu = SystemTrayMenu::new()
@@ -80,11 +95,11 @@ fn main() {
             }
             _ => {}
         })
-        .plugin(
-            tauri_plugin_log::Builder::default()
-                .targets([LogTarget::LogDir, LogTarget::Stdout, LogTarget::Webview])
-                .build(),
-        )
+        // .plugin(
+        //     tauri_plugin_log::Builder::default()
+        //         .targets([LogTarget::LogDir, LogTarget::Stdout, LogTarget::Webview])
+        //         .build(),
+        // )
         .plugin(dataans::init_dataans_plugin())
         .invoke_handler(tauri::generate_handler![
             config::theme,
@@ -103,6 +118,8 @@ fn main() {
             RunEvent::Ready => {
                 let app_handle = app_handle.clone();
                 let app_toggle = crate::config::load_config_inner(&app_handle).app.app_toggle;
+                debug!(?app_toggle);
+
                 app_handle
                     .global_shortcut_manager()
                     .register(&app_toggle, move || {

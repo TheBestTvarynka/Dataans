@@ -22,6 +22,8 @@ impl DataansState {
     pub fn init(db_dir: PathBuf) -> Self {
         let db_file = db_dir.join("dataans.db");
 
+        info!(?db_file, "database file");
+
         Self {
             db: Database::open_file(db_file).expect("Database opening should not fail."),
         }
@@ -43,7 +45,17 @@ pub fn init_dataans_plugin<R: Runtime>() -> TauriPlugin<R> {
             note::search_notes,
         ])
         .setup(|app_handle| {
+            info!("Starting app setup...");
+
             let app_data = app_handle.path_resolver().app_data_dir().unwrap_or_default();
+            debug!(?app_data);
+            if !app_data.exists() {
+                match fs::create_dir(&app_data) {
+                    Ok(()) => info!("Successfully created app data directory: {:?}", app_data),
+                    Err(err) => error!("Filed to create app data directory: {:?}. Path: {:?}", err, app_data),
+                }
+            }
+
             let db_dir = app_data.join("db");
             let files_dir = app_data.join(FILES_DIR);
             let images_dir = app_data.join(IMAGED_DIR);
@@ -52,40 +64,29 @@ pub fn init_dataans_plugin<R: Runtime>() -> TauriPlugin<R> {
             if !db_dir.exists() {
                 match fs::create_dir(&db_dir) {
                     Ok(()) => info!("Successfully created database directory: {:?}", db_dir),
-                    Err(err) => error!(
-                        "Filed to create database directory: {:?}. Path: {:?}",
-                        err, db_dir
-                    ),
+                    Err(err) => error!("Filed to create database directory: {:?}. Path: {:?}", err, db_dir),
                 }
             }
 
             if !files_dir.exists() {
                 match fs::create_dir(&files_dir) {
                     Ok(()) => info!("Successfully created files directory: {:?}", files_dir),
-                    Err(err) => error!(
-                        "Filed to create files directory: {:?}. Path: {:?}",
-                        err, files_dir
-                    ),
+                    Err(err) => error!("Filed to create files directory: {:?}. Path: {:?}", err, files_dir),
                 }
             }
 
             if !images_dir.exists() {
                 match fs::create_dir(&images_dir) {
                     Ok(()) => info!("Successfully created images directory: {:?}", images_dir),
-                    Err(err) => error!(
-                        "Filed to create images directory: {:?}. Path: {:?}",
-                        err, images_dir
-                    ),
+                    Err(err) => error!("Filed to create images directory: {:?}. Path: {:?}", err, images_dir),
                 }
             }
 
+            // TODO: initialize default configs if they are not exist.
             if !configs_dir.exists() {
                 match fs::create_dir(&configs_dir) {
                     Ok(()) => info!("Successfully created configs directory: {:?}", configs_dir),
-                    Err(err) => error!(
-                        "Filed to create configs directory: {:?}. Path: {:?}",
-                        err, configs_dir
-                    ),
+                    Err(err) => error!("Filed to create configs directory: {:?}. Path: {:?}", err, configs_dir),
                 }
             }
 

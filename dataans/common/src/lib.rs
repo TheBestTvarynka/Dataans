@@ -123,7 +123,7 @@ pub struct App {
 }
 
 fn app_toggle() -> String {
-    "F1".into()
+    "F2".into()
 }
 
 /// Represents app configuration.

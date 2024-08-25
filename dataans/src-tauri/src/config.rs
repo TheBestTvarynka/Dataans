@@ -9,7 +9,7 @@ use super::CONFIGS_DIR;
 pub fn load_config_inner(app_handle: &AppHandle) -> Config {
     let configs_dir = app_handle
         .path_resolver()
-        .app_config_dir()
+        .app_data_dir()
         .unwrap_or_default()
         .join(CONFIGS_DIR);
 
@@ -42,11 +42,10 @@ pub fn config(app_handle: AppHandle) -> Config {
 pub fn theme(app_handle: AppHandle, file_path: PathBuf) -> Theme {
     let configs_dir = app_handle
         .path_resolver()
-        .app_config_dir()
+        .app_data_dir()
         .unwrap_or_default()
         .join(CONFIGS_DIR);
 
-    // TODO(@TheBestTvarynka): proper config file path detection.
     let theme_file_path = configs_dir.join(file_path);
     info!("Theme file path: {:?}", theme_file_path);
 
