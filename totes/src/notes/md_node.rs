@@ -217,7 +217,7 @@ pub fn render_md_node(node: &Node) -> HtmlElement<AnyElement> {
             let lang = code.lang.clone().unwrap_or_else(|| String::from("txt"));
             view! {
                 <div>
-                    <CodeBlock code={code.value.clone()} lang/>
+                    <CodeBlock code=code.value.clone() lang/>
                 </div>
             }
             .into_any()
@@ -258,7 +258,7 @@ fn CodeBlock(code: String, lang: String) -> impl IntoView {
             >
                 {move || highlighted_code.get()
                     .map(|inner_html| view! {
-                        <div class="code-block-wrapper" inner_html={inner_html} />
+                        <div class="code-block-wrapper" inner_html=inner_html />
                     })}
             </Suspense>
         </div>
