@@ -85,6 +85,23 @@ pub fn Spaces(
                     }
                 },
             }}
+            <div style="flex-grow: 1; align-content: end;">
+                {move || if spaces_minimized.get() {
+                    view! {
+                        <a class="icons-by-icons8" href="https://icons8.com" target="_blank">
+                            <svg width="18" height="18" viewBox="0 0 18 18">
+                                <path d="M9 0H0V18H9V0Z" fill="#1FB141"></path>
+                                <path d="M13.5 9C15.9853 9 18 6.98528 18 4.5C18 2.01472 15.9853 0 13.5 0C11.0147 0 9 2.01472 9 4.5C9 6.98528 11.0147 9 13.5 9Z" fill="#1FB141"></path>
+                                <path d="M13.5 18C15.9853 18 18 15.9853 18 13.5C18 11.0147 15.9853 9 13.5 9C11.0147 9 9 11.0147 9 13.5C9 15.9853 11.0147 18 13.5 18Z" fill="#1FB141"></path>
+                            </svg>
+                        </a>
+                    }.into_any()
+                } else {
+                    view! {
+                        <span class="icons-by-icons8">"Icons by: "<a href="https://icons8.com" target="_blank">"icons8.com"</a></span>
+                    }.into_any()
+                }}
+            </div>
         </div>
     }
 }

@@ -2,7 +2,7 @@ body {
     margin: 0;
     padding: 0;
     height: 100vh;
-    
+
     font-family: "Noto Sans", sans-serif;
     font-optical-sizing: auto;
     font-style: normal;
@@ -59,4 +59,27 @@ body {
 ::-webkit-scrollbar-thumb:hover {
     background: #555;
     cursor: crosshair;
+}
+
+.icons-by-icons8 {
+    width: 100%;
+    text-align: center;
+    display: block;
+    color: var(--space_text_color);
+    border-top: 1px solid var(--notes_border_color);
+    padding: 0.2em;
+}
+
+.icons-by-icons8 a {
+    color: inherit;
+    text-decoration: underline;
+    padding: 0 0.2em 0 0.2em;
+    border-radius: 0.2em;
+    transition: all 0.2s;
+}
+
+.icons-by-icons8 a:hover {
+    background-color: #50437f;
+    color: #dbcfbf;
+    cursor: pointer;
 }
