@@ -15,7 +15,7 @@ use time::OffsetDateTime;
 /// Name of the custom tauri plugin.
 pub const APP_PLUGIN_NAME: &str = "dataans";
 
-/// Totes app theme.
+/// Dataans app theme.
 ///
 /// The theme is just a collection of names and values. Every name
 /// corresponds to some color name in the app. And the value is an actual color value.

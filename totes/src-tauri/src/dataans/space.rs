@@ -2,10 +2,10 @@ use common::space::{DeleteSpace, OwnedSpace, UpdateSpace};
 use polodb_core::bson::doc;
 use tauri::State;
 
-use crate::totes::{TotesState, SPACES_COLLECTION_NAME};
+use crate::dataans::{DataansState, SPACES_COLLECTION_NAME};
 
 #[tauri::command]
-pub async fn list_spaces(state: State<'_, TotesState>) -> Result<Vec<OwnedSpace>, String> {
+pub async fn list_spaces(state: State<'_, DataansState>) -> Result<Vec<OwnedSpace>, String> {
     let collection = state.db.collection::<OwnedSpace>(SPACES_COLLECTION_NAME);
 
     let mut spaces = Vec::new();
@@ -17,7 +17,7 @@ pub async fn list_spaces(state: State<'_, TotesState>) -> Result<Vec<OwnedSpace>
 }
 
 #[tauri::command]
-pub fn create_space(state: State<'_, TotesState>, space_data: OwnedSpace) -> Result<(), String> {
+pub fn create_space(state: State<'_, DataansState>, space_data: OwnedSpace) -> Result<(), String> {
     let collection = state.db.collection::<OwnedSpace>(SPACES_COLLECTION_NAME);
 
     collection
@@ -28,7 +28,7 @@ pub fn create_space(state: State<'_, TotesState>, space_data: OwnedSpace) -> Res
 }
 
 #[tauri::command]
-pub fn update_space(state: State<'_, TotesState>, space_data: UpdateSpace<'static>) -> Result<(), String> {
+pub fn update_space(state: State<'_, DataansState>, space_data: UpdateSpace<'static>) -> Result<(), String> {
     let collection = state.db.collection::<OwnedSpace>(SPACES_COLLECTION_NAME);
 
     let _ = collection
@@ -49,7 +49,7 @@ pub fn update_space(state: State<'_, TotesState>, space_data: UpdateSpace<'stati
 }
 
 #[tauri::command]
-pub fn delete_space(state: State<'_, TotesState>, space_data: DeleteSpace) -> Result<(), String> {
+pub fn delete_space(state: State<'_, DataansState>, space_data: DeleteSpace) -> Result<(), String> {
     let collection = state.db.collection::<OwnedSpace>(SPACES_COLLECTION_NAME);
 
     let _ = collection

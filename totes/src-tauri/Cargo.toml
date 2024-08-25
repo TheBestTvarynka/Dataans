@@ -1,10 +1,10 @@
 [package]
-name = "totes"
+name = "dataans"
 version = "0.1.0"
 description = "t[elegram n]otes"
 authors = ["Pavlo Myroniuk <the.best.tvarynka@gmail.com>"]
 edition = "2021"
-repository = "https://github.com/TheBestTvarynka/totes"
+repository = "https://github.com/TheBestTvarynka/dataans"
 
 [build-dependencies]
 tauri-build = { version = "1", features = [] }

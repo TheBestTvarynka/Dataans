@@ -1,4 +1,4 @@
-# Totes
+# Dataans
 
 ## Technology stack
 
@@ -13,6 +13,6 @@ Thus, everything starting from the back end and up to the front end is written i
 0. Tauri Prerequisites: [https://tauri.app/v1/guides/getting-started/prerequisites](https://tauri.app/v1/guides/getting-started/prerequisites).
 1. Run:
 ```bash
-cd totes
+cd dataans
 cargo tauri dev
 ```

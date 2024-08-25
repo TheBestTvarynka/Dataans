@@ -7,8 +7,8 @@
     "withGlobalTauri": true
   },
   "package": {
-    "productName": "totes",
-    "version": "0.0.0"
+    "productName": "dataans",
+    "version": "0.1.0"
   },
   "tauri": {
     "allowlist": {
@@ -28,7 +28,7 @@
       "fs": {
         "all": true,
         "scope": [
-          "$HOME/.config/totes/*",
+          "$HOME/.config/dataans/*",
           "$APPCACHE/**",
           "$RESOURCE/**"
         ],
@@ -45,7 +45,7 @@
     },
     "windows": [
       {
-        "title": "totes",
+        "title": "dataans",
         "width": 1300,
         "height": 700,
         "x": 0,
@@ -61,7 +61,7 @@
     "bundle": {
       "active": true,
       "targets": "all",
-      "identifier": "com.tbt.totes",
+      "identifier": "com.tbt.dataans",
       "icon": [
         "icons/32x32.png",
         "icons/128x128.png",

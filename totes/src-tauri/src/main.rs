@@ -8,7 +8,7 @@ mod code_block;
 mod config;
 mod file;
 mod image;
-mod totes;
+mod dataans;
 
 use tauri::{
     AppHandle, CustomMenuItem, GlobalShortcutManager, Manager, Result, RunEvent, SystemTray, SystemTrayEvent,
@@ -85,7 +85,7 @@ fn main() {
                 .targets([LogTarget::LogDir, LogTarget::Stdout, LogTarget::Webview])
                 .build(),
         )
-        .plugin(totes::init_totes_plugin())
+        .plugin(dataans::init_dataans_plugin())
         .invoke_handler(tauri::generate_handler![
             config::theme,
             config::config,

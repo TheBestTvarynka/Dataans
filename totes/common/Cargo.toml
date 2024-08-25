@@ -3,7 +3,7 @@ name = "common"
 version = "0.1.0"
 authors = ["Pavlo Myroniuk <the.best.tvarynka@gmail.com>"]
 edition = "2021"
-repository = "https://github.com/TheBestTvarynka/totes"
+repository = "https://github.com/TheBestTvarynka/dataans"
 
 [dependencies]
 serde = { version = "1", features = ["derive"] }

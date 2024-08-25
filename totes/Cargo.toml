@@ -1,9 +1,9 @@
 [package]
-name = "totes-ui"
+name = "dataans-ui"
 version = "0.1.0"
 authors = ["Pavlo Myroniuk <the.best.tvarynka@gmail.com>"]
 edition = "2021"
-repository = "https://github.com/TheBestTvarynka/totes"
+repository = "https://github.com/TheBestTvarynka/dataans"
 
 [dependencies]
 leptos = { version = "0.6", features = ["csr"] }

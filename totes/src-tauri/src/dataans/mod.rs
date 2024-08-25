@@ -14,13 +14,13 @@ mod space;
 const SPACES_COLLECTION_NAME: &str = "spaces";
 const NOTES_COLLECTION_NAME: &str = "notes";
 
-pub struct TotesState {
+pub struct DataansState {
     db: Database,
 }
 
-impl TotesState {
+impl DataansState {
     pub fn init(db_dir: PathBuf) -> Self {
-        let db_file = db_dir.join("totes.db");
+        let db_file = db_dir.join("dataans.db");
 
         Self {
             db: Database::open_file(db_file).expect("Database opening should not fail."),
@@ -28,7 +28,7 @@ impl TotesState {
     }
 }
 
-pub fn init_totes_plugin<R: Runtime>() -> TauriPlugin<R> {
+pub fn init_dataans_plugin<R: Runtime>() -> TauriPlugin<R> {
     Builder::new(APP_PLUGIN_NAME)
         .invoke_handler(tauri::generate_handler![
             space::list_spaces,
@@ -51,9 +51,9 @@ pub fn init_totes_plugin<R: Runtime>() -> TauriPlugin<R> {
 
             if !db_dir.exists() {
                 match fs::create_dir(&db_dir) {
-                    Ok(()) => info!("Successfully created totes database directory: {:?}", db_dir),
+                    Ok(()) => info!("Successfully created database directory: {:?}", db_dir),
                     Err(err) => error!(
-                        "Filed to create totes database directory: {:?}. Path: {:?}",
+                        "Filed to create database directory: {:?}. Path: {:?}",
                         err, db_dir
                     ),
                 }
@@ -61,9 +61,9 @@ pub fn init_totes_plugin<R: Runtime>() -> TauriPlugin<R> {
 
             if !files_dir.exists() {
                 match fs::create_dir(&files_dir) {
-                    Ok(()) => info!("Successfully created totes files directory: {:?}", files_dir),
+                    Ok(()) => info!("Successfully created files directory: {:?}", files_dir),
                     Err(err) => error!(
-                        "Filed to create totes files directory: {:?}. Path: {:?}",
+                        "Filed to create files directory: {:?}. Path: {:?}",
                         err, files_dir
                     ),
                 }
@@ -71,9 +71,9 @@ pub fn init_totes_plugin<R: Runtime>() -> TauriPlugin<R> {
 
             if !images_dir.exists() {
                 match fs::create_dir(&images_dir) {
-                    Ok(()) => info!("Successfully created totes images directory: {:?}", images_dir),
+                    Ok(()) => info!("Successfully created images directory: {:?}", images_dir),
                     Err(err) => error!(
-                        "Filed to create totes images directory: {:?}. Path: {:?}",
+                        "Filed to create images directory: {:?}. Path: {:?}",
                         err, images_dir
                     ),
                 }
@@ -81,15 +81,15 @@ pub fn init_totes_plugin<R: Runtime>() -> TauriPlugin<R> {
 
             if !configs_dir.exists() {
                 match fs::create_dir(&configs_dir) {
-                    Ok(()) => info!("Successfully created totes configs directory: {:?}", configs_dir),
+                    Ok(()) => info!("Successfully created configs directory: {:?}", configs_dir),
                     Err(err) => error!(
-                        "Filed to create totes configs directory: {:?}. Path: {:?}",
+                        "Filed to create configs directory: {:?}. Path: {:?}",
                         err, configs_dir
                     ),
                 }
             }
 
-            app_handle.manage(TotesState::init(db_dir));
+            app_handle.manage(DataansState::init(db_dir));
             Ok(())
         })
         .build()
