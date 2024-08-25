@@ -13,7 +13,7 @@ use serde::{Deserialize, Serialize};
 use time::OffsetDateTime;
 
 /// Name of the custom tauri plugin.
-pub const TOTES_PLUGIN_NAME: &str = "totes";
+pub const APP_PLUGIN_NAME: &str = "dataans";
 
 /// Totes app theme.
 ///

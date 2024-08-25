@@ -1,7 +1,7 @@
 use std::fs;
 use std::path::PathBuf;
 
-use common::TOTES_PLUGIN_NAME;
+use common::APP_PLUGIN_NAME;
 use polodb_core::Database;
 use tauri::plugin::{Builder, TauriPlugin};
 use tauri::{Manager, Runtime};
@@ -29,7 +29,7 @@ impl TotesState {
 }
 
 pub fn init_totes_plugin<R: Runtime>() -> TauriPlugin<R> {
-    Builder::new(TOTES_PLUGIN_NAME)
+    Builder::new(APP_PLUGIN_NAME)
         .invoke_handler(tauri::generate_handler![
             space::list_spaces,
             space::create_space,
