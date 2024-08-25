@@ -26,6 +26,7 @@ const WINDOW_QUIT_TITLE: &str = "Quit";
 const IMAGED_DIR: &str = "images";
 const FILES_DIR: &str = "files";
 const CONFIGS_DIR: &str = "configs";
+const LOGS_DIR: &str = "logs";
 
 fn toggle_app_visibility(app: &AppHandle) -> Result<()> {
     if let Some(window) = app.get_window(MAIN_WINDOW_NAME) {
@@ -48,17 +49,49 @@ fn toggle_app_visibility(app: &AppHandle) -> Result<()> {
 }
 
 fn init_tracing() {
-    use std::io;
+    use std::fs::OpenOptions;
+    use std::{fs, io};
 
     use tracing_subscriber::prelude::*;
     use tracing_subscriber::EnvFilter;
 
-    let fmt_layer = tracing_subscriber::fmt::layer().pretty().with_writer(io::stdout);
+    // STDOUT layer
+    let stdout_layer = tracing_subscriber::fmt::layer().pretty().with_writer(io::stdout);
 
-    tracing_subscriber::registry()
-        .with(fmt_layer)
-        .with(EnvFilter::from_default_env())
-        .init();
+    let registry = tracing_subscriber::registry().with(stdout_layer);
+
+    // `dataans.log` layer
+    let context = tauri::generate_context!();
+    let app_data = tauri::api::path::app_data_dir(context.config()).expect("APP_DATA directory should be defined.");
+
+    if !app_data.exists() {
+        match fs::create_dir(&app_data) {
+            Ok(()) => println!("Successfully created app data directory: {:?}", app_data),
+            Err(err) => eprintln!("Filed to create app data directory: {:?}. Path: {:?}", err, app_data),
+        }
+    }
+    let logs_dir = app_data.join(LOGS_DIR);
+    if !logs_dir.exists() {
+        match fs::create_dir(&logs_dir) {
+            Ok(()) => println!("Successfully created logs directory: {:?}", logs_dir),
+            Err(err) => eprintln!("Filed to create logs directory: {:?}. Path: {:?}", err, logs_dir),
+        }
+    }
+
+    let log_file = logs_dir.join("dataans.log");
+    match OpenOptions::new().create(true).append(true).open(&log_file) {
+        Ok(log_file) => {
+            let log_file_layer = tracing_subscriber::fmt::layer().pretty().with_writer(log_file);
+
+            registry.with(log_file_layer).with(EnvFilter::from_default_env()).init();
+            return;
+        }
+        Err(e) => {
+            eprintln!("Couldn't open log file: {e}. Path: {:?}.", log_file);
+        }
+    };
+
+    registry.with(EnvFilter::from_default_env()).init();
 }
 
 fn main() {
