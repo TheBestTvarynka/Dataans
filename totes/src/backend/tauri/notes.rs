@@ -4,7 +4,7 @@ use common::TOTES_PLUGIN_NAME;
 use serde::{Deserialize, Serialize};
 use serde_wasm_bindgen::{from_value, to_value};
 
-use crate::backend::invoke;
+use super::invoke;
 
 #[derive(Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]

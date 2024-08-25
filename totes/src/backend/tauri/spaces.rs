@@ -3,7 +3,7 @@ use common::TOTES_PLUGIN_NAME;
 use serde::{Deserialize, Serialize};
 use serde_wasm_bindgen::{from_value, to_value};
 
-use crate::backend::{invoke, EmptyArgs};
+use super::{invoke, EmptyArgs};
 
 pub async fn list_spaces() -> Result<Vec<OwnedSpace>, String> {
     let args = to_value(&EmptyArgs {}).expect("EmptyArgs serialization to JsValue should not fail.");
