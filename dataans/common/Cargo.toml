@@ -1,0 +1,12 @@
+[package]
+name = "common"
+version = "0.1.0"
+authors = ["Pavlo Myroniuk <the.best.tvarynka@gmail.com>"]
+edition = "2021"
+repository = "https://github.com/TheBestTvarynka/dataans"
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+time = { version = "0.3.36", default-features = false, features = ["serde"] }
+uuid = { version = "1.6.0", features = ["serde"] }
+bson = "2.10"
