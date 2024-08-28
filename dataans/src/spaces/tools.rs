@@ -52,7 +52,7 @@ pub fn Tools(
     };
 
     view! {
-        <div class={class}>
+        <div class=class>
             <Show when=move || !spaces_minimized.get()>
                 <button class="tool" title="Add a new space" on:click=move |_| set_show_modal.set(true)>
                     <img alt="add-space" src="/public/icons/add-space-1.png" />

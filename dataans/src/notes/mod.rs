@@ -124,7 +124,7 @@ pub fn Notes(config: Config) -> impl IntoView {
                         });
                         focus_element(SEARCH_NOTE_INPUT_ID);
                     }
-                    config={config.clone()}
+                    config=config.clone()
                 />
             </Show>
             <div class="notes-inner">

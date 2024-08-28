@@ -153,7 +153,7 @@ pub fn Note(
                             </button>
                             <Attachment id=note_id.to_string() files=updated_files set_files=move |files| set_updated_files.set(files) />
                         </div>
-                        {move || view! { <Files files=updated_files.get() remove_file={remove_file_locally} edit_mode=true /> }}
+                        {move || view! { <Files files=updated_files.get() remove_file=remove_file_locally edit_mode=true /> }}
                     </div>
                 }.into_any()
             } else {

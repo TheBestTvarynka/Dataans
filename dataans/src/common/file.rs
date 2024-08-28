@@ -47,7 +47,7 @@ pub fn Files(files: Vec<File>, edit_mode: bool, #[prop(into)] remove_file: Callb
         <div class="files-container">
             {move || files
                 .iter()
-                .map(|file| view! { <File file={file.clone()} remove_file edit_mode /> })
+                .map(|file| view! { <File file=file.clone() remove_file edit_mode /> })
                 .collect_view()
             }
         </div>

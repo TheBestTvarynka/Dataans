@@ -61,7 +61,7 @@ pub fn SpacesList(
         <div class="spaces-scroll-area">
             {move || spaces.get().into_iter().map(|space| {
                 let selected = selected_space.get().as_ref().map(|selected| selected.id == space.id).unwrap_or_default();
-                view! { <Space space set_selected_space selected minimized={spaces_minimized} /> }
+                view! { <Space space set_selected_space selected minimized=spaces_minimized /> }
             }).collect_view()}
         </div>
     }
