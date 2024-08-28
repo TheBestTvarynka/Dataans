@@ -13,6 +13,7 @@
     padding: 0.3em;
     font-size: var(--spaces_font_size);
     transition: all 0.2s;
+    align-items: center;
 }
 
 .simple-space {
@@ -36,8 +37,8 @@
 }
 
 .space .space-title {
-    align-self: center;
-    width: 100%;
+    text-overflow: ellipsis;
+    white-space: nowrap;
     text-overflow: ellipsis;
 }
 
