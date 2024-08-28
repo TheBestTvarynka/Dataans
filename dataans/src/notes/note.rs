@@ -85,7 +85,11 @@ pub fn Note(
     };
 
     view! {
-        <div class="note-container" id=note.id.to_string() tabindex="-1">
+        <div
+            class=move || if edit_mode.get() { "note-container note-container-edit-mode" } else { "note-container"}
+            id=note.id.to_string()
+            tabindex="-1"
+        >
             <div class="note-meta">
                 <div class="center-span">
                     <span class="note-time">{format_date(note.created_at.as_ref())}</span>
