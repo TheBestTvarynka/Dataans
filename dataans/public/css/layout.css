@@ -67,7 +67,7 @@ body {
     display: block;
     color: var(--space_text_color);
     border-top: 1px solid var(--notes_border_color);
-    padding: 0.2em;
+    padding-top: 0.4em;
 }
 
 .icons-by-icons8 a {
