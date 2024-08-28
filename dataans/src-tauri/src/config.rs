@@ -33,11 +33,13 @@ pub fn load_config_inner(app_handle: &AppHandle) -> Config {
     })
 }
 
+#[instrument(ret, skip(app_handle))]
 #[tauri::command]
 pub fn config(app_handle: AppHandle) -> Config {
     load_config_inner(&app_handle)
 }
 
+#[instrument(level = "trace", ret, skip(app_handle))]
 #[tauri::command]
 pub fn theme(app_handle: AppHandle, file_path: PathBuf) -> Theme {
     let configs_dir = app_handle
@@ -66,16 +68,14 @@ pub fn theme(app_handle: AppHandle, file_path: PathBuf) -> Theme {
     })
 }
 
+#[instrument]
 #[tauri::command]
 pub fn reveal(path: PathBuf) {
-    info!("Revealing the file: {:?}", path);
-
-    info!("{:?}", opener::reveal(&path));
+    info!(reveal_note_file_result = ?opener::reveal(&path));
 }
 
+#[instrument]
 #[tauri::command]
 pub fn open(path: PathBuf) {
-    info!("Opening the file: {:?}", path);
-
-    info!("{:?}", opener::open(&path));
+    info!(open_note_file_result = ?opener::open(&path));
 }

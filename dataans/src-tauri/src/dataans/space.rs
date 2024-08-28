@@ -4,6 +4,7 @@ use tauri::State;
 
 use crate::dataans::{DataansState, SPACES_COLLECTION_NAME};
 
+#[instrument(level = "trace", ret, skip(state))]
 #[tauri::command]
 pub async fn list_spaces(state: State<'_, DataansState>) -> Result<Vec<OwnedSpace>, String> {
     let collection = state.db.collection::<OwnedSpace>(SPACES_COLLECTION_NAME);
@@ -16,6 +17,7 @@ pub async fn list_spaces(state: State<'_, DataansState>) -> Result<Vec<OwnedSpac
     Ok(spaces)
 }
 
+#[instrument(level = "trace", ret, skip(state))]
 #[tauri::command]
 pub fn create_space(state: State<'_, DataansState>, space_data: OwnedSpace) -> Result<(), String> {
     let collection = state.db.collection::<OwnedSpace>(SPACES_COLLECTION_NAME);
@@ -27,6 +29,7 @@ pub fn create_space(state: State<'_, DataansState>, space_data: OwnedSpace) -> R
     Ok(())
 }
 
+#[instrument(level = "trace", ret, skip(state))]
 #[tauri::command]
 pub fn update_space(state: State<'_, DataansState>, space_data: UpdateSpace<'static>) -> Result<(), String> {
     let collection = state.db.collection::<OwnedSpace>(SPACES_COLLECTION_NAME);
@@ -48,6 +51,7 @@ pub fn update_space(state: State<'_, DataansState>, space_data: UpdateSpace<'sta
     Ok(())
 }
 
+#[instrument(level = "trace", ret, skip(state))]
 #[tauri::command]
 pub fn delete_space(state: State<'_, DataansState>, space_data: DeleteSpace) -> Result<(), String> {
     let collection = state.db.collection::<OwnedSpace>(SPACES_COLLECTION_NAME);

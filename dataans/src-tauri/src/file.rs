@@ -6,6 +6,7 @@ use uuid::Uuid;
 
 use crate::FILES_DIR;
 
+#[instrument(ret, skip(app_handle, data))]
 #[tauri::command]
 pub fn upload_file(app_handle: AppHandle, id: Uuid, name: String, data: Vec<u8>) -> PathBuf {
     let file_name = format!("{}_{}", id, name);
@@ -22,6 +23,7 @@ pub fn upload_file(app_handle: AppHandle, id: Uuid, name: String, data: Vec<u8>)
     file_path
 }
 
+#[instrument]
 #[tauri::command]
 pub fn remove_file(path: PathBuf) {
     fs::remove_file(path).expect("File removing should not fail")
