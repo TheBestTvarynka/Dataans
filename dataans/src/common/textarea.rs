@@ -118,7 +118,7 @@ pub fn TextArea(
         #[cfg(not(windows_is_host_os))]
         {
             let lines_amount = text.get().split('\n').count();
-            format!("height: {}em", lines_amount.max(1))
+            format!("height: {:.2?}em", lines_amount.max(1) as f32 * 1.3)
         }
     };
 

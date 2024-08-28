@@ -1,4 +1,3 @@
-
 .resizable-textarea {
     margin: 0;
     width: inherit;
@@ -18,4 +17,5 @@
     border: none;
     outline: none;
     resize: vertical;
+    line-height: 1.3;
 }
