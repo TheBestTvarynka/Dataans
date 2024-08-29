@@ -7,6 +7,7 @@ use uuid::Uuid;
 
 use crate::IMAGED_DIR;
 
+#[instrument(ret, skip(app_handle))]
 #[tauri::command]
 pub fn gen_random_avatar(app_handle: AppHandle) -> PathBuf {
     let avatar = avatar_generator::generate::avatar();
@@ -25,6 +26,7 @@ pub fn gen_random_avatar(app_handle: AppHandle) -> PathBuf {
     avatar_path
 }
 
+#[instrument(ret, skip(app_handle))]
 #[tauri::command]
 pub fn handle_clipboard_image(app_handle: AppHandle) -> PathBuf {
     let mut clipboard = Clipboard::new().expect("Initialized Clipboard object");

@@ -108,6 +108,20 @@ pub fn TextArea(
         }
     };
 
+    let style = move || {
+        #[cfg(windows_is_host_os)]
+        {
+            // WARN: This CSS property is experimental and supported only in WebView2 which is used on Windows. More info:
+            // https://developer.mozilla.org/en-US/docs/Web/CSS/field-sizing#browser_compatibility
+            "field-sizing: content".to_owned()
+        }
+        #[cfg(not(windows_is_host_os))]
+        {
+            let lines_amount = text.get().split('\n').count();
+            format!("height: {:.2?}em", lines_amount.max(1) as f32 * 1.3)
+        }
+    };
+
     view! {
         <div class="resizable-textarea">
             <textarea
@@ -115,9 +129,7 @@ pub fn TextArea(
                 type="text"
                 placeholder="Type a note..."
                 class="resizable-textarea-textarea"
-                // WARN: This CSS property is experimental.
-                // https://developer.mozilla.org/en-US/docs/Web/CSS/field-sizing#browser_compatibility
-                style="field-sizing: content"
+                style=style
                 on:input=move |ev| set_text.call(event_target_value(&ev))
                 on:keydown=move |ev| {
                     key_down.call(ev.clone());

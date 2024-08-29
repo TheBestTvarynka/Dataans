@@ -7,6 +7,7 @@ use tauri::State;
 
 use crate::dataans::{DataansState, NOTES_COLLECTION_NAME, SPACES_COLLECTION_NAME};
 
+#[instrument(ret, skip(state))]
 #[tauri::command]
 pub fn list_notes(state: State<'_, DataansState>, space_id: SpaceId) -> Result<Vec<Note>, String> {
     let collection = state.db.collection::<Note<'static>>(NOTES_COLLECTION_NAME);
@@ -24,6 +25,7 @@ pub fn list_notes(state: State<'_, DataansState>, space_id: SpaceId) -> Result<V
     Ok(notes)
 }
 
+#[instrument(ret, skip(state))]
 #[tauri::command]
 pub fn create_note(state: State<'_, DataansState>, note: Note<'static>) -> Result<(), String> {
     let collection = state.db.collection::<Note<'static>>(NOTES_COLLECTION_NAME);
@@ -33,6 +35,7 @@ pub fn create_note(state: State<'_, DataansState>, note: Note<'static>) -> Resul
     Ok(())
 }
 
+#[instrument(ret, skip(state))]
 #[tauri::command]
 pub fn update_note(state: State<'_, DataansState>, note_data: UpdateNote<'_>) -> Result<(), String> {
     let collection = state.db.collection::<Note<'static>>(NOTES_COLLECTION_NAME);
@@ -54,6 +57,7 @@ pub fn update_note(state: State<'_, DataansState>, note_data: UpdateNote<'_>) ->
     Ok(())
 }
 
+#[instrument(ret, skip(state))]
 #[tauri::command]
 pub fn delete_note(state: State<'_, DataansState>, note_id: NoteId) -> Result<(), String> {
     let collection = state.db.collection::<Note<'static>>(NOTES_COLLECTION_NAME);
@@ -67,6 +71,7 @@ pub fn delete_note(state: State<'_, DataansState>, note_id: NoteId) -> Result<()
     Ok(())
 }
 
+#[instrument(level = "trace", ret, skip(state))]
 #[tauri::command]
 pub fn search_notes_in_space(
     state: State<'_, DataansState>,
@@ -114,6 +119,7 @@ pub fn search_notes_in_space(
     Ok(notes)
 }
 
+#[instrument(level = "trace", ret, skip(state))]
 #[tauri::command]
 pub fn search_notes(state: State<'_, DataansState>, query: String) -> Result<Vec<NoteFullOwned>, String> {
     let collection = state.db.collection::<Note<'static>>(NOTES_COLLECTION_NAME);

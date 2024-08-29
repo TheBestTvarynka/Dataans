@@ -11,6 +11,11 @@
     font-family: "Noto Sans", system-ui;
 }
 
+.note-container-edit-mode {
+    width: 100%;
+    box-sizing: border-box;
+}
+
 .note-container:focus {
     border: 2px solid var(--note-focus-border-color);
 }

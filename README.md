@@ -2,20 +2,18 @@
 
 Table of content:
 
-- [Totes](#totes)
+- [Dataans](#dataans)
   - [Motivation](#motivation)
   - [App philosophy](#app-philosophy)
   - [Installation](#installation)
   - [Contributing](#contributing)
   - [Meta](#meta)
 
-# Totes
+# Dataans
 
-> _Why **totes**?_
+> _Why **dataans**?_
 
-Teleram notes -> T[elegram n]otes -> Totes. Get it?
-
-Get it? :wink: :grin:
+Dataans - Data answer. The data is answer to all your questions :)
 
 ![](https://totes.qkation.com/imgs/2024-08-03_12-29.png)
 

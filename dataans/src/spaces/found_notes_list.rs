@@ -90,14 +90,14 @@ pub fn FoundNotesList(
                     view! {
                         <div class="note-search-options">
                             <span class="note-search-label">"in:"</span>
-                            <Space space set_selected_space=|_| {} selected=true minimized={spaces_minimized} />
+                            <Space space set_selected_space=|_| {} selected=true minimized=spaces_minimized />
                         </div>
                     }.into_view()
                 } else {
                     view! {
                         <div class="note-search-options">
                             <span class="note-search-label">"Search notes in:"</span>
-                            <Space space set_selected_space=|_| {} selected=true minimized={spaces_minimized} />
+                            <Space space set_selected_space=|_| {} selected=true minimized=spaces_minimized />
                         </div>
                     }.into_view()
                 }
