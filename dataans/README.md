@@ -8,6 +8,16 @@
 
 Thus, everything starting from the back end and up to the front end is written in Rust.
 
+## Installation
+
+You can download the app installer here: https://github.com/TheBestTvarynka/Dataans/releases. Or alternatively you can build the app from source code:
+
+```bash
+git clone https://github.com/TheBestTvarynka/Dataans.git
+cd Dataans/dataans
+cargo tauri build
+```
+
 ## Development
 
 0. Tauri Prerequisites: [https://tauri.app/v1/guides/getting-started/prerequisites](https://tauri.app/v1/guides/getting-started/prerequisites).
