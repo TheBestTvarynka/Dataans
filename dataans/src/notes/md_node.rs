@@ -66,11 +66,8 @@ pub fn render_md_node(node: &Node) -> HtmlElement<AnyElement> {
             let code_value = code.value.clone();
             view! {
                 <span class="incline-code" on:click=move |_| {
-                    if let Some(clipboard) = window().navigator().clipboard() {
-                        let _ = clipboard.write_text(&code_value);
-                    } else {
-                        error!("clipboard is not defined.")
-                    }
+                    let clipboard = window().navigator().clipboard();
+                    let _ = clipboard.write_text(&code_value);
                 }>{&code.value}</span>
             }
             .into_any()
@@ -246,11 +243,8 @@ fn CodeBlock(code: String, lang: String) -> impl IntoView {
             <div class="note-code-block-meta">
                 <i>{lang}</i>
                 <button on:click=move |_| {
-                    if let Some(clipboard) = window().navigator().clipboard() {
-                        let _ = clipboard.write_text(&code_value);
-                    } else {
-                        error!("clipboard is not defined.")
-                    }
+                    let clipboard = window().navigator().clipboard();
+                    let _ = clipboard.write_text(&code_value);
                 }>"Copy"</button>
             </div>
             <Suspense
