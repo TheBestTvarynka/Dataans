@@ -1,3 +1,4 @@
+mod app_info;
 mod found_notes_list;
 mod space;
 pub mod space_form;
@@ -10,6 +11,7 @@ use common::Config;
 use leptos::*;
 use leptos_hotkeys::{use_hotkeys, use_hotkeys_scoped};
 
+use self::app_info::AppInfo;
 use self::found_notes_list::FoundNotesList;
 use self::space::Space;
 use self::spaces_list::SpacesList;
@@ -101,6 +103,7 @@ pub fn Spaces(
                         <span class="icons-by-icons8">"Icons by: "<a href="https://icons8.com" target="_blank">"icons8.com"</a></span>
                     }.into_any()
                 }}
+                <AppInfo />
             </div>
         </div>
     }
