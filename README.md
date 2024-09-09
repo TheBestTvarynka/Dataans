@@ -29,7 +29,7 @@ Yes, you are right. This is why the second most important feature is the **_drop
 
 **_Cross platform_**. This app supports **Windows** and **Linux**. It can be compiled on macOS too, but it wasn't tested on it. So, you can try to use it on macOS but you can face more bugs.
 
-There are many similar existing apps but all of them have one or more major flaws. You can read more about motivation and features on the app's official website: https://totes.qkation.com.
+There are many similar existing apps but all of them have one or more major flaws. You can read more about motivation and features on the app's official website: https://dataans.com.
 
 ## App philosophy
 
@@ -45,17 +45,11 @@ TL;DR. This is a citation from the mentioned article above:
 
 :thinking: What does it mean for the app? It means that the implementation is always _straightforward_, only _common use cases_ are covered, only _wanted and valuable features_ are implemented.
 
-If you lack any functionality or you face a bug, then report it ([issue](https://github.com/TheBestTvarynka/totes/issues/new) or [discussion](https://github.com/TheBestTvarynka/totes/discussions)). Any reasonable/valuable bugs/features will be fixed/implemented!
+If you lack any functionality or you face a bug, then report it ([issue](https://github.com/TheBestTvarynka/Dataans/issues/new) or [discussion](https://github.com/TheBestTvarynka/Dataans/discussions)). Any reasonable/valuable bugs/features will be fixed/implemented!
 
 ## Installation
 
-You can download the app installer here: https://github.com/TheBestTvarynka/totes/releases. Or alternatively you can build the app from source code:
-
-```bash
-git clone https://github.com/TheBestTvarynka/totes.git
-cd totes/totes
-cargo tauri build
-```
+You can download the app installer here: https://github.com/TheBestTvarynka/Dataans/releases. Or alternatively you can build the app from source code: 
 
 ## Contributing
 
@@ -63,10 +57,10 @@ Feel free to contribute. Contributions are very welcome :blush:.
 
 If you want to implement a missing/wanting feature or fix a bug, then create an issue/discussion and we'll guide you. We'll help you set up the environment, explain needed parts of the code, discuss implementation, and review the code.
 
-If you don't know what to implement, then you can browse [existing issues](https://github.com/TheBestTvarynka/totes/issues?q=sort%3Aupdated-desc+is%3Aissue+is%3Aopen) or ask for help in [the discussions](https://github.com/TheBestTvarynka/totes/discussions). We always have something to do :stuck_out_tongue_winking_eye:.
+If you don't know what to implement, then you can browse [existing issues](https://github.com/TheBestTvarynka/Dataans/issues?q=sort%3Aupdated-desc+is%3Aissue+is%3Aopen) or ask for help in [the discussions](https://github.com/TheBestTvarynka/Dataans/discussions). We always have something to do :stuck_out_tongue_winking_eye:.
 
 ## Meta
 
 [Pavlo Myroniuk](https://github.com/TheBestTvarynka) - [the.best.tvarynka@gmail.com](mailto:the.best.tvarynka@gmail.com).
 
-Distributed under the [MIT](https://github.com/TheBestTvarynka/crypto-helper/blob/main/LICENSE) license.
+Distributed under the [MIT](https://github.com/TheBestTvarynka/Dataans/blob/main/LICENSE) license.

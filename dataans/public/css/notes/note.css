@@ -49,17 +49,17 @@
     color: var(--note_link_color);
 }
 
-.note .incline-code {
+.incline-code {
     font-family: "JetBrains Mono", monospace;
     cursor: pointer;
     background-color: #2d4042;
 }
 
-.note .incline-code:hover {
+.incline-code:hover {
     background-color: var(--note-inline-background-color);
 }
 
-.note .incline-code:active {
+.incline-code:active {
     background-color: var(--note_link_color);
 }
 

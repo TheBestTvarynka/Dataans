@@ -68,6 +68,45 @@ pub fn theme(app_handle: AppHandle, file_path: PathBuf) -> Theme {
     })
 }
 
+#[tauri::command]
+pub fn open_config_file(app_handle: AppHandle) {
+    let configs_dir = app_handle
+        .path_resolver()
+        .app_data_dir()
+        .unwrap_or_default()
+        .join(CONFIGS_DIR);
+
+    let config_file_path = configs_dir.join("config.toml");
+
+    info!(open_config_file_result = ?opener::open(&config_file_path));
+}
+
+#[tauri::command]
+pub fn open_theme_file(app_handle: AppHandle, file_path: PathBuf) {
+    let configs_dir = app_handle
+        .path_resolver()
+        .app_data_dir()
+        .unwrap_or_default()
+        .join(CONFIGS_DIR);
+
+    let theme_file_path = configs_dir.join(file_path);
+
+    info!(open_config_file_result = ?opener::reveal(&theme_file_path));
+}
+
+#[tauri::command]
+pub fn open_config_file_folder(app_handle: AppHandle) {
+    let configs_dir = app_handle
+        .path_resolver()
+        .app_data_dir()
+        .unwrap_or_default()
+        .join(CONFIGS_DIR);
+
+    let config_file_path = configs_dir.join("config.toml");
+
+    info!(open_config_file_folder_result = ?opener::reveal(&config_file_path));
+}
+
 #[instrument]
 #[tauri::command]
 pub fn reveal(path: PathBuf) {
