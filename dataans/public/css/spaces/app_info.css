@@ -9,6 +9,7 @@
     border-radius: 0.5em;
     color: var(--note_text_color);
     background-color: var(--note_background_color);
+    position: relative;
 }
 
 .app-into-window a {
@@ -29,4 +30,10 @@
     width: 100%;
     text-align: center;
     font-size: 1.3em;
+}
+
+.app-window-close-button {
+    top: 0.2em;
+    right: 0.2em;
+    position: absolute;
 }
