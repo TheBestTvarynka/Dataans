@@ -37,3 +37,17 @@
     right: 0.2em;
     position: absolute;
 }
+
+.app-into-window table, th, td {
+    border: 1px solid #dbcfbf;
+    border-collapse: collapse;
+}
+
+.app-into-window table {
+    font-size: 0.9em;
+    width: 100%;
+}
+
+.app-into-window td, th {
+    padding: 0.15em;
+}

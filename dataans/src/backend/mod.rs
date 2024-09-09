@@ -45,7 +45,7 @@ struct ThemeFilepath<'path> {
 }
 
 pub async fn load_theme(file_path: &Path) -> Theme {
-    let args = to_value(&ThemeFilepath { file_path }).expect("EmptyArgs serialization to JsValue should not fail.");
+    let args = to_value(&ThemeFilepath { file_path }).expect("ThemeFilepath serialization to JsValue should not fail.");
     let theme_value = invoke("theme", args).await;
 
     from_value(theme_value).expect("Theme object deserialization from JsValue should not fail.")
@@ -53,6 +53,21 @@ pub async fn load_theme(file_path: &Path) -> Theme {
 
 #[derive(Serialize)]
 struct EmptyArgs {}
+
+pub async fn open_config_file() {
+    let args = to_value(&EmptyArgs { }).expect("EmptyArgs serialization to JsValue should not fail.");
+    let _ = invoke("open_config_file", args).await;
+}
+
+pub async fn open_theme_file(file_path: &Path) {
+    let args = to_value(&ThemeFilepath { file_path }).expect("ThemeFilepath serialization to JsValue should not fail.");
+    let _ = invoke("open_theme_file", args).await;
+}
+
+pub async fn open_config_file_folder() {
+    let args = to_value(&EmptyArgs { }).expect("EmptyArgs serialization to JsValue should not fail.");
+    let _ = invoke("open_config_file_folder", args).await;
+}
 
 pub async fn load_config() -> Config {
     let args = to_value(&EmptyArgs {}).expect("EmptyArgs serialization to JsValue should not fail.");
