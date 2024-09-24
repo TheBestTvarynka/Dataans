@@ -28,6 +28,7 @@ const WINDOW_QUIT_TITLE: &str = "Quit";
 const IMAGED_DIR: &str = "images";
 const FILES_DIR: &str = "files";
 const CONFIGS_DIR: &str = "configs";
+const CONFIG_FILE_NAME: &str = "config.toml";
 const LOGS_DIR: &str = "logs";
 
 fn toggle_app_visibility(app: &AppHandle) -> Result<()> {
