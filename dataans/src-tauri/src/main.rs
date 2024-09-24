@@ -15,6 +15,8 @@ use tauri::{
     SystemTrayMenu, SystemTrayMenuItem,
 };
 
+const LOGGING_ENV_VAR_NAME: &str = "DATAANS_LOG";
+
 const MAIN_WINDOW_NAME: &str = "main";
 
 const WINDOW_VISIBILITY_MENU_ITEM_ID: &str = "visibility";
@@ -82,16 +84,13 @@ fn init_tracing() {
     match OpenOptions::new().create(true).append(true).open(&log_file) {
         Ok(log_file) => {
             let log_file_layer = tracing_subscriber::fmt::layer().pretty().with_writer(log_file);
-
             registry.with(log_file_layer).with(EnvFilter::from_default_env()).init();
-            return;
         }
         Err(e) => {
             eprintln!("Couldn't open log file: {e}. Path: {:?}.", log_file);
+            registry.with(EnvFilter::from_env(LOGGING_ENV_VAR_NAME)).init();
         }
-    };
-
-    registry.with(EnvFilter::from_default_env()).init();
+    }
 }
 
 fn main() {
@@ -128,11 +127,6 @@ fn main() {
             }
             _ => {}
         })
-        // .plugin(
-        //     tauri_plugin_log::Builder::default()
-        //         .targets([LogTarget::LogDir, LogTarget::Stdout, LogTarget::Webview])
-        //         .build(),
-        // )
         .plugin(dataans::init_dataans_plugin())
         .invoke_handler(tauri::generate_handler![
             config::theme,

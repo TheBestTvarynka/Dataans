@@ -52,7 +52,7 @@
         "y": 0,
         "closable": false,
         "maximized": true,
-        "alwaysOnTop": true
+        "alwaysOnTop": false
       }
     ],
     "security": {
