@@ -6,7 +6,7 @@ use polodb_core::Database;
 use tauri::plugin::{Builder, TauriPlugin};
 use tauri::{Manager, Runtime};
 
-use crate::{CONFIGS_DIR, FILES_DIR, IMAGED_DIR};
+use crate::{CONFIGS_DIR, CONFIG_FILE_NAME, FILES_DIR, IMAGED_DIR};
 
 mod note;
 mod space;
@@ -47,12 +47,13 @@ pub fn init_dataans_plugin<R: Runtime>() -> TauriPlugin<R> {
         .setup(|app_handle| {
             info!("Starting app setup...");
 
-            let app_data = app_handle.path_resolver().app_data_dir().unwrap_or_default();
+            let path_resolver = app_handle.path_resolver();
+            let app_data = path_resolver.app_data_dir().unwrap_or_default();
             debug!(?app_data);
             if !app_data.exists() {
                 match fs::create_dir(&app_data) {
-                    Ok(()) => info!("Successfully created app data directory: {:?}", app_data),
-                    Err(err) => error!("Filed to create app data directory: {:?}. Path: {:?}", err, app_data),
+                    Ok(()) => info!(?app_data, "Successfully created app data directory"),
+                    Err(err) => error!(?err, ?app_data, "Filed to create app data directory"),
                 }
             }
 
@@ -63,34 +64,75 @@ pub fn init_dataans_plugin<R: Runtime>() -> TauriPlugin<R> {
 
             if !db_dir.exists() {
                 match fs::create_dir(&db_dir) {
-                    Ok(()) => info!("Successfully created database directory: {:?}", db_dir),
-                    Err(err) => error!("Filed to create database directory: {:?}. Path: {:?}", err, db_dir),
+                    Ok(()) => info!(?db_dir, "Successfully created database directory"),
+                    Err(err) => error!(?err, ?db_dir, "Filed to create database directory"),
                 }
             }
 
             if !files_dir.exists() {
                 match fs::create_dir(&files_dir) {
-                    Ok(()) => info!("Successfully created files directory: {:?}", files_dir),
-                    Err(err) => error!("Filed to create files directory: {:?}. Path: {:?}", err, files_dir),
+                    Ok(()) => info!(?files_dir, "Successfully created files directory"),
+                    Err(err) => error!(?err, ?files_dir, "Filed to create files directory"),
                 }
             }
 
             if !images_dir.exists() {
                 match fs::create_dir(&images_dir) {
-                    Ok(()) => info!("Successfully created images directory: {:?}", images_dir),
-                    Err(err) => error!("Filed to create images directory: {:?}. Path: {:?}", err, images_dir),
+                    Ok(()) => info!(?images_dir, "Successfully created images directory"),
+                    Err(err) => error!(?err, ?images_dir, "Filed to create images directory"),
                 }
             }
 
-            // TODO: initialize default configs if they are not exist.
             if !configs_dir.exists() {
                 match fs::create_dir(&configs_dir) {
-                    Ok(()) => info!("Successfully created configs directory: {:?}", configs_dir),
-                    Err(err) => error!("Filed to create configs directory: {:?}. Path: {:?}", err, configs_dir),
+                    Ok(()) => info!(?configs_dir, "Successfully created configs directory"),
+                    Err(err) => error!(?err, ?configs_dir, "Filed to create configs directory"),
+                }
+            }
+
+            let config_file = configs_dir.join(CONFIG_FILE_NAME);
+            if !config_file.exists() {
+                if let Some(default_config) = path_resolver.resolve_resource("resources/configs/config.toml") {
+                    if let Err(err) = fs::copy(&default_config, &config_file) {
+                        error!(
+                            ?err,
+                            ?default_config,
+                            ?config_file,
+                            "Cannot create the default config file"
+                        );
+                    } else {
+                        info!(?config_file, "Successfully created default config file");
+                    }
+                } else {
+                    error!(
+                        "Cannot to resolve the default config file. You need to fix it manually or reinstall the app"
+                    );
+                }
+            }
+
+            let config = crate::config::read_config(config_file);
+            let theme_file = configs_dir.join(&config.appearance.theme);
+            if !theme_file.exists() {
+                if let Some(default_theme) = path_resolver.resolve_resource("resources/configs/theme_dark.toml") {
+                    if let Err(err) = fs::copy(&default_theme, &theme_file) {
+                        error!(
+                            ?err,
+                            ?default_theme,
+                            ?theme_file,
+                            "Cannot create the default theme file"
+                        );
+                    } else {
+                        info!(?theme_file, "Successfully created default theme file");
+                    }
+                } else {
+                    error!(
+                        "Cannot to resolve the default theme file. You need to fix it manually or reinstall the app"
+                    );
                 }
             }
 
             app_handle.manage(DataansState::init(db_dir));
+
             Ok(())
         })
         .build()
