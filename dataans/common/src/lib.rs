@@ -94,7 +94,7 @@ fn select_next_list_item() -> String {
 }
 
 fn select_prev_list_item() -> String {
-    "AltLeft+Digit2".into()
+    "AltLeft+Digit1".into()
 }
 
 fn toggle_spaces_bar() -> String {
