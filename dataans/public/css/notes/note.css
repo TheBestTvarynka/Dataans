@@ -29,13 +29,14 @@
 }
 
 .note .paragraph {
-    margin-block-start: 0.2em;
-    margin-block-end: 0.2em;
+    margin-block-start: 0.1em;
+    margin-block-end: 0.1em;
 }
 
 .note .list {
-    margin-block-start: 0.2em;
-    margin-block-end: 0.2em;
+    margin-block-start: 0.1em;
+    margin-block-end: 0.1em;
+    padding-inline-start: 2em;
 }
 
 .note-meta {
@@ -164,4 +165,10 @@
 
 .note .note-image:hover {
     cursor: pointer;
+}
+
+.note .note-list-checkbox {
+    display: flex;
+    width: 100%;
+    list-style-type: none;
 }
