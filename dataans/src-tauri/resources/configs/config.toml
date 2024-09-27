@@ -3,10 +3,9 @@ toggle-spaces-bar = "ControlLeft+keyS"
 create-space = "ControlLeft+keyN"
 edit-current-space = "ControlLeft+keyE"
 delete-current-space = "ControlLeft+Delete"
-select-next-list-item = "AltLeft+Digit2"
 select-prev-list-item = "AltLeft+Digit1"
+select-next-list-item = "AltLeft+Digit2"
 find-note = "ControlLeft+keyF"
-find-note-in-selected-space = "ControlLeft+keyM"
 
 [appearance]
 theme = "theme_dark.toml"
