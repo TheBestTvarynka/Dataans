@@ -131,7 +131,7 @@ pub fn Note(
                 view! {
                     <div class="vertical">
                         <TextArea
-                            id=note.id.to_string()
+                            id=format!("edit_input_{}", note.id)
                             text=updated_note_text
                             set_text=move |t| set_updated_note_text.set(t)
                             key_down
