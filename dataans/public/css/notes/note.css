@@ -168,7 +168,7 @@
 }
 
 .note .note-list-checkbox {
-    display: inline-flex;
+    display: flex;
     width: 100%;
     list-style-type: none;
 }
