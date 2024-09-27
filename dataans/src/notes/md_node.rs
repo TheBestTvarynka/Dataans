@@ -19,12 +19,12 @@ pub fn render_md_node(node: &Node) -> HtmlElement<AnyElement> {
         }
         .into_any(),
         Node::Paragraph(paragraph) => view! {
-            <p class="paragraph">
+            <span class="paragraph">
                 {paragraph.children
                     .iter()
                     .map(render_md_node)
                     .collect::<Vec<_>>()}
-            </p>
+            </span>
         }
         .into_any(),
         Node::ThematicBreak(_) => view! { <br class="br" /> }.into_any(),
@@ -141,15 +141,49 @@ pub fn render_md_node(node: &Node) -> HtmlElement<AnyElement> {
                 .into_any()
             }
         }
-        Node::ListItem(list_item) => view! {
-            <li>
-                {list_item.children
-                    .iter()
-                    .map(render_md_node)
-                    .collect_view()}
-            </li>
-        }
-        .into_any(),
+        Node::ListItem(list_item) => match list_item.checked {
+            None => view! {
+                <li>
+                    {list_item.children
+                        .iter()
+                        .map(render_md_node)
+                        .collect_view()}
+                </li>
+            }
+            .into_any(),
+            Some(true) => {
+                let id = crate::utils::gen_id();
+                view! {
+                    <li class="note-list-checkbox">
+                        // Sorry, I'm tired of CSS and I don't know how to do it better (so far).
+                        <input type="checkbox" id=id.clone() checked style="margin-left: -1.5em;" />
+                        <label for=id>
+                            {list_item.children
+                                .iter()
+                                .map(render_md_node)
+                                .collect_view()}
+                        </label>
+                    </li>
+                }
+                .into_any()
+            }
+            Some(false) => {
+                let id = crate::utils::gen_id();
+                view! {
+                    <li class="note-list-checkbox">
+                        // Sorry, I'm tired of CSS and I don't know how to do it better (so far).
+                        <input type="checkbox" id=id.clone() style="margin-left: -1.5em;" />
+                        <label for=id>
+                            {list_item.children
+                                .iter()
+                                .map(render_md_node)
+                                .collect_view()}
+                        </label>
+                    </li>
+                }
+                .into_any()
+            }
+        },
         Node::Image(image) => {
             let image_path = image.url.clone();
             let open_image = move |_| {

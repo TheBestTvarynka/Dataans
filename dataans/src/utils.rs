@@ -13,3 +13,7 @@ pub fn focus_element(id: impl AsRef<str>) {
         warn!("Element not found (id = '{id}')");
     }
 }
+
+pub fn gen_id() -> String {
+    uuid::Uuid::new_v4().to_string()
+}
