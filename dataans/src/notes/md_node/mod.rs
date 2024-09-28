@@ -105,7 +105,7 @@ pub fn render_md_node(node: &Node) -> HtmlElement<AnyElement> {
             </b>
         }
         .into_any(),
-        Node::BlockQuote(quote) => view! {
+        Node::Blockquote(quote) => view! {
             <div class="quote">
                 {quote.children
                     .iter()
