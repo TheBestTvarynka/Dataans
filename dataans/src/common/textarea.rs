@@ -7,7 +7,7 @@ use crate::backend::load_clipboard_image;
 #[component]
 pub fn TextArea(
     id: String,
-    text: ReadSignal<String>,
+    text: Signal<String>,
     #[prop(into)] set_text: Callback<String, ()>,
     #[prop(into)] key_down: Callback<KeyboardEvent, ()>,
 ) -> impl IntoView {
