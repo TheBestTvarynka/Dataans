@@ -1,6 +1,6 @@
 use common::note::File;
 use js_sys::{ArrayBuffer, Uint8Array};
-use leptos::{component, spawn_local, view, Callable, Callback, IntoView, ReadSignal, SignalGet};
+use leptos::{component, spawn_local, view, Callable, Callback, IntoView, Signal, SignalGet};
 use uuid::Uuid;
 use wasm_bindgen::JsCast;
 use web_sys::{Blob, HtmlInputElement};
@@ -8,7 +8,7 @@ use web_sys::{Blob, HtmlInputElement};
 #[component]
 pub fn Attachment(
     id: String,
-    files: ReadSignal<Vec<File>>,
+    files: Signal<Vec<File>>,
     #[prop(into)] set_files: Callback<Vec<File>, ()>,
 ) -> impl IntoView {
     let handle_files_upload = move |ev: leptos::ev::Event| {

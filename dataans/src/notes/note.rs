@@ -132,7 +132,7 @@ pub fn Note(
                     <div class="vertical">
                         <TextArea
                             id=format!("edit_input_{}", note.id)
-                            text=updated_note_text
+                            text=updated_note_text.into()
                             set_text=move |t| set_updated_note_text.set(t)
                             key_down
                         />
@@ -151,7 +151,7 @@ pub fn Note(
                             >
                                 <img alt="save" src="/public/icons/accept.png" />
                             </button>
-                            <Attachment id=note_id.to_string() files=updated_files set_files=move |files| set_updated_files.set(files) />
+                            <Attachment id=note_id.to_string() files=updated_files.into() set_files=move |files| set_updated_files.set(files) />
                         </div>
                         {move || view! { <Files files=updated_files.get() remove_file=remove_file_locally edit_mode=true /> }}
                     </div>

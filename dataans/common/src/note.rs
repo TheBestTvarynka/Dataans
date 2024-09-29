@@ -93,6 +93,15 @@ pub struct Note<'text> {
     // TODO(@TheBestTvarynka): implement update time etc.
 }
 
+/// Represents draft note.
+#[derive(Serialize, Deserialize, Debug, Clone, Eq, PartialEq, Default)]
+pub struct DraftNote<'text> {
+    /// Note data in MD format.
+    pub text: MdText<'text>,
+    /// Attached files.
+    pub files: Vec<File>,
+}
+
 /// Represent one note.
 #[derive(Serialize, Deserialize, Debug, Clone, Eq, PartialEq)]
 pub struct NoteFull<'text, 'space_name, 'space_avatar> {
