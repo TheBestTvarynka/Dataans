@@ -19,7 +19,7 @@ Dataans - Data answer. The data is answer to all your questions :)
 
 ## Motivation
 
-Have you noticed how convenient and easy it is to take notes in Telegram or any other messaging app? The idea was to create a note-taking app where notes are small markdown snippets grouped in spaces. Such notes are easy to create, read, remember, and edit. In addition, there are several other particularly important features:
+Have you noticed how convenient and easy it is to take notes in Telegram or any other messaging app? The idea was to create a note-taking app where notes are small *markdown* snippets grouped in spaces. Such notes are easy to create, read, remember, and edit. In addition, there are several other particularly important features:
 
 **_Desktop app_**. Usually, the browser has dozens of opened tabs across multiple windows. It becomes hard to find the tab with notes (even when it's pinned).
 
@@ -49,7 +49,7 @@ If you lack any functionality or you face a bug, then report it ([issue](https:/
 
 ## Installation
 
-You can download the app installer here: https://github.com/TheBestTvarynka/Dataans/releases. Or alternatively you can build the app from source code: 
+You can download the app installer here: https://github.com/TheBestTvarynka/Dataans/releases. Or alternatively you can build the app from source code: https://github.com/TheBestTvarynka/Dataans/tree/main/dataans#installation
 
 ## Contributing
 
