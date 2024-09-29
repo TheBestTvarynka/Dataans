@@ -9,7 +9,7 @@ pub fn TextArea(
     id: String,
     text: Signal<String>,
     #[prop(into)] set_text: Callback<String, ()>,
-    #[prop(into)] key_down: Callback<KeyboardEvent, ()>,
+    key_down: impl Fn(KeyboardEvent) -> () + 'static,
 ) -> impl IntoView {
     let (disabled, set_disabled) = create_signal(false);
 
@@ -61,48 +61,49 @@ pub fn TextArea(
 
     let elem_id = id.clone();
     let text_editing_keybindings = move |event: KeyboardEvent| {
-        let text = text.get();
-        if let Some(format_fn) = get_text_format_fn(event) {
-            let text_area = document()
-                .get_element_by_id(&elem_id)
-                .expect("Dom element should present");
-            let text_area = text_area
-                .dyn_into::<web_sys::HtmlTextAreaElement>()
-                .expect("Element should be textarea");
+        if let Some(text) = text.try_get() {
+            if let Some(format_fn) = get_text_format_fn(event) {
+                let text_area = document()
+                    .get_element_by_id(&elem_id)
+                    .expect("Dom element should present");
+                let text_area = text_area
+                    .dyn_into::<web_sys::HtmlTextAreaElement>()
+                    .expect("Element should be textarea");
 
-            let (text, selection) = match (
-                text_area.selection_start().ok().flatten(),
-                text_area.selection_end().ok().flatten(),
-            ) {
-                (Some(start), Some(end)) => {
-                    let pre_text = text.chars().take(start as usize).collect::<String>();
-                    let link_text = text
-                        .chars()
-                        .skip(start as usize)
-                        .take((end - start) as usize)
-                        .collect::<String>();
-                    let after_text = text.chars().skip(end as usize).collect::<String>();
+                let (text, selection) = match (
+                    text_area.selection_start().ok().flatten(),
+                    text_area.selection_end().ok().flatten(),
+                ) {
+                    (Some(start), Some(end)) => {
+                        let pre_text = text.chars().take(start as usize).collect::<String>();
+                        let link_text = text
+                            .chars()
+                            .skip(start as usize)
+                            .take((end - start) as usize)
+                            .collect::<String>();
+                        let after_text = text.chars().skip(end as usize).collect::<String>();
 
-                    format_fn(pre_text, link_text, after_text, start)
-                }
-                (Some(position), None) | (None, Some(position)) => {
-                    let pre_text = text.chars().take(position as usize).collect::<String>();
-                    let after_text = text.chars().skip(position as usize).collect::<String>();
+                        format_fn(pre_text, link_text, after_text, start)
+                    }
+                    (Some(position), None) | (None, Some(position)) => {
+                        let pre_text = text.chars().take(position as usize).collect::<String>();
+                        let after_text = text.chars().skip(position as usize).collect::<String>();
 
-                    format_fn(pre_text, String::new(), after_text, position)
-                }
-                (None, None) => {
-                    warn!("Empty text selection");
-                    (text, None)
-                }
-            };
-            set_text.call(text);
-            if let Some((selection_start, selection_end)) = selection {
-                if let Err(err) = text_area.set_selection_start(Some(selection_start)) {
-                    error!("{:?}", err);
-                }
-                if let Err(err) = text_area.set_selection_end(Some(selection_end)) {
-                    error!("{:?}", err);
+                        format_fn(pre_text, String::new(), after_text, position)
+                    }
+                    (None, None) => {
+                        warn!("Empty text selection");
+                        (text, None)
+                    }
+                };
+                set_text.call(text);
+                if let Some((selection_start, selection_end)) = selection {
+                    if let Err(err) = text_area.set_selection_start(Some(selection_start)) {
+                        error!("{:?}", err);
+                    }
+                    if let Err(err) = text_area.set_selection_end(Some(selection_end)) {
+                        error!("{:?}", err);
+                    }
                 }
             }
         }
@@ -132,7 +133,7 @@ pub fn TextArea(
                 style=style
                 on:input=move |ev| set_text.call(event_target_value(&ev))
                 on:keydown=move |ev| {
-                    key_down.call(ev.clone());
+                    key_down(ev.clone());
                     text_editing_keybindings(ev);
                 }
                 on:paste=paste_handler
