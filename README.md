@@ -11,7 +11,7 @@ Table of content:
 
 # Dataans
 
-> _Why **dataans**?_
+> _Why `dataans`?_
 
 Dataans - Data answer. The data is answer to all your questions :)
 
@@ -29,7 +29,7 @@ Yes, you are right. This is why the second most important feature is the **_drop
 
 **_Cross platform_**. This app supports **Windows** and **Linux**. It can be compiled on macOS too, but it wasn't tested on it. So, you can try to use it on macOS but you can face more bugs.
 
-There are many similar existing apps but all of them have one or more major flaws. You can read more about motivation and features on the app's official website: https://dataans.com.
+There are many similar existing apps but all of them have one or more major flaws. You can read more about motivation and features in the blog post: https://tbt.qkation.com/.
 
 ## App philosophy
 
