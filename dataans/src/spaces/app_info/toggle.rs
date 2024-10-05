@@ -9,7 +9,7 @@ pub fn AppInfo() -> impl IntoView {
 
     view! {
         <div style="display: inline-flex; width: 100%; justify-content: center; margin-bottom: 0.2em;">
-            <button class="button_cancel" on:click=move |_| set_show_window.set(true)>{format!("v.{}", env!("CARGO_PKG_VERSION"))}</button>
+            <button class="button_cancel" on:click=move |_| set_show_window.set(true)>{format!("{}.{}", env!("CARGO_PKG_VERSION_MAJOR"), env!("CARGO_PKG_VERSION_MINOR"))}</button>
         </div>
         <Show when=move || show_window.get()>
             <Modal>
