@@ -1,14 +1,5 @@
 [![Stand With Ukraine](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/banner2-direct.svg)](https://stand-with-ukraine.pp.ua/)
 
-Table of content:
-
-- [Dataans](#dataans)
-  - [Motivation](#motivation)
-  - [App philosophy](#app-philosophy)
-  - [Installation](#installation)
-  - [Contributing](#contributing)
-  - [Meta](#meta)
-
 # Dataans
 
 > _Why `dataans`?_

@@ -8,14 +8,14 @@ We'll help to set up the environment, explain needed parts of the code, discuss 
 ## Workflow
 
 1. Fork the repo: https://github.com/TheBestTvarynka/Dataans/fork.
-2. Set up local development environment: https://github.com/TheBestTvarynka/Dataans/tree/main/dataans#development.
+2. Set up local development environment: [TheBestTvarynka/Dataans#development](https://github.com/TheBestTvarynka/Dataans/tree/main/dataans#development).
 3. Make changes and commit them to your development branch.
 4. Push commits to your repo.
-5. Create a pull request with a proper description.
+5. Create a pull request with a proper title and description.
 
 ## Commit messages
 
-We don't have a strict style guide for the commit messages. Anyway, your pull request will be [squashed and merged](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/incorporating-changes-from-a-pull-request/about-pull-request-merges#squash-and-merge-your-commits). The only restriction we have is our [`CODE_OF_CONDUCT.md`](https://github.com/TheBestTvarynka/Dataans/blob/main/CODE_OF_CONDUCT.md). Please, follow this policy :blush:.
+We don't have a strict style guide for the commit messages. Your pull request will be [squashed and merged](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/incorporating-changes-from-a-pull-request/about-pull-request-merges#squash-and-merge-your-commits) anyway. The only restriction we have is our [`CODE_OF_CONDUCT.md`](https://github.com/TheBestTvarynka/Dataans/blob/main/CODE_OF_CONDUCT.md). Please, follow this policy :blush:.
 
 ## Code style
 
