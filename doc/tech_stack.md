@@ -71,7 +71,7 @@ The chosen frontend framework is [`Leptos`](https://leptos.dev/). Why:
 * Fast.
 * Easy to write and maintain projects.
 
-Keep in mind that only Rust frontend frameworks were considered for this project. We don't want to deal with `JS`/`TS` and want to implement everything in Rust. Rust has a lot of interesting and worth-trying [frontend frameworks](https://www.arewewebyet.org/topics/frameworks/). The `create-tauri-app` has a [limited template list](https://tauri.app/start/create-project/), so our list was shrunk to 3 ones: [Yew](https://yew.rs/), [Leptos](https://leptos.dev/), and [Sycamore](https://sycamore-rs.netlify.app/).
+Keep in mind that **only Rust frontend frameworks were considered** for this project. We don't want to deal with `JS`/`TS` and want to implement everything in `Rust`. `Rust` has a lot of interesting and worth-trying [frontend frameworks](https://www.arewewebyet.org/topics/frameworks/). The `create-tauri-app` has a [limited template list](https://tauri.app/start/create-project/), so our list of candidates was shrunk to 3 ones: [Yew](https://yew.rs/), [Leptos](https://leptos.dev/), and [Sycamore](https://sycamore-rs.netlify.app/).
 
 All of them are popular, fast, and interesting: [`Yew` vs `Dioxus` vs `Leptos` vs `Sycamore`](https://www.reddit.com/r/rust/comments/1526qo3/comment/jsdq72u/). We chose `Leptos` because of:
 
