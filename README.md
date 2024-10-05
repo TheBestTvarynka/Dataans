@@ -1,17 +1,8 @@
 [![Stand With Ukraine](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/banner2-direct.svg)](https://stand-with-ukraine.pp.ua/)
 
-Table of content:
-
-- [Dataans](#dataans)
-  - [Motivation](#motivation)
-  - [App philosophy](#app-philosophy)
-  - [Installation](#installation)
-  - [Contributing](#contributing)
-  - [Meta](#meta)
-
 # Dataans
 
-> _Why **dataans**?_
+> _Why `dataans`?_
 
 Dataans - Data answer. The data is answer to all your questions :)
 
@@ -19,7 +10,7 @@ Dataans - Data answer. The data is answer to all your questions :)
 
 ## Motivation
 
-Have you noticed how convenient and easy it is to take notes in Telegram or any other messaging app? The idea was to create a note-taking app where notes are small markdown snippets grouped in spaces. Such notes are easy to create, read, remember, and edit. In addition, there are several other particularly important features:
+Have you noticed how convenient and easy it is to take notes in Telegram or any other messaging app? The idea was to create a note-taking app where notes are small *markdown* snippets grouped in spaces. Such notes are easy to create, read, remember, and edit. In addition, there are several other particularly important features:
 
 **_Desktop app_**. Usually, the browser has dozens of opened tabs across multiple windows. It becomes hard to find the tab with notes (even when it's pinned).
 
@@ -29,7 +20,7 @@ Yes, you are right. This is why the second most important feature is the **_drop
 
 **_Cross platform_**. This app supports **Windows** and **Linux**. It can be compiled on macOS too, but it wasn't tested on it. So, you can try to use it on macOS but you can face more bugs.
 
-There are many similar existing apps but all of them have one or more major flaws. You can read more about motivation and features on the app's official website: https://dataans.com.
+There are many similar existing apps but all of them have one or more major flaws. You can read more about motivation and features in the blog post: https://tbt.qkation.com/.
 
 ## App philosophy
 
@@ -49,15 +40,13 @@ If you lack any functionality or you face a bug, then report it ([issue](https:/
 
 ## Installation
 
-You can download the app installer here: https://github.com/TheBestTvarynka/Dataans/releases. Or alternatively you can build the app from source code: 
+You can download the app installer here: https://github.com/TheBestTvarynka/Dataans/releases. Or alternatively you can build the app from source code: https://github.com/TheBestTvarynka/Dataans/tree/main/dataans#installation
 
 ## Contributing
 
 Feel free to contribute. Contributions are very welcome :blush:.
 
-If you want to implement a missing/wanting feature or fix a bug, then create an issue/discussion and we'll guide you. We'll help you set up the environment, explain needed parts of the code, discuss implementation, and review the code.
-
-If you don't know what to implement, then you can browse [existing issues](https://github.com/TheBestTvarynka/Dataans/issues?q=sort%3Aupdated-desc+is%3Aissue+is%3Aopen) or ask for help in [the discussions](https://github.com/TheBestTvarynka/Dataans/discussions). We always have something to do :stuck_out_tongue_winking_eye:.
+Read more in the [`CONTRIBUTING.md`](/doc/CONTRIBUTING.md) document.
 
 ## Meta
 
