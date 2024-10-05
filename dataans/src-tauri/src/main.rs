@@ -85,7 +85,10 @@ fn init_tracing() {
     match OpenOptions::new().create(true).append(true).open(&log_file) {
         Ok(log_file) => {
             let log_file_layer = tracing_subscriber::fmt::layer().pretty().with_writer(log_file);
-            registry.with(log_file_layer).with(EnvFilter::from_default_env()).init();
+            registry
+                .with(log_file_layer)
+                .with(EnvFilter::from_env(LOGGING_ENV_VAR_NAME))
+                .init();
         }
         Err(e) => {
             eprintln!("Couldn't open log file: {e}. Path: {:?}.", log_file);
