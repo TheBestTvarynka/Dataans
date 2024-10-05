@@ -55,9 +55,7 @@ You can download the app installer here: https://github.com/TheBestTvarynka/Data
 
 Feel free to contribute. Contributions are very welcome :blush:.
 
-If you want to implement a missing/wanting feature or fix a bug, then create an issue/discussion and we'll guide you. We'll help you set up the environment, explain needed parts of the code, discuss implementation, and review the code.
-
-If you don't know what to implement, then you can browse [existing issues](https://github.com/TheBestTvarynka/Dataans/issues?q=sort%3Aupdated-desc+is%3Aissue+is%3Aopen) or ask for help in [the discussions](https://github.com/TheBestTvarynka/Dataans/discussions). We always have something to do :stuck_out_tongue_winking_eye:.
+Read more in the [`CONTRIBUTING.md`](/doc/CONTRIBUTING.md) document.
 
 ## Meta
 
