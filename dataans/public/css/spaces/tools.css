@@ -1,6 +1,6 @@
 .tools {
     background-color: var(--spaces-tools-background-color);
-    border-bottom: 1px solid var(--notes-border-color);
+    border-bottom: 2px solid var(--notes-border-color);
     color: var(--spaces-tools-text-color);
     display: flex;
     flex-wrap: wrap;

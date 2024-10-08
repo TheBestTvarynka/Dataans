@@ -5,8 +5,8 @@
     gap: 0;
     justify-content: space-between;
     background-color: var(--notes-background-color);
-    border-right: 1px solid var(--notes-border-color);
-    border-left: 1px solid var(--notes-border-color);
+    border-right: 2px solid var(--notes-border-color);
+    border-left: 2px solid var(--notes-border-color);
     max-height: 100vh;
     flex-grow: 1;
 }
