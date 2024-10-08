@@ -54,7 +54,7 @@
     padding: 1em;
     gap: 0.4em;
     width: 30%;
-    background-color: var(--profile-background-color);
+    background-color: var(--spaces-background-color);
     border-radius: 0.5em;
 }
 

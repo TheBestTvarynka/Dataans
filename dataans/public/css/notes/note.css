@@ -53,11 +53,14 @@
 .incline-code {
     font-family: "JetBrains Mono", monospace;
     cursor: pointer;
-    background-color: var(--incline-code-background-color);
+    background-color: var(--note-inline-background-color);
+    border: 2px solid var(--note-inline-background-color);
+    padding: 0 0.2em 0 0.2em;
+    border-radius: 0.2em;
 }
 
 .incline-code:hover {
-    background-color: var(--note-inline-background-color);
+    border-color: var(--note-link-color);
 }
 
 .incline-code:active {

@@ -9,6 +9,10 @@ body {
     font-variation-settings: "wdth" 100;
 }
 
+h1, h2, h3, h4 {
+    color: var(--note-headers-text-color);
+}
+
 h1 {
     font-size: 2em;
     margin-block-start: 0.3em;

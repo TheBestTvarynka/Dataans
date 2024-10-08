@@ -3,7 +3,7 @@
     flex-direction: column;
     align-content: flex-start;
     gap: 0;
-    background-color: var(--profile-background-color);
+    background-color: var(--spaces-background-color);
     height: 100vh;
     max-width: 20%;
 }
