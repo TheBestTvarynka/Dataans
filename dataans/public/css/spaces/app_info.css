@@ -7,8 +7,8 @@
     gap: 0.2em;
     padding: 0.5em;
     border-radius: 0.5em;
-    color: var(--note_text_color);
-    background-color: var(--note_background_color);
+    color: var(--note-text-color);
+    background-color: var(--note-background-color);
     position: relative;
 }
 
@@ -21,8 +21,8 @@
 }
 
 .app-into-window a:hover {
-    background-color: #50437f;
-    color: #dbcfbf;
+    background-color: var(--app-info-window-background-color);
+    color: var(--app-info-window-text-color);
     cursor: pointer;
 }
 

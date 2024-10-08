@@ -9,7 +9,7 @@
 
 .note-preview:hover {
     cursor: pointer;
-    background-color: var(--space_hover_background_color);
+    background-color: var(--space-hover-background-color);
 }
 
 .note-preview-selected {

@@ -89,8 +89,8 @@ h4 {
     width: 100%;
     text-align: center;
     display: block;
-    color: var(--space_text_color);
-    border-top: 1px solid var(--notes_border_color);
+    color: var(--space-text-color);
+    border-top: 1px solid var(--notes-border-color);
     padding-top: 0.4em;
 }
 

@@ -10,8 +10,8 @@
 }
 
 .resizable-textarea .resizable-textarea-textarea {
-    background-color: var(--messages_editor_background_color);
-    color: var(--note_text_color);
+    background-color: var(--messages-editor-background-color);
+    color: var(--note-text-color);
     width: 100%;
     min-height: 1em;
     border: none;

@@ -11,29 +11,29 @@
     display: inline-flex;
     gap: 0.3em;
     padding: 0.3em;
-    font-size: var(--spaces_font_size);
+    font-size: var(--spaces-font-size);
     transition: all 0.2s;
     align-items: center;
 }
 
 .simple-space {
-    color: var(--space_text_color);
-    background-color: var(--space_background_color);
+    color: var(--space-text-color);
+    background-color: var(--space-background-color);
 }
 
 .simple-space:hover {
     cursor: pointer;
-    background-color: var(--space_hover_background_color);
+    background-color: var(--space-hover-background-color);
 }
 
 .selected-space {
-    color: var(--space_text_color);
-    background-color: var(--space_selected_background_color);
+    color: var(--space-text-color);
+    background-color: var(--space-selected-background-color);
 }
 
 .selected-space:hover {
     cursor: pointer;
-    background-color: var(--space_selected_background_color);
+    background-color: var(--space-selected-background-color);
 }
 
 .space .space-title {
@@ -54,7 +54,7 @@
     padding: 1em;
     gap: 0.4em;
     width: 30%;
-    background-color: var(--spaces_background_color);
+    background-color: var(--profile-background-color);
     border-radius: 0.5em;
 }
 

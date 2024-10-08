@@ -4,9 +4,9 @@
     flex-direction: column;
     gap: 0;
     justify-content: space-between;
-    background-color: var(--notes_background_color);
-    border-right: 1px solid var(--notes_border_color);
-    border-left: 1px solid var(--notes_border_color);
+    background-color: var(--notes-background-color);
+    border-right: 1px solid var(--notes-border-color);
+    border-left: 1px solid var(--notes-border-color);
     max-height: 100vh;
     flex-grow: 1;
 }
