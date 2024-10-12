@@ -3,8 +3,9 @@
     display: flex;
     flex-direction: column;
     gap: 0;
-    background-color: var(--messages_editor_background_color);
-    color: var(--messages_editor_text_color);
+    border-top: 3px solid var(--notes-background-color);
+    background-color: var(--messages-editor-background-color);
+    color: var(--messages-editor-text-color);
     justify-content: flex-start;
     align-items: center;
     width: 100%;

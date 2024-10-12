@@ -5,39 +5,40 @@
 */
 
 body {
-    --notes_background_color: #18191d;
-    --notes_border_color: #18191d;
+    --notes-background-color: #232634;
+    --notes-border-color: #24192a;
 
-    --profile_background_color: #282e33;
-    --spaces_background_color: #282e33;
+    --spaces-background-color: #232634;
 
-    --spaces_tools_background_color: #282e33;
-    --spaces_tools_border_color: #c6c4af;
-    --spaces_tools_text_color: #c6c4af;
+    --spaces-tools-background-color: #232634;
+    --spaces-tools-border-color: #c6c4af;
+    --spaces-tools-text-color: #c6c4af;
 
-    --messages_info_background_color: #282e33;
-    --messages_info_text_color: #ababad;
+    --messages-info-background-color: #232634;
+    --messages-info-text-color: #ababad;
 
-    --messages_editor_background_color: #2d4042;
-    --messages_editor_text_color: #ababad;
+    --messages-editor-background-color: #303446;
+    --messages-editor-text-color: #c6d0f5;
 
-    --note_background_color: #2a2f33;
-    --note_text_color: #e0e0e7;
-    --note_quote_text_color: #bcbcc2;
-    --note_font_size: 1em;
-    --note_link_color: #35c9a2;
+    --note-background-color: #303446;
+    --note-text-color: #c6d0f5;
+    --note-quote-text-color: #919ab9;
+    --note-inline-background-color: #232634;
+    --note-inline-background-color-hover: #232634;
+    --note-font-size: 1em;
+    --note-link-color: #829edd;
+    --note-headers-text-color: #e78284;
     --note-time-label-text-color: #b0bbb5;
     --note-table-border-color: #444c56;
-    --note-inline-background-color: #2d4042;
     --note-code-block-background-color: #031e24;
 
-    --editor-file-background-color: #463546;
+    --editor-file-background-color: #232634;
 
-    --spaces_font_size: 1.3em;
-    --space_background_color: #282e33;
-    --space_text_color: #e0e0e7;
-    --space_hover_background_color: #3c4449;
-    --space_selected_background_color: #35c9a2;
+    --spaces-font-size: 1.3em;
+    --space-background-color: #232634;
+    --space-text-color: #e0e0e7;
+    --space-hover-background-color: #3c4449;
+    --space-selected-background-color: #70628a;
 
     --input-border-color: #777783;
     --input-background-color: #ababad;
@@ -65,4 +66,7 @@ body {
     --note-preview-selected-note-background-color: #678da6;
 
     --note-focus-border-color: #678da6;
+
+    --app-info-window-background-color: #50437f;
+    --app-info-window-text-color: #dbcfbf;
 }

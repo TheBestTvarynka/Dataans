@@ -1,10 +1,10 @@
 .info {
     display: inline-flex;
-    background-color: var(--messages_info_background_color);
-    color: var(--messages_info_text_color);
+    background-color: var(--messages-info-background-color);
+    color: var(--messages-info-text-color);
     min-height: calc(var(--tools-panel-height) + 0.4em);
     max-height: calc(var(--tools-panel-height) + 0.4em);
-    border-bottom: 1px solid var(--notes_border_color);
+    border-bottom: 2px solid var(--notes-border-color);
     padding: 0 0.6em 0 0.6em;
     justify-content: space-between;
     align-items: center;
