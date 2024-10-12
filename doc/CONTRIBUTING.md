@@ -19,7 +19,8 @@ We don't have a strict style guide for the commit messages. Your pull request wi
 
 ## Code style
 
-Refer to the [`STYLE.md`](/doc/STYLE.md) document to read about the code style guidelines.
+1. Run `cargo +nightly fmt --all` periodically.
+2. Additionally, refer to the [`STYLE.md`](/doc/STYLE.md) document to read about the code style guidelines.
 
 ## What to contribute?
 
