@@ -50,20 +50,21 @@
     color: var(--note-link-color);
 }
 
-.incline-code {
+.inline-code {
     font-family: "JetBrains Mono", monospace;
     cursor: pointer;
     background-color: var(--note-inline-background-color);
     border: 2px solid var(--note-inline-background-color);
+    box-sizing: border-box;
     padding: 0 0.2em 0 0.2em;
     border-radius: 0.2em;
 }
 
-.incline-code:hover {
+.inline-code:hover {
     border-color: var(--note-link-color);
 }
 
-.incline-code:active {
+.inline-code:active {
     background-color: var(--note-link-color);
 }
 

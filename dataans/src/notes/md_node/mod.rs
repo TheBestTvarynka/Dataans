@@ -70,7 +70,7 @@ pub fn render_md_node(node: &Node) -> HtmlElement<AnyElement> {
         Node::InlineCode(code) => {
             let code_value = code.value.clone();
             view! {
-                <span class="incline-code" on:click=move |_| {
+                <span class="inline-code" on:click=move |_| {
                     let clipboard = window().navigator().clipboard();
                     let _ = clipboard.write_text(&code_value);
                 }>{&code.value}</span>

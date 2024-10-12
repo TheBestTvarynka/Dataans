@@ -54,7 +54,9 @@ pub fn AppInfoWindow(#[prop(into)] close: Callback<(), ()>) -> impl IntoView {
                         </tr>
                         <tr>
                             <td>"App window toggle"</td>
-                            <td class="incline-code">{app_toggle}</td>
+                            <td>
+                                <span class="inline-code">{app_toggle}</span>
+                            </td>
                         </tr>
 
                         // Appearance config
@@ -64,7 +66,7 @@ pub fn AppInfoWindow(#[prop(into)] close: Callback<(), ()>) -> impl IntoView {
                         <tr>
                             <td>"Theme file"</td>
                             <td class="horizontal">
-                                <span class="incline-code">{theme.display().to_string()}</span>
+                                <span class="inline-code">{theme.display().to_string()}</span>
                                 <button
                                     class="tool"
                                     title="Open theme file location"
@@ -81,35 +83,51 @@ pub fn AppInfoWindow(#[prop(into)] close: Callback<(), ()>) -> impl IntoView {
                         </tr>
                         <tr>
                             <td>"Toggle side bar"</td>
-                            <td class="incline-code">{toggle_spaces_bar}</td>
+                            <td>
+                                <span class="inline-code">{toggle_spaces_bar}</span>
+                            </td>
                         </tr>
                         <tr>
                             <td>"Create a new space"</td>
-                            <td class="incline-code">{create_space}</td>
+                            <td>
+                                <span class="inline-code">{create_space}</span>
+                            </td>
                         </tr>
                         <tr>
                             <td>"Edit current space"</td>
-                            <td class="incline-code">{edit_current_space}</td>
+                            <td>
+                                <span class="inline-code">{edit_current_space}</span>
+                            </td>
                         </tr>
                         <tr>
                             <td>"Delete current space"</td>
-                            <td class="incline-code">{delete_current_space}</td>
+                            <td>
+                                <span class="inline-code">{delete_current_space}</span>
+                            </td>
                         </tr>
                         <tr>
                             <td>"Select next item in the side bar list"</td>
-                            <td class="incline-code">{select_next_list_item}</td>
+                            <td>
+                                <span class="inline-code">{select_next_list_item}</span>
+                            </td>
                         </tr>
                         <tr>
                             <td>"Select previous item in the side bar list"</td>
-                            <td class="incline-code">{select_prev_list_item}</td>
+                            <td>
+                                <span class="inline-code">{select_prev_list_item}</span>
+                            </td>
                         </tr>
                         <tr>
                             <td>"Search notes globally"</td>
-                            <td class="incline-code">{find_note}</td>
+                            <td>
+                                <span class="inline-code">{find_note}</span>
+                            </td>
                         </tr>
                         <tr>
                             <td>"Search notes in the current space"</td>
-                            <td class="incline-code">{find_note_in_selected_space}</td>
+                            <td>
+                                <span class="inline-code">{find_note_in_selected_space}</span>
+                            </td>
                         </tr>
                     </table>
                 }
