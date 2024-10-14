@@ -6,7 +6,9 @@
 
 Dataans - Data answer. The data is answer to all your questions :)
 
-![](https://totes.qkation.com/imgs/2024-08-03_12-29.png)
+![](https://github.com/user-attachments/assets/690d8609-ffa3-4999-9fe7-85d910d75bd6)
+
+![](https://github.com/user-attachments/assets/f238cd08-03e8-4c3c-9b83-7813772c3b8b)
 
 ## Motivation
 
