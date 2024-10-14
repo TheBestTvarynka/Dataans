@@ -10,12 +10,14 @@ Thus, everything starting from the back end and up to the front end is written i
 
 ## Installation
 
-You can download the app installer here: https://github.com/TheBestTvarynka/Dataans/releases. Or alternatively you can build the app from source code:
+Note: this is a temporary solutions. One day we will have a proper flow of app installing and releases publishing.
 
 ```bash
 git clone https://github.com/TheBestTvarynka/Dataans.git
 cd Dataans/dataans
 cargo tauri build
+mkdir -p ~/.local/share/com.tbt.dataans/configs/
+cp src-tauri/resources/configs/* ~/.local/share/com.tbt.dataans/configs/
 ```
 
 ## Development
