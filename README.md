@@ -6,9 +6,9 @@
 
 Dataans - Data answer. The data is answer to all your questions :)
 
-![](https://github.com/user-attachments/assets/690d8609-ffa3-4999-9fe7-85d910d75bd6)
+![image](https://github.com/user-attachments/assets/496f924c-9d98-4d7a-9501-b86dab0cb3f5)
 
-![](https://github.com/user-attachments/assets/f238cd08-03e8-4c3c-9b83-7813772c3b8b)
+![image](https://github.com/user-attachments/assets/af88b3c9-2d3b-4afa-b349-bf3620144875)
 
 ## Motivation
 
