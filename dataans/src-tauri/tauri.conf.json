@@ -56,7 +56,7 @@
       }
     ],
     "security": {
-      "csp": "default-src 'self'; script-src 'wasm-unsafe-eval'; style-src 'unsafe-inline'; font-src https://fonts.gstatic.com; img-src 'unsafe-inline' asset: http://asset.localhost  tauri://localhost"
+      "csp": null
     },
     "bundle": {
       "active": true,
