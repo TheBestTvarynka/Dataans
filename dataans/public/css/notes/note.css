@@ -73,6 +73,8 @@
     border-left: 2px solid var(--note-quote-text-color);
     color: var(--note-quote-text-color);
     font-size: 0.85em;
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
 }
 
 .note .text {

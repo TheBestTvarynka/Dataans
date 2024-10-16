@@ -6,7 +6,9 @@
 
 Dataans - Data answer. The data is answer to all your questions :)
 
-![](https://totes.qkation.com/imgs/2024-08-03_12-29.png)
+![image](https://github.com/user-attachments/assets/496f924c-9d98-4d7a-9501-b86dab0cb3f5)
+
+![image](https://github.com/user-attachments/assets/af88b3c9-2d3b-4afa-b349-bf3620144875)
 
 ## Motivation
 
@@ -16,11 +18,11 @@ Have you noticed how convenient and easy it is to take notes in Telegram or any 
 
 > _FYI, the app window is also hard to find when you have a dozen other windows_ :raised_eyebrow:.
 
-Yes, you are right. This is why the second most important feature is the **_drop-down mode_**. You don't need to track the window location/position. You just open/hide it using the global configurable shortcut.
+Yes, you are right. This is why the second most important feature is the **_drop-down mode (quake mode)_**. You don't need to track the window location/position. You just open/hide it using the global configurable shortcut :sunglasses:.
 
 **_Cross platform_**. This app supports **Windows** and **Linux**. It can be compiled on macOS too, but it wasn't tested on it. So, you can try to use it on macOS but you can face more bugs.
 
-There are many similar existing apps but all of them have one or more major flaws. You can read more about motivation and features in the blog post: https://tbt.qkation.com/.
+There are many similar existing apps but all of them have one or more major flaws. You can read more about motivation and features in the blog post: https://tbt.qkation.com/projects/dataans/.
 
 ## App philosophy
 
