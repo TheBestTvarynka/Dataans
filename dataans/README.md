@@ -12,6 +12,8 @@ Thus, everything starting from the back end and up to the front end is written i
 
 Note: this is a temporary solutions. One day we will have a proper flow of app installing and releases publishing.
 
+First of all, you need to fulfill Tauri Prerequisites first: https://v1.tauri.app/v1/guides/getting-started/prerequisites.
+
 ```bash
 git clone https://github.com/TheBestTvarynka/Dataans.git
 cd Dataans/dataans
@@ -22,7 +24,7 @@ cp src-tauri/resources/configs/* ~/.local/share/com.tbt.dataans/configs/
 
 ## Development
 
-0. Tauri Prerequisites: https://tauri.app/v1/guides/getting-started/prerequisites.
+0. Tauri Prerequisites: https://v1.tauri.app/v1/guides/getting-started/prerequisites.
 1. Run:
 ```bash
 git clone https://github.com/TheBestTvarynka/Dataans.git
