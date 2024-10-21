@@ -27,7 +27,7 @@ pub fn AppInfoWindow(#[prop(into)] close: Callback<(), ()>) -> impl IntoView {
             </button>
             <span class="app-into-window-title">{format!("Dataans v.{}", env!("CARGO_PKG_VERSION"))}</span>
             <span>"Take notes in the form of markdown snippets grouped into spaces."</span>
-            <span>"Source code: "<a href="https://github.com/TheBestTvarynka/Dataans">"GitHub/TbeBestTvarynka/Dataans"</a></span>
+            <span>"Source code: "<a href="https://github.com/TheBestTvarynka/Dataans" target="_blank">"GitHub/TbeBestTvarynka/Dataans"</a></span>
             <hr style="width: 80%" />
             <div class="horizontal">
                 <button class="button_ok" on:click=open_config_file>"Edit config file"</button>
