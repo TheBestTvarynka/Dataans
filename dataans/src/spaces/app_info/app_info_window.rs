@@ -59,7 +59,7 @@ pub fn AppInfoWindow(#[prop(into)] close: Callback<(), ()>) -> impl IntoView {
                             </td>
                         </tr>
 
-                        // Appearance configё
+                        // Appearance config
                         <tr>
                             <th colspan="2">"Appearance"</th>
                         </tr>

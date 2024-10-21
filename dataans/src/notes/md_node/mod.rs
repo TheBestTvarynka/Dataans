@@ -115,7 +115,7 @@ pub fn render_md_node(node: &Node) -> HtmlElement<AnyElement> {
         }
         .into_any(),
         Node::Link(link) => view! {
-            <a class="link" href=&link.url target="popup">
+            <a class="link" href=&link.url target="_blank">
                 {link.children
                     .iter()
                     .map(render_md_node)
