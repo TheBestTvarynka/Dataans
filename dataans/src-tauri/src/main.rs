@@ -16,6 +16,7 @@ use tauri::{
 };
 
 const LOGGING_ENV_VAR_NAME: &str = "DATAANS_LOG";
+const DEFAULT_LOG_LEVEL: &str = "dataans=warn";
 
 const MAIN_WINDOW_NAME: &str = "main";
 
@@ -58,6 +59,11 @@ fn init_tracing() {
     use tracing_subscriber::prelude::*;
     use tracing_subscriber::EnvFilter;
 
+    let logging_filter: EnvFilter = EnvFilter::builder()
+        .with_default_directive(DEFAULT_LOG_LEVEL.parse().expect("Default log level constant is bad."))
+        .with_env_var(LOGGING_ENV_VAR_NAME)
+        .from_env_lossy();
+
     // STDOUT layer
     let stdout_layer = tracing_subscriber::fmt::layer().pretty().with_writer(io::stdout);
 
@@ -85,14 +91,11 @@ fn init_tracing() {
     match OpenOptions::new().create(true).append(true).open(&log_file) {
         Ok(log_file) => {
             let log_file_layer = tracing_subscriber::fmt::layer().pretty().with_writer(log_file);
-            registry
-                .with(log_file_layer)
-                .with(EnvFilter::from_env(LOGGING_ENV_VAR_NAME))
-                .init();
+            registry.with(log_file_layer).with(logging_filter).init();
         }
         Err(e) => {
             eprintln!("Couldn't open log file: {e}. Path: {:?}.", log_file);
-            registry.with(EnvFilter::from_env(LOGGING_ENV_VAR_NAME)).init();
+            registry.with(logging_filter).init();
         }
     }
 }
