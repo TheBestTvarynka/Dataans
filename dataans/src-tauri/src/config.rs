@@ -77,7 +77,8 @@ pub fn open_config_file(app_handle: AppHandle) {
 
     let config_file_path = configs_dir.join(CONFIG_FILE_NAME);
 
-    info!(open_config_file_result = ?opener::open(&config_file_path));
+    let open_config_file_result = opener::open(&config_file_path);
+    info!(?open_config_file_result);
 }
 
 #[tauri::command]
@@ -90,7 +91,8 @@ pub fn open_theme_file(app_handle: AppHandle, file_path: PathBuf) {
 
     let theme_file_path = configs_dir.join(file_path);
 
-    info!(open_config_file_result = ?opener::reveal(&theme_file_path));
+    let open_theme_file_result = opener::open(&theme_file_path);
+    info!(?open_theme_file_result);
 }
 
 #[tauri::command]
@@ -103,17 +105,20 @@ pub fn open_config_file_folder(app_handle: AppHandle) {
 
     let config_file_path = configs_dir.join(CONFIG_FILE_NAME);
 
-    info!(open_config_file_folder_result = ?opener::reveal(&config_file_path));
+    let open_config_file_folder_result = opener::reveal(&config_file_path);
+    info!(?open_config_file_folder_result);
 }
 
 #[instrument]
 #[tauri::command]
 pub fn reveal(path: PathBuf) {
-    info!(reveal_note_file_result = ?opener::reveal(&path));
+    let reveal_note_file_result = opener::reveal(&path);
+    info!(?reveal_note_file_result);
 }
 
 #[instrument]
 #[tauri::command]
 pub fn open(path: PathBuf) {
-    info!(open_note_file_result = ?opener::open(&path));
+    let open_note_file_result = opener::open(&path);
+    info!(?open_note_file_result);
 }
