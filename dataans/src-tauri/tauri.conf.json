@@ -50,7 +50,7 @@
         "height": 700,
         "x": 0,
         "y": 0,
-        "closable": false,
+        "closable": true,
         "maximized": true,
         "alwaysOnTop": false
       }
