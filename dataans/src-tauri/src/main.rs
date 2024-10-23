@@ -43,6 +43,7 @@ fn toggle_app_visibility(app: &AppHandle) -> Result<()> {
         } else {
             info!("Show main window");
             window.show()?;
+            window.set_focus()?;
             item_handle.set_title(WINDOW_HIDE_TITLE)?;
         }
     } else {
