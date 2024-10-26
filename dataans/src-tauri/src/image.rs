@@ -2,7 +2,7 @@ use std::path::PathBuf;
 
 use arboard::Clipboard;
 use image::{ImageBuffer, Rgba};
-use tauri::AppHandle;
+use tauri::{AppHandle, Manager};
 use uuid::Uuid;
 
 use crate::IMAGED_DIR;
@@ -14,7 +14,7 @@ pub fn gen_random_avatar(app_handle: AppHandle) -> PathBuf {
     let avatar_name = format!("{}.png", Uuid::new_v4());
 
     let avatar_path = app_handle
-        .path_resolver()
+        .path()
         .app_data_dir()
         .unwrap_or_default()
         .join(IMAGED_DIR)
@@ -33,7 +33,7 @@ pub fn handle_clipboard_image(app_handle: AppHandle) -> PathBuf {
     let image_data = clipboard.get_image().expect("Image data");
 
     let image_path = app_handle
-        .path_resolver()
+        .path()
         .app_data_dir()
         .unwrap_or_default()
         .join(IMAGED_DIR)

@@ -13,7 +13,7 @@ use wasm_bindgen::JsValue;
 fn convert_file_src(image_path: impl AsRef<str>) -> String {
     #[cfg(windows_is_host_os)]
     {
-        format!("https://asset.localhost/{}", image_path.as_ref())
+        format!("http://asset.localhost/{}", image_path.as_ref())
     }
     #[cfg(not(windows_is_host_os))]
     {
@@ -34,7 +34,7 @@ pub fn convert_file_url(image_path: impl AsRef<str>) -> String {
 
 #[wasm_bindgen]
 extern "C" {
-    #[wasm_bindgen(js_namespace = ["window", "__TAURI__", "tauri"])]
+    #[wasm_bindgen(js_namespace = ["window", "__TAURI__", "core"])]
     async fn invoke(cmd: &str, args: JsValue) -> JsValue;
 }
 

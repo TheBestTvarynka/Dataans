@@ -7,15 +7,11 @@ edition = "2021"
 repository = "https://github.com/TheBestTvarynka/dataans"
 
 [build-dependencies]
-tauri-build = { version = "1", features = [] }
+tauri-build = { version = "2", features = [] }
 
 [dependencies]
-tauri = { version = "1", features = [
-    "protocol-asset",
-    "shell-open",
-    "fs-all",
-    "system-tray",
-    "global-shortcut",
+tauri = { version = "2", features = [
+    "protocol-asset", "tray-icon",
 ] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
@@ -39,7 +35,12 @@ syntect = { version = "5.2", default-features = false, features = [
     "default-fancy",
     "metadata",
 ] }
+tauri-plugin-fs = "2"
+tauri-plugin-shell = "2"
 
 [features]
 # This feature is used for production builds or when a dev server is not specified, DO NOT REMOVE!!
 custom-protocol = ["tauri/custom-protocol"]
+
+[target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
+tauri-plugin-global-shortcut = "2"
