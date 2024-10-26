@@ -2,47 +2,30 @@
   "build": {
     "beforeDevCommand": "trunk serve",
     "beforeBuildCommand": "trunk build",
-    "devPath": "http://localhost:1420",
-    "distDir": "../dist",
-    "withGlobalTauri": true
+    "frontendDist": "../dist",
+    "devUrl": "http://localhost:1420"
   },
-  "package": {
-    "productName": "dataans",
-    "version": "0.1.0"
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "resources": [
+      "resources/**/*"
+    ],
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ]
   },
-  "tauri": {
-    "allowlist": {
-      "all": false,
-      "shell": {
-        "all": false,
-        "open": true
-      },
-      "protocol": {
-        "asset": true,
-        "assetScope": [
-          "$APPCACHE/**",
-          "$RESOURCE/**",
-          "$APPDATA/**"
-        ]
-      },
-      "fs": {
-        "all": true,
-        "scope": [
-          "$HOME/.config/dataans/*",
-          "$APPCACHE/**",
-          "$RESOURCE/**"
-        ],
-        "readFile": true,
-        "writeFile": true,
-        "readDir": true,
-        "copyFile": true,
-        "createDir": true,
-        "removeDir": true,
-        "removeFile": true,
-        "renameFile": true,
-        "exists": true
-      }
-    },
+  "productName": "dataans",
+  "mainBinaryName": "dataans",
+  "version": "0.1.0",
+  "identifier": "com.tbt.dataans",
+  "plugins": {},
+  "app": {
+    "withGlobalTauri": true,
     "windows": [
       {
         "title": "dataans",
@@ -56,24 +39,17 @@
       }
     ],
     "security": {
+      "assetProtocol": {
+        "scope": [
+          "$APPCACHE/**",
+          "$RESOURCE/**",
+          "$APPDATA/**"
+        ],
+        "enable": true
+      },
       "csp": null
     },
-    "bundle": {
-      "active": true,
-      "targets": "all",
-      "identifier": "com.tbt.dataans",
-      "icon": [
-        "icons/32x32.png",
-        "icons/128x128.png",
-        "icons/128x128@2x.png",
-        "icons/icon.icns",
-        "icons/icon.ico"
-      ],
-      "resources": [
-        "resources/*"
-      ]
-    },
-    "systemTray": {
+    "trayIcon": {
       "iconPath": "icons/icon.png",
       "iconAsTemplate": true
     }

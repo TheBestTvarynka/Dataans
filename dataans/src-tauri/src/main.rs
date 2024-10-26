@@ -10,10 +10,9 @@ mod dataans;
 mod file;
 mod image;
 
-use tauri::{
-    AppHandle, CustomMenuItem, GlobalShortcutManager, Manager, Result, RunEvent, SystemTray, SystemTrayEvent,
-    SystemTrayMenu, SystemTrayMenuItem,
-};
+use tauri::menu::{MenuItemBuilder, MenuBuilder};
+use tauri::tray::TrayIconBuilder;
+use tauri::{AppHandle, Manager, Result, RunEvent};
 
 const LOGGING_ENV_VAR_NAME: &str = "DATAANS_LOG";
 const DEFAULT_LOG_LEVEL: &str = "dataans=warn";
@@ -22,8 +21,7 @@ const MAIN_WINDOW_NAME: &str = "main";
 
 const WINDOW_VISIBILITY_MENU_ITEM_ID: &str = "visibility";
 const WINDOW_QUIT_MENU_ITEM_ID: &str = "quit";
-const WINDOW_HIDE_TITLE: &str = "Hide";
-const WINDOW_SHOW_TITLE: &str = "Show";
+const WINDOW_VISIBILITY_TITLE: &str = "Toggle";
 const WINDOW_QUIT_TITLE: &str = "Quit";
 
 const IMAGED_DIR: &str = "images";
@@ -33,18 +31,15 @@ const CONFIG_FILE_NAME: &str = "config.toml";
 const LOGS_DIR: &str = "logs";
 
 fn toggle_app_visibility(app: &AppHandle) -> Result<()> {
-    if let Some(window) = app.get_window(MAIN_WINDOW_NAME) {
-        let item_handle = app.tray_handle().get_item(WINDOW_VISIBILITY_MENU_ITEM_ID);
+    if let Some(window) = app.get_webview_window(MAIN_WINDOW_NAME) {
 
         if window.is_visible().unwrap_or(true) {
             info!("Hide main window");
             window.hide()?;
-            item_handle.set_title(WINDOW_SHOW_TITLE)?;
         } else {
             info!("Show main window");
             window.show()?;
             window.set_focus()?;
-            item_handle.set_title(WINDOW_HIDE_TITLE)?;
         }
     } else {
         error!("{MAIN_WINDOW_NAME} window not found!");
@@ -71,66 +66,71 @@ fn init_tracing() {
     let registry = tracing_subscriber::registry().with(stdout_layer);
 
     // `dataans.log` layer
-    let context = tauri::generate_context!();
-    let app_data = tauri::api::path::app_data_dir(context.config()).expect("APP_DATA directory should be defined.");
+    // let context = tauri::generate_context!();
+    // let app_data = tauri::api::path::app_data_dir(context.config()).expect("APP_DATA directory should be defined.");
 
-    if !app_data.exists() {
-        match fs::create_dir(&app_data) {
-            Ok(()) => println!("Successfully created app data directory: {:?}", app_data),
-            Err(err) => eprintln!("Filed to create app data directory: {:?}. Path: {:?}", err, app_data),
-        }
-    }
-    let logs_dir = app_data.join(LOGS_DIR);
-    if !logs_dir.exists() {
-        match fs::create_dir(&logs_dir) {
-            Ok(()) => println!("Successfully created logs directory: {:?}", logs_dir),
-            Err(err) => eprintln!("Filed to create logs directory: {:?}. Path: {:?}", err, logs_dir),
-        }
-    }
+    // if !app_data.exists() {
+    //     match fs::create_dir(&app_data) {
+    //         Ok(()) => println!("Successfully created app data directory: {:?}", app_data),
+    //         Err(err) => eprintln!("Filed to create app data directory: {:?}. Path: {:?}", err, app_data),
+    //     }
+    // }
+    // let logs_dir = app_data.join(LOGS_DIR);
+    // if !logs_dir.exists() {
+    //     match fs::create_dir(&logs_dir) {
+    //         Ok(()) => println!("Successfully created logs directory: {:?}", logs_dir),
+    //         Err(err) => eprintln!("Filed to create logs directory: {:?}. Path: {:?}", err, logs_dir),
+    //     }
+    // }
 
-    let log_file = logs_dir.join("dataans.log");
-    match OpenOptions::new().create(true).append(true).open(&log_file) {
-        Ok(log_file) => {
-            let log_file_layer = tracing_subscriber::fmt::layer().pretty().with_writer(log_file);
-            registry.with(log_file_layer).with(logging_filter).init();
-        }
-        Err(e) => {
-            eprintln!("Couldn't open log file: {e}. Path: {:?}.", log_file);
+    // let log_file = logs_dir.join("dataans.log");
+    // match OpenOptions::new().create(true).append(true).open(&log_file) {
+    //     Ok(log_file) => {
+    //         let log_file_layer = tracing_subscriber::fmt::layer().pretty().with_writer(log_file);
+    //         registry.with(log_file_layer).with(logging_filter).init();
+    //     }
+    //     Err(e) => {
+    //         eprintln!("Couldn't open log file: {e}. Path: {:?}.", log_file);
             registry.with(logging_filter).init();
-        }
-    }
+    //     }
+    // }
 }
 
 fn main() {
     init_tracing();
 
-    let quit = CustomMenuItem::new(WINDOW_QUIT_MENU_ITEM_ID.to_string(), WINDOW_QUIT_TITLE);
-    let hide = CustomMenuItem::new(WINDOW_VISIBILITY_MENU_ITEM_ID.to_string(), WINDOW_HIDE_TITLE);
-    let tray_menu = SystemTrayMenu::new()
-        .add_item(quit)
-        .add_native_item(SystemTrayMenuItem::Separator)
-        .add_item(hide);
-
-    let tray = SystemTray::new().with_menu(tray_menu);
-
     tauri::Builder::default()
-        .system_tray(tray)
-        .on_system_tray_event(|app, event| match event {
-            SystemTrayEvent::LeftClick { .. } | SystemTrayEvent::DoubleClick { .. } => {
-                toggle_app_visibility(app).unwrap()
+        .plugin(tauri_plugin_shell::init())
+        .plugin(tauri_plugin_fs::init())
+        .setup(|app| {
+            let toggle_visibility = MenuItemBuilder::with_id(WINDOW_VISIBILITY_MENU_ITEM_ID, WINDOW_VISIBILITY_TITLE).build(app)?;
+            let quit = MenuItemBuilder::with_id(WINDOW_QUIT_MENU_ITEM_ID, WINDOW_QUIT_TITLE).build(app)?;
+
+            let menu = MenuBuilder::new(app).items(&[&toggle_visibility, &quit]).build()?;
+
+            if let Some(tray_icon) = app.tray_by_id("main") {
+                tray_icon.set_menu(Some(menu)).unwrap();
+                tray_icon.on_menu_event(move |app, event| match event.id().as_ref() {
+                    WINDOW_VISIBILITY_MENU_ITEM_ID => {
+                        toggle_app_visibility(app).unwrap()
+                    },
+                    WINDOW_QUIT_MENU_ITEM_ID => {
+                        info!("Exiting the app...");
+
+                        app.cleanup_before_exit();
+                        std::process::exit(0);
+                    },
+                    event_id => warn!(?event_id, "Unknown tray event id"),
+                });
+            } else {
+                warn!("Cannot find the 'main' try icon :(");
             }
-            SystemTrayEvent::MenuItemClick { id, .. } => match id.as_str() {
-                WINDOW_QUIT_MENU_ITEM_ID => {
-                    std::process::exit(0);
-                }
-                WINDOW_VISIBILITY_MENU_ITEM_ID => toggle_app_visibility(app).unwrap(),
-                _ => {}
-            },
-            _ => {}
+
+            Ok(())
         })
-        .on_window_event(|event| match event.event() {
+        .on_window_event(|window, event| match event {
             tauri::WindowEvent::CloseRequested { api, .. } => {
-                event.window().hide().unwrap();
+                window.hide().unwrap();
                 api.prevent_close();
             }
             _ => {}
@@ -154,16 +154,16 @@ fn main() {
         .expect("error while building tauri application")
         .run(|app_handle, event| match event {
             RunEvent::Ready => {
-                let app_handle = app_handle.clone();
-                let app_toggle = crate::config::load_config_inner(&app_handle).app.app_toggle;
-                debug!(?app_toggle);
+                // let app_handle = app_handle.clone();
+                // let app_toggle = crate::config::load_config_inner(&app_handle).app.app_toggle;
+                // debug!(?app_toggle);
 
-                app_handle
-                    .global_shortcut_manager()
-                    .register(&app_toggle, move || {
-                        toggle_app_visibility(&app_handle).unwrap();
-                    })
-                    .unwrap();
+                // app_handle
+                //     .global_shortcut_manager()
+                //     .register(&app_toggle, move || {
+                //         toggle_app_visibility(&app_handle).unwrap();
+                //     })
+                //     .unwrap();
             }
             RunEvent::ExitRequested { api, .. } => {
                 api.prevent_exit();

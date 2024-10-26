@@ -44,10 +44,10 @@ pub fn init_dataans_plugin<R: Runtime>() -> TauriPlugin<R> {
             note::search_notes_in_space,
             note::search_notes,
         ])
-        .setup(|app_handle| {
+        .setup(|app_handle, _api| {
             info!("Starting app setup...");
 
-            let path_resolver = app_handle.path_resolver();
+            let path_resolver = app_handle.path();
             let app_data = path_resolver.app_data_dir().unwrap_or_default();
             debug!(?app_data);
             if !app_data.exists() {
@@ -90,46 +90,46 @@ pub fn init_dataans_plugin<R: Runtime>() -> TauriPlugin<R> {
                 }
             }
 
-            let config_file = configs_dir.join(CONFIG_FILE_NAME);
-            if !config_file.exists() {
-                if let Some(default_config) = path_resolver.resolve_resource("resources/configs/config.toml") {
-                    if let Err(err) = fs::copy(&default_config, &config_file) {
-                        error!(
-                            ?err,
-                            ?default_config,
-                            ?config_file,
-                            "Cannot create the default config file"
-                        );
-                    } else {
-                        info!(?config_file, "Successfully created default config file");
-                    }
-                } else {
-                    error!(
-                        "Cannot to resolve the default config file. You need to fix it manually or reinstall the app"
-                    );
-                }
-            }
+            // let config_file = configs_dir.join(CONFIG_FILE_NAME);
+            // if !config_file.exists() {
+            //     if let Some(default_config) = path_resolver.resolve("resources/configs/config.toml") {
+            //         if let Err(err) = fs::copy(&default_config, &config_file) {
+            //             error!(
+            //                 ?err,
+            //                 ?default_config,
+            //                 ?config_file,
+            //                 "Cannot create the default config file"
+            //             );
+            //         } else {
+            //             info!(?config_file, "Successfully created default config file");
+            //         }
+            //     } else {
+            //         error!(
+            //             "Cannot to resolve the default config file. You need to fix it manually or reinstall the app"
+            //         );
+            //     }
+            // }
 
-            let config = crate::config::read_config(config_file);
-            let theme_file = configs_dir.join(&config.appearance.theme);
-            if !theme_file.exists() {
-                if let Some(default_theme) = path_resolver.resolve_resource("resources/configs/theme_dark.toml") {
-                    if let Err(err) = fs::copy(&default_theme, &theme_file) {
-                        error!(
-                            ?err,
-                            ?default_theme,
-                            ?theme_file,
-                            "Cannot create the default theme file"
-                        );
-                    } else {
-                        info!(?theme_file, "Successfully created default theme file");
-                    }
-                } else {
-                    error!(
-                        "Cannot to resolve the default theme file. You need to fix it manually or reinstall the app"
-                    );
-                }
-            }
+            // let config = crate::config::read_config(config_file);
+            // let theme_file = configs_dir.join(&config.appearance.theme);
+            // if !theme_file.exists() {
+            //     if let Some(default_theme) = path_resolver.resolve("resources/configs/theme_dark.toml") {
+            //         if let Err(err) = fs::copy(&default_theme, &theme_file) {
+            //             error!(
+            //                 ?err,
+            //                 ?default_theme,
+            //                 ?theme_file,
+            //                 "Cannot create the default theme file"
+            //             );
+            //         } else {
+            //             info!(?theme_file, "Successfully created default theme file");
+            //         }
+            //     } else {
+            //         error!(
+            //             "Cannot to resolve the default theme file. You need to fix it manually or reinstall the app"
+            //         );
+            //     }
+            // }
 
             app_handle.manage(DataansState::init(db_dir));
 
