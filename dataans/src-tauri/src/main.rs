@@ -10,9 +10,12 @@ mod dataans;
 mod file;
 mod image;
 
+use std::path::Path;
+use std::str::FromStr;
+
 use tauri::menu::{MenuBuilder, MenuItemBuilder};
-use tauri::tray::TrayIconBuilder;
 use tauri::{AppHandle, Manager, Result, RunEvent};
+use tauri_plugin_global_shortcut::{GlobalShortcutExt, Shortcut, ShortcutState};
 
 const LOGGING_ENV_VAR_NAME: &str = "DATAANS_LOG";
 const DEFAULT_LOG_LEVEL: &str = "dataans=warn";
@@ -47,7 +50,7 @@ fn toggle_app_visibility(app: &AppHandle) -> Result<()> {
     Ok(())
 }
 
-fn init_tracing() {
+fn init_tracing(app_data: &Path) {
     use std::fs::OpenOptions;
     use std::{fs, io};
 
@@ -65,43 +68,40 @@ fn init_tracing() {
     let registry = tracing_subscriber::registry().with(stdout_layer);
 
     // `dataans.log` layer
-    // let context = tauri::generate_context!();
-    // let app_data = tauri::api::path::app_data_dir(context.config()).expect("APP_DATA directory should be defined.");
+    if !app_data.exists() {
+        match fs::create_dir(&app_data) {
+            Ok(()) => println!("Successfully created app data directory: {:?}", app_data),
+            Err(err) => eprintln!("Filed to create app data directory: {:?}. Path: {:?}", err, app_data),
+        }
+    }
+    let logs_dir = app_data.join(LOGS_DIR);
+    if !logs_dir.exists() {
+        match fs::create_dir(&logs_dir) {
+            Ok(()) => println!("Successfully created logs directory: {:?}", logs_dir),
+            Err(err) => eprintln!("Filed to create logs directory: {:?}. Path: {:?}", err, logs_dir),
+        }
+    }
 
-    // if !app_data.exists() {
-    //     match fs::create_dir(&app_data) {
-    //         Ok(()) => println!("Successfully created app data directory: {:?}", app_data),
-    //         Err(err) => eprintln!("Filed to create app data directory: {:?}. Path: {:?}", err, app_data),
-    //     }
-    // }
-    // let logs_dir = app_data.join(LOGS_DIR);
-    // if !logs_dir.exists() {
-    //     match fs::create_dir(&logs_dir) {
-    //         Ok(()) => println!("Successfully created logs directory: {:?}", logs_dir),
-    //         Err(err) => eprintln!("Filed to create logs directory: {:?}. Path: {:?}", err, logs_dir),
-    //     }
-    // }
-
-    // let log_file = logs_dir.join("dataans.log");
-    // match OpenOptions::new().create(true).append(true).open(&log_file) {
-    //     Ok(log_file) => {
-    //         let log_file_layer = tracing_subscriber::fmt::layer().pretty().with_writer(log_file);
-    //         registry.with(log_file_layer).with(logging_filter).init();
-    //     }
-    //     Err(e) => {
-    //         eprintln!("Couldn't open log file: {e}. Path: {:?}.", log_file);
-    registry.with(logging_filter).init();
-    //     }
-    // }
+    let log_file = logs_dir.join("dataans.log");
+    match OpenOptions::new().create(true).append(true).open(&log_file) {
+        Ok(log_file) => {
+            let log_file_layer = tracing_subscriber::fmt::layer().pretty().with_writer(log_file);
+            registry.with(log_file_layer).with(logging_filter).init();
+        }
+        Err(e) => {
+            eprintln!("Couldn't open log file: {e}. Path: {:?}.", log_file);
+            registry.with(logging_filter).init();
+        }
+    }
 }
 
 fn main() {
-    init_tracing();
-
     tauri::Builder::default()
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_fs::init())
         .setup(|app| {
+            init_tracing(&app.path().app_data_dir()?);
+
             // Set up system tray
             let toggle_visibility =
                 MenuItemBuilder::with_id(WINDOW_VISIBILITY_MENU_ITEM_ID, WINDOW_VISIBILITY_TITLE).build(app)?;
@@ -126,29 +126,27 @@ fn main() {
             }
 
             // Set up global shortcut
-            use std::str::FromStr;
-            use tauri_plugin_global_shortcut::{Code, GlobalShortcutExt, Modifiers, Shortcut, ShortcutState};
-
             let app_toggle = crate::config::load_config_inner(app.handle()).app.app_toggle;
             let visibility_shortcut = Shortcut::from_str(&app_toggle).unwrap();
             debug!(?visibility_shortcut);
 
             app.handle().plugin(
-                tauri_plugin_global_shortcut::Builder::new().with_handler(move |app, shortcut, event| {
-                    info!("Handle global shortcut.");
-                    if *shortcut == visibility_shortcut {
-                        match event.state() {
-                            ShortcutState::Pressed => {
-                                debug!("Global visibility shortcut has been pressed.");
-                                toggle_app_visibility(app).unwrap();
-                            }
-                            ShortcutState::Released => {
-                                debug!("Global visibility shortcut has been released.");
+                tauri_plugin_global_shortcut::Builder::new()
+                    .with_handler(move |app, shortcut, event| {
+                        info!("Handle global shortcut.");
+                        if *shortcut == visibility_shortcut {
+                            match event.state() {
+                                ShortcutState::Pressed => {
+                                    debug!("Global visibility shortcut has been pressed.");
+                                    toggle_app_visibility(app).unwrap();
+                                }
+                                ShortcutState::Released => {
+                                    debug!("Global visibility shortcut has been released.");
+                                }
                             }
                         }
-                    }
-                })
-                .build(),
+                    })
+                    .build(),
             )?;
 
             app.global_shortcut().register(visibility_shortcut)?;

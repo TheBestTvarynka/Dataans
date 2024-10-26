@@ -89,7 +89,7 @@ pub fn init_dataans_plugin<R: Runtime>() -> TauriPlugin<R> {
                     Err(err) => error!(?err, ?configs_dir, "Filed to create configs directory"),
                 }
             }
-            
+
             let config_file = configs_dir.join(CONFIG_FILE_NAME);
             if !config_file.exists() {
                 let resource_dir = path_resolver.resource_dir()?.join("resources");
