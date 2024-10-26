@@ -7,7 +7,11 @@ repository = "https://github.com/TheBestTvarynka/dataans"
 
 [dependencies]
 leptos = { version = "0.6", features = ["csr"] }
-leptos_hotkeys = "0.2"
+
+# TODO: The main branch contains an important fix which is not released yet.
+# Replace `git` link with proper version when a new releave will be published:
+leptos_hotkeys = { git = "https://github.com/gaucho-labs/leptos-hotkeys.git", rev = "05b1dcd" }
+
 gloo-storage = "0.3"
 wasm-bindgen = { version = "0.2" }
 wasm-bindgen-futures = "0.4"
