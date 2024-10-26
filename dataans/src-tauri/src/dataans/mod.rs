@@ -22,7 +22,7 @@ impl DataansState {
     pub fn init(db_dir: PathBuf) -> Self {
         let db_file = db_dir.join("dataans.db");
 
-        info!(?db_file, "database file");
+        info!(?db_file, "Database file");
 
         Self {
             db: Database::open_file(db_file).expect("Database opening should not fail."),
@@ -31,6 +31,9 @@ impl DataansState {
 }
 
 pub fn init_dataans_plugin<R: Runtime>() -> TauriPlugin<R> {
+    warn!("init_dataans_plugin");
+    debug!("init_dataans_plugin");
+
     Builder::new(APP_PLUGIN_NAME)
         .invoke_handler(tauri::generate_handler![
             space::list_spaces,

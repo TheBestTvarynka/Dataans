@@ -5,7 +5,20 @@
     "windows",
     "linux"
   ],
+  "windows": [
+    "main"
+  ],
   "permissions": [
+    "dataans:allow-list-spaces",
+    "dataans:allow-create-space",
+    "dataans:allow-update-space",
+    "dataans:allow-delete-space",
+    "dataans:allow-list-notes",
+    "dataans:allow-create-note",
+    "dataans:allow-update-note",
+    "dataans:allow-delete-note",
+    "dataans:allow-search-notes-in-space",
+    "dataans:allow-search-notes",
     "global-shortcut:default",
     "global-shortcut:allow-is-registered",
     "global-shortcut:allow-register",
