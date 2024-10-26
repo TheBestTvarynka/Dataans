@@ -10,7 +10,7 @@ mod dataans;
 mod file;
 mod image;
 
-use tauri::menu::{MenuItemBuilder, MenuBuilder};
+use tauri::menu::{MenuBuilder, MenuItemBuilder};
 use tauri::tray::TrayIconBuilder;
 use tauri::{AppHandle, Manager, Result, RunEvent};
 
@@ -32,7 +32,6 @@ const LOGS_DIR: &str = "logs";
 
 fn toggle_app_visibility(app: &AppHandle) -> Result<()> {
     if let Some(window) = app.get_webview_window(MAIN_WINDOW_NAME) {
-
         if window.is_visible().unwrap_or(true) {
             info!("Hide main window");
             window.hide()?;
@@ -91,7 +90,7 @@ fn init_tracing() {
     //     }
     //     Err(e) => {
     //         eprintln!("Couldn't open log file: {e}. Path: {:?}.", log_file);
-            registry.with(logging_filter).init();
+    registry.with(logging_filter).init();
     //     }
     // }
 }
@@ -103,7 +102,9 @@ fn main() {
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_fs::init())
         .setup(|app| {
-            let toggle_visibility = MenuItemBuilder::with_id(WINDOW_VISIBILITY_MENU_ITEM_ID, WINDOW_VISIBILITY_TITLE).build(app)?;
+            // Set up system tray
+            let toggle_visibility =
+                MenuItemBuilder::with_id(WINDOW_VISIBILITY_MENU_ITEM_ID, WINDOW_VISIBILITY_TITLE).build(app)?;
             let quit = MenuItemBuilder::with_id(WINDOW_QUIT_MENU_ITEM_ID, WINDOW_QUIT_TITLE).build(app)?;
 
             let menu = MenuBuilder::new(app).items(&[&toggle_visibility, &quit]).build()?;
@@ -111,20 +112,46 @@ fn main() {
             if let Some(tray_icon) = app.tray_by_id("main") {
                 tray_icon.set_menu(Some(menu)).unwrap();
                 tray_icon.on_menu_event(move |app, event| match event.id().as_ref() {
-                    WINDOW_VISIBILITY_MENU_ITEM_ID => {
-                        toggle_app_visibility(app).unwrap()
-                    },
+                    WINDOW_VISIBILITY_MENU_ITEM_ID => toggle_app_visibility(app).unwrap(),
                     WINDOW_QUIT_MENU_ITEM_ID => {
                         info!("Exiting the app...");
 
                         app.cleanup_before_exit();
                         std::process::exit(0);
-                    },
+                    }
                     event_id => warn!(?event_id, "Unknown tray event id"),
                 });
             } else {
                 warn!("Cannot find the 'main' try icon :(");
             }
+
+            // Set up global shortcut
+            use std::str::FromStr;
+            use tauri_plugin_global_shortcut::{Code, GlobalShortcutExt, Modifiers, Shortcut, ShortcutState};
+
+            let app_toggle = crate::config::load_config_inner(app.handle()).app.app_toggle;
+            let visibility_shortcut = Shortcut::from_str(&app_toggle).unwrap();
+            debug!(?visibility_shortcut);
+
+            app.handle().plugin(
+                tauri_plugin_global_shortcut::Builder::new().with_handler(move |app, shortcut, event| {
+                    info!("Handle global shortcut.");
+                    if *shortcut == visibility_shortcut {
+                        match event.state() {
+                            ShortcutState::Pressed => {
+                                debug!("Global visibility shortcut has been pressed.");
+                                toggle_app_visibility(app).unwrap();
+                            }
+                            ShortcutState::Released => {
+                                debug!("Global visibility shortcut has been released.");
+                            }
+                        }
+                    }
+                })
+                .build(),
+            )?;
+
+            app.global_shortcut().register(visibility_shortcut)?;
 
             Ok(())
         })
@@ -152,19 +179,7 @@ fn main() {
         ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application")
-        .run(|app_handle, event| match event {
-            RunEvent::Ready => {
-                // let app_handle = app_handle.clone();
-                // let app_toggle = crate::config::load_config_inner(&app_handle).app.app_toggle;
-                // debug!(?app_toggle);
-
-                // app_handle
-                //     .global_shortcut_manager()
-                //     .register(&app_toggle, move || {
-                //         toggle_app_visibility(&app_handle).unwrap();
-                //     })
-                //     .unwrap();
-            }
+        .run(|_app_handle, event| match event {
             RunEvent::ExitRequested { api, .. } => {
                 api.prevent_exit();
             }
