@@ -50,9 +50,7 @@ fn toggle_app_visibility(app: &AppHandle) -> Result<()> {
     Ok(())
 }
 
-fn init_tracing(
-    // app_data: &Path
-) {
+fn init_tracing(app_data: &Path) {
     use std::fs::OpenOptions;
     use std::{fs, io};
 
@@ -70,42 +68,40 @@ fn init_tracing(
     let registry = tracing_subscriber::registry().with(stdout_layer);
 
     // `dataans.log` layer
-    // if !app_data.exists() {
-    //     match fs::create_dir(&app_data) {
-    //         Ok(()) => println!("Successfully created app data directory: {:?}", app_data),
-    //         Err(err) => eprintln!("Filed to create app data directory: {:?}. Path: {:?}", err, app_data),
-    //     }
-    // }
-    // let logs_dir = app_data.join(LOGS_DIR);
-    // if !logs_dir.exists() {
-    //     match fs::create_dir(&logs_dir) {
-    //         Ok(()) => println!("Successfully created logs directory: {:?}", logs_dir),
-    //         Err(err) => eprintln!("Filed to create logs directory: {:?}. Path: {:?}", err, logs_dir),
-    //     }
-    // }
+    if !app_data.exists() {
+        match fs::create_dir(&app_data) {
+            Ok(()) => println!("Successfully created app data directory: {:?}", app_data),
+            Err(err) => eprintln!("Filed to create app data directory: {:?}. Path: {:?}", err, app_data),
+        }
+    }
+    let logs_dir = app_data.join(LOGS_DIR);
+    if !logs_dir.exists() {
+        match fs::create_dir(&logs_dir) {
+            Ok(()) => println!("Successfully created logs directory: {:?}", logs_dir),
+            Err(err) => eprintln!("Filed to create logs directory: {:?}. Path: {:?}", err, logs_dir),
+        }
+    }
 
-    // let log_file = logs_dir.join("dataans.log");
-    // match OpenOptions::new().create(true).append(true).open(&log_file) {
-    //     Ok(log_file) => {
-    //         let log_file_layer = tracing_subscriber::fmt::layer().pretty().with_writer(log_file);
-    //         registry.with(log_file_layer).with(logging_filter).init();
-    //     }
-    //     Err(e) => {
-    //         eprintln!("Couldn't open log file: {e}. Path: {:?}.", log_file);
+    let log_file = logs_dir.join("dataans.log");
+    match OpenOptions::new().create(true).append(true).open(&log_file) {
+        Ok(log_file) => {
+            let log_file_layer = tracing_subscriber::fmt::layer().pretty().with_writer(log_file);
+            registry.with(log_file_layer).with(logging_filter).init();
+        }
+        Err(e) => {
+            eprintln!("Couldn't open log file: {e}. Path: {:?}.", log_file);
             registry.with(logging_filter).init();
-        // }
-    // }
+        }
+    }
 }
 
 fn main() {
-    init_tracing();
-
     tauri::Builder::default()
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_fs::init())
         .plugin(dataans::init_dataans_plugin())
         .setup(|app| {
-            // init_tracing(&app.path().app_data_dir()?);
+            init_tracing(&app.path().app_data_dir()?);
 
             // Set up system tray
             let toggle_visibility =
