@@ -89,47 +89,41 @@ pub fn init_dataans_plugin<R: Runtime>() -> TauriPlugin<R> {
                     Err(err) => error!(?err, ?configs_dir, "Filed to create configs directory"),
                 }
             }
+            
+            let config_file = configs_dir.join(CONFIG_FILE_NAME);
+            if !config_file.exists() {
+                let resource_dir = path_resolver.resource_dir()?.join("resources");
+                let default_config = resource_dir.join("configs").join("config.toml");
 
-            // let config_file = configs_dir.join(CONFIG_FILE_NAME);
-            // if !config_file.exists() {
-            //     if let Some(default_config) = path_resolver.resolve("resources/configs/config.toml") {
-            //         if let Err(err) = fs::copy(&default_config, &config_file) {
-            //             error!(
-            //                 ?err,
-            //                 ?default_config,
-            //                 ?config_file,
-            //                 "Cannot create the default config file"
-            //             );
-            //         } else {
-            //             info!(?config_file, "Successfully created default config file");
-            //         }
-            //     } else {
-            //         error!(
-            //             "Cannot to resolve the default config file. You need to fix it manually or reinstall the app"
-            //         );
-            //     }
-            // }
+                if let Err(err) = fs::copy(&default_config, &config_file) {
+                    error!(
+                        ?err,
+                        ?default_config,
+                        ?config_file,
+                        "Cannot create the default config file"
+                    );
+                } else {
+                    info!(?config_file, "Successfully created default config file");
+                }
+            }
 
-            // let config = crate::config::read_config(config_file);
-            // let theme_file = configs_dir.join(&config.appearance.theme);
-            // if !theme_file.exists() {
-            //     if let Some(default_theme) = path_resolver.resolve("resources/configs/theme_dark.toml") {
-            //         if let Err(err) = fs::copy(&default_theme, &theme_file) {
-            //             error!(
-            //                 ?err,
-            //                 ?default_theme,
-            //                 ?theme_file,
-            //                 "Cannot create the default theme file"
-            //             );
-            //         } else {
-            //             info!(?theme_file, "Successfully created default theme file");
-            //         }
-            //     } else {
-            //         error!(
-            //             "Cannot to resolve the default theme file. You need to fix it manually or reinstall the app"
-            //         );
-            //     }
-            // }
+            let config = crate::config::read_config(config_file);
+            let theme_file = configs_dir.join(&config.appearance.theme);
+            if !theme_file.exists() {
+                let resource_dir = path_resolver.resource_dir()?.join("resources");
+                let default_theme = resource_dir.join("configs").join("theme_dark.toml");
+
+                if let Err(err) = fs::copy(&default_theme, &theme_file) {
+                    error!(
+                        ?err,
+                        ?default_theme,
+                        ?theme_file,
+                        "Cannot create the default theme file"
+                    );
+                } else {
+                    info!(?theme_file, "Successfully created default theme file");
+                }
+            }
 
             app_handle.manage(DataansState::init(db_dir));
 
