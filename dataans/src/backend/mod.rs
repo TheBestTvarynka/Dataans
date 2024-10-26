@@ -13,7 +13,7 @@ use wasm_bindgen::JsValue;
 fn convert_file_src(image_path: impl AsRef<str>) -> String {
     #[cfg(windows_is_host_os)]
     {
-        format!("https://asset.localhost/{}", image_path.as_ref())
+        format!("http://asset.localhost/{}", image_path.as_ref())
     }
     #[cfg(not(windows_is_host_os))]
     {

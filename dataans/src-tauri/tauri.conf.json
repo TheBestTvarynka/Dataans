@@ -41,9 +41,9 @@
     "security": {
       "assetProtocol": {
         "scope": [
-          "$APPCACHE/**",
-          "$RESOURCE/**",
-          "$APPDATA/**"
+          "$APPCACHE/**/*",
+          "$RESOURCE/**/*",
+          "$APPDATA/**/*"
         ],
         "enable": true
       },
