@@ -160,9 +160,7 @@ pub fn TextArea(
 
 type TextFormatFn = &'static dyn Fn(String, String, String, u32) -> (String, Option<(u32, u32)>);
 
-fn get_text_format_fn(
-    event: KeyboardEvent,
-) -> Option<TextFormatFn> {
+fn get_text_format_fn(event: KeyboardEvent) -> Option<TextFormatFn> {
     if event.ctrl_key() && event.key() == "k" {
         Some(&move |pre_text, selected_text, after_text, start| {
             let selection_start = start + selected_text.len() as u32 + 3 /* "[](" */;

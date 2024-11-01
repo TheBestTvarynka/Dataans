@@ -154,9 +154,11 @@ fn main() {
 
             Ok(())
         })
-        .on_window_event(|window, event| if let tauri::WindowEvent::CloseRequested { api, .. } = event {
-            window.hide().unwrap();
-            api.prevent_close();
+        .on_window_event(|window, event| {
+            if let tauri::WindowEvent::CloseRequested { api, .. } = event {
+                window.hide().unwrap();
+                api.prevent_close();
+            }
         })
         .invoke_handler(tauri::generate_handler![
             config::theme,
@@ -174,7 +176,9 @@ fn main() {
         ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application")
-        .run(|_app_handle, event| if let RunEvent::ExitRequested { api, .. } = event {
+        .run(|_app_handle, event| {
+            if let RunEvent::ExitRequested { api, .. } = event {
                 api.prevent_exit();
+            }
         })
 }

@@ -29,14 +29,12 @@ pub struct Theme(HashMap<String, String>);
 impl Theme {
     /// Converts [Theme] to the CSS string.
     pub fn to_css(&self) -> String {
-        self.0
-            .iter()
-            .fold(String::new(), |mut css, (key, value)| {
-                use std::fmt::Write;
+        self.0.iter().fold(String::new(), |mut css, (key, value)| {
+            use std::fmt::Write;
 
-                let _ = write!(css, "--{}: {};", key, value);
-                css
-            })
+            let _ = write!(css, "--{}: {};", key, value);
+            css
+        })
     }
 }
 
