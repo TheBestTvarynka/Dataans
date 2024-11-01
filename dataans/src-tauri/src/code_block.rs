@@ -14,8 +14,7 @@ pub fn parse_code(lang: String, code: String) -> String {
     } else if let Some(syntax) = SYNTAXES.find_syntax_by_extension(&lang) {
         syntax
     } else {
-        SYNTAXES
-            .find_syntax_plain_text()
+        SYNTAXES.find_syntax_plain_text()
     };
 
     let html_rs = highlighted_html_for_string(&code, &SYNTAXES, syntax, &THEMES.themes["Solarized (dark)"])
