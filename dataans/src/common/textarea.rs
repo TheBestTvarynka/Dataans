@@ -12,6 +12,17 @@ pub fn TextArea(
     key_down: impl Fn(KeyboardEvent) -> () + 'static,
 ) -> impl IntoView {
     let (disabled, set_disabled) = create_signal(false);
+    let ref_input = create_node_ref::<html::Textarea>();
+
+    create_effect(move |_| {
+        if let Some(ref_input) = ref_input.get() {
+            let _ = ref_input.on_mount(|input| {
+                if let Err(err) = input.focus() {
+                    warn!("Can not focus TextArea: {:?}", err);
+                }
+            });
+        }
+    });
 
     let elem_id = id.clone();
     let paste_handler = move |e: leptos::ev::Event| {
@@ -127,6 +138,7 @@ pub fn TextArea(
         <div class="resizable-textarea">
             <textarea
                 id=id.clone()
+                _ref=ref_input
                 type="text"
                 placeholder="Type a note..."
                 class="resizable-textarea-textarea"
