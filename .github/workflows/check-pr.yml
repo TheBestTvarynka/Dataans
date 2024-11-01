@@ -1,0 +1,32 @@
+name: Check
+on:
+  pull_request:
+    branches:
+      - main
+jobs:
+  check:
+    name: Check code
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: 'cd'
+      run: 'cd dataans'
+
+    - name: 'Add nightly channel'
+      run: 'rustup toolchain install nightly'
+
+    - name: 'Add nightly fmt'
+      run: 'rustup component add rustfmt --toolchain nightly-x86_64-unknown-linux-gnu'
+
+    - name: 'Fmt'
+      run: 'cargo +nightly fmt --all -- --check'
+
+    - name: 'Clippy'
+      run: 'cargo clippy --all-targets -- -D warnings'
+
+    # We do not have tests yet. Uncomment when we have.
+    # - name: 'Tests'
+    #   run: 'cargo test'
