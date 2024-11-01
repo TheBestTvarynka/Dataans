@@ -6,6 +6,10 @@ edition = "2021"
 repository = "https://github.com/TheBestTvarynka/dataans"
 
 [dependencies]
+serde = { workspace = true, features = ["derive"] }
+time = { workspace = true, features = ["macros", "wasm-bindgen"] }
+uuid = { workspace = true, features = ["v4"] }
+
 leptos = { version = "0.6", features = ["csr"] }
 
 # TODO: The main branch contains an important fix which is not released yet.
@@ -16,15 +20,12 @@ gloo-storage = "0.3"
 wasm-bindgen = { version = "0.2" }
 wasm-bindgen-futures = "0.4"
 js-sys = "0.3"
-serde = { version = "1", features = ["derive"] }
 serde-wasm-bindgen = "0.6"
 console_error_panic_hook = "0.1"
 log = "0.4"
 wasm-logger = "0.2"
 common = { path = "./common" }
 markdown = { version = "1.0.0-alpha.17", features = ["log"] }
-time = { version = "0.3", features = ["macros", "wasm-bindgen"] }
-uuid = { version = "1.10", features = ["v4"] }
 web-sys = { version = "0.3", features = [
     "Clipboard",
     "Navigator",
@@ -44,4 +45,10 @@ web-sys = { version = "0.3", features = [
 futures = { version = "0.3", features = ["std", "alloc"] }
 
 [workspace]
+resolver = "2"
 members = ["common", "src-tauri"]
+
+[workspace.dependencies]
+time = "0.3"
+uuid = "1.10"
+serde = "1"
