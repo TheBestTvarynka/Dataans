@@ -15,8 +15,7 @@ pub fn parse_code(lang: String, code: String) -> String {
         syntax
     } else {
         SYNTAXES
-            .find_syntax_by_extension("txt")
-            .expect("The default plain text syntax should present.")
+            .find_syntax_plain_text()
     };
 
     let html_rs = highlighted_html_for_string(&code, &SYNTAXES, syntax, &THEMES.themes["Solarized (dark)"])
