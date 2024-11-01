@@ -12,9 +12,6 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
 
-    - name: 'cd'
-      run: 'cd dataans'
-
     - name: 'Add nightly channel'
       run: 'rustup toolchain install nightly'
 

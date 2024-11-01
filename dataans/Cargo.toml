@@ -49,6 +49,6 @@ resolver = "2"
 members = ["common", "src-tauri"]
 
 [workspace.dependencies]
-time = "0.3"
-uuid = "1.10"
+time = { version = "0.3" , default-features = false }
+uuid = { version = "1.10", default-features = false }
 serde = "1"
