@@ -22,6 +22,17 @@ pub fn SpaceForm(
             .map(|s| s.avatar.to_string())
             .unwrap_or_else(|| "/public/default_space_avatar.png".to_string()),
     );
+    let ref_input = create_node_ref::<html::Input>();
+
+    create_effect(move |_| {
+        if let Some(ref_input) = ref_input.get() {
+            let _ = ref_input.on_mount(|input| {
+                if let Err(err) = input.focus() {
+                    warn!("Can not focus TextArea: {:?}", err);
+                }
+            });
+        }
+    });
 
     let generate_avatar = move || {
         spawn_local(async move {
@@ -82,6 +93,7 @@ pub fn SpaceForm(
             </div>
             <input
                 id=INPUT_ELEM_ID
+                _ref=ref_input
                 type="text"
                 placeholder="Space name"
                 class="input"
