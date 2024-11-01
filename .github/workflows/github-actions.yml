@@ -22,7 +22,7 @@ jobs:
       run: 'cd dataans && cargo +nightly fmt --all -- --check'
 
     - name: 'Clippy'
-      run: 'cd dataans && cargo clippy --all-targets -- -D warnings'
+      run: 'cd dataans && cargo clippy --all-targets --all -- -D warnings'
 
     # We do not have tests yet. Uncomment when we have.
     - name: 'Tests'
