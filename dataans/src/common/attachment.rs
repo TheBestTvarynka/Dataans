@@ -49,7 +49,7 @@ pub fn Attachment(
             <label for=format!("attachment_{}", id)>
                 <img alt="attach file" src="/public/icons/attachment.png" />
             </label>
-            <input id=format!("attachment_{}", id) type="file" multiple=true style="display: none" on:input=move |ev| handle_files_upload(ev) />
+            <input id=format!("attachment_{}", id) type="file" multiple=true style="display: none" on:input=handle_files_upload />
         </button>
     }
 }

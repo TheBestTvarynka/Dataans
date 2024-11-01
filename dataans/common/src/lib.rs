@@ -31,8 +31,12 @@ impl Theme {
     pub fn to_css(&self) -> String {
         self.0
             .iter()
-            .map(|(key, value)| format!("--{}: {};", key, value))
-            .collect()
+            .fold(String::new(), |mut css, (key, value)| {
+                use std::fmt::Write;
+
+                let _ = write!(css, "--{}: {};", key, value);
+                css
+            })
     }
 }
 

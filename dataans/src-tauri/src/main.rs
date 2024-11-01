@@ -69,7 +69,7 @@ fn init_tracing(app_data: &Path) {
 
     // `dataans.log` layer
     if !app_data.exists() {
-        match fs::create_dir(&app_data) {
+        match fs::create_dir(app_data) {
             Ok(()) => println!("Successfully created app data directory: {:?}", app_data),
             Err(err) => eprintln!("Filed to create app data directory: {:?}. Path: {:?}", err, app_data),
         }
@@ -154,12 +154,9 @@ fn main() {
 
             Ok(())
         })
-        .on_window_event(|window, event| match event {
-            tauri::WindowEvent::CloseRequested { api, .. } => {
-                window.hide().unwrap();
-                api.prevent_close();
-            }
-            _ => {}
+        .on_window_event(|window, event| if let tauri::WindowEvent::CloseRequested { api, .. } = event {
+            window.hide().unwrap();
+            api.prevent_close();
         })
         .invoke_handler(tauri::generate_handler![
             config::theme,
@@ -177,10 +174,7 @@ fn main() {
         ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application")
-        .run(|_app_handle, event| match event {
-            RunEvent::ExitRequested { api, .. } => {
+        .run(|_app_handle, event| if let RunEvent::ExitRequested { api, .. } = event {
                 api.prevent_exit();
-            }
-            _ => {}
         })
 }
