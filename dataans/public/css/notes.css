@@ -9,6 +9,7 @@
     border-left: 2px solid var(--notes-border-color);
     max-height: 100vh;
     flex-grow: 1;
+    overflow-x: hidden;
 }
 
 .notes-inner {
