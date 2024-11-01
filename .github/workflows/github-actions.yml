@@ -12,6 +12,9 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
 
+    - name: Set up dependencies
+      run: sudo apt-get update && sudo apt-get install -y libgtk-3-dev javascriptcoregtk-4.1 libsoup-3.0 webkit2gtk-4.1
+
     - name: 'Add nightly channel'
       run: 'rustup toolchain install nightly'
 
@@ -28,15 +31,17 @@ jobs:
     # - name: 'Tests'
     #   run: 'cargo test'
 
-  deploy:
-    name: Build app
-    runs-on: ubuntu-latest
-    needs: check
+# Some day I'll set up cross platform (matrix) app build with proper artifacts.
+# But currently I don't need it :)
+  # deploy:
+  #   name: Build app
+  #   runs-on: ubuntu-latest
+  #   needs: check
 
-    permissions:
-      contents: 'read'
-      id-token: 'write'
+  #   permissions:
+  #     contents: 'read'
+  #     id-token: 'write'
 
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v4
+  #   steps:
+  #   - name: Checkout
+  #     uses: actions/checkout@v4
