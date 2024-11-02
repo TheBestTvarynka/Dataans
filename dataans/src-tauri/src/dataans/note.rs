@@ -133,24 +133,21 @@ pub fn search_notes(state: State<'_, DataansState>, query: String) -> Result<Vec
         if note.text.as_ref().contains(&query) {
             let space = if let Some(space) = spaces.get(&note.space_id) {
                 space.clone()
-            } else {
-                let space = if let Some(space) = spaces_collection
-                    .find_one(doc! {
-                        "id": note.space_id.inner().to_string(),
-                    })
-                    .expect("Space notes querying should not fail")
-                {
-                    spaces.insert(note.space_id, space.clone());
-                    space
-                } else {
-                    warn!(
-                        "Space(id={}) does not exist. Skipping this note(id={})...",
-                        note.space_id.inner().to_string(),
-                        note.id.to_string()
-                    );
-                    continue;
-                };
+            } else if let Some(space) = spaces_collection
+                .find_one(doc! {
+                    "id": note.space_id.inner().to_string(),
+                })
+                .expect("Space notes querying should not fail")
+            {
+                spaces.insert(note.space_id, space.clone());
                 space
+            } else {
+                warn!(
+                    "Space(id={}) does not exist. Skipping this note(id={})...",
+                    note.space_id.inner().to_string(),
+                    note.id.to_string()
+                );
+                continue;
             };
 
             notes.push(NoteFull {

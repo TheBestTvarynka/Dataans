@@ -9,7 +9,7 @@ pub fn TextArea(
     id: String,
     text: Signal<String>,
     #[prop(into)] set_text: Callback<String, ()>,
-    key_down: impl Fn(KeyboardEvent) -> () + 'static,
+    key_down: impl Fn(KeyboardEvent) + 'static,
 ) -> impl IntoView {
     let (disabled, set_disabled) = create_signal(false);
     let ref_input = create_node_ref::<html::Textarea>();
@@ -56,7 +56,7 @@ pub fn TextArea(
                     } else {
                         text.push_str("![](");
                         text.push_str(&image_path);
-                        text.push_str(")");
+                        text.push(')');
                     }
 
                     set_text.call(text);
@@ -158,9 +158,9 @@ pub fn TextArea(
     }
 }
 
-fn get_text_format_fn(
-    event: KeyboardEvent,
-) -> Option<&'static dyn Fn(String, String, String, u32) -> (String, Option<(u32, u32)>)> {
+type TextFormatFn = &'static dyn Fn(String, String, String, u32) -> (String, Option<(u32, u32)>);
+
+fn get_text_format_fn(event: KeyboardEvent) -> Option<TextFormatFn> {
     if event.ctrl_key() && event.key() == "k" {
         Some(&move |pre_text, selected_text, after_text, start| {
             let selection_start = start + selected_text.len() as u32 + 3 /* "[](" */;
