@@ -44,7 +44,7 @@ pub fn AppInfoWindow(#[prop(into)] close: Callback<(), ()>) -> impl IntoView {
 
                 let KeyBindings { toggle_spaces_bar, create_space, edit_current_space, delete_current_space, select_next_list_item, select_prev_list_item, find_note, find_note_in_selected_space } = key_bindings;
                 let Appearance { theme } = appearance;
-                let App { app_toggle, always_on_top, hide_window_decorations } = app;
+                let App { app_toggle, always_on_top, hide_window_decorations, hide_taskbar_icon } = app;
 
                 view!{
                     <table class="app-window-config-table">
@@ -68,6 +68,12 @@ pub fn AppInfoWindow(#[prop(into)] close: Callback<(), ()>) -> impl IntoView {
                             <td>"Hide window decorations"</td>
                             <td>
                                 <span class="inline-code">{hide_window_decorations}</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>"Hide app taskbar icon"</td>
+                            <td>
+                                <span class="inline-code">{hide_taskbar_icon}</span>
                             </td>
                         </tr>
 

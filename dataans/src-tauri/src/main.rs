@@ -165,7 +165,15 @@ fn main() {
                 if let Some(window) = app.handle().get_webview_window(MAIN_WINDOW_NAME) {
                     window.set_decorations(false)?;
                 } else {
-                    error!("{MAIN_WINDOW_NAME} window not found! Cannot set 'always-on-top'.");
+                    error!("{MAIN_WINDOW_NAME} window not found! Cannot set 'hide-window-decorations'.");
+                }
+            }
+
+            if config.app.hide_taskbar_icon {
+                if let Some(window) = app.handle().get_webview_window(MAIN_WINDOW_NAME) {
+                    window.set_skip_taskbar(true)?;
+                } else {
+                    error!("{MAIN_WINDOW_NAME} window not found! Cannot set 'hide-taskbar-icon'.");
                 }
             }
 

@@ -128,6 +128,13 @@ pub struct App {
     /// Hide app window decorations.
     #[serde(default = "hide_window_decorations")]
     pub hide_window_decorations: bool,
+    /// Hide app icon on taskbar.
+    #[serde(default = "hide_taskbar_icon")]
+    pub hide_taskbar_icon: bool,
+}
+
+fn hide_taskbar_icon() -> bool {
+    false
 }
 
 fn hide_window_decorations() -> bool {

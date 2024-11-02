@@ -13,4 +13,5 @@ theme = "theme_dark.toml"
 [app]
 app-toggle = "F2"
 always-on-top = false
-hide-window-decorations = true
+hide-window-decorations = false
+hide-taskbar-icon = false
