@@ -5,7 +5,7 @@ mod note;
 pub mod note_preview;
 
 use common::note::UpdateNote;
-use common::space::Space as SpaceData;
+use common::space::{OwnedSpace, Space as SpaceData};
 use common::Config;
 use leptos::*;
 use wasm_bindgen::JsCast;
@@ -23,7 +23,11 @@ use crate::FindNoteMode;
 pub fn Notes(config: Config) -> impl IntoView {
     let global_state = expect_context::<RwSignal<GlobalState>>();
 
-    let (current_space, _) = create_slice(global_state, |state| state.selected_space.clone(), |_, _: ()| ());
+    let (current_space, set_selected_space_s) = create_slice(
+        global_state,
+        |state| state.selected_space.clone(),
+        |state, space| state.selected_space = Some(space),
+    );
 
     let (_, set_spaces) = create_slice(
         global_state,
@@ -58,6 +62,14 @@ pub fn Notes(config: Config) -> impl IntoView {
         |state| state.notes.clone(),
         |state, notes| state.notes = notes,
     );
+
+    let set_selected_space = move |space: OwnedSpace| {
+        let space_id = space.id;
+        set_selected_space_s.set(space);
+        spawn_local(async move {
+            set_notes.set(list_notes(space_id).await.expect("Notes listing should not fail"));
+        });
+    };
 
     let (_, delete_note) = create_slice(
         global_state,
@@ -124,6 +136,7 @@ pub fn Notes(config: Config) -> impl IntoView {
                         });
                         focus_element(SEARCH_NOTE_INPUT_ID);
                     }
+                    set_selected_space
                     config=config.clone()
                 />
             </Show>

@@ -13,6 +13,7 @@ pub fn Info(
     set_spaces: SignalSetter<Vec<OwnedSpace>>,
     delete_state_space: SignalSetter<SpaceId>,
     #[prop(into)] toggle_note_search: Callback<(), ()>,
+    #[prop(into)] set_selected_space: Callback<OwnedSpace, ()>,
     config: Config,
 ) -> impl IntoView {
     let (show_edit_modal, set_show_edit_modal) = create_signal(false);
@@ -88,6 +89,7 @@ pub fn Info(
                             space
                             on_cancel=move |_| set_show_edit_modal.set(false)
                             set_spaces
+                            set_selected_space
                             config
                         />
                     </Modal>

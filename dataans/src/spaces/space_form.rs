@@ -15,6 +15,7 @@ pub fn SpaceForm(
     space: Option<OwnedSpace>,
     #[prop(into)] on_cancel: Callback<(), ()>,
     set_spaces: SignalSetter<Vec<OwnedSpace>>,
+    set_selected_space: Callback<OwnedSpace, ()>,
     config: Config,
 ) -> impl IntoView {
     let (space_name, set_space_name) = create_signal(space.as_ref().map(|s| s.name.to_string()).unwrap_or_default());
@@ -57,21 +58,34 @@ pub fn SpaceForm(
                 })
                 .await
                 .expect("Space updating should not fail");
+
+                None
             } else {
+                let new_space_id = Uuid::new_v4();
                 create_space(Space {
-                    id: Uuid::new_v4().into(),
+                    id: new_space_id.into(),
                     name: name.into(),
                     created_at: OffsetDateTime::now_utc().into(),
                     avatar: avatar.into(),
                 })
                 .await
                 .expect("Space creation should not fail");
+
+                Some(new_space_id)
             }
         };
 
         spawn_local(async move {
-            action.await;
-            set_spaces.set(list_spaces().await.expect("list spaces should not fail"));
+            let new_space_id = action.await;
+            let spaces = list_spaces().await.expect("list spaces should not fail");
+            let new_current_space = new_space_id
+                .map(|new_space_id| spaces.iter().find(|space| *space.id.as_ref() == new_space_id).cloned())
+                .flatten();
+
+            set_spaces.set(spaces);
+            if let Some(space) = new_current_space {
+                set_selected_space.call(space);
+            }
         });
     };
 

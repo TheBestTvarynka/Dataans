@@ -18,6 +18,7 @@ pub fn Tools(
     set_spaces_minimized: SignalSetter<bool>,
     set_find_node_mode: SignalSetter<FindNoteMode>,
     set_query: SignalSetter<String>,
+    #[prop(into)] set_selected_space: Callback<OwnedSpace, ()>,
     config: Config,
 ) -> impl IntoView {
     let (show_modal, set_show_modal) = create_signal(false);
@@ -92,6 +93,7 @@ pub fn Tools(
                                 space=None
                                 on_cancel=move |_| set_show_modal.set(false)
                                 set_spaces
+                                set_selected_space
                                 config
                             />
                         </Modal>
