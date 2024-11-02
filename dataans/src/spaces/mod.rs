@@ -75,7 +75,7 @@ pub fn Spaces(
 
     view! {
         <div class="spaces-container">
-            <Tools set_spaces spaces_minimized set_spaces_minimized set_find_node_mode set_query=set_query.into() config=config.clone() />
+            <Tools set_spaces spaces_minimized set_spaces_minimized set_find_node_mode set_query=set_query.into() set_selected_space config=config.clone() />
             {move || match find_note_mode.get() {
                 FindNoteMode::None => view!{
                     <SpacesList config=config.clone() selected_space spaces spaces_minimized set_selected_space />

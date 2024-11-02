@@ -81,6 +81,13 @@ pub struct KeyBindings {
     /// Find note in the selected space.
     #[serde(default = "find_note_in_selected_space")]
     pub find_note_in_selected_space: String,
+    /// Regenerate space avatar image.
+    #[serde(default = "regenerate_space_avatar")]
+    pub regenerate_space_avatar: String,
+}
+
+fn regenerate_space_avatar() -> String {
+    "ControlLeft+keyR".into()
 }
 
 fn find_note_in_selected_space() -> String {
@@ -122,6 +129,27 @@ pub struct App {
     /// App toggle: show/hide app.
     #[serde(default = "app_toggle")]
     pub app_toggle: String,
+    /// Always on top.
+    #[serde(default = "always_on_top")]
+    pub always_on_top: bool,
+    /// Hide app window decorations.
+    #[serde(default = "hide_window_decorations")]
+    pub hide_window_decorations: bool,
+    /// Hide app icon on taskbar.
+    #[serde(default = "hide_taskbar_icon")]
+    pub hide_taskbar_icon: bool,
+}
+
+fn hide_taskbar_icon() -> bool {
+    false
+}
+
+fn hide_window_decorations() -> bool {
+    false
+}
+
+fn always_on_top() -> bool {
+    false
 }
 
 fn app_toggle() -> String {

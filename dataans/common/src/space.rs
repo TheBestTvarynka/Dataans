@@ -17,6 +17,12 @@ impl Id {
     }
 }
 
+impl AsRef<Uuid> for Id {
+    fn as_ref(&self) -> &Uuid {
+        &self.0
+    }
+}
+
 impl From<Uuid> for Id {
     fn from(value: Uuid) -> Self {
         Self(value)

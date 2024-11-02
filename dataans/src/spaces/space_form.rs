@@ -1,6 +1,7 @@
 use common::space::{OwnedSpace, Space, UpdateSpace};
+use common::Config;
 use leptos::*;
-use leptos_hotkeys::use_hotkeys;
+use leptos_hotkeys::{use_hotkeys, use_hotkeys_scoped};
 use time::OffsetDateTime;
 use uuid::Uuid;
 
@@ -14,6 +15,8 @@ pub fn SpaceForm(
     space: Option<OwnedSpace>,
     #[prop(into)] on_cancel: Callback<(), ()>,
     set_spaces: SignalSetter<Vec<OwnedSpace>>,
+    set_selected_space: Callback<OwnedSpace, ()>,
+    config: Config,
 ) -> impl IntoView {
     let (space_name, set_space_name) = create_signal(space.as_ref().map(|s| s.name.to_string()).unwrap_or_default());
     let (avatar_path, set_avatar_path) = create_signal(
@@ -55,26 +58,40 @@ pub fn SpaceForm(
                 })
                 .await
                 .expect("Space updating should not fail");
+
+                None
             } else {
+                let new_space_id = Uuid::new_v4();
                 create_space(Space {
-                    id: Uuid::new_v4().into(),
+                    id: new_space_id.into(),
                     name: name.into(),
                     created_at: OffsetDateTime::now_utc().into(),
                     avatar: avatar.into(),
                 })
                 .await
                 .expect("Space creation should not fail");
+
+                Some(new_space_id)
             }
         };
 
         spawn_local(async move {
-            action.await;
-            set_spaces.set(list_spaces().await.expect("list spaces should not fail"));
+            let new_space_id = action.await;
+            let spaces = list_spaces().await.expect("list spaces should not fail");
+            let new_current_space = new_space_id
+                .and_then(|new_space_id| spaces.iter().find(|space| *space.id.as_ref() == new_space_id).cloned());
+
+            set_spaces.set(spaces);
+            if let Some(space) = new_current_space {
+                set_selected_space.call(space);
+            }
         });
     };
 
     use_hotkeys!(("Escape") => move |_| on_cancel.call(()));
     use_hotkeys!(("Enter") => move |_| create_space());
+    let regenerate_space_avatar = config.key_bindings.regenerate_space_avatar.clone();
+    use_hotkeys!((regenerate_space_avatar) => move |_| generate_avatar());
 
     view! {
         <div class="create-space-window" on:load=move |_| info!("on_load")>

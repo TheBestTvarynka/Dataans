@@ -34,8 +34,7 @@
         "x": 0,
         "y": 0,
         "closable": true,
-        "maximized": true,
-        "alwaysOnTop": false
+        "maximized": true
       }
     ],
     "security": {

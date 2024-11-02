@@ -6,9 +6,14 @@ delete-current-space = "ControlLeft+Delete"
 select-prev-list-item = "AltLeft+Digit1"
 select-next-list-item = "AltLeft+Digit2"
 find-note = "ControlLeft+keyF"
+find-note-in-selected-space = "ControlLeft+keyM"
+regenerate-space-avatar = "ControlLeft+keyR"
 
 [appearance]
 theme = "theme_dark.toml"
 
 [app]
 app-toggle = "F2"
+always-on-top = false
+hide-window-decorations = false
+hide-taskbar-icon = false

@@ -13,6 +13,7 @@ pub fn Info(
     set_spaces: SignalSetter<Vec<OwnedSpace>>,
     delete_state_space: SignalSetter<SpaceId>,
     #[prop(into)] toggle_note_search: Callback<(), ()>,
+    #[prop(into)] set_selected_space: Callback<OwnedSpace, ()>,
     config: Config,
 ) -> impl IntoView {
     let (show_edit_modal, set_show_edit_modal) = create_signal(false);
@@ -30,17 +31,17 @@ pub fn Info(
 
     let current_space_name = current_space.name.to_string();
 
-    let key_bindings = config.key_bindings;
+    let key_bindings = &config.key_bindings;
 
-    use_hotkeys!((key_bindings.edit_current_space) => move |_| {
+    use_hotkeys!((key_bindings.edit_current_space.clone()) => move |_| {
         set_show_edit_modal.set(true);
     });
 
-    use_hotkeys!((key_bindings.delete_current_space) => move |_| {
+    use_hotkeys!((key_bindings.delete_current_space.clone()) => move |_| {
         set_show_delete_modal.set(true);
     });
 
-    use_hotkeys!((key_bindings.find_note_in_selected_space) => move |_| toggle_note_search.call(()));
+    use_hotkeys!((key_bindings.find_note_in_selected_space.clone()) => move |_| toggle_note_search.call(()));
 
     let space = Some(current_space.clone());
 
@@ -81,12 +82,15 @@ pub fn Info(
             </Show>
             <Show when=move || show_edit_modal.get()>{
                 let space = space.clone();
+                let config = config.clone();
                 view! {
                     <Modal>
                         <SpaceForm
                             space
                             on_cancel=move |_| set_show_edit_modal.set(false)
                             set_spaces
+                            set_selected_space
+                            config
                         />
                     </Modal>
                 }
