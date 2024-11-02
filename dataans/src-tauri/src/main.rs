@@ -161,6 +161,14 @@ fn main() {
                 }
             }
 
+            if config.app.hide_window_decorations {
+                if let Some(window) = app.handle().get_webview_window(MAIN_WINDOW_NAME) {
+                    window.set_decorations(false)?;
+                } else {
+                    error!("{MAIN_WINDOW_NAME} window not found! Cannot set 'always-on-top'.");
+                }
+            }
+
             Ok(())
         })
         .on_window_event(|window, event| {

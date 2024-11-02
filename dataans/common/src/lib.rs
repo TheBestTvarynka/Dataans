@@ -125,6 +125,13 @@ pub struct App {
     /// Always on top.
     #[serde(default = "always_on_top")]
     pub always_on_top: bool,
+    /// Hide app window decorations.
+    #[serde(default = "hide_window_decorations")]
+    pub hide_window_decorations: bool,
+}
+
+fn hide_window_decorations() -> bool {
+    false
 }
 
 fn always_on_top() -> bool {
