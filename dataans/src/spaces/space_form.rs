@@ -1,6 +1,7 @@
 use common::space::{OwnedSpace, Space, UpdateSpace};
+use common::Config;
 use leptos::*;
-use leptos_hotkeys::use_hotkeys;
+use leptos_hotkeys::{use_hotkeys, use_hotkeys_scoped};
 use time::OffsetDateTime;
 use uuid::Uuid;
 
@@ -14,6 +15,7 @@ pub fn SpaceForm(
     space: Option<OwnedSpace>,
     #[prop(into)] on_cancel: Callback<(), ()>,
     set_spaces: SignalSetter<Vec<OwnedSpace>>,
+    config: Config,
 ) -> impl IntoView {
     let (space_name, set_space_name) = create_signal(space.as_ref().map(|s| s.name.to_string()).unwrap_or_default());
     let (avatar_path, set_avatar_path) = create_signal(
@@ -75,6 +77,8 @@ pub fn SpaceForm(
 
     use_hotkeys!(("Escape") => move |_| on_cancel.call(()));
     use_hotkeys!(("Enter") => move |_| create_space());
+    let regenerate_space_avatar = config.key_bindings.regenerate_space_avatar.clone();
+    use_hotkeys!((regenerate_space_avatar) => move |_| generate_avatar());
 
     view! {
         <div class="create-space-window" on:load=move |_| info!("on_load")>

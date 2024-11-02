@@ -42,7 +42,7 @@ pub fn AppInfoWindow(#[prop(into)] close: Callback<(), ()>) -> impl IntoView {
             {move || {
                 let Config { key_bindings, appearance, app } = global_config.get();
 
-                let KeyBindings { toggle_spaces_bar, create_space, edit_current_space, delete_current_space, select_next_list_item, select_prev_list_item, find_note, find_note_in_selected_space } = key_bindings;
+                let KeyBindings { toggle_spaces_bar, create_space, edit_current_space, delete_current_space, select_next_list_item, select_prev_list_item, find_note, find_note_in_selected_space, regenerate_space_avatar } = key_bindings;
                 let Appearance { theme } = appearance;
                 let App { app_toggle, always_on_top, hide_window_decorations, hide_taskbar_icon } = app;
 
@@ -145,6 +145,12 @@ pub fn AppInfoWindow(#[prop(into)] close: Callback<(), ()>) -> impl IntoView {
                             <td>"Search notes in the current space"</td>
                             <td>
                                 <span class="inline-code">{find_note_in_selected_space}</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>"Regenerate space avatar image"</td>
+                            <td>
+                                <span class="inline-code">{regenerate_space_avatar}</span>
                             </td>
                         </tr>
                     </table>

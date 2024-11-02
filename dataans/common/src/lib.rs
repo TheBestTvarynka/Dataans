@@ -81,6 +81,13 @@ pub struct KeyBindings {
     /// Find note in the selected space.
     #[serde(default = "find_note_in_selected_space")]
     pub find_note_in_selected_space: String,
+    /// Regenerate space avatar image.
+    #[serde(default = "regenerate_space_avatar")]
+    pub regenerate_space_avatar: String,
+}
+
+fn regenerate_space_avatar() -> String {
+    "ControlLeft+keyR".into()
 }
 
 fn find_note_in_selected_space() -> String {

@@ -30,13 +30,13 @@ pub fn Tools(
         }
     };
 
-    let key_bindings = config.key_bindings;
+    let key_bindings = &config.key_bindings;
 
-    use_hotkeys!((key_bindings.create_space) => move |_| {
+    use_hotkeys!((key_bindings.create_space.clone()) => move |_| {
         set_show_modal.set(true);
     });
 
-    use_hotkeys!((key_bindings.find_note) => move |_| {
+    use_hotkeys!((key_bindings.find_note.clone()) => move |_| {
         if spaces_minimized.get() {
             set_spaces_minimized.set(false);
         }
@@ -84,13 +84,19 @@ pub fn Tools(
                 }}
             </button>
             <Show when=move || show_modal.get()>
-                <Modal>
-                    <SpaceForm
-                        space=None
-                        on_cancel=move |_| set_show_modal.set(false)
-                        set_spaces
-                    />
-                </Modal>
+                {
+                    let config = config.clone();
+                    view! {
+                        <Modal>
+                            <SpaceForm
+                                space=None
+                                on_cancel=move |_| set_show_modal.set(false)
+                                set_spaces
+                                config
+                            />
+                        </Modal>
+                    }
+                }
             </Show>
         </div>
     }
