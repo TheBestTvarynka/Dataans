@@ -79,8 +79,7 @@ pub fn SpaceForm(
             let new_space_id = action.await;
             let spaces = list_spaces().await.expect("list spaces should not fail");
             let new_current_space = new_space_id
-                .map(|new_space_id| spaces.iter().find(|space| *space.id.as_ref() == new_space_id).cloned())
-                .flatten();
+                .and_then(|new_space_id| spaces.iter().find(|space| *space.id.as_ref() == new_space_id).cloned());
 
             set_spaces.set(spaces);
             if let Some(space) = new_current_space {
