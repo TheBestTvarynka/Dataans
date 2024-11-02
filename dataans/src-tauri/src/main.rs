@@ -35,7 +35,7 @@ const LOGS_DIR: &str = "logs";
 
 fn toggle_app_visibility(app: &AppHandle) -> Result<()> {
     if let Some(window) = app.get_webview_window(MAIN_WINDOW_NAME) {
-        if window.is_visible().unwrap_or(true) {
+        if window.is_visible().unwrap_or(false) {
             info!("Hide main window");
             window.hide()?;
         } else {
@@ -126,9 +126,10 @@ fn main() {
                 warn!("Cannot find the 'main' try icon :(");
             }
 
+            let config = crate::config::load_config_inner(app.handle());
+
             // Set up global shortcut
-            let app_toggle = crate::config::load_config_inner(app.handle()).app.app_toggle;
-            let visibility_shortcut = Shortcut::from_str(&app_toggle).unwrap();
+            let visibility_shortcut = Shortcut::from_str(&config.app.app_toggle).unwrap();
             debug!(?visibility_shortcut);
 
             app.handle().plugin(
@@ -151,6 +152,14 @@ fn main() {
             )?;
 
             app.global_shortcut().register(visibility_shortcut)?;
+
+            if config.app.always_on_top {
+                if let Some(window) = app.handle().get_webview_window(MAIN_WINDOW_NAME) {
+                    window.set_always_on_top(true)?;
+                } else {
+                    error!("{MAIN_WINDOW_NAME} window not found! Cannot set 'always-on-top'.");
+                }
+            }
 
             Ok(())
         })

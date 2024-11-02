@@ -44,7 +44,7 @@ pub fn AppInfoWindow(#[prop(into)] close: Callback<(), ()>) -> impl IntoView {
 
                 let KeyBindings { toggle_spaces_bar, create_space, edit_current_space, delete_current_space, select_next_list_item, select_prev_list_item, find_note, find_note_in_selected_space } = key_bindings;
                 let Appearance { theme } = appearance;
-                let App { app_toggle } = app;
+                let App { app_toggle, always_on_top } = app;
 
                 view!{
                     <table class="app-window-config-table">
@@ -56,6 +56,12 @@ pub fn AppInfoWindow(#[prop(into)] close: Callback<(), ()>) -> impl IntoView {
                             <td>"App window toggle"</td>
                             <td>
                                 <span class="inline-code">{app_toggle}</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>"Always on top"</td>
+                            <td>
+                                <span class="inline-code">{always_on_top}</span>
                             </td>
                         </tr>
 

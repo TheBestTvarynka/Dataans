@@ -122,6 +122,13 @@ pub struct App {
     /// App toggle: show/hide app.
     #[serde(default = "app_toggle")]
     pub app_toggle: String,
+    /// Always on top.
+    #[serde(default = "always_on_top")]
+    pub always_on_top: bool,
+}
+
+fn always_on_top() -> bool {
+    false
 }
 
 fn app_toggle() -> String {

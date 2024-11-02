@@ -12,3 +12,4 @@ theme = "theme_dark.toml"
 
 [app]
 app-toggle = "F2"
+always-on-top = false
