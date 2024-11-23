@@ -1,19 +1,19 @@
 This document aimed to describe the server backup, synchronization functionality, users identity system. It contains high-level explanations, diagrams, motivation, reason, and purpose for all technical decisions.
 
 > [!WARNING]
-> It is an initial document version and the implementation hasn't started yet. The content may be changed in the future.
+> It is an initial version of the document and the implementation hasn't started yet. The content may be changed in the future.
 > All comments, feedback, questions, and proposals are highly welcome.
 
 # Motivation
 
-Currently (23.111.2024), all notes, spaces, files, and all other data are saved only on the user's computer without any synchronization between devices or even between client-server.
+Currently (23.11.2024), all notes, spaces, files, and all other data are saved only on the user's computer without any synchronization between devices or even between client-server.
 
 As a user, I want to be able to synchronize my data between devices and to have online backup on the web server. Moreover, it shouldn't block me from using the app offline.
 
 # Goals
 
 - To be able to sync data between server and client (local app).
-- To be able to have multiple devices that will sync the data from the same user.
+- To be able to have multiple devices that will sync the same data (data that belong to the same user).
 - Encryption of the data located on the server. All data on the server should be encrypted and the server should know nothing about the user's identity or user's data content.
 
 # Design
@@ -46,7 +46,7 @@ fn encrypt(key: &[u8], plain_text: &[u8]) -> (Vec<u8>, Vec<u8>) {
 }
 ```
 
-The same principle with data decryption:
+The same principle with data decryption but reversed:
 
 ```rust
 // Pseudocode
@@ -72,7 +72,7 @@ The secret key is a piece of random bytes generated during the user's sign-up pr
 
 If the user needs to add another device to their account, then it will need to type the secret key on the new device.
 
-The secret key is stored in plain text as the other app data on the computer. We trust the user's computer by design.
+The secret key is stored in plain text on the computer. We trust the user's computer by design.
 
 ### Password
 
@@ -80,7 +80,7 @@ The password is created by the user during the sign-up process. The user is resp
 
 ### Encryption key derivation
 
-General encryption key derivation process is shown below:
+The encryption key derivation process is shown below:
 
 ```rust
 // Pseudocode
@@ -94,11 +94,11 @@ fn derive_encryption_key(secret_key: &[u8], password: &[u8], user_id: &[u8]) -> 
 
 ## Auth
 
-### Sign up
+### Sign-up
 
 `todo!()`
 
-### Sign in
+### Sign-in
 
 `todo!()`
 
@@ -108,6 +108,6 @@ fn derive_encryption_key(secret_key: &[u8], password: &[u8], user_id: &[u8]) -> 
 
 2FA secret and recovery codes are stored on the server side and encrypted using the server's encryption key.
 
-2FA does not make the encryption of the data stronger. It makes the auth process stronger and better. In other words, the [secret key](#secret-key) is *a second factor* for data encryption like authenticator app is 2FA for auth. The attacker with a password is unable to decrypt the data without a secret key and to sign in without 2FA.
+2FA does not make the encryption of the data stronger. It makes the auth process stronger and better. In other words, the [secret key](#secret-key) is *a second factor* for data encryption like authenticator app is the second factor for auth. The attacker with the password is unable to decrypt the data without a secret key and to sign-in without 2FA.
 
 ## Data synchronization
