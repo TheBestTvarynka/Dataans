@@ -8,7 +8,7 @@ This document aimed to describe the server backup, synchronization functionality
 
 Currently (23.11.2024), all notes, spaces, files, and all other data are saved only on the user's computer without any synchronization between devices or even between client-server.
 
-As a user, I want to be able to synchronize my data between devices and to have online backup on the web server. Moreover, it shouldn't block me from using the app offline.
+As a user, I want to be able to synchronize my data between devices and to have online backups on the web server. Moreover, it shouldn't block me from using the app offline.
 
 # Goals
 
@@ -96,18 +96,31 @@ fn derive_encryption_key(secret_key: &[u8], password: &[u8], user_id: &[u8]) -> 
 
 ### Sign-up
 
-`todo!()`
+The user types the invitation token, password, and username during the sign-up process.
+
+* `Invitation token`. The server has limited capacity and the app is no-profit. So, the number of users is also limited. You need to have an invitation token to sign up.
+* `Username`. It can be any friendly name. The server doesn't share any data with anyone. Moreover, the server stores the hash of the username. The only reason why the user needs a username is to simplify the sign-in process on new devices.
+* `Password`.
+
+That's all. The server will create a new session and the sync process will begin right after the successful sign-up.
 
 ### Sign-in
 
-`todo!()`
+You can install the app on any supported device and sign in. The sync process will begin right after the successful sign-in. To sign-in user needs to provide the following:
+
+* `Username`.
+* `Password`.
+* [`Secret key`](#secret-key). This key is automatically generated during the sign-up process. The user can use the app on any other logged-in device to show the secret key.
+
+> [!CAUTION]
+> If the user loses their secret key (fs corruption, lost the laptop, etc), then they will not be able to decrypt the data. If you want, you can also put the secret key in your password manager alongside the password.
 
 ### 2FA
 
-2FA is possible but optional. The only one supported 2FA method is Authenticator App. The user can ask the app to generate the QR code and recovery codes.
+2FA is possible but optional. The only supported 2FA method is the Authenticator App. The user can ask the app to generate the QR code and recovery codes.
 
 2FA secret and recovery codes are stored on the server side and encrypted using the server's encryption key.
 
-2FA does not make the encryption of the data stronger. It makes the auth process stronger and better. In other words, the [secret key](#secret-key) is *a second factor* for data encryption like authenticator app is the second factor for auth. The attacker with the password is unable to decrypt the data without a secret key and to sign-in without 2FA.
+2FA does not make the encryption of the data stronger. It makes the auth process stronger and better. In other words, the [secret key](#secret-key) is *a second factor* for data encryption like the authenticator app is the second factor for auth. The attacker with the password is unable to decrypt the data without a secret key and to sign-in without 2FA.
 
 ## Data synchronization
