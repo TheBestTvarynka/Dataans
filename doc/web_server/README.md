@@ -98,7 +98,7 @@ fn derive_encryption_key(secret_key: &[u8], password: &[u8], user_id: &[u8]) -> 
 
 The user types the invitation token, password, and username during the sign-up process.
 
-* `Invitation token`. The server has limited capacity and the app is no-profit. So, the number of users is also limited. You need to have an invitation token to sign up.
+* `Invitation token`. The server has limited capacity and the app is no-profit. So, the number of users is also limited. You need to have an invitation token to sign up. You can obtain the token here: `todo!()`.
 * `Username`. It can be any friendly name. The server doesn't share any data with anyone. Moreover, the server stores the hash of the username. The only reason why the user needs a username is to simplify the sign-in process on new devices.
 * `Password`.
 
