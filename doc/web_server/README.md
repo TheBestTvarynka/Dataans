@@ -133,6 +133,8 @@ The synchronization task can be represented (simplified) as follows: we have two
 
 All items are divided into blocks. Or, in other words, every item has its `block_id`. The `block_id` is assigned during item creation and can not be changed in the future. Additionally, each item and each block has its hash.
 
+
+
 1. The client requests a list of blocks from the server when synchronization starts.
 2. It compares the server's list of blocks with the local one and tracks blocks with different hashes. The client will have a list of different blocks as a result.
 3. The client requests items hashes from the server that are in those found blocks.
@@ -142,3 +144,8 @@ All items are divided into blocks. Or, in other words, every item has its `block
 **_What if the server has some items that the client knows nothing about?_** They will be found in step 4. And instead of overwriting, they will be added to the local DB.
 
 **_What if the client has some items that the server knows nothing about?_** Local items, that are not synched with the server, don't have a `block_id`. So, they don't appear in the synchronization process. Only the server can assign `block_id` to items during their creation on the server side.
+
+**_What if some items were deleted from the server DB by another client?_** Then the client will find them in step 4 and erase them from the local DB too.
+
+### Technical details
+
