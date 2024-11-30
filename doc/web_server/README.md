@@ -13,7 +13,7 @@ As a user, I want to be able to synchronize my data between devices and to have 
 # Goals
 
 - To be able to sync data between server and client (local app).
-- To be able to have multiple devices that will sync the same data (data that belong to the same user).
+- Multiple devices will sync the same data (data that belongs to the same user).
 - Encryption of the data located on the server. All data on the server should be encrypted and the server should know nothing about the user's identity or user's data content.
 
 # Design
@@ -27,7 +27,7 @@ All security design is designed with the following statements in mind:
 * Never trust any server.
 * Trust the client's computer. So, the local DB is not encrypted and can be read by any app on the client's computer.
 
-All data is encrypted using the [AES](https://en.wikipedia.org/wiki/Advanced_Encryption_Standard) [GCM](https://en.wikipedia.org/wiki/Galois/Counter_Mode) algorithm. The random AES block (16-byte) is prepended to the plaintext data to make the encrypted non-deterministic (e.g. the same data encrypted with the same key will result in the different cipher texts).
+All data is encrypted using the [AES](https://en.wikipedia.org/wiki/Advanced_Encryption_Standard) [GCM](https://en.wikipedia.org/wiki/Galois/Counter_Mode) algorithm. The random AES block (16-byte) is prepended to the plaintext data to make the encryption non-deterministic (e.g. the same data encrypted with the same key will result in different cipher texts).
 Additionally, the [HMAC](https://en.wikipedia.org/wiki/HMAC) SHA256 checksum is calculated over the plaintext data. HMAC is used to ensure data integrity.
 
 The summarized encryption scheme looks like this:
@@ -124,3 +124,21 @@ You can install the app on any supported device and sign in. The sync process wi
 2FA does not make the encryption of the data stronger. It makes the auth process stronger and better. In other words, the [secret key](#secret-key) is *a second factor* for data encryption like the authenticator app is the second factor for auth. The attacker with the password is unable to decrypt the data without a secret key and to sign-in without 2FA.
 
 ## Data synchronization
+
+The client and the web server implement the data synchronization algorithm. Given two DBs: local one and server one. The goal is to synchronize the data between them. The difference can be of any size. For example, one of the devices can be offline for a long time. So, in such a case the difference may be huge.
+
+### Data synchronization algorithm
+
+The synchronization task can be represented (simplified) as follows: we have two sets of items (numbers, notes, spaces, files, any kind of items) and we need to find the difference and then merge them. Moreover, the amount of items can be large, so we don't want to waste a lot of time on delta calculation.
+
+All items are divided into blocks. Or, in other words, every item has its `block_id`. The `block_id` is assigned during item creation and can not be changed in the future. Additionally, each item and each block has its hash.
+
+1. The client requests a list of blocks from the server when synchronization starts.
+2. It compares the server's list of blocks with the local one and tracks blocks with different hashes. The client will have a list of different blocks as a result.
+3. The client requests items hashes from the server that are in those found blocks.
+4. It compares items hashes with local ones and tracks different ones. As a result, it will know what items were changed.
+5. The client requests found items from the server and overrides the local ones. It always assumes that the server's data has a higher priority.
+
+**_What if the server has some items that the client knows nothing about?_** They will be found in step 4. And instead of overwriting, they will be added to the local DB.
+
+**_What if the client has some items that the server knows nothing about?_** Local items, that are not synched with the server, don't have a `block_id`. So, they don't appear in the synchronization process. Only the server can assign `block_id` to items during their creation on the server side.
