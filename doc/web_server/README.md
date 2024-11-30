@@ -142,7 +142,7 @@ block-beta
   i0 i1 i2 i3 i4 i5 i6 i7 i8 i9 i10 i11
 ```
 
-`h` - hash function. `i0..11` - items. `h(i0)` - item `i0` hashe. `b0..4` - blocks. `h(b0) = h(h(i0) | h(i1) | h(i2) | h(i3))` - block `b0` hash.
+`h` - hash function. `i0..11` - items. `h(i0)` - `i0` item hashe. `b0..4` - blocks. `h(b0) = h(h(i0) | h(i1) | h(i2) | h(i3))` - `b0` block hash.
 
 1. The client requests a list of blocks from the server when synchronization starts.
 2. It compares the server's list of blocks with the local one and tracks blocks with different hashes. The client will have a list of different blocks as a result.
