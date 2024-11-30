@@ -131,7 +131,7 @@ The client and the web server implement the data synchronization algorithm. Give
 
 The synchronization task can be represented (simplified) as follows: we have two sets of items (numbers, notes, spaces, files, any kind of items) and we need to find the difference and then merge them. Moreover, the amount of items can be large, so we don't want to waste a lot of time on delta calculation.
 
-All items are divided into blocks. Or, in other words, every item has its `block_id`. The `block_id` is assigned during item creation and can not be changed in the future. Additionally, each item and each block has its hash.
+All items are divided into blocks. Or, in other words, every item has its `block_id`. The `block_id` is assigned during item creation and can not be changed in the future. Additionally, each item and each block has its hash. The item hash is calculated from encrypted item data, and the block hash is calculated from the concatenated block item hashes.
 
 ```mermaid
 block-beta
@@ -142,7 +142,7 @@ block-beta
   i0 i1 i2 i3 i4 i5 i6 i7 i8 i9 i10 i11
 ```
 
-`h` - hash function. `i0..11` - items. `h(i0)` - item `i0` hashe. `b0..4` - blocks. `h(b0)` - block `b0` hash.
+`h` - hash function. `i0..11` - items. `h(i0)` - item `i0` hashe. `b0..4` - blocks. `h(b0) = h(h(i0) | h(i1) | h(i2) | h(i3))` - block `b0` hash.
 
 1. The client requests a list of blocks from the server when synchronization starts.
 2. It compares the server's list of blocks with the local one and tracks blocks with different hashes. The client will have a list of different blocks as a result.
