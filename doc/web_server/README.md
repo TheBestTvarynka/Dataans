@@ -133,7 +133,16 @@ The synchronization task can be represented (simplified) as follows: we have two
 
 All items are divided into blocks. Or, in other words, every item has its `block_id`. The `block_id` is assigned during item creation and can not be changed in the future. Additionally, each item and each block has its hash.
 
+```mermaid
+block-beta
+  columns 12
+  hb0["h(b0)"]:4 hb1["h(b1)"]:4 hb2["h(b2)"]:4
+  b0:4 b1:4 b2:4
+  h0["h(i0)"] h1["h(i1)"] h2["h(i2)"] h3["h(i3)"] h4["h(i4)"] h5["h(i5)"] h6["h(i6)"] h7["h(i7)"] h8["h(i8)"] h9["h(i9)"] h10["h(i10)"] h11["h(i11)"]
+  i0 i1 i2 i3 i4 i5 i6 i7 i8 i9 i10 i11
+```
 
+`h` - hash function. `i0..11` - items. `h(i0)` - item `i0` hashe. `b0..4` - blocks. `h(b0)` - block `b0` hash.
 
 1. The client requests a list of blocks from the server when synchronization starts.
 2. It compares the server's list of blocks with the local one and tracks blocks with different hashes. The client will have a list of different blocks as a result.
