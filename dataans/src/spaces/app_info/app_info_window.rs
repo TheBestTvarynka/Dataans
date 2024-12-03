@@ -16,6 +16,22 @@ pub fn AppInfoWindow(#[prop(into)] close: Callback<(), ()>) -> impl IntoView {
     let open_config_file_folder = move |_| spawn_local(open_config_file_folder());
     let open_theme_file = move |theme: PathBuf| spawn_local(async move { open_theme_file(&theme).await });
 
+    let (is_autostart_enabled, set_autostart) = create_signal(false);
+
+    let enable_autostart = move |_| {
+        spawn_local(async move {
+            let flag = crate::backend::autostart::enable().await;
+            set_autostart.set(flag);
+        })
+    };
+
+    let disable_autostart = move |_| {
+        spawn_local(async move {
+            let flag = crate::backend::autostart::disable().await;
+            set_autostart.set(flag);
+        })
+    };
+
     view! {
         <div class="app-into-window">
             <button
@@ -38,6 +54,11 @@ pub fn AppInfoWindow(#[prop(into)] close: Callback<(), ()>) -> impl IntoView {
                 >
                     <img alt="edit note" src="/public/icons/folder.png" />
                 </button>
+                {move || if is_autostart_enabled.get() {view! {
+                    <button class="button_ok" on:click=disable_autostart title="Disable autostart">"Disable autostart"</button>
+                }} else {view! {
+                    <button class="button_ok" on:click=enable_autostart  title="Enable autostart">"Enable autostart"</button>
+                }}}
             </div>
             {move || {
                 let Config { key_bindings, appearance, app } = global_config.get();
