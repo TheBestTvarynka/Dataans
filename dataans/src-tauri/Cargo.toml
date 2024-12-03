@@ -37,6 +37,7 @@ syntect = { version = "5.2", default-features = false, features = [
 ] }
 tauri-plugin-fs = "2"
 tauri-plugin-shell = "2"
+tauri-plugin-autostart = "2"
 
 [features]
 # This feature is used for production builds or when a dev server is not specified, DO NOT REMOVE!!

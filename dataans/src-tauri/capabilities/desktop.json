@@ -9,6 +9,10 @@
     "main"
   ],
   "permissions": [
+    "autostart:default",
+    "autostart:allow-enable",
+    "autostart:allow-disable",
+    "autostart:allow-is-enabled",
     "dataans:allow-list-spaces",
     "dataans:allow-create-space",
     "dataans:allow-update-space",

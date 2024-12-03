@@ -1,3 +1,4 @@
+pub mod autostart;
 pub mod file;
 pub mod notes;
 pub mod spaces;
@@ -52,7 +53,7 @@ pub async fn load_theme(file_path: &Path) -> Theme {
 }
 
 #[derive(Serialize)]
-struct EmptyArgs {}
+pub struct EmptyArgs {}
 
 pub async fn open_config_file() {
     let args = to_value(&EmptyArgs {}).expect("EmptyArgs serialization to JsValue should not fail.");
