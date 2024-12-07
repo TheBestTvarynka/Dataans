@@ -18,14 +18,14 @@ As a user, I want to be able to synchronize my data between devices and to have 
 
 # Design
 
-## Encryption
+## Data encryption
 
 The web server serves as the user's data backup storage. It doesn't know about the data content or the user's identity. All data is encrypted using a strong encryption algorithm and the encryption key is known only to the user.
 
 All security design is designed with the following statements in mind:
 
 * Never trust any server.
-* Trust the client's computer. So, the local DB is not encrypted and can be read by any app on the client's computer.
+* Trust the client's computer. So, the local DB is not encrypted and, theoretically, can be read by any app on the client's computer.
 
 All data is encrypted using the [AES](https://en.wikipedia.org/wiki/Advanced_Encryption_Standard) [GCM](https://en.wikipedia.org/wiki/Galois/Counter_Mode) algorithm. The random AES block (16-byte) is prepended to the plaintext data to make the encryption non-deterministic (e.g. the same data encrypted with the same key will result in different cipher texts).
 Additionally, the [HMAC](https://en.wikipedia.org/wiki/HMAC) SHA256 checksum is calculated over the plaintext data. HMAC is used to ensure data integrity.
@@ -55,7 +55,7 @@ fn decrypt(key: &[u8], cipher_text: &[u8], checksum: &[u8]) -> Vec<u8> {
 
     hmac_sha_256.verify(key, plain_text, checksum).expect("Data has been corrupted");
 
-    // Remove confounder block:
+    // Remove the confounder block:
     plain_text[AES_BLOCK_SIZE..].to_vec()
 }
 ```
@@ -76,9 +76,9 @@ The secret key is stored in plain text on the computer. We trust the user's comp
 
 ### Password
 
-The password is created by the user during the sign-up process. The user is responsible for keeping the password safe. The app never stores the user's password.
+The password is created by the user during the sign-up process. The user is responsible for keeping the password safe. The app never stores the user's password (read more in the [auth](#auth) section).
 
-### Encryption key derivation
+### Key derivation
 
 The encryption key derivation process is shown below:
 
@@ -91,6 +91,14 @@ fn derive_encryption_key(secret_key: &[u8], password: &[u8], user_id: &[u8]) -> 
     xor(k1, k2);
 }
 ```
+
+### Relationship between entities in the server DB
+
+All spaces ids, notes ids, etc are stored in plain text. There is no need to HMAC/encrypt IDs because all of them are randomly generated.
+
+But, the user is 
+
+So, if the attacker gets the server DB somehow, they will be able aware of the spaces <-> notes relationship (e.g. the attacker will know which notes belong to which spaces, but will not know the content itself), but they will not be able to match spaces + notes with users.
 
 ## Auth
 
@@ -122,6 +130,19 @@ You can install the app on any supported device and sign in. The sync process wi
 2FA secret and recovery codes are stored on the server side and encrypted using the server's encryption key.
 
 2FA does not make the encryption of the data stronger. It makes the auth process stronger and better. In other words, the [secret key](#secret-key) is *a second factor* for data encryption like the authenticator app is the second factor for auth. The attacker with the password is unable to decrypt the data without a secret key and to sign-in without 2FA.
+
+### The server encryption key rotation
+
+The server encryption key rotation is not planned for the next few releases, but it's not a problem to implement it. The app design is flexible and it's not a big dial to implement the key rotation.
+
+### User's identity on the server
+
+Only the following user information is stored on the server:
+
+* User id. All user ids are randomly generated and the server does not store any information about the user's real identity. So, there is no point in user id encryption.
+* `Argon2` hash of the user password.
+* `Sha256` hash of the user name.
+* 2FA secret and recovery codes encrypted with the server's encryption key.
 
 ## Data synchronization
 
@@ -156,5 +177,75 @@ block-beta
 
 **_What if some items were deleted from the server DB by another client?_** Then the client will find them in step 4 and erase them from the local DB too.
 
-### Technical details
+### How notes and spaces are stored
 
+Here is an approximate scheme:
+
+```mermaid
+erDiagram
+    Users {
+        uuid user_id
+        bytes name_sha256
+        bytes password_argon2
+        bytes encrypted_2fa_secret
+    }
+    Users ||--o{ Sessions : user_id
+    Sessions {
+        uuid session_id
+        uuid user_id
+        bytes encrypted_data
+    }
+    Users ||--o{ RecoveryCodes : user_id
+    RecoveryCodes {
+        uuid recode_code_id
+        uuid user_id
+        bytes encrypted_code
+    }
+    Users ||--o{ Spaces : user_id
+    Spaces {
+        uuid space_id
+        bytes encrypted_data
+        bytes data_hmac
+        uuid user_id
+    }
+    Spaces ||--o{ Notes : space_id
+    Notes {
+        uuid note_id
+        bytes encrypted_data
+        uuid space_id
+        bytes data_hmac
+        int block
+    }
+    Notes ||--o{ Files : note_id
+    Files {
+        uuid file_id
+        bytes encrypted_metadata
+        uuid note_id
+    }
+    Blocks {
+        uuid space_id
+        int block_number
+        bytes hash_sha256
+    }
+    Spaces ||--o{ Blocks : space_id
+```
+
+The server stores hash blocks only for notes, not for spaces. The user will most likely not have too many spaces to build hash blocks over.
+
+### Synchronization options
+
+This document implies the following possible synchronization options:
+
+* **_Manual sync_**. The user manually synchronize the data between client and server by pressing the sync button.
+* **_Poll sync_**. The client app will periodically sync the data.
+* **_Push sync_**. The client keeps the socket connection open and the server will automatically send updates to the client device.
+
+# Questions
+
+> _Does the app need to have such a complex schema?_
+
+Well, the server owner doesn't want to be responsible for the user's data. So, the less server knows the better.
+
+> _Can I restore the data if the local DB was corrupted/erased?_
+
+Only if you remember the `password` and the `secret key` or have another device logged in. In such a case, you can sign in again and all the data will be synchronized again. But you will lost the unsynchronized data.
