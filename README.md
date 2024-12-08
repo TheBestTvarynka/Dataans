@@ -2,10 +2,6 @@
 
 # Dataans
 
-> _Why `dataans`?_
-
-Dataans - Data answer. The data is answer to all your questions :)
-
 ![image](https://github.com/user-attachments/assets/496f924c-9d98-4d7a-9501-b86dab0cb3f5)
 
 ![image](https://github.com/user-attachments/assets/af88b3c9-2d3b-4afa-b349-bf3620144875)
