@@ -33,21 +33,21 @@ fn write_space_notes(
             files,
         } = note.unwrap();
 
-        write!(file, "### `{}`\n\n", id.inner().to_string())?;
-        write!(file, "Space Id: `{}`\n\n", space_id.inner().to_string())?;
+        writeln!(file, "### `{}`\n", id.inner())?;
+        writeln!(file, "Space Id: `{}`\n", space_id.inner())?;
         // TODO: format creation datetime.
-        write!(file, "{}\n\n", text.as_ref())?;
+        writeln!(file, "{}\n", text.as_ref())?;
 
-        write!(file, "#### Files\n\n")?;
+        writeln!(file, "#### Files\n")?;
         for note_file in files {
             let NoteFile { id, name, path } = note_file;
 
-            write!(file, "##### {}\n\n", name)?;
-            write!(file, "Id: {}\n", id.to_string())?;
-            write!(file, "Path: {:?}\n\n", path)?;
+            writeln!(file, "##### {}\n", name)?;
+            writeln!(file, "Id: {}", id)?;
+            writeln!(file, "Path: {:?}\n", path)?;
         }
 
-        write!(file, "---\n\n")?;
+        writeln!(file, "---\n")?;
     }
 
     Ok(())
@@ -60,13 +60,13 @@ fn write_space(space: &OwnedSpace, file: &mut File) -> Result<(), IoError> {
         created_at: _,
         avatar,
     } = space;
-    write!(file, "# {}\n\n", name.as_ref())?;
+    writeln!(file, "# {}\n", name.as_ref())?;
 
-    write!(file, "Id: `{}`\n", id.inner().to_string())?;
+    writeln!(file, "Id: `{}`", id.inner())?;
     // TODO: format creation datetime.
-    write!(file, "Avatar path: `{}`\n\n", avatar.as_ref())?;
+    writeln!(file, "Avatar path: `{}`\n", avatar.as_ref())?;
 
-    write!(file, "## {} notes\n\n", space.name.as_ref())?;
+    writeln!(file, "## {} notes\n", space.name.as_ref())?;
 
     Ok(())
 }

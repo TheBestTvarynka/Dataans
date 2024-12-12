@@ -54,7 +54,7 @@ impl<'text> From<&'text str> for MdText<'text> {
     }
 }
 
-impl<'text> AsRef<str> for MdText<'text> {
+impl AsRef<str> for MdText<'_> {
     fn as_ref(&self) -> &str {
         self.0.as_ref()
     }

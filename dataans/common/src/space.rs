@@ -60,7 +60,7 @@ impl<'name> From<&'name str> for Name<'name> {
     }
 }
 
-impl<'name> AsRef<str> for Name<'name> {
+impl AsRef<str> for Name<'_> {
     fn as_ref(&self) -> &str {
         self.0.as_ref()
     }
@@ -84,7 +84,7 @@ impl Display for Avatar<'_> {
     }
 }
 
-impl<'name> AsRef<str> for Avatar<'name> {
+impl AsRef<str> for Avatar<'_> {
     fn as_ref(&self) -> &str {
         self.0.as_ref()
     }
