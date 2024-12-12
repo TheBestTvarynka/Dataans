@@ -185,7 +185,7 @@ impl AsRef<OffsetDateTime> for CreationDate {
 }
 
 /// Option that describes how to export notes.
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone)]
 pub enum NotesExportOption {
     /// All exported data will be in one `.md` file.
     OneFile,
@@ -196,7 +196,7 @@ pub enum NotesExportOption {
 }
 
 /// Configuration for app data export.
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone)]
 pub struct DataExportConfig {
     /// Option that describes how to export notes.
     pub notes_export_option: NotesExportOption,

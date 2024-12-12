@@ -1,9 +1,11 @@
 use std::path::PathBuf;
 
-use common::{App, Appearance, Config, KeyBindings};
+use common::{App, Appearance, Config, DataExportConfig, KeyBindings, NotesExportOption};
 use leptos::*;
 use leptos_hotkeys::use_hotkeys;
 
+use crate::backend::export::export_data;
+use crate::backend::file::open;
 use crate::backend::{open_config_file, open_config_file_folder, open_theme_file};
 
 #[component]
@@ -31,6 +33,25 @@ pub fn AppInfoWindow(#[prop(into)] close: Callback<(), ()>) -> impl IntoView {
             set_autostart.set(flag);
         })
     };
+
+    let (export_option, set_export_option) = create_signal(None);
+    let export_result = create_resource(
+        move || export_option.get(),
+        move |export_option| async move {
+            if let Some(export_option) = export_option {
+                Some(
+                    export_data(DataExportConfig {
+                        notes_export_option: export_option,
+                    })
+                    .await,
+                )
+            } else {
+                None
+            }
+        },
+    );
+    let export_data = move |_| set_export_option.set(Some(NotesExportOption::OneFile));
+    let open_exported_data_dir = move |path: PathBuf| spawn_local(async move { open(&path).await });
 
     view! {
         <div class="app-into-window">
@@ -177,6 +198,21 @@ pub fn AppInfoWindow(#[prop(into)] close: Callback<(), ()>) -> impl IntoView {
                     </table>
                 }
             }}
+            <div class="horizontal">
+                <span>"One file"</span>
+                <button class="button_ok" on:click=export_data>"Export"</button>
+                <Suspense
+                    fallback=move || view! { <span>"Exporting...."</span> }
+                >
+                    {move || export_result.get()
+                        .flatten()
+                        .map(|backup_path| view! {
+                            <button class="button_ok" on:click=move |_| open_exported_data_dir(backup_path.clone())>
+                                "Open backup location"
+                            </button>
+                        })}
+                </Suspense>
+            </div>
         </div>
     }
 }
