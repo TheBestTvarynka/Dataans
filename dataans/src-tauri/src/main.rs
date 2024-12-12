@@ -32,6 +32,7 @@ const FILES_DIR: &str = "files";
 const CONFIGS_DIR: &str = "configs";
 const CONFIG_FILE_NAME: &str = "config.toml";
 const LOGS_DIR: &str = "logs";
+const BACKUPS_DIR: &str = "backups";
 
 fn toggle_app_visibility(app: &AppHandle) -> Result<()> {
     if let Some(window) = app.get_webview_window(MAIN_WINDOW_NAME) {

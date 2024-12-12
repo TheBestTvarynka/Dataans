@@ -10,7 +10,7 @@ repository = "https://github.com/TheBestTvarynka/dataans"
 tauri-build = { version = "2", features = [] }
 
 [dependencies]
-time = { workspace = true, features = ["macros"] }
+time = { workspace = true, features = ["macros", "formatting"] }
 uuid = { workspace = true, features = ["serde", "v4"] }
 serde = { workspace = true, features = ["derive"] }
 

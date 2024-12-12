@@ -183,3 +183,21 @@ impl AsRef<OffsetDateTime> for CreationDate {
         &self.0
     }
 }
+
+/// Option that describes how to export notes.
+#[derive(Serialize, Deserialize, Debug)]
+pub enum NotesExportOption {
+    /// All exported data will be in one `.md` file.
+    OneFile,
+    /// For each space a separate file will be created.
+    FilePerSpace,
+    /// For each note a separate file will be created. All these files will be grouped by folders which represent spaces.
+    FilePerNote,
+}
+
+/// Configuration for app data export.
+#[derive(Serialize, Deserialize, Debug)]
+pub struct DataExportConfig {
+    /// Option that describes how to export notes.
+    pub notes_export_option: NotesExportOption,
+}
