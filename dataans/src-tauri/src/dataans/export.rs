@@ -33,21 +33,21 @@ fn write_space_notes(
             files,
         } = note.unwrap();
 
-        write!(file, "### `{}`\n", id.inner().to_string())?;
-        write!(file, "Space Id: `{}`\n", space_id.inner().to_string())?;
+        write!(file, "### `{}`\n\n", id.inner().to_string())?;
+        write!(file, "Space Id: `{}`\n\n", space_id.inner().to_string())?;
         // TODO: format creation datetime.
-        write!(file, "{}\n", text.as_ref())?;
+        write!(file, "{}\n\n", text.as_ref())?;
 
-        write!(file, "#### Files\n")?;
+        write!(file, "#### Files\n\n")?;
         for note_file in files {
             let NoteFile { id, name, path } = note_file;
 
-            write!(file, "##### {}\n", name)?;
+            write!(file, "##### {}\n\n", name)?;
             write!(file, "Id: {}\n", id.to_string())?;
-            write!(file, "Path: {:?}\n", path)?;
+            write!(file, "Path: {:?}\n\n", path)?;
         }
 
-        write!(file, "---\n")?;
+        write!(file, "---\n\n")?;
     }
 
     Ok(())
@@ -60,20 +60,20 @@ fn write_space(space: &OwnedSpace, file: &mut File) -> Result<(), IoError> {
         created_at: _,
         avatar,
     } = space;
-    write!(file, "# {} \n", name.as_ref())?;
+    write!(file, "# {}\n\n", name.as_ref())?;
 
-    write!(file, "Id: `{}` \n", id.inner().to_string())?;
+    write!(file, "Id: `{}`\n", id.inner().to_string())?;
     // TODO: format creation datetime.
-    write!(file, "Avatar path: `{}` \n", avatar.as_ref())?;
+    write!(file, "Avatar path: `{}`\n\n", avatar.as_ref())?;
 
-    write!(file, "## {} notes \n", space.name.as_ref())?;
+    write!(file, "## {} notes\n\n", space.name.as_ref())?;
 
     Ok(())
 }
 
 #[instrument(level = "trace", ret, skip(state))]
 #[tauri::command]
-pub fn export_app_data(state: State<'_, DataansState>, options: DataExportConfig) -> Result<(), String> {
+pub fn export_app_data(state: State<'_, DataansState>, options: DataExportConfig) -> Result<String, String> {
     let backups_dir = state.app_data_dir.join(BACKUPS_DIR);
 
     if !backups_dir.exists() {
@@ -83,7 +83,7 @@ pub fn export_app_data(state: State<'_, DataansState>, options: DataExportConfig
         }
     }
 
-    let format = format_description!("[year].[month].[day]-[hour]:[minute]:[second]");
+    let format = format_description!("[year].[month].[day]-[hour].[minute].[second]");
     let backups_dir = backups_dir.join(
         OffsetDateTime::now_utc()
             .format(&format)
@@ -95,9 +95,9 @@ pub fn export_app_data(state: State<'_, DataansState>, options: DataExportConfig
 
     match options.notes_export_option {
         NotesExportOption::OneFile => {
-            let backup_file = backups_dir.join(format!("dataans-backup-{}.md", Uuid::new_v4()));
-            let mut backup_file = File::create(&backup_file)
-                .map_err(|err| format!("Cannot create backup file: {:?}. File: {:?}", err, backup_file))?;
+            let backup_file_path = backups_dir.join(format!("dataans-backup-{}.md", Uuid::new_v4()));
+            let mut backup_file = File::create(&backup_file_path)
+                .map_err(|err| format!("Cannot create backup file: {:?}. File: {:?}", err, backup_file_path))?;
 
             let spaces_collection = state.db.collection::<OwnedSpace>(SPACES_COLLECTION_NAME);
             let notes_collection = state.db.collection::<Note<'static>>(NOTES_COLLECTION_NAME);
@@ -109,6 +109,8 @@ pub fn export_app_data(state: State<'_, DataansState>, options: DataExportConfig
                 write_space_notes(space.id, &notes_collection, &mut backup_file)
                     .map_err(|err| format!("Cannot write space notes: {:?}", err))?;
             }
+
+            Ok(format!("{:?}", backups_dir))
         }
         NotesExportOption::FilePerSpace => {
             todo!()
@@ -117,6 +119,4 @@ pub fn export_app_data(state: State<'_, DataansState>, options: DataExportConfig
             todo!()
         }
     }
-
-    Ok(())
 }
