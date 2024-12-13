@@ -7,6 +7,7 @@ pub mod note;
 pub mod space;
 
 use std::collections::HashMap;
+use std::fmt;
 use std::path::PathBuf;
 
 use serde::{Deserialize, Serialize};
@@ -195,6 +196,48 @@ pub enum NotesExportOption {
     FilePerNote,
 }
 
+impl NotesExportOption {
+    /// Returns a slice that contains all [NotesExportOption] variants.
+    pub fn variants() -> &'static [NotesExportOption] {
+        &[
+            NotesExportOption::OneFile,
+            NotesExportOption::FilePerSpace,
+            NotesExportOption::FilePerNote,
+        ]
+    }
+
+    /// Returns pretty name of [NotesExportOption].
+    pub fn pretty(&self) -> &str {
+        match self {
+            NotesExportOption::OneFile => "One file",
+            NotesExportOption::FilePerSpace => "File per space",
+            NotesExportOption::FilePerNote => "File per note",
+        }
+    }
+
+    /// Creates [NotesExportOption] from the `str`.
+    ///
+    /// Panic: on invalid value.
+    pub fn from_str(value: &str) -> Self {
+        match value {
+            "OneFile" => NotesExportOption::OneFile,
+            "FilePerSpace" => NotesExportOption::FilePerSpace,
+            "FilePerNote" => NotesExportOption::FilePerNote,
+            _ => panic!("Invalid NotesExportOption value: {}", value),
+        }
+    }
+}
+
+impl fmt::Display for NotesExportOption {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
+        match self {
+            NotesExportOption::OneFile => f.write_str("OneFile"),
+            NotesExportOption::FilePerSpace => f.write_str("FilePerSpace"),
+            NotesExportOption::FilePerNote => f.write_str("FilePerNote"),
+        }
+    }
+}
+
 /// Format for the data exporting.
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone)]
 pub enum ExportFormat {
@@ -202,6 +245,41 @@ pub enum ExportFormat {
     Md,
     /// Export data in the `json` format. Importing back from the `json` format is possible.
     Json,
+}
+
+impl ExportFormat {
+    /// Returns a slice that contains all [ExportFormat] variants.
+    pub fn variants() -> &'static [ExportFormat] {
+        &[ExportFormat::Md, ExportFormat::Json]
+    }
+
+    /// Returns pretty name of [ExportFormat].
+    pub fn pretty(&self) -> &str {
+        match self {
+            ExportFormat::Md => "Markdown",
+            ExportFormat::Json => "Json",
+        }
+    }
+
+    /// Creates [ExportFormat] from the `str`.
+    ///
+    /// Panic: on invalid value.
+    pub fn from_str(value: &str) -> Self {
+        match value {
+            "Md" => ExportFormat::Md,
+            "Json" => ExportFormat::Json,
+            _ => panic!("Invalid ExportFormat value: {}", value),
+        }
+    }
+}
+
+impl fmt::Display for ExportFormat {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
+        match self {
+            ExportFormat::Md => f.write_str("Md"),
+            ExportFormat::Json => f.write_str("Json"),
+        }
+    }
 }
 
 /// Configuration for app data export.

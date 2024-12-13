@@ -3,6 +3,8 @@ use std::path::PathBuf;
 use common::{App, Appearance, Config, DataExportConfig, ExportFormat, KeyBindings, NotesExportOption};
 use leptos::*;
 use leptos_hotkeys::use_hotkeys;
+use wasm_bindgen::JsCast;
+use web_sys::HtmlSelectElement;
 
 use crate::backend::export::export_data;
 use crate::backend::file::open;
@@ -34,24 +36,26 @@ pub fn AppInfoWindow(#[prop(into)] close: Callback<(), ()>) -> impl IntoView {
         })
     };
 
-    let (export_option, set_export_option) = create_signal(None);
+    let (export_config, set_export_config) = create_signal(None);
+    let (export_option, set_export_option) = create_signal(NotesExportOption::OneFile);
+    let (export_format, set_export_format) = create_signal(ExportFormat::Md);
+
     let export_result = create_resource(
-        move || export_option.get(),
-        move |export_option| async move {
-            if let Some(export_option) = export_option {
-                Some(
-                    export_data(DataExportConfig {
-                        notes_export_option: export_option,
-                        format: ExportFormat::Md,
-                    })
-                    .await,
-                )
+        move || export_config.get(),
+        move |export_config| async move {
+            if let Some(export_config) = export_config {
+                Some(export_data(export_config).await)
             } else {
                 None
             }
         },
     );
-    let export_data = move |_| set_export_option.set(Some(NotesExportOption::OneFile));
+    let export_data = move |_| {
+        set_export_config.set(Some(DataExportConfig {
+            notes_export_option: export_option.get(),
+            format: export_format.get(),
+        }));
+    };
     let open_exported_data_dir = move |path: PathBuf| spawn_local(async move { open(&path).await });
 
     view! {
@@ -200,7 +204,28 @@ pub fn AppInfoWindow(#[prop(into)] close: Callback<(), ()>) -> impl IntoView {
                 }
             }}
             <div class="horizontal">
-                <span>"One file"</span>
+                <select
+                    on:change=move |ev: leptos::ev::Event| {
+                        let select: HtmlSelectElement = ev.target().unwrap().unchecked_into();
+                        set_export_option.set(NotesExportOption::from_str(&select.value()));
+                    }
+                    prop:value=move || export_option.get().to_string()
+                >
+                    {NotesExportOption::variants().into_iter().map(|export_option| view! {
+                        <option value=export_option.to_string()>{export_option.pretty()}</option>
+                    }).collect_view()}
+                </select>
+                <select
+                    on:change=move |ev: leptos::ev::Event| {
+                        let select: HtmlSelectElement = ev.target().unwrap().unchecked_into();
+                        set_export_format.set(ExportFormat::from_str(&select.value()));
+                    }
+                    prop:value=move || export_format.get().to_string()
+                >
+                    {ExportFormat::variants().into_iter().map(|export_format| view! {
+                        <option value=export_format.to_string()>{export_format.pretty()}</option>
+                    }).collect_view()}
+                </select>
                 <button class="button_ok" on:click=export_data>"Export"</button>
                 <Suspense
                     fallback=move || view! { <span>"Exporting...."</span> }
