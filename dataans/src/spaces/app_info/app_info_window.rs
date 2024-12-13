@@ -207,22 +207,22 @@ pub fn AppInfoWindow(#[prop(into)] close: Callback<(), ()>) -> impl IntoView {
                 <select
                     on:change=move |ev: leptos::ev::Event| {
                         let select: HtmlSelectElement = ev.target().unwrap().unchecked_into();
-                        set_export_option.set(NotesExportOption::from_str(&select.value()));
+                        set_export_option.set(NotesExportOption::_from_str(&select.value()));
                     }
                     prop:value=move || export_option.get().to_string()
                 >
-                    {NotesExportOption::variants().into_iter().map(|export_option| view! {
+                    {NotesExportOption::variants().iter().map(|export_option| view! {
                         <option value=export_option.to_string()>{export_option.pretty()}</option>
                     }).collect_view()}
                 </select>
                 <select
                     on:change=move |ev: leptos::ev::Event| {
                         let select: HtmlSelectElement = ev.target().unwrap().unchecked_into();
-                        set_export_format.set(ExportFormat::from_str(&select.value()));
+                        set_export_format.set(ExportFormat::_from_str(&select.value()));
                     }
                     prop:value=move || export_format.get().to_string()
                 >
-                    {ExportFormat::variants().into_iter().map(|export_format| view! {
+                    {ExportFormat::variants().iter().map(|export_format| view! {
                         <option value=export_format.to_string()>{export_format.pretty()}</option>
                     }).collect_view()}
                 </select>

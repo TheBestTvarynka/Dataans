@@ -218,7 +218,7 @@ impl NotesExportOption {
     /// Creates [NotesExportOption] from the `str`.
     ///
     /// Panic: on invalid value.
-    pub fn from_str(value: &str) -> Self {
+    pub fn _from_str(value: &str) -> Self {
         match value {
             "OneFile" => NotesExportOption::OneFile,
             "FilePerSpace" => NotesExportOption::FilePerSpace,
@@ -264,7 +264,7 @@ impl ExportFormat {
     /// Creates [ExportFormat] from the `str`.
     ///
     /// Panic: on invalid value.
-    pub fn from_str(value: &str) -> Self {
+    pub fn _from_str(value: &str) -> Self {
         match value {
             "Md" => ExportFormat::Md,
             "Json" => ExportFormat::Json,
