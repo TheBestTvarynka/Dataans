@@ -76,7 +76,7 @@ fn write_space(space: &OwnedSpace, file: &mut File) -> Result<(), IoError> {
     Ok(())
 }
 
-pub fn export(notes_export_option: &NotesExportOption, backups_dir: &Path, db: &Database) -> Result<String, String> {
+pub fn export(notes_export_option: &NotesExportOption, backups_dir: &Path, db: &Database) -> Result<(), String> {
     match notes_export_option {
         NotesExportOption::OneFile => {
             let backup_file_path = backups_dir.join(format!("dataans-backup-{}.md", Uuid::new_v4()));
@@ -93,14 +93,27 @@ pub fn export(notes_export_option: &NotesExportOption, backups_dir: &Path, db: &
                 write_space_notes(space.id, &notes_collection, &mut backup_file)
                     .map_err(|err| format!("Cannot write space notes: {:?}", err))?;
             }
-
-            Ok(format!("{:?}", backups_dir))
         }
         NotesExportOption::FilePerSpace => {
-            todo!()
+            let spaces_collection = db.collection::<OwnedSpace>(SPACES_COLLECTION_NAME);
+            let notes_collection = db.collection::<Note<'static>>(NOTES_COLLECTION_NAME);
+
+            for space in spaces_collection.find(None).expect("Spaces querying should not fail.") {
+                let space = space.unwrap();
+
+                let space_file_name = backups_dir.join(format!("{}-{}.md", space.name.as_ref(), space.id.inner()));
+                let mut space_file = File::create(&space_file_name)
+                    .map_err(|err| format!("Cannot create backup file: {:?}. File: {:?}", err, space_file_name))?;
+
+                write_space(&space, &mut space_file).map_err(|err| format!("Cannot write space: {:?}", err))?;
+                write_space_notes(space.id, &notes_collection, &mut space_file)
+                    .map_err(|err| format!("Cannot write space notes: {:?}", err))?;
+            }
         }
         NotesExportOption::FilePerNote => {
             todo!()
         }
     }
+
+    Ok(())
 }
