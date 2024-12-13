@@ -1,18 +1,23 @@
-use std::fs::{self, File};
+use std::fs::File;
 use std::io::{Error as IoError, Write};
+use std::path::Path;
 
 use common::note::{File as NoteFile, Note};
 use common::space::{Id as SpaceId, OwnedSpace};
-use common::{DataExportConfig, NotesExportOption};
+use common::NotesExportOption;
 use polodb_core::bson::doc;
-use polodb_core::Collection;
-use tauri::State;
+use polodb_core::{Collection, Database};
 use time::macros::format_description;
 use time::OffsetDateTime;
 use uuid::Uuid;
 
-use crate::dataans::{DataansState, NOTES_COLLECTION_NAME, SPACES_COLLECTION_NAME};
-use crate::BACKUPS_DIR;
+use crate::dataans::{NOTES_COLLECTION_NAME, SPACES_COLLECTION_NAME};
+
+fn format_time(time: &OffsetDateTime) -> Result<String, IoError> {
+    let format = format_description!("[year].[month].[day]-[hour].[minute].[second]");
+
+    Ok(time.format(&format).expect("OffsetDateTime formatting should not fail"))
+}
 
 fn write_space_notes(
     space_id: SpaceId,
@@ -28,14 +33,14 @@ fn write_space_notes(
         let Note {
             id,
             text,
-            created_at: _,
+            created_at,
             space_id,
             files,
         } = note.unwrap();
 
         writeln!(file, "### `{}`\n", id.inner())?;
-        writeln!(file, "Space Id: `{}`\n", space_id.inner())?;
-        // TODO: format creation datetime.
+        writeln!(file, "Space Id: `{}`", space_id.inner())?;
+        writeln!(file, "Created at: {}\n", format_time(created_at.as_ref())?)?;
         writeln!(file, "{}\n", text.as_ref())?;
 
         writeln!(file, "#### Files\n")?;
@@ -57,13 +62,13 @@ fn write_space(space: &OwnedSpace, file: &mut File) -> Result<(), IoError> {
     let OwnedSpace {
         id,
         name,
-        created_at: _,
+        created_at,
         avatar,
     } = space;
     writeln!(file, "# {}\n", name.as_ref())?;
 
     writeln!(file, "Id: `{}`", id.inner())?;
-    // TODO: format creation datetime.
+    writeln!(file, "Created at: {}\n", format_time(created_at.as_ref())?)?;
     writeln!(file, "Avatar path: `{}`\n", avatar.as_ref())?;
 
     writeln!(file, "## {} notes\n", space.name.as_ref())?;
@@ -71,36 +76,15 @@ fn write_space(space: &OwnedSpace, file: &mut File) -> Result<(), IoError> {
     Ok(())
 }
 
-#[instrument(level = "trace", ret, skip(state))]
-#[tauri::command]
-pub fn export_app_data(state: State<'_, DataansState>, options: DataExportConfig) -> Result<String, String> {
-    let backups_dir = state.app_data_dir.join(BACKUPS_DIR);
-
-    if !backups_dir.exists() {
-        match fs::create_dir(&backups_dir) {
-            Ok(()) => info!(?backups_dir, "Successfully created backups directory"),
-            Err(err) => error!(?err, ?backups_dir, "Filed to create backups directory"),
-        }
-    }
-
-    let format = format_description!("[year].[month].[day]-[hour].[minute].[second]");
-    let backups_dir = backups_dir.join(
-        OffsetDateTime::now_utc()
-            .format(&format)
-            .map_err(|err| format!("Cannot format datetime: {:?}", err))?,
-    );
-
-    fs::create_dir(&backups_dir)
-        .map_err(|err| format!("Cannot create backups dir: {:?}. dir: {:?}", err, backups_dir))?;
-
-    match options.notes_export_option {
+pub fn export(notes_export_option: &NotesExportOption, backups_dir: &Path, db: &Database) -> Result<String, String> {
+    match notes_export_option {
         NotesExportOption::OneFile => {
             let backup_file_path = backups_dir.join(format!("dataans-backup-{}.md", Uuid::new_v4()));
             let mut backup_file = File::create(&backup_file_path)
                 .map_err(|err| format!("Cannot create backup file: {:?}. File: {:?}", err, backup_file_path))?;
 
-            let spaces_collection = state.db.collection::<OwnedSpace>(SPACES_COLLECTION_NAME);
-            let notes_collection = state.db.collection::<Note<'static>>(NOTES_COLLECTION_NAME);
+            let spaces_collection = db.collection::<OwnedSpace>(SPACES_COLLECTION_NAME);
+            let notes_collection = db.collection::<Note<'static>>(NOTES_COLLECTION_NAME);
 
             for space in spaces_collection.find(None).expect("Spaces querying should not fail.") {
                 let space = space.unwrap();

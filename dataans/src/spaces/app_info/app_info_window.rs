@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use common::{App, Appearance, Config, DataExportConfig, KeyBindings, NotesExportOption};
+use common::{App, Appearance, Config, DataExportConfig, ExportFormat, KeyBindings, NotesExportOption};
 use leptos::*;
 use leptos_hotkeys::use_hotkeys;
 
@@ -42,6 +42,7 @@ pub fn AppInfoWindow(#[prop(into)] close: Callback<(), ()>) -> impl IntoView {
                 Some(
                     export_data(DataExportConfig {
                         notes_export_option: export_option,
+                        format: ExportFormat::Md,
                     })
                     .await,
                 )

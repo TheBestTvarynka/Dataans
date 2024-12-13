@@ -195,9 +195,20 @@ pub enum NotesExportOption {
     FilePerNote,
 }
 
+/// Format for the data exporting.
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone)]
+pub enum ExportFormat {
+    /// Export data in the `md` format. Importing back from the `md` format is not possible.
+    Md,
+    /// Export data in the `json` format. Importing back from the `json` format is possible.
+    Json,
+}
+
 /// Configuration for app data export.
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone)]
 pub struct DataExportConfig {
     /// Option that describes how to export notes.
     pub notes_export_option: NotesExportOption,
+    /// Options that describes the format for data exporting.
+    pub format: ExportFormat,
 }
