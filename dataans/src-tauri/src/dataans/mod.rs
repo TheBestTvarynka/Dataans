@@ -2,7 +2,8 @@ use std::fs;
 use std::path::PathBuf;
 
 use common::APP_PLUGIN_NAME;
-use polodb_core::Database;
+use sqlx::sqlite::SqlitePoolOptions;
+use sqlx::SqlitePool;
 use tauri::plugin::{Builder, TauriPlugin};
 use tauri::{Manager, Runtime};
 
@@ -12,29 +13,38 @@ mod export;
 mod note;
 mod space;
 
-const SPACES_COLLECTION_NAME: &str = "spaces";
-const NOTES_COLLECTION_NAME: &str = "notes";
-
 pub struct DataansState {
     app_data_dir: PathBuf,
-    db: Database,
+    db: SqlitePool,
 }
 
 impl DataansState {
-    pub fn init(db_dir: PathBuf, app_data_dir: PathBuf) -> Self {
-        let db_file = db_dir.join("dataans.db");
+    pub async fn init(db_dir: PathBuf, app_data_dir: PathBuf) -> Self {
+        // It's okay to panic in this function because the app is useless without a working db.
+
+        let db_file = db_dir.join("dataans.sqlite");
 
         info!(?db_file, "Database file");
 
-        Self {
-            app_data_dir,
-            db: Database::open_file(db_file).expect("Database opening should not fail."),
+        if !db_file.exists() {
+            std::fs::File::create(&db_file).expect("Can not create db file");
         }
+
+        let db = SqlitePoolOptions::new()
+            .max_connections(4)
+            .min_connections(1)
+            .acquire_timeout(std::time::Duration::from_secs(5))
+            .connect_lazy(&format!(
+                "sqlite://{}",
+                db_file.to_str().expect("Bro, wtf, use UTF-8 paths")
+            ))
+            .expect("can not connect to sqlite db");
+
+        Self { app_data_dir, db }
     }
 }
 
 pub fn init_dataans_plugin<R: Runtime>() -> TauriPlugin<R> {
-    warn!("init_dataans_plugin");
     debug!("init_dataans_plugin");
 
     Builder::new(APP_PLUGIN_NAME)

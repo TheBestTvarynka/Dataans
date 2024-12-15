@@ -5,7 +5,6 @@ use std::fs;
 use std::path::PathBuf;
 
 use common::DataExportConfig;
-use polodb_core::bson::doc;
 use tauri::State;
 use time::macros::format_description;
 use time::OffsetDateTime;
