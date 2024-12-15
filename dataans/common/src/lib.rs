@@ -15,6 +15,8 @@ use std::path::PathBuf;
 use serde::{Deserialize, Serialize};
 use time::OffsetDateTime;
 
+use crate::export::SchemaVersion;
+
 /// Name of the custom tauri plugin.
 pub const APP_PLUGIN_NAME: &str = "dataans";
 
@@ -188,9 +190,10 @@ impl AsRef<OffsetDateTime> for CreationDate {
 }
 
 /// Option that describes how to export notes.
-#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone, Default)]
 pub enum NotesExportOption {
     /// All exported data will be in one `.md` file.
+    #[default]
     OneFile,
     /// For each space a separate file will be created.
     FilePerSpace,
@@ -208,8 +211,17 @@ impl NotesExportOption {
         ]
     }
 
+    /// Returns [NotesExportOption] variant name.
+    pub fn variant_name(&self) -> &'static str {
+        match self {
+            NotesExportOption::OneFile => "OneFile",
+            NotesExportOption::FilePerSpace => "FilePerSpace",
+            NotesExportOption::FilePerNote => "FilePerNote",
+        }
+    }
+
     /// Returns pretty name of [NotesExportOption].
-    pub fn pretty(&self) -> &str {
+    pub fn pretty(&self) -> &'static str {
         match self {
             NotesExportOption::OneFile => "One file",
             NotesExportOption::FilePerSpace => "File per space",
@@ -232,11 +244,7 @@ impl NotesExportOption {
 
 impl fmt::Display for NotesExportOption {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
-        match self {
-            NotesExportOption::OneFile => f.write_str("OneFile"),
-            NotesExportOption::FilePerSpace => f.write_str("FilePerSpace"),
-            NotesExportOption::FilePerNote => f.write_str("FilePerNote"),
-        }
+        f.write_str(self.variant_name())
     }
 }
 
@@ -246,5 +254,40 @@ pub enum DataExportConfig {
     /// Markdown format with its options.
     Md(NotesExportOption),
     /// Json export format with its options.
-    Json(crate::export::SchemaVersion),
+    Json(SchemaVersion),
+}
+
+impl DataExportConfig {
+    /// Returns all possible [DataExportConfig] variants initialized with default values.
+    pub fn variants() -> &'static [DataExportConfig] {
+        &[
+            DataExportConfig::Md(NotesExportOption::OneFile),
+            DataExportConfig::Json(SchemaVersion::V1),
+        ]
+    }
+
+    /// Creates [NotesExportOption] from the `str` variant name.
+    ///
+    /// Panic: on invalid value.
+    pub fn _from_str(value: &str) -> Self {
+        match value {
+            "Md" => DataExportConfig::Md(Default::default()),
+            "Json" => DataExportConfig::Json(Default::default()),
+            _ => panic!("Invalid DataExportConfig variant name: {}", value),
+        }
+    }
+
+    /// Returns name of the [DataExportConfig] variant.
+    pub fn variant_name(&self) -> &'static str {
+        match self {
+            DataExportConfig::Md(_) => "Md",
+            DataExportConfig::Json(_) => "Json",
+        }
+    }
+}
+
+impl Default for DataExportConfig {
+    fn default() -> Self {
+        Self::Json(Default::default())
+    }
 }

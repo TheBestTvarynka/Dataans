@@ -13,7 +13,7 @@ use crate::dataans::space::query_spaces;
 use crate::dataans::{NOTES_COLLECTION_NAME, SPACES_COLLECTION_NAME};
 
 pub fn export_v1(backups_dir: &Path, db: &Database) -> Result<(), IoError> {
-    let backup_file_path = backups_dir.join(format!("dataans-backup-{}.md", Uuid::new_v4()));
+    let backup_file_path = backups_dir.join(format!("dataans-backup-{}.json", Uuid::new_v4()));
     let backup_file = File::create(&backup_file_path)?;
 
     let spaces_collection = db.collection::<OwnedSpace>(SPACES_COLLECTION_NAME);

@@ -1,4 +1,3 @@
-mod app_info;
 mod found_notes_list;
 mod space;
 pub mod space_form;
@@ -11,12 +10,12 @@ use common::Config;
 use leptos::*;
 use leptos_hotkeys::{use_hotkeys, use_hotkeys_scoped};
 
-use self::app_info::AppInfo;
 use self::found_notes_list::FoundNotesList;
 use self::space::Space;
 use self::spaces_list::SpacesList;
 use self::tools::Tools;
 use crate::app::GlobalState;
+use crate::app_info::AppInfo;
 use crate::backend::notes::list_notes;
 use crate::backend::spaces::list_spaces;
 use crate::utils::focus_element;

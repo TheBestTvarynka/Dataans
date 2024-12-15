@@ -6,9 +6,10 @@ use crate::note::OwnedNote;
 use crate::space::OwnedSpace;
 
 /// Schema version.
-#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone, Copy)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone, Copy, Default)]
 pub enum SchemaVersion {
     /// V1.
+    #[default]
     V1,
 }
 
@@ -16,6 +17,13 @@ impl SchemaVersion {
     /// Returns slice that contains all possible schema versions.
     pub fn variants() -> &'static [SchemaVersion] {
         &[SchemaVersion::V1]
+    }
+
+    /// Returns [SchemaVersion] variant name.
+    pub fn variant_name(&self) -> &'static str {
+        match self {
+            SchemaVersion::V1 => "V1",
+        }
     }
 
     /// Creates [SchemaVersion] from the `str`.
@@ -31,9 +39,7 @@ impl SchemaVersion {
 
 impl fmt::Display for SchemaVersion {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
-        match self {
-            SchemaVersion::V1 => f.write_str("V1"),
-        }
+        f.write_str(self.variant_name())
     }
 }
 
