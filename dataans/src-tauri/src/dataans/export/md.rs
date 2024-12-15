@@ -1,3 +1,6 @@
+// TODO:
+// Currently, all code is synchronous. But it can be optimized by using async.
+
 use std::fs::{self, File};
 use std::io::{Error as IoError, Write};
 use std::path::Path;

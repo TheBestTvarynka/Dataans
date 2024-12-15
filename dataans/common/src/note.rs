@@ -93,6 +93,9 @@ pub struct Note<'text> {
     // TODO(@TheBestTvarynka): implement update time etc.
 }
 
+/// Owned version of [Note].
+pub type OwnedNote = Note<'static>;
+
 /// Represents draft note.
 #[derive(Serialize, Deserialize, Debug, Clone, Eq, PartialEq, Default)]
 pub struct DraftNote<'text> {

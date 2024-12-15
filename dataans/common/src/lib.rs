@@ -1,6 +1,8 @@
 #![doc = include_str!("../README.md")]
 #![warn(missing_docs)]
 
+/// Contains schema definitions for data export.
+pub mod export;
 /// Contains all note-related structures.
 pub mod note;
 /// Contains all space-related structures.
@@ -238,55 +240,11 @@ impl fmt::Display for NotesExportOption {
     }
 }
 
-/// Format for the data exporting.
-#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone)]
-pub enum ExportFormat {
-    /// Export data in the `md` format. Importing back from the `md` format is not possible.
-    Md,
-    /// Export data in the `json` format. Importing back from the `json` format is possible.
-    Json,
-}
-
-impl ExportFormat {
-    /// Returns a slice that contains all [ExportFormat] variants.
-    pub fn variants() -> &'static [ExportFormat] {
-        &[ExportFormat::Md, ExportFormat::Json]
-    }
-
-    /// Returns pretty name of [ExportFormat].
-    pub fn pretty(&self) -> &str {
-        match self {
-            ExportFormat::Md => "Markdown",
-            ExportFormat::Json => "Json",
-        }
-    }
-
-    /// Creates [ExportFormat] from the `str`.
-    ///
-    /// Panic: on invalid value.
-    pub fn _from_str(value: &str) -> Self {
-        match value {
-            "Md" => ExportFormat::Md,
-            "Json" => ExportFormat::Json,
-            _ => panic!("Invalid ExportFormat value: {}", value),
-        }
-    }
-}
-
-impl fmt::Display for ExportFormat {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
-        match self {
-            ExportFormat::Md => f.write_str("Md"),
-            ExportFormat::Json => f.write_str("Json"),
-        }
-    }
-}
-
 /// Configuration for app data export.
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone)]
-pub struct DataExportConfig {
-    /// Option that describes how to export notes.
-    pub notes_export_option: NotesExportOption,
-    /// Options that describes the format for data exporting.
-    pub format: ExportFormat,
+pub enum DataExportConfig {
+    /// Markdown format with its options.
+    Md(NotesExportOption),
+    /// Json export format with its options.
+    Json(crate::export::SchemaVersion),
 }

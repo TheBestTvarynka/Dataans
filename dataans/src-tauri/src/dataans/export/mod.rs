@@ -4,7 +4,7 @@ mod md;
 use std::fs;
 use std::path::PathBuf;
 
-use common::{DataExportConfig, ExportFormat};
+use common::DataExportConfig;
 use polodb_core::bson::doc;
 use tauri::State;
 use time::macros::format_description;
@@ -15,7 +15,7 @@ use crate::BACKUPS_DIR;
 
 #[instrument(level = "trace", ret, skip(state))]
 #[tauri::command]
-pub fn export_app_data(state: State<'_, DataansState>, options: DataExportConfig) -> Result<PathBuf, String> {
+pub fn export_app_data(state: State<'_, DataansState>, export_config: DataExportConfig) -> Result<PathBuf, String> {
     let backups_dir = state.app_data_dir.join(BACKUPS_DIR);
 
     if !backups_dir.exists() {
@@ -35,9 +35,9 @@ pub fn export_app_data(state: State<'_, DataansState>, options: DataExportConfig
     fs::create_dir(&backups_dir)
         .map_err(|err| format!("Cannot create backups dir: {:?}. dir: {:?}", err, backups_dir))?;
 
-    match options.format {
-        ExportFormat::Md => md::export(&options.notes_export_option, &backups_dir, &state.db)?,
-        ExportFormat::Json => todo!(),
+    match export_config {
+        DataExportConfig::Md(notes_export_option) => md::export(&notes_export_option, &backups_dir, &state.db)?,
+        DataExportConfig::Json(schema_version) => json::export(schema_version, &backups_dir, &state.db)?,
     }
 
     Ok(backups_dir)

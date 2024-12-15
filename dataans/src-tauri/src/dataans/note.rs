@@ -3,16 +3,14 @@ use std::collections::HashMap;
 use common::note::{Id as NoteId, Note, NoteFull, NoteFullOwned, UpdateNote};
 use common::space::{Id as SpaceId, OwnedSpace};
 use polodb_core::bson::doc;
+use polodb_core::Collection;
 use tauri::State;
 
 use crate::dataans::{DataansState, NOTES_COLLECTION_NAME, SPACES_COLLECTION_NAME};
 
-#[instrument(ret, skip(state))]
-#[tauri::command]
-pub fn list_notes(state: State<'_, DataansState>, space_id: SpaceId) -> Result<Vec<Note>, String> {
-    let collection = state.db.collection::<Note<'static>>(NOTES_COLLECTION_NAME);
-
+pub fn query_space_notes(space_id: SpaceId, collection: &Collection<Note<'static>>) -> Vec<Note<'static>> {
     let mut notes = Vec::new();
+
     for note in collection
         .find(doc! {
             "space_id": space_id.inner().to_string(),
@@ -22,7 +20,15 @@ pub fn list_notes(state: State<'_, DataansState>, space_id: SpaceId) -> Result<V
         notes.push(note.expect("Note parsing should not fail."));
     }
 
-    Ok(notes)
+    notes
+}
+
+#[instrument(ret, skip(state))]
+#[tauri::command]
+pub fn list_notes(state: State<'_, DataansState>, space_id: SpaceId) -> Result<Vec<Note>, String> {
+    let collection = state.db.collection::<Note<'static>>(NOTES_COLLECTION_NAME);
+
+    Ok(query_space_notes(space_id, &collection))
 }
 
 #[instrument(ret, skip(state))]

@@ -1,20 +1,26 @@
 use common::space::{DeleteSpace, OwnedSpace, UpdateSpace};
 use polodb_core::bson::doc;
+use polodb_core::Collection;
 use tauri::State;
 
 use crate::dataans::{DataansState, SPACES_COLLECTION_NAME};
+
+pub fn query_spaces(collection: &Collection<OwnedSpace>) -> Vec<OwnedSpace> {
+    let mut spaces = Vec::new();
+
+    for space in collection.find(None).expect("Spaces querying should not fail.") {
+        spaces.push(space.unwrap());
+    }
+
+    spaces
+}
 
 #[instrument(level = "trace", ret, skip(state))]
 #[tauri::command]
 pub async fn list_spaces(state: State<'_, DataansState>) -> Result<Vec<OwnedSpace>, String> {
     let collection = state.db.collection::<OwnedSpace>(SPACES_COLLECTION_NAME);
 
-    let mut spaces = Vec::new();
-    for space in collection.find(None).expect("Spaces querying should not fail.") {
-        spaces.push(space.unwrap());
-    }
-
-    Ok(spaces)
+    Ok(query_spaces(&collection))
 }
 
 #[instrument(level = "trace", ret, skip(state))]
