@@ -51,5 +51,5 @@ members = ["common", "src-tauri"]
 
 [workspace.dependencies]
 time = { version = "0.3" , default-features = false }
-uuid = { version = "1.10", default-features = false }
+uuid = { version = "1.11", default-features = false }
 serde = "1"

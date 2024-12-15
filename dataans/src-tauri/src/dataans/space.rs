@@ -16,7 +16,11 @@ pub async fn list_spaces(state: State<'_, DataansState>) -> Result<Vec<OwnedSpac
 #[instrument(level = "trace", ret, skip(state))]
 #[tauri::command]
 pub fn create_space(state: State<'_, DataansState>, space_data: OwnedSpace) -> Result<(), String> {
-    todo!()
+    let connection = state.db.try_acquire().expect("sqlite connection");
+
+    // connection.
+
+    Ok(())
 }
 
 #[instrument(level = "trace", ret, skip(state))]

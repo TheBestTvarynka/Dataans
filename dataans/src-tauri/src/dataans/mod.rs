@@ -9,6 +9,7 @@ use tauri::{Manager, Runtime};
 
 use crate::{CONFIGS_DIR, CONFIG_FILE_NAME, FILES_DIR, IMAGED_DIR};
 
+mod db;
 mod export;
 mod note;
 mod space;
