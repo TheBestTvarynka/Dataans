@@ -178,6 +178,7 @@ pub fn AppInfoWindow(#[prop(into)] close: Callback<(), ()>) -> impl IntoView {
                     </table>
                 }
             }}
+            <hr style="width: 80%" />
             <Export />
         </div>
     }

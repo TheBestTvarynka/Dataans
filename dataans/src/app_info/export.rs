@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use common::export::SchemaVersion;
 use common::{DataExportConfig, NotesExportOption};
 use leptos::*;
@@ -5,7 +7,7 @@ use wasm_bindgen::JsCast;
 use web_sys::HtmlSelectElement;
 
 use crate::backend::export::export_data;
-// use crate::backend::file::open;
+use crate::backend::file::open;
 
 #[component]
 pub fn Export() -> impl IntoView {
@@ -20,12 +22,20 @@ pub fn Export() -> impl IntoView {
         }
     });
 
+    let open_backup_folder = move |path: PathBuf| {
+        spawn_local(async move {
+            set_backup_dir.set(None);
+            open(&path).await;
+        });
+    };
+
     view! {
-        <div>
+        <div class="horizontal">
             {move || {
                 let export_config = export_config.get();
                 view! {
                     <select
+                        class="input"
                         on:change=move |ev: leptos::ev::Event| {
                             let select: HtmlSelectElement = ev.target().unwrap().unchecked_into();
                             set_export_config.set(DataExportConfig::_from_str(&select.value()));
@@ -45,6 +55,7 @@ pub fn Export() -> impl IntoView {
             {move || match export_config.get() {
                 DataExportConfig::Md(notes_export_option) => view! {
                     <select
+                        class="input"
                         on:change=move |ev: leptos::ev::Event| {
                             let select: HtmlSelectElement = ev.target().unwrap().unchecked_into();
                             set_export_config.set(DataExportConfig::Md(NotesExportOption::_from_str(&select.value())));
@@ -62,6 +73,7 @@ pub fn Export() -> impl IntoView {
                 },
                 DataExportConfig::Json(schema_version) => view! {
                     <select
+                        class="input"
                         on:change=move |ev: leptos::ev::Event| {
                             let select: HtmlSelectElement = ev.target().unwrap().unchecked_into();
                             set_export_config.set(DataExportConfig::Json(SchemaVersion::_from_str(&select.value())));
@@ -78,10 +90,21 @@ pub fn Export() -> impl IntoView {
                     </select>
                 },
             }}
-            <button class="button_ok" on:click=move |_| export_data_action.dispatch(export_config.get())>"Export"</button>
-            {move || if let Some(backup_dir) = backup_dir.get() {view! {
-                <span>{backup_dir.to_str().expect("UTF-8 valid path").to_string()}</span>
-            }} else { view! { <span /> }}}
+            <button class="button_cancel" on:click=move |_| export_data_action.dispatch(export_config.get())>"Export"</button>
+            <Show when=move || backup_dir.get().is_some()>
+                {move || {
+                    let backup_dir = backup_dir.get().unwrap();
+                    view! {
+                        <button
+                            class="tool"
+                            title="Open backup folder"
+                            on:click=move |_| open_backup_folder(backup_dir.clone())
+                        >
+                            <img alt="edit note" src="/public/icons/folder.png" />
+                        </button>
+                    }
+                }}
+            </Show>
         </div>
     }
 }
