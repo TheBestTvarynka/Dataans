@@ -54,7 +54,7 @@ impl<'text> From<&'text str> for MdText<'text> {
     }
 }
 
-impl<'text> AsRef<str> for MdText<'text> {
+impl AsRef<str> for MdText<'_> {
     fn as_ref(&self) -> &str {
         self.0.as_ref()
     }
@@ -92,6 +92,9 @@ pub struct Note<'text> {
     pub files: Vec<File>,
     // TODO(@TheBestTvarynka): implement update time etc.
 }
+
+/// Owned version of [Note].
+pub type OwnedNote = Note<'static>;
 
 /// Represents draft note.
 #[derive(Serialize, Deserialize, Debug, Clone, Eq, PartialEq, Default)]

@@ -23,6 +23,7 @@
     "dataans:allow-delete-note",
     "dataans:allow-search-notes-in-space",
     "dataans:allow-search-notes",
+    "dataans:allow-export-app-data",
     "global-shortcut:default",
     "global-shortcut:allow-is-registered",
     "global-shortcut:allow-register",

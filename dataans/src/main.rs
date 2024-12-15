@@ -4,6 +4,7 @@
 extern crate log;
 
 mod app;
+mod app_info;
 mod backend;
 mod common;
 mod notes;

@@ -1,12 +1,12 @@
 use common::note::{Id as NoteId, Note, NoteFullOwned, UpdateNote};
 use common::space::Id as SpaceId;
 use common::APP_PLUGIN_NAME;
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 use serde_wasm_bindgen::{from_value, to_value};
 
 use crate::backend::invoke;
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 struct ListNotesArgs {
     pub space_id: SpaceId,
@@ -19,7 +19,7 @@ pub async fn list_notes(space_id: SpaceId) -> Result<Vec<Note<'static>>, String>
     Ok(from_value(notes).expect("Notes list deserialization from JsValue should not fail."))
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 struct CreateNoteArgs<'text> {
     pub note: Note<'text>,
@@ -32,7 +32,7 @@ pub async fn create_note(note: Note<'_>) -> Result<(), String> {
     Ok(())
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 struct UpdateNoteArgs<'text> {
     pub note_data: UpdateNote<'text>,
@@ -46,7 +46,7 @@ pub async fn update_note(note_data: UpdateNote<'_>) -> Result<(), String> {
     Ok(())
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 struct DeleteNoteArgs {
     pub note_id: NoteId,
@@ -59,7 +59,7 @@ pub async fn delete_note(note_id: NoteId) -> Result<(), String> {
     Ok(())
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 struct SearchNotesInSpaceArgs<'query> {
     pub space_id: SpaceId,
@@ -74,7 +74,7 @@ pub async fn search_notes_in_space(space_id: SpaceId, query: &str) -> Result<Vec
     Ok(from_value(notes).expect("Notes list deserialization from JsValue should not fail."))
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 struct SearchNotesArgs<'query> {
     pub query: &'query str,

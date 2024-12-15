@@ -17,12 +17,6 @@ pub enum FindNoteMode {
     },
 }
 
-impl FindNoteMode {
-    pub fn is_find_mode(&self) -> bool {
-        matches!(self, FindNoteMode::FindNote { .. })
-    }
-}
-
 #[derive(Debug, Clone)]
 pub struct GlobalState {
     pub spaces: Vec<OwnedSpace>,

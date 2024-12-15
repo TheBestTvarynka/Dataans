@@ -27,7 +27,7 @@
 
 .tool:hover {
     cursor: pointer;
-    transition: 0.3s;
+    transition: 0.1s;
     background-color: var(--tools-button-hover);
     border-color: var(--spaces-tools-border-color);
 }
@@ -45,8 +45,7 @@
     border-radius: 3px;
     margin: 0;
     padding: 0.2em;
-    font-size: 0.9em;
-    transition: all 0.4s;
+    transition: all 0.2s;
     border: 3px solid transparent;
     background: var(--input-background-color);
     /*width: inherit;*/
@@ -63,24 +62,23 @@
     padding: 0.2em;
     margin: 0;
     border-radius: 0.3em;
-    border: 3px solid transparent;
-    transition: 0.3s;
+    border: 2px solid transparent;
+    transition: 0.15s;
     background: var(--button-ok-background-color);
     color: var(--button-ok-text-color);
 }
 
 .button_ok:hover {
     cursor: pointer;
-    border: 3px solid var(--button-ok-outline-color);
+    border: 2px solid var(--button-ok-outline-color);
 }
 
 .button_cancel {
-    height: 2em;
     padding: 0.2em;
     margin: 0;
     border: 2px solid transparent;
     border-radius: 0.2em;
-    transition: 0.3s;
+    transition: 0.15s;
     background-color: transparent;
     color: var(--button-cancel-color);
 }

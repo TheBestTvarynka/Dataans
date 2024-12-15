@@ -1,16 +1,21 @@
 #![doc = include_str!("../README.md")]
 #![warn(missing_docs)]
 
+/// Contains schema definitions for data export.
+pub mod export;
 /// Contains all note-related structures.
 pub mod note;
 /// Contains all space-related structures.
 pub mod space;
 
 use std::collections::HashMap;
+use std::fmt;
 use std::path::PathBuf;
 
 use serde::{Deserialize, Serialize};
 use time::OffsetDateTime;
+
+use crate::export::SchemaVersion;
 
 /// Name of the custom tauri plugin.
 pub const APP_PLUGIN_NAME: &str = "dataans";
@@ -181,5 +186,108 @@ impl From<OffsetDateTime> for CreationDate {
 impl AsRef<OffsetDateTime> for CreationDate {
     fn as_ref(&self) -> &OffsetDateTime {
         &self.0
+    }
+}
+
+/// Option that describes how to export notes.
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone, Default)]
+pub enum NotesExportOption {
+    /// All exported data will be in one `.md` file.
+    #[default]
+    OneFile,
+    /// For each space a separate file will be created.
+    FilePerSpace,
+    /// For each note a separate file will be created. All these files will be grouped by folders which represent spaces.
+    FilePerNote,
+}
+
+impl NotesExportOption {
+    /// Returns a slice that contains all [NotesExportOption] variants.
+    pub fn variants() -> &'static [NotesExportOption] {
+        &[
+            NotesExportOption::OneFile,
+            NotesExportOption::FilePerSpace,
+            NotesExportOption::FilePerNote,
+        ]
+    }
+
+    /// Returns [NotesExportOption] variant name.
+    pub fn variant_name(&self) -> &'static str {
+        match self {
+            NotesExportOption::OneFile => "OneFile",
+            NotesExportOption::FilePerSpace => "FilePerSpace",
+            NotesExportOption::FilePerNote => "FilePerNote",
+        }
+    }
+
+    /// Returns pretty name of [NotesExportOption].
+    pub fn pretty(&self) -> &'static str {
+        match self {
+            NotesExportOption::OneFile => "One file",
+            NotesExportOption::FilePerSpace => "File per space",
+            NotesExportOption::FilePerNote => "File per note",
+        }
+    }
+
+    /// Creates [NotesExportOption] from the `str`.
+    ///
+    /// Panic: on invalid value.
+    pub fn _from_str(value: &str) -> Self {
+        match value {
+            "OneFile" => NotesExportOption::OneFile,
+            "FilePerSpace" => NotesExportOption::FilePerSpace,
+            "FilePerNote" => NotesExportOption::FilePerNote,
+            _ => panic!("Invalid NotesExportOption value: {}", value),
+        }
+    }
+}
+
+impl fmt::Display for NotesExportOption {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
+        f.write_str(self.variant_name())
+    }
+}
+
+/// Configuration for app data export.
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone)]
+pub enum DataExportConfig {
+    /// Markdown format with its options.
+    Md(NotesExportOption),
+    /// Json export format with its options.
+    Json(SchemaVersion),
+}
+
+impl DataExportConfig {
+    /// Returns all possible [DataExportConfig] variants initialized with default values.
+    pub fn variants() -> &'static [DataExportConfig] {
+        &[
+            DataExportConfig::Md(NotesExportOption::OneFile),
+            DataExportConfig::Json(SchemaVersion::V1),
+        ]
+    }
+
+    /// Creates [NotesExportOption] from the `str` variant name.
+    ///
+    /// Panic: on invalid value.
+    pub fn _from_str(value: &str) -> Self {
+        match value {
+            "Md" => DataExportConfig::Md(Default::default()),
+            "Json" => DataExportConfig::Json(Default::default()),
+            _ => panic!("Invalid DataExportConfig variant name: {}", value),
+        }
+    }
+
+    /// Returns name of the [DataExportConfig] variant.
+    pub fn variant_name(&self) -> &'static str {
+        match self {
+            DataExportConfig::Md(_) => "Md",
+            DataExportConfig::Json(_) => "Json",
+        }
+    }
+}
+
+impl Default for DataExportConfig {
+    fn default() -> Self {
+        Self::Json(Default::default())
     }
 }

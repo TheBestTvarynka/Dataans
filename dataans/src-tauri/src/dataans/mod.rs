@@ -8,6 +8,7 @@ use tauri::{Manager, Runtime};
 
 use crate::{CONFIGS_DIR, CONFIG_FILE_NAME, FILES_DIR, IMAGED_DIR};
 
+mod export;
 mod note;
 mod space;
 
@@ -15,16 +16,18 @@ const SPACES_COLLECTION_NAME: &str = "spaces";
 const NOTES_COLLECTION_NAME: &str = "notes";
 
 pub struct DataansState {
+    app_data_dir: PathBuf,
     db: Database,
 }
 
 impl DataansState {
-    pub fn init(db_dir: PathBuf) -> Self {
+    pub fn init(db_dir: PathBuf, app_data_dir: PathBuf) -> Self {
         let db_file = db_dir.join("dataans.db");
 
         info!(?db_file, "Database file");
 
         Self {
+            app_data_dir,
             db: Database::open_file(db_file).expect("Database opening should not fail."),
         }
     }
@@ -46,6 +49,7 @@ pub fn init_dataans_plugin<R: Runtime>() -> TauriPlugin<R> {
             note::delete_note,
             note::search_notes_in_space,
             note::search_notes,
+            export::export_app_data,
         ])
         .setup(|app_handle, _api| {
             info!("Starting app setup...");
@@ -128,7 +132,7 @@ pub fn init_dataans_plugin<R: Runtime>() -> TauriPlugin<R> {
                 }
             }
 
-            app_handle.manage(DataansState::init(db_dir));
+            app_handle.manage(DataansState::init(db_dir, app_data));
 
             Ok(())
         })

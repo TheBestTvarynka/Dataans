@@ -12,6 +12,7 @@ fn main() {
             "delete_note",
             "search_notes_in_space",
             "search_notes",
+            "export_app_data",
         ]),
     ))
     .expect("Tauri app build should not fail")
