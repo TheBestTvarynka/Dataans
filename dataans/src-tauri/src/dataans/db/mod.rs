@@ -20,6 +20,7 @@ pub trait Db: Send + Sync {
     async fn update_file(&self, file: &File) -> Result<(), DbError>;
 
     async fn spaces(&self) -> Result<Vec<Space>, DbError>;
+    async fn space_by_id(&self, space_id: Uuid) -> Result<Space, DbError>;
     async fn create_space(&self, space: &Space) -> Result<(), DbError>;
     async fn remove_space(&self, space_id: Uuid) -> Result<(), DbError>;
     async fn update_space(&self, space: &Space) -> Result<(), DbError>;

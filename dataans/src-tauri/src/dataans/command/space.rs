@@ -14,18 +14,21 @@ pub async fn list_spaces(state: State<'_, DataansState>) -> Result<Vec<OwnedSpac
 
 #[instrument(level = "trace", ret, skip(state))]
 #[tauri::command]
-pub fn create_space(state: State<'_, DataansState>, space_data: OwnedSpace) -> Result<(), DataansError> {
-    todo!()
+pub async fn create_space(state: State<'_, DataansState>, space_data: OwnedSpace) -> Result<(), DataansError> {
+    state.space_service.create_space(space_data).await
 }
 
 #[instrument(level = "trace", ret, skip(state))]
 #[tauri::command]
-pub fn update_space(state: State<'_, DataansState>, space_data: UpdateSpace<'static>) -> Result<(), DataansError> {
-    todo!()
+pub async fn update_space(
+    state: State<'_, DataansState>,
+    space_data: UpdateSpace<'static>,
+) -> Result<(), DataansError> {
+    state.space_service.update_space(space_data).await
 }
 
 #[instrument(level = "trace", ret, skip(state))]
 #[tauri::command]
-pub fn delete_space(state: State<'_, DataansState>, space_data: DeleteSpace) -> Result<(), DataansError> {
-    todo!()
+pub async fn delete_space(state: State<'_, DataansState>, space_data: DeleteSpace) -> Result<(), DataansError> {
+    state.space_service.delete_space(space_data).await
 }

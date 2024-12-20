@@ -70,23 +70,25 @@ impl AsRef<str> for Name<'_> {
 ///
 /// Example: `461d7188-062a-4514-bece-3577624d0ee8.png`.
 #[derive(Serialize, Deserialize, Debug, Default, Clone, Eq, PartialEq)]
-pub struct Avatar<'avatar>(Cow<'avatar, str>);
-
-impl From<String> for Avatar<'static> {
-    fn from(value: String) -> Self {
-        Self(Cow::Owned(value))
-    }
+pub struct Avatar<'avatar> {
+    id: Uuid,
+    path: Cow<'avatar, str>,
 }
 
-impl Display for Avatar<'_> {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        f.write_str(self.0.as_ref())
+impl<'avatar> Avatar<'avatar> {
+    pub fn new(id: Uuid, path: impl Into<Cow<'avatar, str>>) -> Self {
+        Self {
+            id,
+            path: path.into(),
+        }
     }
-}
 
-impl AsRef<str> for Avatar<'_> {
-    fn as_ref(&self) -> &str {
-        self.0.as_ref()
+    pub fn id(&self) -> Uuid {
+        self.id
+    }
+
+    pub fn path(&self) -> &str {
+        self.path.as_ref()
     }
 }
 

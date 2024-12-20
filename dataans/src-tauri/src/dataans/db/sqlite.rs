@@ -67,6 +67,15 @@ impl Db for SqliteDb {
         Ok(spaces)
     }
 
+    async fn space_by_id(&self, space_id: Uuid) -> Result<Space, DbError> {
+        let space = sqlx::query_as("SELECT id, name, avatar_id, created_at FROM spaces WHERE id = ?1")
+            .bind(space_id)
+            .fetch_one(&self.pool)
+            .await?;
+
+        Ok(space)
+    }
+
     async fn create_space(&self, space: &Space) -> Result<(), DbError> {
         let Space {
             id,

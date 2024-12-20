@@ -183,6 +183,12 @@ impl From<OffsetDateTime> for CreationDate {
     }
 }
 
+impl From<CreationDate> for OffsetDateTime {
+    fn from(value: CreationDate) -> Self {
+        value.0
+    }
+}
+
 impl AsRef<OffsetDateTime> for CreationDate {
     fn as_ref(&self) -> &OffsetDateTime {
         &self.0
