@@ -1,4 +1,4 @@
-use sqlx::SqlitePool;
+use sqlx::{SqlitePool, Transaction};
 use uuid::Uuid;
 
 use super::*;
@@ -10,6 +10,34 @@ pub struct SqliteDb {
 impl SqliteDb {
     pub fn new(pool: SqlitePool) -> Self {
         Self { pool }
+    }
+}
+
+impl SqliteDb {
+    async fn remove_note_inner(note_id: Uuid, transaction: &mut Transaction<'_, sqlx::Sqlite>) -> Result<(), DbError> {
+        let note_files: Vec<File> = sqlx::query_as(
+            "SELECT id, name, path FROM files LEFT JOIN notes ON notes.id = notes_files.note_id WHERE notes.id = ?1",
+        )
+        .bind(note_id)
+        .fetch_all(&mut **transaction)
+        .await?;
+
+        sqlx::query("DELETE FROM notes_files WHERE note_id = ?1")
+            .bind(note_id)
+            .execute(&mut **transaction)
+            .await?;
+
+        for file in note_files {
+            sqlx::query!("DELETE FROM files WHERE id = ?1", file.id)
+                .execute(&mut **transaction)
+                .await?;
+        }
+
+        sqlx::query!("DELETE FROM notes WHERE id = ?1", note_id)
+            .execute(&mut **transaction)
+            .await?;
+
+        Ok(())
     }
 }
 
@@ -98,9 +126,31 @@ impl Db for SqliteDb {
     }
 
     async fn remove_space(&self, space_id: Uuid) -> Result<(), DbError> {
-        sqlx::query!("DELETE FROM spaces WHERE id = ?1", space_id)
-            .execute(&self.pool)
+        let mut transaction = self.pool.begin().await?;
+
+        let notes: Vec<Note> = sqlx::query_as("SELECT id, text, created_at, space_id FROM notes WHERE space_id = ?1")
+            .bind(space_id)
+            .fetch_all(&mut *transaction)
             .await?;
+
+        for note in notes {
+            SqliteDb::remove_note_inner(note.id, &mut transaction).await?;
+        }
+
+        let space: Space = sqlx::query_as("SELECT id, name, avatar_id, created_at FROM spaces WHERE id = ?1")
+            .bind(space_id)
+            .fetch_one(&mut *transaction)
+            .await?;
+
+        sqlx::query!("DELETE FROM spaces WHERE id = ?1", space_id)
+            .execute(&mut *transaction)
+            .await?;
+
+        sqlx::query!("DELETE FROM files WHERE id = ?1", space.avatar_id)
+            .execute(&mut *transaction)
+            .await?;
+
+        transaction.commit().await?;
 
         Ok(())
     }
@@ -134,6 +184,15 @@ impl Db for SqliteDb {
         Ok(notes)
     }
 
+    async fn note_by_id(&self, note_id: Uuid) -> Result<Note, DbError> {
+        let note = sqlx::query_as("SELECT id, text, created_at, space_id FROM notes WHERE note_id = ?1")
+            .bind(note_id)
+            .fetch_one(&self.pool)
+            .await?;
+
+        Ok(note)
+    }
+
     async fn create_note(&self, note: &Note) -> Result<(), DbError> {
         let Note {
             id,
@@ -156,9 +215,11 @@ impl Db for SqliteDb {
     }
 
     async fn remove_note(&self, note_id: Uuid) -> Result<(), DbError> {
-        sqlx::query!("DELETE FROM notes WHERE id = ?1", note_id)
-            .execute(&self.pool)
-            .await?;
+        let mut transaction = self.pool.begin().await?;
+
+        SqliteDb::remove_note_inner(note_id, &mut transaction).await?;
+
+        transaction.commit().await?;
 
         Ok(())
     }
@@ -174,6 +235,38 @@ impl Db for SqliteDb {
         sqlx::query!("UPDATE notes SET text = ?1 WHERE id = ?2", text, id)
             .execute(&self.pool)
             .await?;
+
+        Ok(())
+    }
+
+    async fn note_files(&self, note_id: Uuid) -> Result<Vec<File>, DbError> {
+        let files = sqlx::query_as(
+            "SELECT id, name, path FROM files LEFT JOIN notes ON notes.id = notes_files.note_id WHERE notes.id = ?1",
+        )
+        .bind(note_id)
+        .fetch_all(&self.pool)
+        .await?;
+
+        Ok(files)
+    }
+
+    async fn set_note_files(&self, note_id: Uuid, files: &[Uuid]) -> Result<(), DbError> {
+        let mut transaction = self.pool.begin().await?;
+
+        sqlx::query("DELETE FROM notes_files WHERE note_id = ?1")
+            .bind(note_id)
+            .execute(&mut *transaction)
+            .await?;
+
+        for file_id in files {
+            sqlx::query("INSERT INTO notes_files (note_id, file_id) VALUES (?1, ?2)")
+                .bind(note_id)
+                .bind(file_id)
+                .execute(&mut *transaction)
+                .await?;
+        }
+
+        transaction.commit().await?;
 
         Ok(())
     }

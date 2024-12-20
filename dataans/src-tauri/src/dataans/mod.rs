@@ -20,11 +20,13 @@ mod export;
 mod service;
 
 use crate::dataans::error::DataansError;
+use crate::dataans::service::note::NoteService;
 use crate::dataans::service::space::SpaceService;
 
 pub struct State<D> {
     app_data_dir: PathBuf,
-    space_service: SpaceService<D>,
+    space_service: Arc<SpaceService<D>>,
+    note_service: Arc<NoteService<D>>,
 }
 
 pub type DataansState = State<SqliteDb>;
@@ -53,9 +55,13 @@ impl DataansState {
 
         let sqlite = Arc::new(SqliteDb::new(pool));
 
+        let space_service = Arc::new(SpaceService::new(Arc::clone(&sqlite)));
+        let note_service = Arc::new(NoteService::new(sqlite, Arc::clone(&space_service)));
+
         Self {
             app_data_dir,
-            space_service: SpaceService::new(sqlite),
+            space_service,
+            note_service,
         }
     }
 }

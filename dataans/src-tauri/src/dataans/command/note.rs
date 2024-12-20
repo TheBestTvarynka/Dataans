@@ -1,37 +1,33 @@
 use std::collections::HashMap;
 
-use common::note::{Id as NoteId, Note, NoteFull, NoteFullOwned, UpdateNote};
-use common::space::{Id as SpaceId, OwnedSpace};
+use common::note::{Id as NoteId, NoteFull, NoteFullOwned, OwnedNote, UpdateNote};
+use common::space::Id as SpaceId;
 use tauri::State;
 
-use crate::dataans::{DataansState, Db};
+use crate::dataans::{DataansError, DataansState};
 
-pub fn query_space_notes(space_id: SpaceId) -> Vec<Note<'static>> {
-    todo!()
+#[instrument(ret, skip(state))]
+#[tauri::command]
+pub async fn list_notes(state: State<'_, DataansState>, space_id: SpaceId) -> Result<Vec<OwnedNote>, DataansError> {
+    state.note_service.space_notes(space_id).await
 }
 
 #[instrument(ret, skip(state))]
 #[tauri::command]
-pub fn list_notes(state: State<'_, DataansState>, space_id: SpaceId) -> Result<Vec<Note>, String> {
-    todo!()
+pub async fn create_note(state: State<'_, DataansState>, note: OwnedNote) -> Result<(), DataansError> {
+    state.note_service.create_note(note).await
 }
 
 #[instrument(ret, skip(state))]
 #[tauri::command]
-pub fn create_note(state: State<'_, DataansState>, note: Note<'static>) -> Result<(), String> {
-    todo!()
+pub async fn update_note(state: State<'_, DataansState>, note_data: UpdateNote<'_>) -> Result<(), DataansError> {
+    state.note_service.update_note(note_data).await
 }
 
 #[instrument(ret, skip(state))]
 #[tauri::command]
-pub fn update_note(state: State<'_, DataansState>, note_data: UpdateNote<'_>) -> Result<(), String> {
-    todo!()
-}
-
-#[instrument(ret, skip(state))]
-#[tauri::command]
-pub fn delete_note(state: State<'_, DataansState>, note_id: NoteId) -> Result<(), String> {
-    todo!()
+pub async fn delete_note(state: State<'_, DataansState>, note_id: NoteId) -> Result<(), DataansError> {
+    state.note_service.delete_note(note_id).await
 }
 
 #[instrument(level = "trace", ret, skip(state))]
@@ -40,12 +36,12 @@ pub fn search_notes_in_space(
     state: State<'_, DataansState>,
     query: String,
     space_id: SpaceId,
-) -> Result<Vec<NoteFullOwned>, String> {
+) -> Result<Vec<NoteFullOwned>, DataansError> {
     todo!()
 }
 
 #[instrument(level = "trace", ret, skip(state))]
 #[tauri::command]
-pub fn search_notes(state: State<'_, DataansState>, query: String) -> Result<Vec<NoteFullOwned>, String> {
+pub fn search_notes(state: State<'_, DataansState>, query: String) -> Result<Vec<NoteFullOwned>, DataansError> {
     todo!()
 }

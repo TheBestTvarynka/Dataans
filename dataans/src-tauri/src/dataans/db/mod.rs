@@ -26,7 +26,10 @@ pub trait Db: Send + Sync {
     async fn update_space(&self, space: &Space) -> Result<(), DbError>;
 
     async fn space_notes(&self, space_id: Uuid) -> Result<Vec<Note>, DbError>;
+    async fn note_by_id(&self, note_id: Uuid) -> Result<Note, DbError>;
     async fn create_note(&self, note: &Note) -> Result<(), DbError>;
     async fn remove_note(&self, note_id: Uuid) -> Result<(), DbError>;
     async fn update_note(&self, note: &Note) -> Result<(), DbError>;
+    async fn note_files(&self, note_id: Uuid) -> Result<Vec<File>, DbError>;
+    async fn set_note_files(&self, note_id: Uuid, files: &[Uuid]) -> Result<(), DbError>;
 }

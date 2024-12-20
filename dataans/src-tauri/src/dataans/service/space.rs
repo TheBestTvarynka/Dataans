@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use common::space::{Avatar, DeleteSpace, OwnedSpace, UpdateSpace};
+use common::space::{Avatar, DeleteSpace, Id as SpaceId, OwnedSpace, UpdateSpace};
 use futures::future::try_join_all;
 
 use crate::dataans::db::model::{File as FileModel, Space as SpaceModel};
@@ -63,38 +63,42 @@ impl<D: Db> SpaceService<D> {
         Ok(self.db.remove_space(id.inner()).await?)
     }
 
+    async fn map_model_space_to_space<T: Db>(space: SpaceModel, db: &T) -> Result<OwnedSpace, DataansError> {
+        let SpaceModel {
+            id,
+            name,
+            avatar_id,
+            created_at,
+        } = space;
+
+        let FileModel {
+            id: avatar_id,
+            name: _,
+            path: avatar_path,
+        } = db.file_by_id(avatar_id).await?;
+
+        Ok(OwnedSpace {
+            id: id.into(),
+            name: name.into(),
+            avatar: Avatar::new(avatar_id, avatar_path),
+            created_at: created_at.into(),
+        })
+    }
+
     pub async fn spaces(&self) -> Result<Vec<OwnedSpace>, DataansError> {
-        async fn map_model_space_to_space<T: Db>(space: SpaceModel, db: &T) -> Result<OwnedSpace, DataansError> {
-            let SpaceModel {
-                id,
-                name,
-                avatar_id,
-                created_at,
-            } = space;
-
-            let FileModel {
-                id: avatar_id,
-                name: _,
-                path: avatar_path,
-            } = db.file_by_id(avatar_id).await?;
-
-            Ok(OwnedSpace {
-                id: id.into(),
-                name: name.into(),
-                avatar: Avatar::new(avatar_id, avatar_path),
-                created_at: created_at.into(),
-            })
-        }
-
         let spaces = try_join_all(
             self.db
                 .spaces()
                 .await?
                 .into_iter()
-                .map(|space| map_model_space_to_space(space, &*self.db)),
+                .map(|space| Self::map_model_space_to_space(space, &*self.db)),
         )
         .await?;
 
         Ok(spaces)
+    }
+
+    pub async fn space_by_id(&self, space_id: SpaceId) -> Result<OwnedSpace, DataansError> {
+        Self::map_model_space_to_space(self.db.space_by_id(space_id.inner()).await?, &*self.db).await
     }
 }
