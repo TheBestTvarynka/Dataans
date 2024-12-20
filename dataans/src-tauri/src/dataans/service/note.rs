@@ -19,43 +19,57 @@ impl<D: Db> NoteService<D> {
         Self { db, space_service }
     }
 
+    async fn map_note_model_to_note(note: NoteModel, db: &D) -> Result<OwnedNote, DataansError> {
+        let NoteModel {
+            id,
+            text,
+            space_id,
+            created_at,
+        } = note;
+
+        let files = db
+            .note_files(id)
+            .await?
+            .into_iter()
+            .map(|file| {
+                let FileModel { id, name, path } = file;
+                File {
+                    id: id.into(),
+                    name: name.into(),
+                    path: path.into(),
+                }
+            })
+            .collect();
+
+        Ok(OwnedNote {
+            id: id.into(),
+            text: text.into(),
+            space_id: space_id.into(),
+            created_at: created_at.into(),
+            files,
+        })
+    }
+
     pub async fn space_notes(&self, space_id: SpaceId) -> Result<Vec<OwnedNote>, DataansError> {
         let notes = try_join_all(
             self.db
                 .space_notes(space_id.inner())
                 .await?
                 .into_iter()
-                .map(|note| async move {
-                    let NoteModel {
-                        id,
-                        text,
-                        space_id,
-                        created_at,
-                    } = note;
+                .map(|note| Self::map_note_model_to_note(note, &self.db)),
+        )
+        .await?;
 
-                    let files = self
-                        .db
-                        .note_files(id)
-                        .await?
-                        .into_iter()
-                        .map(|file| {
-                            let FileModel { id, name, path } = file;
-                            File {
-                                id: id.into(),
-                                name: name.into(),
-                                path: path.into(),
-                            }
-                        })
-                        .collect();
+        Ok(notes)
+    }
 
-                    Result::<OwnedNote, DataansError>::Ok(OwnedNote {
-                        id: id.into(),
-                        text: text.into(),
-                        space_id: space_id.into(),
-                        created_at: created_at.into(),
-                        files,
-                    })
-                }),
+    pub async fn notes(&self) -> Result<Vec<OwnedNote>, DataansError> {
+        let notes = try_join_all(
+            self.db
+                .notes()
+                .await?
+                .into_iter()
+                .map(|note| Self::map_note_model_to_note(note, &self.db)),
         )
         .await?;
 
@@ -121,11 +135,37 @@ impl<D: Db> NoteService<D> {
 
     pub async fn search_notes_in_space(
         &self,
-        query: String,
+        query: &str,
         space_id: SpaceId,
     ) -> Result<Vec<NoteFullOwned>, DataansError> {
         Ok(try_join_all(
             self.space_notes(space_id)
+                .await?
+                .into_iter()
+                .filter(|note| note.text.as_ref().contains(&query))
+                .map(|note| async move {
+                    let Note {
+                        id,
+                        text,
+                        created_at,
+                        space_id,
+                        files,
+                    } = note;
+                    Result::<NoteFullOwned, DataansError>::Ok(NoteFullOwned {
+                        id,
+                        text,
+                        created_at,
+                        files,
+                        space: self.space_service.space_by_id(space_id).await?,
+                    })
+                }),
+        )
+        .await?)
+    }
+
+    pub async fn search_notes(&self, query: &str) -> Result<Vec<NoteFullOwned>, DataansError> {
+        Ok(try_join_all(
+            self.notes()
                 .await?
                 .into_iter()
                 .filter(|note| note.text.as_ref().contains(&query))

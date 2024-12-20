@@ -175,6 +175,14 @@ impl Db for SqliteDb {
         Ok(())
     }
 
+    async fn notes(&self) -> Result<Vec<Note>, DbError> {
+        let notes = sqlx::query_as("SELECT id, text, created_at, space_id FROM notes")
+            .fetch_all(&self.pool)
+            .await?;
+
+        Ok(notes)
+    }
+
     async fn space_notes(&self, space_id: Uuid) -> Result<Vec<Note>, DbError> {
         let notes = sqlx::query_as("SELECT id, text, created_at, space_id FROM notes WHERE space_id = ?1")
             .bind(space_id)

@@ -32,16 +32,16 @@ pub async fn delete_note(state: State<'_, DataansState>, note_id: NoteId) -> Res
 
 #[instrument(level = "trace", ret, skip(state))]
 #[tauri::command]
-pub fn search_notes_in_space(
+pub async fn search_notes_in_space(
     state: State<'_, DataansState>,
     query: String,
     space_id: SpaceId,
 ) -> Result<Vec<NoteFullOwned>, DataansError> {
-    todo!()
+    state.note_service.search_notes_in_space(&query, space_id).await
 }
 
 #[instrument(level = "trace", ret, skip(state))]
 #[tauri::command]
-pub fn search_notes(state: State<'_, DataansState>, query: String) -> Result<Vec<NoteFullOwned>, DataansError> {
-    todo!()
+pub async fn search_notes(state: State<'_, DataansState>, query: String) -> Result<Vec<NoteFullOwned>, DataansError> {
+    state.note_service.search_notes(&query).await
 }
