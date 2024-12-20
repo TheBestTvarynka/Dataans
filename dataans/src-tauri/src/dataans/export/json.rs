@@ -8,9 +8,6 @@ use common::space::OwnedSpace;
 use sqlx::SqlitePool;
 use uuid::Uuid;
 
-use crate::dataans::note::query_space_notes;
-use crate::dataans::space::query_spaces;
-
 pub fn export_v1(backups_dir: &Path, db: &SqlitePool) -> Result<(), IoError> {
     let backup_file_path = backups_dir.join(format!("dataans-backup-{}.json", Uuid::new_v4()));
     let backup_file = File::create(&backup_file_path)?;

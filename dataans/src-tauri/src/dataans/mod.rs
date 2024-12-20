@@ -1,5 +1,6 @@
 use std::fs;
 use std::path::PathBuf;
+use std::sync::Arc;
 
 use common::APP_PLUGIN_NAME;
 use serde::Serialize;
@@ -12,17 +13,18 @@ use crate::dataans::db::sqlite::SqliteDb;
 use crate::dataans::db::{Db, DbError};
 use crate::{CONFIGS_DIR, CONFIG_FILE_NAME, FILES_DIR, IMAGED_DIR};
 
+mod command;
 mod db;
 pub mod error;
 mod export;
-mod note;
-mod space;
+mod service;
 
-pub use self::error::DataansError;
+use crate::dataans::error::DataansError;
+use crate::dataans::service::space::SpaceService;
 
 pub struct State<D> {
     app_data_dir: PathBuf,
-    db: D,
+    space_service: SpaceService<D>,
 }
 
 pub type DataansState = State<SqliteDb>;
@@ -49,11 +51,11 @@ impl DataansState {
             ))
             .expect("can not connect to sqlite db");
 
-        let sqlite = SqliteDb::new(pool);
+        let sqlite = Arc::new(SqliteDb::new(pool));
 
         Self {
             app_data_dir,
-            db: sqlite,
+            space_service: SpaceService::new(sqlite),
         }
     }
 }
@@ -63,16 +65,16 @@ pub fn init_dataans_plugin<R: Runtime>() -> TauriPlugin<R> {
 
     Builder::new(APP_PLUGIN_NAME)
         .invoke_handler(tauri::generate_handler![
-            space::list_spaces,
-            space::create_space,
-            space::update_space,
-            space::delete_space,
-            note::list_notes,
-            note::create_note,
-            note::update_note,
-            note::delete_note,
-            note::search_notes_in_space,
-            note::search_notes,
+            command::space::list_spaces,
+            command::space::create_space,
+            command::space::update_space,
+            command::space::delete_space,
+            command::note::list_notes,
+            command::note::create_note,
+            command::note::update_note,
+            command::note::delete_note,
+            command::note::search_notes_in_space,
+            command::note::search_notes,
             export::export_app_data,
         ])
         .setup(|app_handle, _api| {
