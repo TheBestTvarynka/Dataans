@@ -4,7 +4,7 @@ use common::note::{Id as NoteId, Note, NoteFull, NoteFullOwned, UpdateNote};
 use common::space::{Id as SpaceId, OwnedSpace};
 use tauri::State;
 
-use crate::dataans::DataansState;
+use crate::dataans::{DataansState, Db};
 
 pub fn query_space_notes(space_id: SpaceId) -> Vec<Note<'static>> {
     todo!()

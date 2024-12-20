@@ -1034,6 +1034,7 @@ version = "0.1.0"
 dependencies = [
  "arboard",
  "common",
+ "futures",
  "image 0.25.4",
  "image 0.3.2",
  "opener",

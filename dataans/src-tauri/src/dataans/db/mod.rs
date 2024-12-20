@@ -1,5 +1,5 @@
-mod model;
-mod sqlite;
+pub mod model;
+pub mod sqlite;
 
 use thiserror::Error;
 use uuid::Uuid;
@@ -12,8 +12,9 @@ pub enum DbError {
     SqlxError(#[from] sqlx::Error),
 }
 
-pub trait Db {
+pub trait Db: Send + Sync {
     async fn files(&self) -> Result<Vec<File>, DbError>;
+    async fn file_by_id(&self, file_id: Uuid) -> Result<File, DbError>;
     async fn add_file(&self, file: &File) -> Result<(), DbError>;
     async fn remove_file(&self, file_id: Uuid) -> Result<(), DbError>;
     async fn update_file(&self, file: &File) -> Result<(), DbError>;

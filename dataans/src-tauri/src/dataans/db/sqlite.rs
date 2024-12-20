@@ -22,6 +22,15 @@ impl Db for SqliteDb {
         Ok(files)
     }
 
+    async fn file_by_id(&self, file_id: Uuid) -> Result<File, DbError> {
+        let files = sqlx::query_as("SELECT id, name, path FROM files WHERE id=?1")
+            .bind(file_id)
+            .fetch_one(&self.pool)
+            .await?;
+
+        Ok(files)
+    }
+
     async fn add_file(&self, file: &File) -> Result<(), DbError> {
         let File { id, name, path } = file;
 
@@ -185,12 +194,23 @@ mod tests {
     async fn space_crud() {
         let db = SqliteDb::new(pool());
 
+        let file_id = Uuid::new_v4();
+        let file = File {
+            id: file_id,
+            name: "cat.jpg".into(),
+            path: "/home/tbt/cat-01.jpg".into(),
+        };
+
+        //------
+
+        db.add_file(&file).await.unwrap();
+
         let id = Uuid::new_v4();
         let created_at = OffsetDateTime::now_utc();
         let space = Space {
             id,
             name: "Tbt".into(),
-            avatar_id: Uuid::from_str("620b74b0-05d7-4170-911f-6eeea7b15c44").unwrap(),
+            avatar_id: file_id,
             created_at: created_at.clone(),
         };
 
@@ -214,6 +234,10 @@ mod tests {
 
         let spaces = db.spaces().await.unwrap();
         assert!(spaces.iter().find(|space| space.id == id).is_none());
+
+        //------
+
+        db.remove_file(file_id).await.unwrap();
     }
 
     #[tokio::test]
@@ -252,11 +276,20 @@ mod tests {
     async fn note_crud() {
         let db = SqliteDb::new(pool());
 
+        let file_id = Uuid::new_v4();
+        let file = File {
+            id: file_id,
+            name: "cat.jpg".into(),
+            path: "/home/tbt/cat-01.jpg".into(),
+        };
+
+        db.add_file(&file).await.unwrap();
+
         let space_id = Uuid::new_v4();
         let space = Space {
             id: space_id,
             name: "Test Notes CRUD".into(),
-            avatar_id: Uuid::from_str("620b74b0-05d7-4170-911f-6eeea7b15c44").unwrap(),
+            avatar_id: file_id,
             created_at: OffsetDateTime::now_utc(),
         };
 
@@ -294,6 +327,9 @@ mod tests {
         let notes = db.space_notes(space_id).await.unwrap();
         assert!(notes.iter().find(|note| note.id == id).is_none());
 
+        //------
+
         db.remove_space(space_id).await.unwrap();
+        db.remove_file(file_id).await.unwrap();
     }
 }

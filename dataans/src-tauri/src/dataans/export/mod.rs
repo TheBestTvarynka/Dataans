@@ -34,10 +34,12 @@ pub fn export_app_data(state: State<'_, DataansState>, export_config: DataExport
     fs::create_dir(&backups_dir)
         .map_err(|err| format!("Cannot create backups dir: {:?}. dir: {:?}", err, backups_dir))?;
 
-    match export_config {
-        DataExportConfig::Md(notes_export_option) => md::export(&notes_export_option, &backups_dir, &state.db)?,
-        DataExportConfig::Json(schema_version) => json::export(schema_version, &backups_dir, &state.db)?,
-    }
+    // match export_config {
+    //     DataExportConfig::Md(notes_export_option) => md::export(&notes_export_option, &backups_dir, &state.db)?,
+    //     DataExportConfig::Json(schema_version) => json::export(schema_version, &backups_dir, &state.db)?,
+    // }
 
-    Ok(backups_dir)
+    // Ok(backups_dir)
+
+    todo!()
 }

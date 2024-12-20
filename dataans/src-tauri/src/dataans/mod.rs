@@ -2,22 +2,30 @@ use std::fs;
 use std::path::PathBuf;
 
 use common::APP_PLUGIN_NAME;
+use serde::Serialize;
 use sqlx::sqlite::SqlitePoolOptions;
 use sqlx::SqlitePool;
 use tauri::plugin::{Builder, TauriPlugin};
 use tauri::{Manager, Runtime};
 
+use crate::dataans::db::sqlite::SqliteDb;
+use crate::dataans::db::{Db, DbError};
 use crate::{CONFIGS_DIR, CONFIG_FILE_NAME, FILES_DIR, IMAGED_DIR};
 
 mod db;
+pub mod error;
 mod export;
 mod note;
 mod space;
 
-pub struct DataansState {
+pub use self::error::DataansError;
+
+pub struct State<D> {
     app_data_dir: PathBuf,
-    db: SqlitePool,
+    db: D,
 }
+
+pub type DataansState = State<SqliteDb>;
 
 impl DataansState {
     pub async fn init(db_dir: PathBuf, app_data_dir: PathBuf) -> Self {
@@ -31,7 +39,7 @@ impl DataansState {
             std::fs::File::create(&db_file).expect("Can not create db file");
         }
 
-        let db = SqlitePoolOptions::new()
+        let pool = SqlitePoolOptions::new()
             .max_connections(4)
             .min_connections(1)
             .acquire_timeout(std::time::Duration::from_secs(5))
@@ -41,7 +49,12 @@ impl DataansState {
             ))
             .expect("can not connect to sqlite db");
 
-        Self { app_data_dir, db }
+        let sqlite = SqliteDb::new(pool);
+
+        Self {
+            app_data_dir,
+            db: sqlite,
+        }
     }
 }
 
