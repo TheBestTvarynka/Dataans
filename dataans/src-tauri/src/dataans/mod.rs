@@ -3,14 +3,11 @@ use std::path::PathBuf;
 use std::sync::Arc;
 
 use common::APP_PLUGIN_NAME;
-use serde::Serialize;
 use sqlx::sqlite::SqlitePoolOptions;
-use sqlx::SqlitePool;
 use tauri::plugin::{Builder, TauriPlugin};
 use tauri::{Manager, Runtime};
 
 use crate::dataans::db::sqlite::SqliteDb;
-use crate::dataans::db::{Db, DbError};
 use crate::{CONFIGS_DIR, CONFIG_FILE_NAME, FILES_DIR, IMAGED_DIR};
 
 mod command;

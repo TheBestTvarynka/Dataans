@@ -38,7 +38,9 @@ pub async fn export_app_data(
     let spaces = state.space_service.spaces().await?;
 
     match export_config {
-        DataExportConfig::Md(notes_export_option) => todo!(), /* md::export(&notes_export_option, &backups_dir, &state.db)? */,
+        DataExportConfig::Md(notes_export_option) => {
+            md::export(&notes_export_option, &backups_dir, spaces, &state.note_service).await?
+        }
         DataExportConfig::Json(schema_version) => {
             json::export(schema_version, &backups_dir, spaces, &state.note_service).await?
         }

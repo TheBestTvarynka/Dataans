@@ -1,9 +1,7 @@
 use std::fs::File;
-use std::io::Error as IoError;
 use std::path::Path;
 
 use common::export::{Schema, SchemaV1, SchemaVersion, Space};
-use common::note::OwnedNote;
 use common::space::OwnedSpace;
 use futures::future::try_join_all;
 use uuid::Uuid;

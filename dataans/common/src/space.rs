@@ -76,6 +76,7 @@ pub struct Avatar<'avatar> {
 }
 
 impl<'avatar> Avatar<'avatar> {
+    /// Creates a new [Avatar] based on `id` and `path`.
     pub fn new(id: Uuid, path: impl Into<Cow<'avatar, str>>) -> Self {
         Self {
             id,
@@ -83,10 +84,12 @@ impl<'avatar> Avatar<'avatar> {
         }
     }
 
+    /// Returns avatar [Uuid].
     pub fn id(&self) -> Uuid {
         self.id
     }
 
+    /// Returns path to the avatar file.
     pub fn path(&self) -> &str {
         self.path.as_ref()
     }

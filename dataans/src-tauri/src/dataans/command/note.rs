@@ -1,6 +1,4 @@
-use std::collections::HashMap;
-
-use common::note::{Id as NoteId, NoteFull, NoteFullOwned, OwnedNote, UpdateNote};
+use common::note::{Id as NoteId, NoteFullOwned, OwnedNote, UpdateNote};
 use common::space::Id as SpaceId;
 use tauri::State;
 

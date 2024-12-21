@@ -1,9 +1,6 @@
 use common::space::{DeleteSpace, OwnedSpace, UpdateSpace};
-use futures::future::try_join_all;
 use tauri::State;
 
-use crate::dataans::db::model::Space as SpaceModel;
-use crate::dataans::db::Db;
 use crate::dataans::{DataansError, DataansState};
 
 #[instrument(level = "trace", ret, skip(state))]

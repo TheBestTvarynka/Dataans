@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use common::note::{File, Id as NoteId, Note, NoteFull, NoteFullOwned, OwnedNote, UpdateNote};
+use common::note::{File, Id as NoteId, Note, NoteFullOwned, OwnedNote, UpdateNote};
 use common::space::Id as SpaceId;
 use futures::future::try_join_all;
 
