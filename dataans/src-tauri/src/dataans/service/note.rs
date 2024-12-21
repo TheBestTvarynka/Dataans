@@ -34,8 +34,8 @@ impl<D: Db> NoteService<D> {
             .map(|file| {
                 let FileModel { id, name, path } = file;
                 File {
-                    id: id.into(),
-                    name: name.into(),
+                    id,
+                    name,
                     path: path.into(),
                 }
             })
@@ -138,11 +138,11 @@ impl<D: Db> NoteService<D> {
         query: &str,
         space_id: SpaceId,
     ) -> Result<Vec<NoteFullOwned>, DataansError> {
-        Ok(try_join_all(
+        try_join_all(
             self.space_notes(space_id)
                 .await?
                 .into_iter()
-                .filter(|note| note.text.as_ref().contains(&query))
+                .filter(|note| note.text.as_ref().contains(query))
                 .map(|note| async move {
                     let Note {
                         id,
@@ -160,15 +160,15 @@ impl<D: Db> NoteService<D> {
                     })
                 }),
         )
-        .await?)
+        .await
     }
 
     pub async fn search_notes(&self, query: &str) -> Result<Vec<NoteFullOwned>, DataansError> {
-        Ok(try_join_all(
+        try_join_all(
             self.notes()
                 .await?
                 .into_iter()
-                .filter(|note| note.text.as_ref().contains(&query))
+                .filter(|note| note.text.as_ref().contains(query))
                 .map(|note| async move {
                     let Note {
                         id,
@@ -186,6 +186,6 @@ impl<D: Db> NoteService<D> {
                     })
                 }),
         )
-        .await?)
+        .await
     }
 }

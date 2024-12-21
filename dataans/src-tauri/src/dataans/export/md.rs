@@ -157,7 +157,7 @@ pub async fn export<D: Db>(
                 let space_dir = backups_dir.join(format!("{}.{}", space.name.as_ref(), space.id.inner()));
                 fs::create_dir(&space_dir)?;
 
-                write_space_notes_per_file(&space, &note_service, &space_dir).await
+                write_space_notes_per_file(&space, note_service, &space_dir).await
             }))
             .await?;
         }
