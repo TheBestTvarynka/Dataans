@@ -7,8 +7,6 @@ extern crate tracing;
 mod code_block;
 mod config;
 mod dataans;
-mod file;
-mod image;
 
 use std::path::Path;
 use std::str::FromStr;
@@ -27,7 +25,7 @@ const WINDOW_QUIT_MENU_ITEM_ID: &str = "quit";
 const WINDOW_VISIBILITY_TITLE: &str = "Toggle";
 const WINDOW_QUIT_TITLE: &str = "Quit";
 
-const IMAGED_DIR: &str = "images";
+const IMAGES_DIR: &str = "images";
 const FILES_DIR: &str = "files";
 const CONFIGS_DIR: &str = "configs";
 const CONFIG_FILE_NAME: &str = "config.toml";
@@ -198,11 +196,7 @@ fn main() {
             config::open_config_file,
             config::open_config_file_folder,
             config::open_theme_file,
-            image::gen_random_avatar,
-            image::handle_clipboard_image,
-            file::upload_file,
-            file::remove_file,
-            code_block::parse_code
+            code_block::parse_code,
         ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application")

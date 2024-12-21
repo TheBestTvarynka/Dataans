@@ -13,10 +13,12 @@ pub enum DbError {
 }
 
 pub trait Db: Send + Sync {
+    #[allow(dead_code)]
     async fn files(&self) -> Result<Vec<File>, DbError>;
     async fn file_by_id(&self, file_id: Uuid) -> Result<File, DbError>;
     async fn add_file(&self, file: &File) -> Result<(), DbError>;
     async fn remove_file(&self, file_id: Uuid) -> Result<(), DbError>;
+    #[allow(dead_code)]
     async fn update_file(&self, file: &File) -> Result<(), DbError>;
 
     async fn spaces(&self) -> Result<Vec<Space>, DbError>;

@@ -8,7 +8,7 @@ use tauri::plugin::{Builder, TauriPlugin};
 use tauri::{Manager, Runtime};
 
 use crate::dataans::db::sqlite::SqliteDb;
-use crate::{CONFIGS_DIR, CONFIG_FILE_NAME, FILES_DIR, IMAGED_DIR};
+use crate::{CONFIGS_DIR, CONFIG_FILE_NAME, FILES_DIR, IMAGES_DIR};
 
 mod command;
 mod db;
@@ -17,6 +17,7 @@ mod export;
 mod service;
 
 use crate::dataans::error::DataansError;
+use crate::dataans::service::file::FileService;
 use crate::dataans::service::note::NoteService;
 use crate::dataans::service::space::SpaceService;
 
@@ -24,6 +25,7 @@ pub struct State<D> {
     app_data_dir: PathBuf,
     space_service: Arc<SpaceService<D>>,
     note_service: Arc<NoteService<D>>,
+    file_service: Arc<FileService<D>>,
 }
 
 pub type DataansState = State<SqliteDb>;
@@ -53,12 +55,14 @@ impl DataansState {
         let sqlite = Arc::new(SqliteDb::new(pool));
 
         let space_service = Arc::new(SpaceService::new(Arc::clone(&sqlite)));
-        let note_service = Arc::new(NoteService::new(sqlite, Arc::clone(&space_service)));
+        let note_service = Arc::new(NoteService::new(Arc::clone(&sqlite), Arc::clone(&space_service)));
+        let file_service = Arc::new(FileService::new(sqlite));
 
         Self {
             app_data_dir,
             space_service,
             note_service,
+            file_service,
         }
     }
 }
@@ -78,6 +82,10 @@ pub fn init_dataans_plugin<R: Runtime>() -> TauriPlugin<R> {
             command::note::delete_note,
             command::note::search_notes_in_space,
             command::note::search_notes,
+            command::file::upload_file,
+            command::file::delete_file,
+            command::file::gen_random_avatar,
+            command::file::handle_clipboard_image,
             export::export_app_data,
         ])
         .setup(|app_handle, _api| {
@@ -95,7 +103,7 @@ pub fn init_dataans_plugin<R: Runtime>() -> TauriPlugin<R> {
 
             let db_dir = app_data.join("db");
             let files_dir = app_data.join(FILES_DIR);
-            let images_dir = app_data.join(IMAGED_DIR);
+            let images_dir = app_data.join(IMAGES_DIR);
             let configs_dir = app_data.join(CONFIGS_DIR);
 
             if !db_dir.exists() {
