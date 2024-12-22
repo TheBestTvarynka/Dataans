@@ -63,7 +63,7 @@ pub fn Editor(space_id: SpaceId, #[prop(into)] create_note: Callback<Note<'stati
         let DraftNote { text, mut files } = draft_note.get();
 
         spawn_local(async move {
-            remove_file(&path).await;
+            remove_file(&path).await.expect("TODO: handle err");
 
             files.retain(|file| file.id != id);
             set_draft_note(DraftNote { text, files });

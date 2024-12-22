@@ -40,6 +40,15 @@ extern "C" {
     async fn invoke(cmd: &str, args: JsValue) -> JsValue;
 }
 
+fn from_js_value<T: serde::de::DeserializeOwned>(value: JsValue) -> Result<T, String> {
+    use common::error::DataansResult;
+    use serde_wasm_bindgen::from_value;
+
+    from_value::<DataansResult<T>>(value)
+        .expect("DataansResult deserialization should not fail")
+        .into()
+}
+
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 struct ThemeFilepath<'path> {
@@ -76,24 +85,6 @@ pub async fn load_config() -> Config {
     let theme_value = invoke("config", args).await;
 
     from_value(theme_value).expect("Config object deserialization from JsValue should not fail.")
-}
-
-pub async fn gen_avatar() -> String {
-    let args = to_value(&EmptyArgs {}).expect("EmptyArgs serialization to JsValue should not fail.");
-    let image_path = invoke("gen_random_avatar", args).await;
-
-    let image_path: String =
-        from_value(image_path).expect("PathBuf object deserialization from JsValue should not fail.");
-    convert_file_src(image_path)
-}
-
-pub async fn load_clipboard_image() -> String {
-    let args = to_value(&EmptyArgs {}).expect("EmptyArgs serialization to JsValue should not fail.");
-    let image_path = invoke("handle_clipboard_image", args).await;
-
-    let image_path: String =
-        from_value(image_path).expect("PathBuf object deserialization from JsValue should not fail.");
-    convert_file_src(image_path)
 }
 
 #[derive(Serialize)]

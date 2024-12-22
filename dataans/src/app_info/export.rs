@@ -17,8 +17,10 @@ pub fn Export() -> impl IntoView {
     let export_data_action = Action::new(move |export_config: &DataExportConfig| {
         let export_config = export_config.clone();
         async move {
-            let backup_dir = export_data(export_config).await;
-            set_backup_dir.set(Some(backup_dir));
+            match export_data(export_config).await {
+                Ok(backup_dir) => set_backup_dir.set(Some(backup_dir)),
+                Err(err) => error!("{}", err),
+            }
         }
     });
 

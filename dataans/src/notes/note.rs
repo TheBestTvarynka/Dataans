@@ -67,7 +67,7 @@ pub fn Note(
         let id = file.id;
 
         spawn_local(async move {
-            remove_file(&file.path).await;
+            remove_file(&file.path).await.expect("TODO: handle err");
 
             files.retain(|file| file.id != id);
             set_updated_files.set(files.clone());

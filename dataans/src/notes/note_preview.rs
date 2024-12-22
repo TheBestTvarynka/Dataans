@@ -18,7 +18,7 @@ pub fn NotePreview(
 
     view! {
         <div class=class on:click=move |_| set_selected_note.call(note_id)>
-            <img class="note-preview-image" alt="space avatar image" src=note.space.avatar.to_string() />
+            <img class="note-preview-image" alt="space avatar image" src=note.space.avatar.path().to_owned() />
             <Show when=move || !minimized.get()>
                 <div class="vertical">
                     <span class="note-preview-space-name">{note.space.name.to_string()}</span>

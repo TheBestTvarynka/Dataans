@@ -4,6 +4,7 @@ use std::fmt::{Display, Formatter};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
+use crate::note::File;
 use crate::CreationDate;
 
 /// Represent a space ID.
@@ -89,6 +90,16 @@ impl<'avatar> Avatar<'avatar> {
     /// Returns path to the avatar file.
     pub fn path(&self) -> &str {
         self.path.as_ref()
+    }
+}
+
+impl<'avatar> From<File> for Avatar<'avatar> {
+    fn from(file: File) -> Self {
+        let File { id, name: _, path } = file;
+        Self {
+            id,
+            path: path.to_str().expect("UTF8-path").to_owned().into(),
+        }
     }
 }
 

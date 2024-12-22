@@ -22,7 +22,7 @@ pub fn Space(
 
     view! {
         <div class=class on:click=move |_| set_selected_space.call(space_data.clone()) title=space_name>
-            <img class="space-avatar" alt="space avatar image" src=space.avatar.to_string() />
+            <img class="space-avatar" alt="space avatar image" src=space.avatar.path().to_owned() />
             <Show when=move || !minimized.get()>
                 <span class="space-title">{space.name.to_string()}</span>
             </Show>

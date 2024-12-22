@@ -1,6 +1,6 @@
 use std::fmt;
 
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
 /// Custom result type.
 ///
@@ -32,6 +32,18 @@ impl<T> DataansResult<T> {
     /// Check result status.
     pub fn is_ok(&self) -> bool {
         self.ok.is_some()
+    }
+}
+
+impl<T> From<DataansResult<T>> for Result<T, String> {
+    fn from(result: DataansResult<T>) -> Result<T, String> {
+        let DataansResult { ok, err } = result;
+
+        if let Some(ok) = ok {
+            Ok(ok)
+        } else {
+            Err(err.expect("Err obj should present"))
+        }
     }
 }
 

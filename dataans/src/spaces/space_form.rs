@@ -1,11 +1,11 @@
-use common::space::{OwnedSpace, Space, UpdateSpace};
+use common::space::{Avatar, OwnedSpace, Space, UpdateSpace};
 use common::Config;
 use leptos::*;
 use leptos_hotkeys::{use_hotkeys, use_hotkeys_scoped};
 use time::OffsetDateTime;
 use uuid::Uuid;
 
-use crate::backend::gen_avatar;
+use crate::backend::file::gen_avatar;
 use crate::backend::spaces::{create_space, list_spaces, update_space};
 
 const INPUT_ELEM_ID: &str = "space-form";
@@ -19,11 +19,12 @@ pub fn SpaceForm(
     config: Config,
 ) -> impl IntoView {
     let (space_name, set_space_name) = create_signal(space.as_ref().map(|s| s.name.to_string()).unwrap_or_default());
-    let (avatar_path, set_avatar_path) = create_signal(
+    let (avatar, set_avatar) = create_signal(
         space
             .as_ref()
-            .map(|s| s.avatar.to_string())
-            .unwrap_or_else(|| "/public/default_space_avatar.png".to_string()),
+            .map(|s| s.avatar.clone())
+            // TODO:
+            .unwrap_or_else(|| Avatar::new(Uuid::new_v4(), "/public/default_space_avatar.png")),
     );
     let ref_input = create_node_ref::<html::Input>();
 
@@ -39,14 +40,14 @@ pub fn SpaceForm(
 
     let generate_avatar = move || {
         spawn_local(async move {
-            set_avatar_path.set(gen_avatar().await);
+            set_avatar.set(gen_avatar().await.expect("TODO: handle err").into());
         });
     };
 
     let id = space.as_ref().map(|s| s.id);
     let create_space = move || {
         let name = space_name.get();
-        let avatar = avatar_path.get();
+        let avatar = avatar.get();
         on_cancel.call(());
 
         let action = async move {
@@ -54,7 +55,7 @@ pub fn SpaceForm(
                 update_space(UpdateSpace {
                     id,
                     name: name.into(),
-                    avatar: avatar.into(),
+                    avatar,
                 })
                 .await
                 .expect("Space updating should not fail");
@@ -66,7 +67,7 @@ pub fn SpaceForm(
                     id: new_space_id.into(),
                     name: name.into(),
                     created_at: OffsetDateTime::now_utc().into(),
-                    avatar: avatar.into(),
+                    avatar,
                 })
                 .await
                 .expect("Space creation should not fail");
@@ -101,7 +102,7 @@ pub fn SpaceForm(
                 view! { <span class="create-space-title">"Create space"</span> }
             }}
             <div class="create-space-avatar">
-                <img class="create-space-avatar-img" src=avatar_path />
+                <img class="create-space-avatar-img" src=move || avatar.get().path().to_owned() />
                 <div style="align-self: center">
                     <button class="tool" title="Regenerate avatar" on:click=move |_| generate_avatar()>
                         <img alt="regenerate-avatar" src="/public/icons/refresh.svg" />
