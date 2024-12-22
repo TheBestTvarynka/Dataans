@@ -24,8 +24,8 @@ pub fn SpaceForm(
         space
             .as_ref()
             .map(|s| s.avatar.clone())
-            // TODO:
-            .unwrap_or_else(|| Avatar::new(Uuid::new_v4(), "/public/default_space_avatar.png")),
+            // The default space avatar is always exists in DB. It is checked during the app start up.
+            .unwrap_or_else(|| Avatar::new(common::DEFAULT_SPACE_AVATAR_ID, common::DEFAULT_SPACE_AVATAR_PATH)),
     );
     let ref_input = create_node_ref::<html::Input>();
 

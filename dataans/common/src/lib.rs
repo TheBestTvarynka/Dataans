@@ -16,11 +16,19 @@ use std::path::PathBuf;
 
 use serde::{Deserialize, Serialize};
 use time::OffsetDateTime;
+use uuid::{uuid, Uuid};
 
 use crate::export::SchemaVersion;
 
 /// Name of the custom tauri plugin.
 pub const APP_PLUGIN_NAME: &str = "dataans";
+
+/// Default space avatar file id.
+///
+/// It's just a random UUID. Nothing special.
+pub const DEFAULT_SPACE_AVATAR_ID: Uuid = uuid!("54d49bda-644e-44a9-a1ad-4a8fa5f368a5");
+/// Default space avatar file path.
+pub const DEFAULT_SPACE_AVATAR_PATH: &str = "/public/default_space_avatar.png";
 
 /// Dataans app theme.
 ///

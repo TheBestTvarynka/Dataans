@@ -8,7 +8,7 @@ use image::{ImageBuffer, Rgba};
 use uuid::Uuid;
 
 use crate::dataans::db::model::File as FileModel;
-use crate::dataans::db::Db;
+use crate::dataans::db::{Db, DbError};
 use crate::dataans::DataansError;
 use crate::{FILES_DIR, IMAGES_DIR};
 
@@ -21,11 +21,33 @@ impl<D: Db> FileService<D> {
         Self { db }
     }
 
+    pub async fn check_default_space_avatar(&self) -> Result<(), DataansError> {
+        if let Err(DbError::SqlxError(err)) = self.db.file_by_id(common::DEFAULT_SPACE_AVATAR_ID).await {
+            if let sqlx::Error::RowNotFound = err {
+                warn!(?err);
+
+                self.db
+                    .add_file(&FileModel {
+                        id: common::DEFAULT_SPACE_AVATAR_ID,
+                        name: "default_space_avatar.png".into(),
+                        path: common::DEFAULT_SPACE_AVATAR_PATH.into(),
+                    })
+                    .await?;
+
+                Ok(())
+            } else {
+                Err(DataansError::DbError(DbError::SqlxError(err)))
+            }
+        } else {
+            Ok(())
+        }
+    }
+
     pub async fn upload_file(
         &self,
         id: Uuid,
         name: String,
-        data: Vec<u8>,
+        data: &[u8],
         base_path: &Path,
     ) -> Result<File, DataansError> {
         let file_name = format!("{}_{}", id, name);

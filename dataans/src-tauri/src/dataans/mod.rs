@@ -169,7 +169,11 @@ pub fn init_dataans_plugin<R: Runtime>() -> TauriPlugin<R> {
                 }
             }
 
-            app_handle.manage(block_on(DataansState::init(db_dir, app_data)));
+            let dataans_state = block_on(DataansState::init(db_dir, app_data));
+            if let Err(err) = block_on(dataans_state.file_service.check_default_space_avatar()) {
+                error!(?err);
+            }
+            app_handle.manage(dataans_state);
 
             Ok(())
         })
