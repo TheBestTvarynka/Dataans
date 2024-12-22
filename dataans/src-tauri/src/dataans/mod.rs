@@ -14,7 +14,6 @@ use crate::{CONFIGS_DIR, CONFIG_FILE_NAME, FILES_DIR, IMAGES_DIR};
 mod command;
 mod db;
 pub mod error;
-mod export;
 mod service;
 
 use crate::dataans::error::DataansError;
@@ -87,7 +86,7 @@ pub fn init_dataans_plugin<R: Runtime>() -> TauriPlugin<R> {
             command::file::delete_file,
             command::file::gen_random_avatar,
             command::file::handle_clipboard_image,
-            export::export_app_data,
+            command::export::export_app_data,
         ])
         .setup(|app_handle, _api| {
             info!("Starting app setup...");
