@@ -14,9 +14,13 @@ impl SqliteDb {
 }
 
 impl SqliteDb {
+    #[instrument(ret, skip(transaction))]
     async fn remove_note_inner(note_id: Uuid, transaction: &mut Transaction<'_, sqlx::Sqlite>) -> Result<(), DbError> {
         let note_files: Vec<File> = sqlx::query_as(
-            "SELECT id, name, path FROM files LEFT JOIN notes ON notes.id = notes_files.note_id WHERE notes.id = ?1",
+            "SELECT files.id, files.name, files.path
+            FROM files
+                LEFT JOIN notes_files ON files.id = notes_files.file_id
+            WHERE notes_files.note_id = ?1",
         )
         .bind(note_id)
         .fetch_all(&mut **transaction)
@@ -42,6 +46,7 @@ impl SqliteDb {
 }
 
 impl Db for SqliteDb {
+    #[instrument(ret, skip(self))]
     async fn files(&self) -> Result<Vec<File>, DbError> {
         let files = sqlx::query_as("SELECT id, name, path FROM files")
             .fetch_all(&self.pool)
@@ -50,6 +55,7 @@ impl Db for SqliteDb {
         Ok(files)
     }
 
+    #[instrument(ret, skip(self))]
     async fn file_by_id(&self, file_id: Uuid) -> Result<File, DbError> {
         let files = sqlx::query_as("SELECT id, name, path FROM files WHERE id=?1")
             .bind(file_id)
@@ -59,6 +65,7 @@ impl Db for SqliteDb {
         Ok(files)
     }
 
+    #[instrument(ret, skip(self))]
     async fn add_file(&self, file: &File) -> Result<(), DbError> {
         let File { id, name, path } = file;
 
@@ -69,6 +76,7 @@ impl Db for SqliteDb {
         Ok(())
     }
 
+    #[instrument(ret, skip(self))]
     async fn remove_file(&self, file_id: Uuid) -> Result<(), DbError> {
         sqlx::query!("DELETE FROM files WHERE id = ?1", file_id)
             .execute(&self.pool)
@@ -77,6 +85,7 @@ impl Db for SqliteDb {
         Ok(())
     }
 
+    #[instrument(ret, skip(self))]
     async fn update_file(&self, file: &File) -> Result<(), DbError> {
         let File { id, name, path } = file;
 
@@ -87,6 +96,7 @@ impl Db for SqliteDb {
         Ok(())
     }
 
+    #[instrument(ret, skip(self))]
     async fn spaces(&self) -> Result<Vec<Space>, DbError> {
         let spaces = sqlx::query_as("SELECT id, name, avatar_id, created_at FROM spaces")
             .fetch_all(&self.pool)
@@ -95,6 +105,7 @@ impl Db for SqliteDb {
         Ok(spaces)
     }
 
+    #[instrument(ret, skip(self))]
     async fn space_by_id(&self, space_id: Uuid) -> Result<Space, DbError> {
         let space = sqlx::query_as("SELECT id, name, avatar_id, created_at FROM spaces WHERE id = ?1")
             .bind(space_id)
@@ -104,6 +115,7 @@ impl Db for SqliteDb {
         Ok(space)
     }
 
+    #[instrument(ret, skip(self))]
     async fn create_space(&self, space: &Space) -> Result<(), DbError> {
         let Space {
             id,
@@ -125,6 +137,7 @@ impl Db for SqliteDb {
         Ok(())
     }
 
+    #[instrument(ret, skip(self))]
     async fn remove_space(&self, space_id: Uuid) -> Result<(), DbError> {
         let mut transaction = self.pool.begin().await?;
 
@@ -155,6 +168,7 @@ impl Db for SqliteDb {
         Ok(())
     }
 
+    #[instrument(ret, skip(self))]
     async fn update_space(&self, space: &Space) -> Result<(), DbError> {
         let Space {
             id,
@@ -175,6 +189,7 @@ impl Db for SqliteDb {
         Ok(())
     }
 
+    #[instrument(ret, skip(self))]
     async fn notes(&self) -> Result<Vec<Note>, DbError> {
         let notes = sqlx::query_as("SELECT id, text, created_at, space_id FROM notes")
             .fetch_all(&self.pool)
@@ -183,6 +198,7 @@ impl Db for SqliteDb {
         Ok(notes)
     }
 
+    #[instrument(ret, skip(self))]
     async fn space_notes(&self, space_id: Uuid) -> Result<Vec<Note>, DbError> {
         let notes = sqlx::query_as("SELECT id, text, created_at, space_id FROM notes WHERE space_id = ?1")
             .bind(space_id)
@@ -192,8 +208,9 @@ impl Db for SqliteDb {
         Ok(notes)
     }
 
+    #[instrument(ret, skip(self))]
     async fn note_by_id(&self, note_id: Uuid) -> Result<Note, DbError> {
-        let note = sqlx::query_as("SELECT id, text, created_at, space_id FROM notes WHERE note_id = ?1")
+        let note = sqlx::query_as("SELECT id, text, created_at, space_id FROM notes WHERE id = ?1")
             .bind(note_id)
             .fetch_one(&self.pool)
             .await?;
@@ -201,6 +218,7 @@ impl Db for SqliteDb {
         Ok(note)
     }
 
+    #[instrument(ret, skip(self))]
     async fn create_note(&self, note: &Note) -> Result<(), DbError> {
         let Note {
             id,
@@ -222,6 +240,7 @@ impl Db for SqliteDb {
         Ok(())
     }
 
+    #[instrument(ret, skip(self))]
     async fn remove_note(&self, note_id: Uuid) -> Result<(), DbError> {
         let mut transaction = self.pool.begin().await?;
 
@@ -232,6 +251,7 @@ impl Db for SqliteDb {
         Ok(())
     }
 
+    #[instrument(ret, skip(self))]
     async fn update_note(&self, note: &Note) -> Result<(), DbError> {
         let Note {
             id,
@@ -247,9 +267,13 @@ impl Db for SqliteDb {
         Ok(())
     }
 
+    #[instrument(ret, skip(self))]
     async fn note_files(&self, note_id: Uuid) -> Result<Vec<File>, DbError> {
         let files = sqlx::query_as(
-            "SELECT id, name, path FROM files LEFT JOIN notes ON notes.id = notes_files.note_id WHERE notes.id = ?1",
+            "SELECT files.id, files.name, files.path
+            FROM files
+                LEFT JOIN notes_files ON files.id = notes_files.file_id
+            WHERE notes_files.note_id = ?1",
         )
         .bind(note_id)
         .fetch_all(&self.pool)
@@ -258,6 +282,7 @@ impl Db for SqliteDb {
         Ok(files)
     }
 
+    #[instrument(ret, skip(self))]
     async fn set_note_files(&self, note_id: Uuid, files: &[Uuid]) -> Result<(), DbError> {
         let mut transaction = self.pool.begin().await?;
 
