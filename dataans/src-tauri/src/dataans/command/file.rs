@@ -2,7 +2,7 @@ use common::note::File;
 use tauri::State;
 use uuid::Uuid;
 
-use super::CommandResult;
+use super::{CommandResult, CommandResultEmpty};
 use crate::dataans::DataansState;
 
 #[instrument(ret, skip(state))]
@@ -17,7 +17,7 @@ pub async fn upload_file(state: State<'_, DataansState>, id: Uuid, name: String,
 
 #[instrument(ret, skip(state))]
 #[tauri::command]
-pub async fn delete_file(state: State<'_, DataansState>, id: Uuid) -> CommandResult<()> {
+pub async fn delete_file(state: State<'_, DataansState>, id: Uuid) -> CommandResultEmpty {
     Ok(state.file_service.delete_file(id).await.into())
 }
 

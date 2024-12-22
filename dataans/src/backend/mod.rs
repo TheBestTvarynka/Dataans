@@ -12,6 +12,8 @@ use serde_wasm_bindgen::{from_value, to_value};
 use wasm_bindgen::prelude::wasm_bindgen;
 use wasm_bindgen::JsValue;
 
+pub type DummyResult = Result<common::error::DummyUnit, String>;
+
 /// Accepts image fs path and returns its Tauri asset url.
 pub fn convert_file_src(image_path: impl AsRef<str>) -> String {
     let image_path = image_path.as_ref();
@@ -36,13 +38,13 @@ extern "C" {
     async fn invoke(cmd: &str, args: JsValue) -> JsValue;
 }
 
-fn from_js_value<T: serde::de::DeserializeOwned>(value: JsValue) -> Result<T, String> {
+fn from_js_value<T: serde::de::DeserializeOwned + std::fmt::Debug>(value: JsValue) -> Result<T, String> {
     use common::error::DataansResult;
     use serde_wasm_bindgen::from_value;
 
-    from_value::<DataansResult<T>>(value)
-        .expect("DataansResult deserialization should not fail")
-        .into()
+    let r = from_value::<DataansResult<T>>(value).expect("DataansResult deserialization should not fail");
+    info!("DataansResult: {:?}", r);
+    r.into()
 }
 
 #[derive(Serialize)]

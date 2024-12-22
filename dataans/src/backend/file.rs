@@ -6,7 +6,7 @@ use serde::Serialize;
 use serde_wasm_bindgen::to_value;
 use uuid::Uuid;
 
-use super::{from_js_value, invoke, EmptyArgs};
+use super::{from_js_value, invoke, DummyResult, EmptyArgs};
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -29,7 +29,7 @@ struct FilePath<'path> {
     path: &'path Path,
 }
 
-pub async fn remove_file(path: &Path) -> Result<(), String> {
+pub async fn remove_file(path: &Path) -> DummyResult {
     let args = to_value(&FilePath { path }).expect("FilePath serialization to JsValue should not fail.");
     let result = invoke(&format!("plugin:{}|delete_file", APP_PLUGIN_NAME), args).await;
 

@@ -3,6 +3,7 @@ pub mod file;
 pub mod note;
 pub mod space;
 
-use common::error::DataansResult;
+use common::error::{DataansResult, DummyUnit};
 
-pub type CommandResult<T> = Result<DataansResult<T>, ()>;
+type CommandResult<T> = Result<DataansResult<T>, ()>;
+type CommandResultEmpty = Result<DataansResult<DummyUnit>, ()>;

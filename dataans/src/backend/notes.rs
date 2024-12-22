@@ -4,7 +4,7 @@ use common::APP_PLUGIN_NAME;
 use serde::Serialize;
 use serde_wasm_bindgen::to_value;
 
-use super::from_js_value;
+use super::{from_js_value, DummyResult};
 use crate::backend::invoke;
 
 #[derive(Serialize)]
@@ -26,7 +26,7 @@ struct CreateNoteArgs<'text> {
     pub note: Note<'text>,
 }
 
-pub async fn create_note(note: Note<'_>) -> Result<(), String> {
+pub async fn create_note(note: Note<'_>) -> DummyResult {
     let args = to_value(&CreateNoteArgs { note }).expect("CreateNoteArgs serialization to JsValue should not fail.");
     let result = invoke(&format!("plugin:{}|create_note", APP_PLUGIN_NAME), args).await;
 
@@ -39,7 +39,7 @@ struct UpdateNoteArgs<'text> {
     pub note_data: UpdateNote<'text>,
 }
 
-pub async fn update_note(note_data: UpdateNote<'_>) -> Result<(), String> {
+pub async fn update_note(note_data: UpdateNote<'_>) -> DummyResult {
     let args =
         to_value(&UpdateNoteArgs { note_data }).expect("UpdateNoteArgs serialization to JsValue should not fail.");
     let result = invoke(&format!("plugin:{}|update_note", APP_PLUGIN_NAME), args).await;
@@ -53,7 +53,7 @@ struct DeleteNoteArgs {
     pub note_id: NoteId,
 }
 
-pub async fn delete_note(note_id: NoteId) -> Result<(), String> {
+pub async fn delete_note(note_id: NoteId) -> DummyResult {
     let args = to_value(&DeleteNoteArgs { note_id }).expect("DeleteNoteArgs serialization to JsValue should not fail.");
     let result = invoke(&format!("plugin:{}|delete_note", APP_PLUGIN_NAME), args).await;
 

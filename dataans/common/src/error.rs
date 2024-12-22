@@ -55,3 +55,16 @@ impl<T, E: fmt::Display> From<Result<T, E>> for DataansResult<T> {
         }
     }
 }
+
+/// Dummy unit type because `()` is not enough :).
+#[derive(Serialize, Deserialize, Debug, Copy, Clone, PartialEq, Eq, Default)]
+pub struct DummyUnit(u8);
+
+impl<E: fmt::Display> From<Result<(), E>> for DataansResult<DummyUnit> {
+    fn from(err: Result<(), E>) -> Self {
+        match err {
+            Ok(_) => DataansResult::ok(DummyUnit::default()),
+            Err(err) => DataansResult::err(err.to_string()),
+        }
+    }
+}

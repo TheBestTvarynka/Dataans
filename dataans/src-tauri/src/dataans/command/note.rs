@@ -2,7 +2,7 @@ use common::note::{Id as NoteId, NoteFullOwned, OwnedNote, UpdateNote};
 use common::space::Id as SpaceId;
 use tauri::State;
 
-use super::CommandResult;
+use super::{CommandResult, CommandResultEmpty};
 use crate::dataans::DataansState;
 
 #[instrument(ret, skip(state))]
@@ -13,19 +13,19 @@ pub async fn list_notes(state: State<'_, DataansState>, space_id: SpaceId) -> Co
 
 #[instrument(ret, skip(state))]
 #[tauri::command]
-pub async fn create_note(state: State<'_, DataansState>, note: OwnedNote) -> CommandResult<()> {
+pub async fn create_note(state: State<'_, DataansState>, note: OwnedNote) -> CommandResultEmpty {
     Ok(state.note_service.create_note(note).await.into())
 }
 
 #[instrument(ret, skip(state))]
 #[tauri::command]
-pub async fn update_note(state: State<'_, DataansState>, note_data: UpdateNote<'_>) -> CommandResult<()> {
+pub async fn update_note(state: State<'_, DataansState>, note_data: UpdateNote<'_>) -> CommandResultEmpty {
     Ok(state.note_service.update_note(note_data).await.into())
 }
 
 #[instrument(ret, skip(state))]
 #[tauri::command]
-pub async fn delete_note(state: State<'_, DataansState>, note_id: NoteId) -> CommandResult<()> {
+pub async fn delete_note(state: State<'_, DataansState>, note_id: NoteId) -> CommandResultEmpty {
     Ok(state.note_service.delete_note(note_id).await.into())
 }
 
