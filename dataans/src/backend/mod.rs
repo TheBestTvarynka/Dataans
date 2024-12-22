@@ -12,7 +12,8 @@ use serde_wasm_bindgen::{from_value, to_value};
 use wasm_bindgen::prelude::wasm_bindgen;
 use wasm_bindgen::JsValue;
 
-fn convert_file_src(image_path: impl AsRef<str>) -> String {
+/// Aceepts image fs path and returns its Tauri asset url.
+pub fn convert_file_src(image_path: impl AsRef<str>) -> String {
     #[cfg(windows_is_host_os)]
     {
         format!("http://asset.localhost/{}", image_path.as_ref())
@@ -20,17 +21,6 @@ fn convert_file_src(image_path: impl AsRef<str>) -> String {
     #[cfg(not(windows_is_host_os))]
     {
         format!("asset://localhost/{}", image_path.as_ref())
-    }
-}
-
-pub fn convert_file_url(image_path: impl AsRef<str>) -> String {
-    #[cfg(windows_is_host_os)]
-    {
-        image_path.as_ref()[24..].to_owned()
-    }
-    #[cfg(not(windows_is_host_os))]
-    {
-        image_path.as_ref()[18..].to_owned()
     }
 }
 

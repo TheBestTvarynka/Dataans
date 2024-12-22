@@ -5,6 +5,7 @@ use leptos_hotkeys::{use_hotkeys, use_hotkeys_scoped};
 use time::OffsetDateTime;
 use uuid::Uuid;
 
+use crate::backend::convert_file_src;
 use crate::backend::file::gen_avatar;
 use crate::backend::spaces::{create_space, list_spaces, update_space};
 
@@ -102,7 +103,7 @@ pub fn SpaceForm(
                 view! { <span class="create-space-title">"Create space"</span> }
             }}
             <div class="create-space-avatar">
-                <img class="create-space-avatar-img" src=move || avatar.get().path().to_owned() />
+                <img class="create-space-avatar-img" src=move || convert_file_src(avatar.get().path()) />
                 <div style="align-self: center">
                     <button class="tool" title="Regenerate avatar" on:click=move |_| generate_avatar()>
                         <img alt="regenerate-avatar" src="/public/icons/refresh.svg" />
