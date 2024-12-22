@@ -4,12 +4,12 @@ mod md;
 use std::fs;
 use std::path::{Path, PathBuf};
 
-use common::error::Error as CommonError;
 use common::DataExportConfig;
 use tauri::State;
 use time::macros::format_description;
 use time::OffsetDateTime;
 
+use crate::dataans::command::CommandResult;
 use crate::dataans::{DataansError, DataansState};
 use crate::BACKUPS_DIR;
 
@@ -34,12 +34,7 @@ fn prepare_backups_dir(base_path: &Path) -> Result<PathBuf, DataansError> {
     Ok(backups_dir)
 }
 
-#[instrument(level = "trace", ret, skip(state))]
-#[tauri::command]
-pub async fn export_app_data(
-    state: State<'_, DataansState>,
-    export_config: DataExportConfig,
-) -> Result<PathBuf, CommonError> {
+async fn export_data(state: State<'_, DataansState>, export_config: DataExportConfig) -> Result<PathBuf, DataansError> {
     let backups_dir = prepare_backups_dir(&state.app_data_dir)?;
     let spaces = state.space_service.spaces().await?;
 
@@ -53,4 +48,13 @@ pub async fn export_app_data(
     }
 
     Ok(backups_dir)
+}
+
+#[instrument(level = "trace", ret, skip(state))]
+#[tauri::command]
+pub async fn export_app_data(
+    state: State<'_, DataansState>,
+    export_config: DataExportConfig,
+) -> CommandResult<PathBuf> {
+    Ok(export_data(state, export_config).await.into())
 }

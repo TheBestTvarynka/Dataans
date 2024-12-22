@@ -1,7 +1,6 @@
 use std::io::Error as IoError;
 use std::path::PathBuf;
 
-use common::error::Error as CommonError;
 use thiserror::Error;
 
 use crate::dataans::db::DbError;
@@ -34,12 +33,4 @@ pub enum DataansError {
 
     #[error("Can not create an image from raw image data")]
     ImageFromRaw,
-}
-
-impl From<DataansError> for CommonError {
-    fn from(err: DataansError) -> Self {
-        Self {
-            dataans_error: err.to_string(),
-        }
-    }
 }
