@@ -4,6 +4,7 @@ use std::sync::Arc;
 
 use common::APP_PLUGIN_NAME;
 use sqlx::sqlite::SqlitePoolOptions;
+use tauri::async_runtime::block_on;
 use tauri::plugin::{Builder, TauriPlugin};
 use tauri::{Manager, Runtime};
 
@@ -169,7 +170,7 @@ pub fn init_dataans_plugin<R: Runtime>() -> TauriPlugin<R> {
                 }
             }
 
-            app_handle.manage(DataansState::init(db_dir, app_data));
+            app_handle.manage(block_on(DataansState::init(db_dir, app_data)));
 
             Ok(())
         })

@@ -78,10 +78,7 @@ pub struct Avatar<'avatar> {
 impl<'avatar> Avatar<'avatar> {
     /// Creates a new [Avatar] based on `id` and `path`.
     pub fn new(id: Uuid, path: impl Into<Cow<'avatar, str>>) -> Self {
-        Self {
-            id,
-            path: path.into(),
-        }
+        Self { id, path: path.into() }
     }
 
     /// Returns avatar [Uuid].

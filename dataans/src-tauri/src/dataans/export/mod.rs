@@ -2,8 +2,9 @@ mod json;
 mod md;
 
 use std::fs;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
+use common::error::Error as CommonError;
 use common::DataExportConfig;
 use tauri::State;
 use time::macros::format_description;
@@ -12,13 +13,8 @@ use time::OffsetDateTime;
 use crate::dataans::{DataansError, DataansState};
 use crate::BACKUPS_DIR;
 
-#[instrument(level = "trace", ret, skip(state))]
-#[tauri::command]
-pub async fn export_app_data(
-    state: State<'_, DataansState>,
-    export_config: DataExportConfig,
-) -> Result<PathBuf, DataansError> {
-    let backups_dir = state.app_data_dir.join(BACKUPS_DIR);
+fn prepare_backups_dir(base_path: &Path) -> Result<PathBuf, DataansError> {
+    let backups_dir = base_path.join(BACKUPS_DIR);
 
     if !backups_dir.exists() {
         match fs::create_dir(&backups_dir) {
@@ -35,6 +31,16 @@ pub async fn export_app_data(
 
     fs::create_dir(&backups_dir)?;
 
+    Ok(backups_dir)
+}
+
+#[instrument(level = "trace", ret, skip(state))]
+#[tauri::command]
+pub async fn export_app_data(
+    state: State<'_, DataansState>,
+    export_config: DataExportConfig,
+) -> Result<PathBuf, CommonError> {
+    let backups_dir = prepare_backups_dir(&state.app_data_dir)?;
     let spaces = state.space_service.spaces().await?;
 
     match export_config {
