@@ -1,6 +1,8 @@
 use common::space::OwnedSpace;
 use leptos::*;
 
+use crate::backend::convert_file_src;
+
 #[allow(clippy::needless_lifetimes)]
 #[component]
 pub fn Space(
@@ -22,7 +24,7 @@ pub fn Space(
 
     view! {
         <div class=class on:click=move |_| set_selected_space.call(space_data.clone()) title=space_name>
-            <img class="space-avatar" alt="space avatar image" src=space.avatar.to_string() />
+            <img class="space-avatar" alt="space avatar image" src=convert_file_src(space.avatar.path()) />
             <Show when=move || !minimized.get()>
                 <span class="space-title">{space.name.to_string()}</span>
             </Show>

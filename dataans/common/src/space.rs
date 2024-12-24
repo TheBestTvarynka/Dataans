@@ -4,6 +4,7 @@ use std::fmt::{Display, Formatter};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
+use crate::note::File;
 use crate::CreationDate;
 
 /// Represent a space ID.
@@ -70,23 +71,35 @@ impl AsRef<str> for Name<'_> {
 ///
 /// Example: `461d7188-062a-4514-bece-3577624d0ee8.png`.
 #[derive(Serialize, Deserialize, Debug, Default, Clone, Eq, PartialEq)]
-pub struct Avatar<'avatar>(Cow<'avatar, str>);
+pub struct Avatar<'avatar> {
+    id: Uuid,
+    path: Cow<'avatar, str>,
+}
 
-impl From<String> for Avatar<'static> {
-    fn from(value: String) -> Self {
-        Self(Cow::Owned(value))
+impl<'avatar> Avatar<'avatar> {
+    /// Creates a new [Avatar] based on `id` and `path`.
+    pub fn new(id: Uuid, path: impl Into<Cow<'avatar, str>>) -> Self {
+        Self { id, path: path.into() }
+    }
+
+    /// Returns avatar [Uuid].
+    pub fn id(&self) -> Uuid {
+        self.id
+    }
+
+    /// Returns path to the avatar file.
+    pub fn path(&self) -> &str {
+        self.path.as_ref()
     }
 }
 
-impl Display for Avatar<'_> {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        f.write_str(self.0.as_ref())
-    }
-}
-
-impl AsRef<str> for Avatar<'_> {
-    fn as_ref(&self) -> &str {
-        self.0.as_ref()
+impl From<File> for Avatar<'_> {
+    fn from(file: File) -> Self {
+        let File { id, name: _, path } = file;
+        Self {
+            id,
+            path: path.to_str().expect("UTF8-path").to_owned().into(),
+        }
     }
 }
 

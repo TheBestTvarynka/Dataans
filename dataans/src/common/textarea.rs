@@ -2,7 +2,7 @@ use leptos::web_sys::KeyboardEvent;
 use leptos::*;
 use wasm_bindgen::JsCast;
 
-use crate::backend::load_clipboard_image;
+use crate::backend::file::load_clipboard_image;
 
 #[component]
 pub fn TextArea(
@@ -43,7 +43,8 @@ pub fn TextArea(
                 let mut text = text.get();
                 let id = elem_id.clone();
                 spawn_local(async move {
-                    let image_path = load_clipboard_image().await;
+                    let image = load_clipboard_image().await.expect("TODO: handle err");
+                    let image_path = image.path.to_str().expect("TODO: handle none");
 
                     let text_area = document().get_element_by_id(&id).expect("Dom element should present");
                     let text_area = text_area
@@ -55,7 +56,7 @@ pub fn TextArea(
                         text = format!("{} ![]({}){}", &text[0..start], &image_path, &text[start..]);
                     } else {
                         text.push_str("![](");
-                        text.push_str(&image_path);
+                        text.push_str(image_path);
                         text.push(')');
                     }
 

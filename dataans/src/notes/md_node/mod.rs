@@ -9,7 +9,7 @@ use markdown::mdast::Node;
 
 use self::code_block::CodeBlock;
 use self::list_item::ListItem;
-use crate::backend::convert_file_url;
+use crate::backend::convert_file_src;
 use crate::backend::file::open;
 
 pub fn render_md_node(node: &Node) -> HtmlElement<AnyElement> {
@@ -157,11 +157,11 @@ pub fn render_md_node(node: &Node) -> HtmlElement<AnyElement> {
             let open_image = move |_| {
                 let path = image_path.clone();
                 spawn_local(async move {
-                    open(Path::new(&convert_file_url(path))).await;
+                    open(Path::new(&path)).await;
                 })
             };
             view! {
-                <img src=image.url.clone() alt=image.alt.clone() class="note-image" on:click=open_image />
+                <img src=convert_file_src(&image.url) alt=image.alt.clone() class="note-image" on:click=open_image />
             }
         }
         .into_any(),

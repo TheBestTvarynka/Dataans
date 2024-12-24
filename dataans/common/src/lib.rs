@@ -1,6 +1,8 @@
 #![doc = include_str!("../README.md")]
 #![warn(missing_docs)]
 
+/// Contains general error type for tauri frontend and backend.
+pub mod error;
 /// Contains schema definitions for data export.
 pub mod export;
 /// Contains all note-related structures.
@@ -14,11 +16,19 @@ use std::path::PathBuf;
 
 use serde::{Deserialize, Serialize};
 use time::OffsetDateTime;
+use uuid::{uuid, Uuid};
 
 use crate::export::SchemaVersion;
 
 /// Name of the custom tauri plugin.
 pub const APP_PLUGIN_NAME: &str = "dataans";
+
+/// Default space avatar file id.
+///
+/// It's just a random UUID. Nothing special.
+pub const DEFAULT_SPACE_AVATAR_ID: Uuid = uuid!("54d49bda-644e-44a9-a1ad-4a8fa5f368a5");
+/// Default space avatar file path.
+pub const DEFAULT_SPACE_AVATAR_PATH: &str = "/public/default_space_avatar.png";
 
 /// Dataans app theme.
 ///
@@ -180,6 +190,12 @@ pub struct CreationDate(OffsetDateTime);
 impl From<OffsetDateTime> for CreationDate {
     fn from(value: OffsetDateTime) -> Self {
         Self(value)
+    }
+}
+
+impl From<CreationDate> for OffsetDateTime {
+    fn from(value: CreationDate) -> Self {
+        value.0
     }
 }
 

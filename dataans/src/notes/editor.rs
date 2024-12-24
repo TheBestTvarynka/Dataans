@@ -59,11 +59,11 @@ pub fn Editor(space_id: SpaceId, #[prop(into)] create_note: Callback<Note<'stati
         }
     };
 
-    let remove_file = move |File { id, name: _, path }| {
+    let remove_file = move |File { id, name: _, path: _ }| {
         let DraftNote { text, mut files } = draft_note.get();
 
         spawn_local(async move {
-            remove_file(&path).await;
+            remove_file(id).await.expect("TODO: handle err");
 
             files.retain(|file| file.id != id);
             set_draft_note(DraftNote { text, files });
@@ -71,16 +71,18 @@ pub fn Editor(space_id: SpaceId, #[prop(into)] create_note: Callback<Note<'stati
     };
 
     let handle_files = move |files| {
-        let DraftNote { text, files: _ } = draft_note.get();
-        set_draft_note(DraftNote { text, files });
+        if let Some(DraftNote { text, files: _ }) = draft_note.try_get_untracked() {
+            set_draft_note(DraftNote { text, files });
+        }
     };
 
     let set_text = move |text: String| {
-        let DraftNote { text: _, files } = draft_note.get();
-        set_draft_note(DraftNote {
-            text: text.into(),
-            files,
-        });
+        if let Some(DraftNote { text: _, files }) = draft_note.try_get_untracked() {
+            set_draft_note(DraftNote {
+                text: text.into(),
+                files,
+            });
+        }
     };
 
     view! {

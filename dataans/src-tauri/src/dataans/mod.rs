@@ -1,55 +1,92 @@
 use std::fs;
 use std::path::PathBuf;
+use std::sync::Arc;
 
 use common::APP_PLUGIN_NAME;
-use polodb_core::Database;
+use sqlx::sqlite::SqlitePoolOptions;
+use tauri::async_runtime::block_on;
 use tauri::plugin::{Builder, TauriPlugin};
 use tauri::{Manager, Runtime};
 
-use crate::{CONFIGS_DIR, CONFIG_FILE_NAME, FILES_DIR, IMAGED_DIR};
+use crate::dataans::db::sqlite::SqliteDb;
+use crate::{CONFIGS_DIR, CONFIG_FILE_NAME, FILES_DIR, IMAGES_DIR};
 
-mod export;
-mod note;
-mod space;
+mod command;
+mod db;
+pub mod error;
+mod service;
 
-const SPACES_COLLECTION_NAME: &str = "spaces";
-const NOTES_COLLECTION_NAME: &str = "notes";
+use crate::dataans::error::DataansError;
+use crate::dataans::service::file::FileService;
+use crate::dataans::service::note::NoteService;
+use crate::dataans::service::space::SpaceService;
 
-pub struct DataansState {
+pub struct State<D> {
     app_data_dir: PathBuf,
-    db: Database,
+    space_service: Arc<SpaceService<D>>,
+    note_service: Arc<NoteService<D>>,
+    file_service: Arc<FileService<D>>,
 }
 
+pub type DataansState = State<SqliteDb>;
+
 impl DataansState {
-    pub fn init(db_dir: PathBuf, app_data_dir: PathBuf) -> Self {
-        let db_file = db_dir.join("dataans.db");
+    pub async fn init(db_dir: PathBuf, app_data_dir: PathBuf) -> Self {
+        // It's okay to panic in this function because the app is useless without a working db.
+
+        let db_file = db_dir.join("dataans.sqlite");
 
         info!(?db_file, "Database file");
 
+        if !db_file.exists() {
+            std::fs::File::create(&db_file).expect("Can not create db file");
+        }
+
+        let pool = SqlitePoolOptions::new()
+            .max_connections(4)
+            .min_connections(1)
+            .acquire_timeout(std::time::Duration::from_secs(5))
+            .connect_lazy(&format!(
+                "sqlite://{}",
+                db_file.to_str().expect("Bro, wtf, use UTF-8 paths")
+            ))
+            .expect("can not connect to sqlite db");
+
+        let sqlite = Arc::new(SqliteDb::new(pool));
+
+        let space_service = Arc::new(SpaceService::new(Arc::clone(&sqlite)));
+        let note_service = Arc::new(NoteService::new(Arc::clone(&sqlite), Arc::clone(&space_service)));
+        let file_service = Arc::new(FileService::new(sqlite));
+
         Self {
             app_data_dir,
-            db: Database::open_file(db_file).expect("Database opening should not fail."),
+            space_service,
+            note_service,
+            file_service,
         }
     }
 }
 
 pub fn init_dataans_plugin<R: Runtime>() -> TauriPlugin<R> {
-    warn!("init_dataans_plugin");
     debug!("init_dataans_plugin");
 
     Builder::new(APP_PLUGIN_NAME)
         .invoke_handler(tauri::generate_handler![
-            space::list_spaces,
-            space::create_space,
-            space::update_space,
-            space::delete_space,
-            note::list_notes,
-            note::create_note,
-            note::update_note,
-            note::delete_note,
-            note::search_notes_in_space,
-            note::search_notes,
-            export::export_app_data,
+            command::space::list_spaces,
+            command::space::create_space,
+            command::space::update_space,
+            command::space::delete_space,
+            command::note::list_notes,
+            command::note::create_note,
+            command::note::update_note,
+            command::note::delete_note,
+            command::note::search_notes_in_space,
+            command::note::search_notes,
+            command::file::upload_file,
+            command::file::delete_file,
+            command::file::gen_random_avatar,
+            command::file::handle_clipboard_image,
+            command::export::export_app_data,
         ])
         .setup(|app_handle, _api| {
             info!("Starting app setup...");
@@ -66,7 +103,7 @@ pub fn init_dataans_plugin<R: Runtime>() -> TauriPlugin<R> {
 
             let db_dir = app_data.join("db");
             let files_dir = app_data.join(FILES_DIR);
-            let images_dir = app_data.join(IMAGED_DIR);
+            let images_dir = app_data.join(IMAGES_DIR);
             let configs_dir = app_data.join(CONFIGS_DIR);
 
             if !db_dir.exists() {
@@ -132,7 +169,11 @@ pub fn init_dataans_plugin<R: Runtime>() -> TauriPlugin<R> {
                 }
             }
 
-            app_handle.manage(DataansState::init(db_dir, app_data));
+            let dataans_state = block_on(DataansState::init(db_dir, app_data));
+            if let Err(err) = block_on(dataans_state.file_service.check_default_space_avatar()) {
+                error!(?err);
+            }
+            app_handle.manage(dataans_state);
 
             Ok(())
         })

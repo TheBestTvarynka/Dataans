@@ -54,6 +54,15 @@ impl<'text> From<&'text str> for MdText<'text> {
     }
 }
 
+impl<'text> From<MdText<'text>> for String {
+    fn from(value: MdText<'text>) -> String {
+        match value.0 {
+            Cow::Borrowed(s) => s.to_owned(),
+            Cow::Owned(s) => s,
+        }
+    }
+}
+
 impl AsRef<str> for MdText<'_> {
     fn as_ref(&self) -> &str {
         self.0.as_ref()
@@ -90,7 +99,6 @@ pub struct Note<'text> {
     pub space_id: SpaceId,
     /// Attached files.
     pub files: Vec<File>,
-    // TODO(@TheBestTvarynka): implement update time etc.
 }
 
 /// Owned version of [Note].

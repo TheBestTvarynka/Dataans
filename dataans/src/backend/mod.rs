@@ -12,25 +12,23 @@ use serde_wasm_bindgen::{from_value, to_value};
 use wasm_bindgen::prelude::wasm_bindgen;
 use wasm_bindgen::JsValue;
 
-fn convert_file_src(image_path: impl AsRef<str>) -> String {
-    #[cfg(windows_is_host_os)]
-    {
-        format!("http://asset.localhost/{}", image_path.as_ref())
-    }
-    #[cfg(not(windows_is_host_os))]
-    {
-        format!("asset://localhost/{}", image_path.as_ref())
-    }
-}
+pub type DummyResult = Result<common::error::DummyUnit, String>;
 
-pub fn convert_file_url(image_path: impl AsRef<str>) -> String {
+/// Accepts image fs path and returns its Tauri asset url.
+pub fn convert_file_src(image_path: impl AsRef<str>) -> String {
+    let image_path = image_path.as_ref();
+
+    if image_path == common::DEFAULT_SPACE_AVATAR_PATH {
+        return image_path.to_owned();
+    }
+
     #[cfg(windows_is_host_os)]
     {
-        image_path.as_ref()[24..].to_owned()
+        format!("http://asset.localhost/{}", image_path)
     }
     #[cfg(not(windows_is_host_os))]
     {
-        image_path.as_ref()[18..].to_owned()
+        format!("asset://localhost/{}", image_path)
     }
 }
 
@@ -38,6 +36,15 @@ pub fn convert_file_url(image_path: impl AsRef<str>) -> String {
 extern "C" {
     #[wasm_bindgen(js_namespace = ["window", "__TAURI__", "core"])]
     async fn invoke(cmd: &str, args: JsValue) -> JsValue;
+}
+
+fn from_js_value<T: serde::de::DeserializeOwned + std::fmt::Debug>(value: JsValue) -> Result<T, String> {
+    use common::error::DataansResult;
+    use serde_wasm_bindgen::from_value;
+
+    from_value::<DataansResult<T>>(value)
+        .expect("DataansResult deserialization should not fail")
+        .into()
 }
 
 #[derive(Serialize)]
@@ -76,24 +83,6 @@ pub async fn load_config() -> Config {
     let theme_value = invoke("config", args).await;
 
     from_value(theme_value).expect("Config object deserialization from JsValue should not fail.")
-}
-
-pub async fn gen_avatar() -> String {
-    let args = to_value(&EmptyArgs {}).expect("EmptyArgs serialization to JsValue should not fail.");
-    let image_path = invoke("gen_random_avatar", args).await;
-
-    let image_path: String =
-        from_value(image_path).expect("PathBuf object deserialization from JsValue should not fail.");
-    convert_file_src(image_path)
-}
-
-pub async fn load_clipboard_image() -> String {
-    let args = to_value(&EmptyArgs {}).expect("EmptyArgs serialization to JsValue should not fail.");
-    let image_path = invoke("handle_clipboard_image", args).await;
-
-    let image_path: String =
-        from_value(image_path).expect("PathBuf object deserialization from JsValue should not fail.");
-    convert_file_src(image_path)
 }
 
 #[derive(Serialize)]

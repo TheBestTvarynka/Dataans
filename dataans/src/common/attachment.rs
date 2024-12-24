@@ -1,4 +1,5 @@
 use common::note::File;
+use futures::future::try_join_all;
 use js_sys::{ArrayBuffer, Uint8Array};
 use leptos::{component, spawn_local, view, Callable, Callback, IntoView, Signal, SignalGet};
 use uuid::Uuid;
@@ -16,28 +17,17 @@ pub fn Attachment(
         let mut attached_files = files.get();
 
         if let Some(files) = input.files() {
-            let files = (0..files.length())
-                .map(|index| {
-                    let file = files.get(index).unwrap();
-                    let blob = file.slice().expect("File reading should not fail");
-                    let name = file.name();
-                    let id = Uuid::new_v4();
+            let files = try_join_all((0..files.length()).map(|index| {
+                let file = files.get(index).unwrap();
+                let blob = file.slice().expect("File reading should not fail");
+                let name = file.name();
+                let id = Uuid::new_v4();
 
-                    async move { (name.clone(), id, upload_file(blob, name, id).await) }
-                })
-                .collect::<Vec<_>>();
+                async move { upload_file(blob, name, id).await }
+            }));
 
-            let files = futures::future::join_all(files);
             spawn_local(async move {
-                let files = files
-                    .await
-                    .into_iter()
-                    .map(|(name, id, path)| File {
-                        id,
-                        name,
-                        path: path.into(),
-                    })
-                    .collect::<Vec<_>>();
+                let files = files.await.expect("TODO: handle err");
                 attached_files.extend_from_slice(&files);
                 set_files.call(attached_files);
             });
@@ -55,7 +45,7 @@ pub fn Attachment(
 }
 
 // Returns path to the uploaded file.
-async fn upload_file(blob: Blob, name: String, id: Uuid) -> String {
+async fn upload_file(blob: Blob, name: String, id: Uuid) -> Result<File, String> {
     let file_raw_data = wasm_bindgen_futures::JsFuture::from(blob.array_buffer())
         .await
         .expect("File reading should not fail");
