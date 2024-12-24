@@ -307,27 +307,15 @@ impl Db for SqliteDb {
 
 #[cfg(test)]
 mod tests {
-    use std::str::FromStr;
-
+    use sqlx::SqlitePool;
     use time::OffsetDateTime;
     use uuid::Uuid;
 
     use super::*;
 
-    fn pool() -> SqlitePool {
-        use crate::dataans::SqlitePoolOptions;
-
-        SqlitePoolOptions::new()
-            .max_connections(4)
-            .min_connections(1)
-            .acquire_timeout(std::time::Duration::from_secs(5))
-            .connect_lazy("sqlite:///home/pavlo-myroniuk/.local/share/com.tbt.dataans/db/dataans.sqlite")
-            .expect("can not connect to sqlite db")
-    }
-
-    #[tokio::test]
-    async fn space_crud() {
-        let db = SqliteDb::new(pool());
+    #[sqlx::test]
+    async fn space_crud(pool: SqlitePool) {
+        let db = SqliteDb::new(pool);
 
         let file_id = Uuid::new_v4();
         let file = File {
@@ -336,9 +324,18 @@ mod tests {
             path: "/home/tbt/cat-01.jpg".into(),
         };
 
-        //------
-
         db.add_file(&file).await.unwrap();
+
+        let new_avatar_id = Uuid::new_v4();
+        let new_avatar = File {
+            id: new_avatar_id,
+            name: "cat-2.jpg".into(),
+            path: "/home/tbt/cat-02.jpg".into(),
+        };
+
+        db.add_file(&new_avatar).await.unwrap();
+
+        //------
 
         let id = Uuid::new_v4();
         let created_at = OffsetDateTime::now_utc();
@@ -346,7 +343,7 @@ mod tests {
             id,
             name: "Tbt".into(),
             avatar_id: file_id,
-            created_at: created_at.clone(),
+            created_at,
         };
 
         db.create_space(&space).await.unwrap();
@@ -357,7 +354,7 @@ mod tests {
         let updated_space = Space {
             id,
             name: "TheBestTvarynka".into(),
-            avatar_id: Uuid::from_str("620b74b0-05d7-4170-911f-6eeea7b15c44").unwrap(),
+            avatar_id: new_avatar_id,
             created_at,
         };
         db.update_space(&updated_space).await.unwrap();
@@ -368,16 +365,17 @@ mod tests {
         db.remove_space(id).await.unwrap();
 
         let spaces = db.spaces().await.unwrap();
-        assert!(spaces.iter().find(|space| space.id == id).is_none());
+        assert!(!spaces.iter().any(|space| space.id == id));
 
         //------
 
         db.remove_file(file_id).await.unwrap();
+        db.remove_file(new_avatar_id).await.unwrap();
     }
 
-    #[tokio::test]
-    async fn file_crud() {
-        let db = SqliteDb::new(pool());
+    #[sqlx::test]
+    async fn file_crud(pool: SqlitePool) {
+        let db = SqliteDb::new(pool);
 
         let id = Uuid::new_v4();
         let file = File {
@@ -404,12 +402,12 @@ mod tests {
         db.remove_file(id).await.unwrap();
 
         let files = db.files().await.unwrap();
-        assert!(files.iter().find(|file| file.id == id).is_none());
+        assert!(!files.iter().any(|file| file.id == id));
     }
 
-    #[tokio::test]
-    async fn note_crud() {
-        let db = SqliteDb::new(pool());
+    #[sqlx::test]
+    async fn note_crud(pool: SqlitePool) {
+        let db = SqliteDb::new(pool);
 
         let file_id = Uuid::new_v4();
         let file = File {
@@ -438,7 +436,7 @@ mod tests {
             id,
             text: "some text 1".into(),
             space_id,
-            created_at: created_at.clone(),
+            created_at,
         };
 
         db.create_note(&note).await.unwrap();
@@ -460,7 +458,7 @@ mod tests {
         db.remove_note(id).await.unwrap();
 
         let notes = db.space_notes(space_id).await.unwrap();
-        assert!(notes.iter().find(|note| note.id == id).is_none());
+        assert!(!notes.iter().any(|note| note.id == id));
 
         //------
 

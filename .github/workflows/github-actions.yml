@@ -25,11 +25,10 @@ jobs:
       run: 'cd dataans && cargo +nightly fmt --all -- --check'
 
     - name: 'Clippy'
-      run: 'cd dataans && cargo clippy --all-targets --all -- -D warnings'
+      run: 'cd dataans && cargo clippy --all-targets --workspace -- -D warnings'
 
-    # We do not have tests yet. Uncomment when we have.
-    # - name: 'Tests'
-    #   run: 'cargo test'
+    - name: 'Tests'
+      run: 'cd dataans && cargo test --workspace'
 
 # Some day I'll set up cross platform (matrix) app build with proper artifacts.
 # But currently I don't need it :)

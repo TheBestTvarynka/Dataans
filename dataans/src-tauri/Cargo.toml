@@ -42,10 +42,6 @@ syntect = { version = "5.2", default-features = false, features = [
 serde_json = "1"
 thiserror = "2.0"
 
-[dev-dependencies]
-tokio = { version = "1.42", features = ["rt", "macros"] }
-
-
 [features]
 # This feature is used for production builds or when a dev server is not specified, DO NOT REMOVE!!
 custom-protocol = ["tauri/custom-protocol"]
