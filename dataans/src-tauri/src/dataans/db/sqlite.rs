@@ -307,27 +307,15 @@ impl Db for SqliteDb {
 
 #[cfg(test)]
 mod tests {
-    use std::str::FromStr;
-
+    use sqlx::SqlitePool;
     use time::OffsetDateTime;
     use uuid::Uuid;
 
     use super::*;
 
-    fn pool() -> SqlitePool {
-        use crate::dataans::SqlitePoolOptions;
-
-        SqlitePoolOptions::new()
-            .max_connections(4)
-            .min_connections(1)
-            .acquire_timeout(std::time::Duration::from_secs(5))
-            .connect_lazy("sqlite:///home/pavlo-myroniuk/.local/share/com.tbt.dataans/db/dataans.sqlite")
-            .expect("can not connect to sqlite db")
-    }
-
-    #[tokio::test]
-    async fn space_crud() {
-        let db = SqliteDb::new(pool());
+    #[sqlx::test]
+    async fn space_crud(pool: SqlitePool) {
+        let db = SqliteDb::new(pool);
 
         let file_id = Uuid::new_v4();
         let file = File {
@@ -336,9 +324,18 @@ mod tests {
             path: "/home/tbt/cat-01.jpg".into(),
         };
 
-        //------
-
         db.add_file(&file).await.unwrap();
+
+        let new_avatar_id = Uuid::new_v4();
+        let new_avatar = File {
+            id: new_avatar_id,
+            name: "cat-2.jpg".into(),
+            path: "/home/tbt/cat-02.jpg".into(),
+        };
+
+        db.add_file(&new_avatar).await.unwrap();
+
+        //------
 
         let id = Uuid::new_v4();
         let created_at = OffsetDateTime::now_utc();
@@ -357,7 +354,7 @@ mod tests {
         let updated_space = Space {
             id,
             name: "TheBestTvarynka".into(),
-            avatar_id: Uuid::from_str("620b74b0-05d7-4170-911f-6eeea7b15c44").unwrap(),
+            avatar_id: new_avatar_id,
             created_at,
         };
         db.update_space(&updated_space).await.unwrap();
@@ -373,11 +370,12 @@ mod tests {
         //------
 
         db.remove_file(file_id).await.unwrap();
+        db.remove_file(new_avatar_id).await.unwrap();
     }
 
-    #[tokio::test]
-    async fn file_crud() {
-        let db = SqliteDb::new(pool());
+    #[sqlx::test]
+    async fn file_crud(pool: SqlitePool) {
+        let db = SqliteDb::new(pool);
 
         let id = Uuid::new_v4();
         let file = File {
@@ -407,9 +405,9 @@ mod tests {
         assert!(files.iter().find(|file| file.id == id).is_none());
     }
 
-    #[tokio::test]
-    async fn note_crud() {
-        let db = SqliteDb::new(pool());
+    #[sqlx::test]
+    async fn note_crud(pool: SqlitePool) {
+        let db = SqliteDb::new(pool);
 
         let file_id = Uuid::new_v4();
         let file = File {
