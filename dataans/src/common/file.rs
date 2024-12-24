@@ -19,7 +19,7 @@ pub fn File(file: File, edit_mode: bool, #[prop(into)] remove_file: Callback<Fil
         <div class="files-file">
             {if edit_mode {
                 view! {
-                    <img alt="" src="/public/icons/cancel.png" class="files-file-cancel" on:click=move |_| remove_file.call(file_data.clone()) />
+                    <img alt="" src="/public/icons/cancel-dark.png" class="files-file-cancel" on:click=move |_| remove_file.call(file_data.clone()) />
                     <img src="/public/icons/file.png" alt="" class="files-file-icon" />
                 }
             } else {
