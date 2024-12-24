@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO spaces (id, name, avatar_id, created_at) VALUES (?1, ?2, ?3, ?4)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 4
+    },
+    "nullable": []
+  },
+  "hash": "db8fe09c75473c4a4efe1721f9b3cac0b816f93f44dbbd9ec9f75e43891f7b52"
+}
