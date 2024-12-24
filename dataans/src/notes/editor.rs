@@ -77,11 +77,12 @@ pub fn Editor(space_id: SpaceId, #[prop(into)] create_note: Callback<Note<'stati
     };
 
     let set_text = move |text: String| {
-        let DraftNote { text: _, files } = draft_note.get();
-        set_draft_note(DraftNote {
-            text: text.into(),
-            files,
-        });
+        if let Some(DraftNote { text: _, files }) = draft_note.try_get_untracked() {
+            set_draft_note(DraftNote {
+                text: text.into(),
+                files,
+            });
+        }
     };
 
     view! {

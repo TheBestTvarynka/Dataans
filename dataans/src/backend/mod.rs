@@ -42,7 +42,9 @@ fn from_js_value<T: serde::de::DeserializeOwned + std::fmt::Debug>(value: JsValu
     use common::error::DataansResult;
     use serde_wasm_bindgen::from_value;
 
-    from_value::<DataansResult<T>>(value).expect("DataansResult deserialization should not fail").into()
+    from_value::<DataansResult<T>>(value)
+        .expect("DataansResult deserialization should not fail")
+        .into()
 }
 
 #[derive(Serialize)]
