@@ -56,7 +56,7 @@ pub fn TextArea(
                         text = format!("{} ![]({}){}", &text[0..start], &image_path, &text[start..]);
                     } else {
                         text.push_str("![](");
-                        text.push_str(&image_path);
+                        text.push_str(image_path);
                         text.push(')');
                     }
 

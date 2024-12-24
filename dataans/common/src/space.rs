@@ -93,7 +93,7 @@ impl<'avatar> Avatar<'avatar> {
     }
 }
 
-impl<'avatar> From<File> for Avatar<'avatar> {
+impl From<File> for Avatar<'_> {
     fn from(file: File) -> Self {
         let File { id, name: _, path } = file;
         Self {
