@@ -343,7 +343,7 @@ mod tests {
             id,
             name: "Tbt".into(),
             avatar_id: file_id,
-            created_at: created_at.clone(),
+            created_at,
         };
 
         db.create_space(&space).await.unwrap();
@@ -365,7 +365,7 @@ mod tests {
         db.remove_space(id).await.unwrap();
 
         let spaces = db.spaces().await.unwrap();
-        assert!(spaces.iter().find(|space| space.id == id).is_none());
+        assert!(!spaces.iter().any(|space| space.id == id));
 
         //------
 
@@ -402,7 +402,7 @@ mod tests {
         db.remove_file(id).await.unwrap();
 
         let files = db.files().await.unwrap();
-        assert!(files.iter().find(|file| file.id == id).is_none());
+        assert!(!files.iter().any(|file| file.id == id));
     }
 
     #[sqlx::test]
@@ -436,7 +436,7 @@ mod tests {
             id,
             text: "some text 1".into(),
             space_id,
-            created_at: created_at.clone(),
+            created_at,
         };
 
         db.create_note(&note).await.unwrap();
@@ -458,7 +458,7 @@ mod tests {
         db.remove_note(id).await.unwrap();
 
         let notes = db.space_notes(space_id).await.unwrap();
-        assert!(notes.iter().find(|note| note.id == id).is_none());
+        assert!(!notes.iter().any(|note| note.id == id));
 
         //------
 
