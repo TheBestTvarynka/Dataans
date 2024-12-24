@@ -64,10 +64,11 @@ pub fn Note(
     let remove_file = move |file: File| {
         let text = updated_note_text.get();
         let mut files = updated_files.get();
-        let id = file.id;
+
+        let File { id, name: _, path: _ } = file;
 
         spawn_local(async move {
-            remove_file(&file.path).await.expect("TODO: handle err");
+            remove_file(id).await.expect("TODO: handle err");
 
             files.retain(|file| file.id != id);
             set_updated_files.set(files.clone());
