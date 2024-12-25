@@ -55,19 +55,22 @@
 .inline-code {
     font-family: "JetBrains Mono", monospace;
     cursor: pointer;
-    background-color: var(--note-inline-background-color);
-    border: 2px solid var(--note-inline-background-color);
     box-sizing: border-box;
     padding: 0 0.2em 0 0.2em;
     border-radius: 0.2em;
+
+    background-color: var(--note-link-color);
+    color: var(--note-inline-background-color);
 }
 
 .inline-code:hover {
-    border-color: var(--note-link-color);
+    background-color: var(--note-inline-background-color);
+    color: var(--note-text-color);
 }
 
 .inline-code:active {
-    background-color: var(--note-link-color);
+    background-color: var(--note-inline-background-color);
+    color: var(--note-text-color);
 }
 
 .note .quote {
@@ -146,6 +149,37 @@
     align-items: flex-start;
     gap: 0;
     border-radius: 0.2em;
+    position: relative;
+}
+
+.note .note-code-block-meta-container {
+    position: absolute;
+    top: 0;
+    right: 0;
+}
+
+.code-block-tool {
+    background-color: var(--note-link-color);
+    height: 2em;
+    padding: 0.2em;
+    border-radius: 0.2em;
+    border: 1px solid transparent;
+    transition: 0.1s;
+    opacity: 0;
+}
+
+.code-block-tool:hover {
+    opacity: 1;
+    cursor: pointer;
+}
+
+.code-block-tool img {
+    height: 100%;
+    width: auto;
+}
+
+.code-block-tool img:hover {
+    cursor: pointer;
 }
 
 .note .note-code-block .note-code-block-meta {

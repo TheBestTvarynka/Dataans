@@ -24,14 +24,15 @@
     gap: 0.2em;
     flex-wrap: wrap;
     flex-grow: 1;
+    width: 100%;
 }
 
 .files-file {
     padding: 0.2em;
-    margin: 0.15em;
     font-size: 0.9em;
     border-radius: 0.2em;
-    background-color: var(--editor-file-background-color);
+    background-color: var(--note-link-color);
+    color: var(--note-inline-background-color);
     display: inline-flex;
     gap: 0.1em;
     justify-content: flex-start;

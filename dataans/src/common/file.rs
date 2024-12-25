@@ -19,7 +19,7 @@ pub fn File(file: File, edit_mode: bool, #[prop(into)] remove_file: Callback<Fil
         <div class="files-file">
             {if edit_mode {
                 view! {
-                    <img alt="" src="/public/icons/cancel.png" class="files-file-cancel" on:click=move |_| remove_file.call(file_data.clone()) />
+                    <img alt="" title="remove file" src="/public/icons/cancel-dark.png" class="files-file-cancel" on:click=move |_| remove_file.call(file_data.clone()) />
                     <img src="/public/icons/file.png" alt="" class="files-file-icon" />
                 }
             } else {
@@ -32,11 +32,11 @@ pub fn File(file: File, edit_mode: bool, #[prop(into)] remove_file: Callback<Fil
                 };
 
                 view! {
-                    <img alt="" src="/public/icons/folder.png" class="files-file-cancel" on:click=reveal_file />
+                    <img alt="" title="open file location" src="/public/icons/folder.png" class="files-file-cancel" on:click=reveal_file />
                     <img src="/public/icons/file.png" alt="" class="files-file-icon" />
                 }
             }}
-            <span on:click=open_file>{file.name.clone()}</span>
+            <span title="click to open the file" on:click=open_file>{file.name.clone()}</span>
         </div>
     }
 }
