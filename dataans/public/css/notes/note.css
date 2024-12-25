@@ -149,6 +149,37 @@
     align-items: flex-start;
     gap: 0;
     border-radius: 0.2em;
+    position: relative;
+}
+
+.note .note-code-block-meta-container {
+    position: absolute;
+    top: 0;
+    right: 0;
+}
+
+.code-block-tool {
+    background-color: var(--note-link-color);
+    height: 2em;
+    padding: 0.2em;
+    border-radius: 0.2em;
+    border: 1px solid transparent;
+    transition: 0.1s;
+    opacity: 0;
+}
+
+.code-block-tool:hover {
+    opacity: 1;
+    cursor: pointer;
+}
+
+.code-block-tool img {
+    height: 100%;
+    width: auto;
+}
+
+.code-block-tool img:hover {
+    cursor: pointer;
 }
 
 .note .note-code-block .note-code-block-meta {
