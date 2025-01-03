@@ -102,7 +102,7 @@ pub fn Export() -> impl IntoView {
                             title="Open backup folder"
                             on:click=move |_| open_backup_folder(backup_dir.clone())
                         >
-                            <img alt="edit note" src="/public/icons/folder.png" />
+                            <img alt="edit note" src="/public/icons/folder-light.png" />
                         </button>
                     }
                 }}

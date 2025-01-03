@@ -63,7 +63,7 @@ pub fn AppInfoWindow(#[prop(into)] close: Callback<(), ()>) -> impl IntoView {
                     title="Open config file location"
                     on:click=open_config_file_folder
                 >
-                    <img alt="edit note" src="/public/icons/folder.png" />
+                    <img alt="edit note" src="/public/icons/folder-light.png" />
                 </button>
                 {move || if is_autostart_enabled.get() {view! {
                     <button class="button_ok" on:click=disable_autostart title="Disable autostart">"Disable autostart"</button>
@@ -122,7 +122,7 @@ pub fn AppInfoWindow(#[prop(into)] close: Callback<(), ()>) -> impl IntoView {
                                     title="Open theme file location"
                                     on:click=move |_| open_theme_file(theme.clone())
                                 >
-                                    <img alt="edit note" src="/public/icons/folder.png" />
+                                    <img alt="edit note" src="/public/icons/folder-light.png" />
                                 </button>
                             </td>
                         </tr>
