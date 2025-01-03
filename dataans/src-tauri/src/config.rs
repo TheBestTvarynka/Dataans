@@ -1,28 +1,21 @@
 use std::fs::read_to_string;
+use std::io::{Error as IoError, ErrorKind as IoErrorKind};
 use std::path::{Path, PathBuf};
 
+use common::error::CommandResult;
 use common::{Config, Theme};
 use tauri::{AppHandle, Manager};
 
 use super::{CONFIGS_DIR, CONFIG_FILE_NAME};
 
-pub fn read_config(path: impl AsRef<Path>) -> Config {
+pub fn read_config(path: impl AsRef<Path>) -> Result<Config, IoError> {
     let config_file_path = path.as_ref();
-    let config_data = match read_to_string(config_file_path) {
-        Ok(data) => data,
-        Err(err) => {
-            error!(?err, ?config_file_path, "Can not read config file",);
-            return Default::default();
-        }
-    };
+    let config_data = read_to_string(config_file_path)?;
 
-    toml::from_str(&config_data).unwrap_or_else(|err| {
-        error!(?err, "Can not parse config");
-        Default::default()
-    })
+    toml::from_str(&config_data).map_err(|err| IoError::new(IoErrorKind::InvalidInput, err))
 }
 
-pub fn load_config_inner(app_handle: &AppHandle) -> Config {
+pub fn load_config_inner(app_handle: &AppHandle) -> Result<Config, IoError> {
     let configs_dir = app_handle.path().app_data_dir().unwrap_or_default().join(CONFIGS_DIR);
 
     let config_file_path = configs_dir.join(CONFIG_FILE_NAME);
@@ -33,30 +26,21 @@ pub fn load_config_inner(app_handle: &AppHandle) -> Config {
 
 #[instrument(ret, skip(app_handle))]
 #[tauri::command]
-pub fn config(app_handle: AppHandle) -> Config {
-    load_config_inner(&app_handle)
+pub fn config(app_handle: AppHandle) -> CommandResult<Config> {
+    Ok(load_config_inner(&app_handle)?)
 }
 
 #[instrument(level = "trace", ret, skip(app_handle))]
 #[tauri::command]
-pub fn theme(app_handle: AppHandle, file_path: PathBuf) -> Theme {
+pub fn theme(app_handle: AppHandle, file_path: PathBuf) -> CommandResult<Theme> {
     let configs_dir = app_handle.path().app_data_dir().unwrap_or_default().join(CONFIGS_DIR);
 
     let theme_file_path = configs_dir.join(file_path);
     info!(?theme_file_path, "Theme file path");
 
-    let theme_data = match read_to_string(&theme_file_path) {
-        Ok(data) => data,
-        Err(err) => {
-            error!(?err, ?theme_file_path, "Can not read theme config file",);
-            return Default::default();
-        }
-    };
+    let theme_data = read_to_string(&theme_file_path)?;
 
-    toml::from_str(&theme_data).unwrap_or_else(|err| {
-        error!(?err, "Can not parse theme config");
-        Default::default()
-    })
+    Ok(toml::from_str(&theme_data).map_err(|err| IoError::new(IoErrorKind::InvalidInput, err))?)
 }
 
 #[tauri::command]

@@ -129,7 +129,7 @@ fn main() {
                 warn!("Cannot find the 'main' try icon :(");
             }
 
-            let config = crate::config::load_config_inner(app.handle());
+            let config = crate::config::load_config_inner(app.handle()).expect("config reading should not fail");
 
             // Set up global shortcut
             let visibility_shortcut = Shortcut::from_str(&config.app.app_toggle).unwrap();

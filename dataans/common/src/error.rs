@@ -13,6 +13,12 @@ pub enum CommandError {
     JsValue(String),
 }
 
+impl From<std::io::Error> for CommandError {
+    fn from(err: std::io::Error) -> Self {
+        Self::Dataans(err.to_string())
+    }
+}
+
 impl fmt::Display for CommandError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{:?}", self)
