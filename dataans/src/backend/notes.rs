@@ -1,11 +1,10 @@
+use common::error::{CommandResult, CommandResultEmpty};
 use common::note::{Id as NoteId, Note, NoteFullOwned, OwnedNote, UpdateNote};
 use common::space::Id as SpaceId;
 use common::APP_PLUGIN_NAME;
 use serde::Serialize;
-use serde_wasm_bindgen::to_value;
 
-use super::{from_js_value, DummyResult};
-use crate::backend::invoke;
+use crate::backend::invoke_command;
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -13,11 +12,12 @@ struct ListNotesArgs {
     pub space_id: SpaceId,
 }
 
-pub async fn list_notes(space_id: SpaceId) -> Result<Vec<OwnedNote>, String> {
-    let args = to_value(&ListNotesArgs { space_id }).expect("ListNotesArgs serialization to JsValue should not fail.");
-    let notes = invoke(&format!("plugin:{}|list_notes", APP_PLUGIN_NAME), args).await;
-
-    from_js_value(notes)
+pub async fn list_notes(space_id: SpaceId) -> CommandResult<Vec<OwnedNote>> {
+    invoke_command(
+        &format!("plugin:{}|list_notes", APP_PLUGIN_NAME),
+        &ListNotesArgs { space_id },
+    )
+    .await
 }
 
 #[derive(Serialize)]
@@ -26,11 +26,12 @@ struct CreateNoteArgs<'text> {
     pub note: Note<'text>,
 }
 
-pub async fn create_note(note: Note<'_>) -> DummyResult {
-    let args = to_value(&CreateNoteArgs { note }).expect("CreateNoteArgs serialization to JsValue should not fail.");
-    let result = invoke(&format!("plugin:{}|create_note", APP_PLUGIN_NAME), args).await;
-
-    from_js_value(result)
+pub async fn create_note(note: Note<'_>) -> CommandResultEmpty {
+    invoke_command(
+        &format!("plugin:{}|create_note", APP_PLUGIN_NAME),
+        &CreateNoteArgs { note },
+    )
+    .await
 }
 
 #[derive(Serialize)]
@@ -39,12 +40,12 @@ struct UpdateNoteArgs<'text> {
     pub note_data: UpdateNote<'text>,
 }
 
-pub async fn update_note(note_data: UpdateNote<'_>) -> DummyResult {
-    let args =
-        to_value(&UpdateNoteArgs { note_data }).expect("UpdateNoteArgs serialization to JsValue should not fail.");
-    let result = invoke(&format!("plugin:{}|update_note", APP_PLUGIN_NAME), args).await;
-
-    from_js_value(result)
+pub async fn update_note(note_data: UpdateNote<'_>) -> CommandResultEmpty {
+    invoke_command(
+        &format!("plugin:{}|update_note", APP_PLUGIN_NAME),
+        &UpdateNoteArgs { note_data },
+    )
+    .await
 }
 
 #[derive(Serialize)]
@@ -53,11 +54,12 @@ struct DeleteNoteArgs {
     pub note_id: NoteId,
 }
 
-pub async fn delete_note(note_id: NoteId) -> DummyResult {
-    let args = to_value(&DeleteNoteArgs { note_id }).expect("DeleteNoteArgs serialization to JsValue should not fail.");
-    let result = invoke(&format!("plugin:{}|delete_note", APP_PLUGIN_NAME), args).await;
-
-    from_js_value(result)
+pub async fn delete_note(note_id: NoteId) -> CommandResultEmpty {
+    invoke_command(
+        &format!("plugin:{}|delete_note", APP_PLUGIN_NAME),
+        &DeleteNoteArgs { note_id },
+    )
+    .await
 }
 
 #[derive(Serialize)]
@@ -67,12 +69,12 @@ struct SearchNotesInSpaceArgs<'query> {
     pub query: &'query str,
 }
 
-pub async fn search_notes_in_space(space_id: SpaceId, query: &str) -> Result<Vec<NoteFullOwned>, String> {
-    let args = to_value(&SearchNotesInSpaceArgs { space_id, query })
-        .expect("SearchNotesInSpaceArgs serialization to JsValue should not fail.");
-    let notes = invoke(&format!("plugin:{}|search_notes_in_space", APP_PLUGIN_NAME), args).await;
-
-    from_js_value(notes)
+pub async fn search_notes_in_space(space_id: SpaceId, query: &str) -> CommandResult<Vec<NoteFullOwned>> {
+    invoke_command(
+        &format!("plugin:{}|search_notes_in_space", APP_PLUGIN_NAME),
+        &SearchNotesInSpaceArgs { space_id, query },
+    )
+    .await
 }
 
 #[derive(Serialize)]
@@ -81,9 +83,10 @@ struct SearchNotesArgs<'query> {
     pub query: &'query str,
 }
 
-pub async fn search_notes(query: &str) -> Result<Vec<NoteFullOwned>, String> {
-    let args = to_value(&SearchNotesArgs { query }).expect("SearchNotesArgs serialization to JsValue should not fail.");
-    let notes = invoke(&format!("plugin:{}|search_notes", APP_PLUGIN_NAME), args).await;
-
-    from_js_value(notes)
+pub async fn search_notes(query: &str) -> CommandResult<Vec<NoteFullOwned>> {
+    invoke_command(
+        &format!("plugin:{}|search_notes", APP_PLUGIN_NAME),
+        &SearchNotesArgs { query },
+    )
+    .await
 }

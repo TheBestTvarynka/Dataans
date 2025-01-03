@@ -19,7 +19,7 @@ pub fn Export() -> impl IntoView {
         async move {
             match export_data(export_config).await {
                 Ok(backup_dir) => set_backup_dir.set(Some(backup_dir)),
-                Err(err) => error!("{}", err),
+                Err(err) => error!("{:?}", err),
             }
         }
     });

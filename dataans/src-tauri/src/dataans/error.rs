@@ -39,6 +39,6 @@ pub enum DataansError {
 impl From<DataansError> for CommandError {
     fn from(error: DataansError) -> Self {
         // TODO:
-        Self::Other(error.to_string())
+        Self::Dataans(error.to_string())
     }
 }

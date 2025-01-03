@@ -1,27 +1,24 @@
 // https://github.com/tauri-apps/plugins-workspace/blob/715a0477be8f6f77af0377f4eca2b649554446be/plugins/autostart/api-iife.js
 
-use serde_wasm_bindgen::{from_value, to_value};
+use common::error::CommandResult;
 
-use crate::backend::{invoke, EmptyArgs};
+use crate::backend::{invoke_command, EmptyArgs};
 
-pub async fn enable() -> bool {
-    let args = to_value(&EmptyArgs {}).expect("EmptyArgs serialization to JsValue should not fail.");
-    invoke("plugin:autostart|enable", args).await;
-
-    is_enabled().await
-}
-
-pub async fn disable() -> bool {
-    let args = to_value(&EmptyArgs {}).expect("EmptyArgs serialization to JsValue should not fail.");
-    invoke("plugin:autostart|disable", args).await;
+pub async fn enable() -> CommandResult<bool> {
+    let _: () = invoke_command("plugin:autostart|enable", &EmptyArgs {}).await?;
 
     is_enabled().await
 }
 
-pub async fn is_enabled() -> bool {
-    let args = to_value(&EmptyArgs {}).expect("EmptyArgs serialization to JsValue should not fail.");
-    let is_enabled = invoke("plugin:autostart|is_enabled", args).await;
+pub async fn disable() -> CommandResult<bool> {
+    let _: () = invoke_command("plugin:autostart|disable", &EmptyArgs {}).await?;
+
+    is_enabled().await
+}
+
+pub async fn is_enabled() -> CommandResult<bool> {
+    let is_enabled = invoke_command("plugin:autostart|is_enabled", &EmptyArgs {}).await?;
     trace!("Is autostart enabled: {:?}.", is_enabled);
 
-    from_value(is_enabled).expect("bool deserialization from JsValue should not fail.")
+    Ok(is_enabled)
 }

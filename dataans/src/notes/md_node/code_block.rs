@@ -11,7 +11,7 @@ pub fn CodeBlock(code: String, lang: String) -> impl IntoView {
         move |_| {
             let code_value = code_value.clone();
             let lang = language.clone();
-            async move { parse_code(&lang, &code_value).await }
+            async move { parse_code(&lang, &code_value).await.unwrap_or(code_value.clone()) }
         },
     );
 

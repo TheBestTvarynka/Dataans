@@ -21,15 +21,25 @@ pub fn AppInfoWindow(#[prop(into)] close: Callback<(), ()>) -> impl IntoView {
 
     let enable_autostart = move |_| {
         spawn_local(async move {
-            let flag = crate::backend::autostart::enable().await;
-            set_autostart.set(flag);
+            match crate::backend::autostart::enable().await {
+                Ok(flag) => set_autostart.set(flag),
+                Err(err) => {
+                    error!("{:?}", err);
+                    // TODO: toastr.
+                }
+            }
         })
     };
 
     let disable_autostart = move |_| {
         spawn_local(async move {
-            let flag = crate::backend::autostart::disable().await;
-            set_autostart.set(flag);
+            match crate::backend::autostart::disable().await {
+                Ok(flag) => set_autostart.set(flag),
+                Err(err) => {
+                    error!("{:?}", err);
+                    // TODO: toastr.
+                }
+            }
         })
     };
 

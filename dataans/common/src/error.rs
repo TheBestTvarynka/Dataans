@@ -1,29 +1,20 @@
-use std::path::PathBuf;
+use std::fmt;
 
 use serde::{Deserialize, Serialize};
 
+/// Command Error.
 #[derive(Debug, Serialize, Deserialize)]
 pub enum CommandError {
-    /// DbError.
-    DbError(String),
-    /// IO error.
-    IoError(String),
-    /// JSON error.
-    JsonError(String),
-    /// Time format error.
-    TimeFormatError(String),
-    /// Path is not UTF-8.
-    PathIsNotUtf8(PathBuf),
-    /// Clipboard error.
-    Clipboard(String),
-    /// Image error.
-    Image(String),
-    /// Image generation error.
-    ImageGeneration(String),
-    /// Image from raw error.
-    ImageFromRaw,
-    /// Other.
-    Other(String),
+    /// Dataans inner error.
+    Dataans(String),
+    /// Error parsing error.
+    FromJsValue(String),
+}
+
+impl fmt::Display for CommandError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{:?}", self)
+    }
 }
 
 /// TODO.

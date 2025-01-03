@@ -58,5 +58,7 @@ async fn upload_file(blob: Blob, name: String, id: Uuid) -> Result<File, String>
     let mut file_bytes = vec![0; file_raw_data.length() as usize];
     file_raw_data.copy_to(file_bytes.as_mut_slice());
 
-    crate::backend::file::upload_file(id, &name, &file_bytes).await
+    crate::backend::file::upload_file(id, &name, &file_bytes)
+        .await
+        .map_err(|err| err.to_string())
 }
