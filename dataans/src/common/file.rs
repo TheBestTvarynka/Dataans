@@ -32,7 +32,7 @@ pub fn File(file: File, edit_mode: bool, #[prop(into)] remove_file: Callback<Fil
                 };
 
                 view! {
-                    <img alt="" title="open file location" src="/public/icons/folder.png" class="files-file-cancel" on:click=reveal_file />
+                    <img alt="" title="open file location" src="/public/icons/folder-dark.png" class="files-file-cancel" on:click=reveal_file />
                     <img src="/public/icons/file.png" alt="" class="files-file-icon" />
                 }
             }}

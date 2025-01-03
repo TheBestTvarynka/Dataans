@@ -2,69 +2,27 @@ use std::fmt;
 
 use serde::{Deserialize, Serialize};
 
-/// Custom result type.
+/// Error object returned from the Tauri command.
 ///
-/// The frontend does not need to know details of the error. A simple [String] is enough.
-/// If the user wants more info about the error, they can find it in the dataans log file.
+/// [CommandError] is shared between app frontend and backend.
 #[derive(Debug, Serialize, Deserialize)]
-pub struct DataansResult<T> {
-    ok: Option<T>,
-    err: Option<String>,
+pub enum CommandError {
+    /// Any error inside app backend.
+    Dataans(String),
+    /// Error during deserialization from [JsValue] or serialization into [JsValue].
+    JsValue(String),
 }
 
-impl<T> DataansResult<T> {
-    /// Create ok.
-    pub fn ok(ok: T) -> Self {
-        Self {
-            ok: Some(ok),
-            err: None,
-        }
-    }
-
-    /// Create err.
-    pub fn err(err: String) -> Self {
-        Self {
-            ok: None,
-            err: Some(err),
-        }
-    }
-
-    /// Check result status.
-    pub fn is_ok(&self) -> bool {
-        self.ok.is_some()
+impl fmt::Display for CommandError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{:?}", self)
     }
 }
 
-impl<T> From<DataansResult<T>> for Result<T, String> {
-    fn from(result: DataansResult<T>) -> Result<T, String> {
-        let DataansResult { ok, err } = result;
+/// Result type of the Tauri command.
+pub type CommandResult<T> = Result<T, CommandError>;
 
-        if let Some(ok) = ok {
-            Ok(ok)
-        } else {
-            Err(err.expect("Err obj should present"))
-        }
-    }
-}
-
-impl<T, E: fmt::Display> From<Result<T, E>> for DataansResult<T> {
-    fn from(err: Result<T, E>) -> Self {
-        match err {
-            Ok(value) => DataansResult::ok(value),
-            Err(err) => DataansResult::err(err.to_string()),
-        }
-    }
-}
-
-/// Dummy unit type because `()` is not enough :).
-#[derive(Serialize, Deserialize, Debug, Copy, Clone, PartialEq, Eq, Default)]
-pub struct DummyUnit(u8);
-
-impl<E: fmt::Display> From<Result<(), E>> for DataansResult<DummyUnit> {
-    fn from(err: Result<(), E>) -> Self {
-        match err {
-            Ok(_) => DataansResult::ok(DummyUnit::default()),
-            Err(err) => DataansResult::err(err.to_string()),
-        }
-    }
-}
+/// Empty Tauri command result.
+///
+/// Use this type when the Tauri command should not return any data but may fail.
+pub type CommandResultEmpty = Result<(), CommandError>;

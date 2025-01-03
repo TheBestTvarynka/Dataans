@@ -51,16 +51,24 @@ pub fn App() -> impl IntoView {
 
     let global_config = expect_context::<RwSignal<Config>>();
     spawn_local(async move {
-        let config = load_config().await;
-        info!("config: {:?}", config);
+        match load_config().await {
+            Ok(config) => {
+                info!("{:?}", config);
 
-        let theme = config.appearance.theme.clone();
+                let theme = config.appearance.theme.clone();
 
-        global_config.set(config.clone());
-        set_config.set(config);
+                global_config.set(config.clone());
+                set_config.set(config);
 
-        let theme = load_theme(&theme).await;
-        set_theme_css.set(theme.to_css());
+                // TODO.
+                let theme = load_theme(&theme).await.unwrap();
+                set_theme_css.set(theme.to_css());
+            }
+            Err(err) => {
+                error!("{:?}", err);
+                // TODO: toastr.
+            }
+        }
     });
 
     let global_state = expect_context::<RwSignal<GlobalState>>();

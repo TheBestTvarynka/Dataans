@@ -4,12 +4,12 @@ mod md;
 use std::fs;
 use std::path::{Path, PathBuf};
 
+use common::error::CommandResult;
 use common::DataExportConfig;
 use tauri::State;
 use time::macros::format_description;
 use time::OffsetDateTime;
 
-use crate::dataans::command::CommandResult;
 use crate::dataans::{DataansError, DataansState};
 use crate::BACKUPS_DIR;
 
@@ -56,5 +56,5 @@ pub async fn export_app_data(
     state: State<'_, DataansState>,
     export_config: DataExportConfig,
 ) -> CommandResult<PathBuf> {
-    Ok(export_data(state, export_config).await.into())
+    Ok(export_data(state, export_config).await?)
 }

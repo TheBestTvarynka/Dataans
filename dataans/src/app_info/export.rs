@@ -19,7 +19,7 @@ pub fn Export() -> impl IntoView {
         async move {
             match export_data(export_config).await {
                 Ok(backup_dir) => set_backup_dir.set(Some(backup_dir)),
-                Err(err) => error!("{}", err),
+                Err(err) => error!("{:?}", err),
             }
         }
     });
@@ -102,7 +102,7 @@ pub fn Export() -> impl IntoView {
                             title="Open backup folder"
                             on:click=move |_| open_backup_folder(backup_dir.clone())
                         >
-                            <img alt="edit note" src="/public/icons/folder.png" />
+                            <img alt="edit note" src="/public/icons/folder-light.png" />
                         </button>
                     }
                 }}
