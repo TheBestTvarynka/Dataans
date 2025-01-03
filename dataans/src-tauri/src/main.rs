@@ -198,7 +198,12 @@ fn main() {
             config::open_theme_file,
             code_block::parse_code,
         ])
-        .build(tauri::generate_context!())
+        .build(
+            {
+                #![allow(deprecated)]
+                tauri::generate_context!()
+            },
+        )
         .expect("error while building tauri application")
         .run(|_app_handle, event| {
             if let RunEvent::ExitRequested { api, .. } = event {
