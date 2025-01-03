@@ -40,12 +40,12 @@ extern "C" {
 pub async fn invoke_command<T: serde::de::DeserializeOwned>(command: &str, args: &impl Serialize) -> CommandResult<T> {
     let theme_value = invoke(
         command,
-        to_value(&args).map_err(|err| CommandError::FromJsValue(err.to_string()))?,
+        to_value(&args).map_err(|err| CommandError::JsValue(err.to_string()))?,
     )
     .await
-    .map_err(|err| from_value::<CommandError>(err).unwrap_or_else(|err| CommandError::FromJsValue(err.to_string())))?;
+    .map_err(|err| from_value::<CommandError>(err).unwrap_or_else(|err| CommandError::JsValue(err.to_string())))?;
 
-    from_value(theme_value).map_err(|err| CommandError::FromJsValue(err.to_string()))
+    from_value(theme_value).map_err(|err| CommandError::JsValue(err.to_string()))
 }
 
 #[derive(Serialize)]

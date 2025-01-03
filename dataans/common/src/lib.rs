@@ -1,7 +1,7 @@
 #![doc = include_str!("../README.md")]
 #![warn(missing_docs)]
 
-/// Contains general error type for tauri frontend and backend.
+/// Contains general error and result types for Tauri commands.
 pub mod error;
 /// Contains schema definitions for data export.
 pub mod export;
