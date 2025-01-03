@@ -151,7 +151,7 @@ pub fn init_dataans_plugin<R: Runtime>() -> TauriPlugin<R> {
                 }
             }
 
-            let config = crate::config::read_config(config_file);
+            let config = crate::config::read_config(config_file).expect("config reading should not fail");
             let theme_file = configs_dir.join(&config.appearance.theme);
             if !theme_file.exists() {
                 let resource_dir = path_resolver.resource_dir()?.join("resources");
