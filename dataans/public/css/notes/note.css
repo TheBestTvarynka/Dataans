@@ -63,11 +63,6 @@
     color: var(--note-inline-background-color);
 }
 
-.inline-code:hover {
-    background-color: var(--note-inline-background-color);
-    color: var(--note-text-color);
-}
-
 .inline-code:active {
     background-color: var(--note-inline-background-color);
     color: var(--note-text-color);
