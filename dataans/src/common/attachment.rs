@@ -30,16 +30,9 @@ pub fn Attachment(
             let toaster = toaster.clone();
 
             spawn_local(async move {
-                match files.await {
-                    Ok(files) => {
-                        attached_files.extend_from_slice(&files);
-                        set_files.call(attached_files);
-                    }
-                    Err(err) => {
-                        error!("{:?}", err);
-                        toaster.error(&format!("Files uploading failed: {:?}", err));
-                    }
-                }
+                let files = try_exec!(files.await, "Failed to upload files", toaster);
+                attached_files.extend_from_slice(&files);
+                set_files.call(attached_files);
             });
         };
     };

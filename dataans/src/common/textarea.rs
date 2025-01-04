@@ -11,6 +11,8 @@ pub fn TextArea(
     #[prop(into)] set_text: Callback<String, ()>,
     key_down: impl Fn(KeyboardEvent) + 'static,
 ) -> impl IntoView {
+    let toaster = leptoaster::expect_toaster();
+
     let (disabled, set_disabled) = create_signal(false);
     let ref_input = create_node_ref::<html::Textarea>();
 
@@ -39,12 +41,18 @@ pub fn TextArea(
                     .expect("MIME type JsValue should be string");
                 ty.to_ascii_lowercase().contains("files")
             }) {
+                let toaster = toaster.clone();
+
                 ev.prevent_default();
                 let mut text = text.get();
                 let id = elem_id.clone();
                 spawn_local(async move {
-                    let image = load_clipboard_image().await.expect("TODO: handle err");
-                    let image_path = image.path.to_str().expect("TODO: handle none");
+                    let image = try_exec!(load_clipboard_image().await, "Failed to load clipboard image", toaster);
+                    let image_path = try_exec!(
+                        image.path.to_str().ok_or("use UTF-8 valid paths"),
+                        "Image path is not valid UTF-8 string",
+                        toaster
+                    );
 
                     let text_area = document().get_element_by_id(&id).expect("Dom element should present");
                     let text_area = text_area

@@ -11,16 +11,20 @@ use crate::backend::file::open;
 
 #[component]
 pub fn Export() -> impl IntoView {
+    let toaster = leptoaster::expect_toaster();
+
     let (export_config, set_export_config) = create_signal(DataExportConfig::default());
     let (backup_dir, set_backup_dir) = create_signal(None);
 
     let export_data_action = Action::new(move |export_config: &DataExportConfig| {
+        let toaster = toaster.clone();
         let export_config = export_config.clone();
         async move {
-            match export_data(export_config).await {
-                Ok(backup_dir) => set_backup_dir.set(Some(backup_dir)),
-                Err(err) => error!("{:?}", err),
-            }
+            set_backup_dir.set(Some(try_exec!(
+                export_data(export_config).await,
+                "Failed to export the data",
+                toaster
+            )));
         }
     });
 

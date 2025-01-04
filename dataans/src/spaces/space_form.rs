@@ -19,6 +19,8 @@ pub fn SpaceForm(
     set_selected_space: Callback<OwnedSpace, ()>,
     config: Config,
 ) -> impl IntoView {
+    let toaster = leptoaster::expect_toaster();
+
     let (space_name, set_space_name) = create_signal(space.as_ref().map(|s| s.name.to_string()).unwrap_or_default());
     let (avatar, set_avatar) = create_signal(
         space
@@ -39,11 +41,12 @@ pub fn SpaceForm(
         }
     });
 
-    let generate_avatar = move || {
+    let generate_avatar = Callback::new(move |_| {
+        let toaster = toaster.clone();
         spawn_local(async move {
-            set_avatar.set(gen_avatar().await.expect("TODO: handle err").into());
+            set_avatar.set(try_exec!(gen_avatar().await, "Failed to generate a new avatar:", toaster).into());
         });
-    };
+    });
 
     let id = space.as_ref().map(|s| s.id);
     let create_space = move || {
@@ -93,7 +96,7 @@ pub fn SpaceForm(
     use_hotkeys!(("Escape") => move |_| on_cancel.call(()));
     use_hotkeys!(("Enter") => move |_| create_space());
     let regenerate_space_avatar = config.key_bindings.regenerate_space_avatar.clone();
-    use_hotkeys!((regenerate_space_avatar) => move |_| generate_avatar());
+    use_hotkeys!((regenerate_space_avatar) => move |_| generate_avatar.call(()));
 
     view! {
         <div class="create-space-window" on:load=move |_| info!("on_load")>
@@ -105,7 +108,7 @@ pub fn SpaceForm(
             <div class="create-space-avatar">
                 <img class="create-space-avatar-img" src=move || convert_file_src(avatar.get().path()) />
                 <div style="align-self: center">
-                    <button class="tool" title="Regenerate avatar" on:click=move |_| generate_avatar()>
+                    <button class="tool" title="Regenerate avatar" on:click=move |_| generate_avatar.call(())>
                         <img alt="regenerate-avatar" src="/public/icons/refresh.svg" />
                     </button>
                 </div>

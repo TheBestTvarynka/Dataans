@@ -9,6 +9,8 @@ use crate::backend::{open_config_file, open_config_file_folder, open_theme_file}
 
 #[component]
 pub fn AppInfoWindow(#[prop(into)] close: Callback<(), ()>) -> impl IntoView {
+    let toaster = leptoaster::expect_toaster();
+
     use_hotkeys!(("Escape") => move |_| close.call(()));
 
     let global_config = expect_context::<RwSignal<Config>>();
@@ -19,29 +21,29 @@ pub fn AppInfoWindow(#[prop(into)] close: Callback<(), ()>) -> impl IntoView {
 
     let (is_autostart_enabled, set_autostart) = create_signal(false);
 
-    let enable_autostart = move |_| {
+    let t = toaster.clone();
+    let enable_autostart = Callback::new(move |_| {
+        let t = t.clone();
         spawn_local(async move {
-            match crate::backend::autostart::enable().await {
-                Ok(flag) => set_autostart.set(flag),
-                Err(err) => {
-                    error!("{:?}", err);
-                    // TODO: toastr.
-                }
-            }
+            set_autostart.set(try_exec!(
+                crate::backend::autostart::enable().await,
+                "Failed to enable autostart",
+                t
+            ));
         })
-    };
+    });
 
-    let disable_autostart = move |_| {
+    let t = toaster.clone();
+    let disable_autostart = Callback::new(move |_| {
+        let t = t.clone();
         spawn_local(async move {
-            match crate::backend::autostart::disable().await {
-                Ok(flag) => set_autostart.set(flag),
-                Err(err) => {
-                    error!("{:?}", err);
-                    // TODO: toastr.
-                }
-            }
+            set_autostart.set(try_exec!(
+                crate::backend::autostart::disable().await,
+                "Failed to disable autostart",
+                t
+            ));
         })
-    };
+    });
 
     view! {
         <div class="app-into-window">
@@ -66,9 +68,9 @@ pub fn AppInfoWindow(#[prop(into)] close: Callback<(), ()>) -> impl IntoView {
                     <img alt="edit note" src="/public/icons/folder-light.png" />
                 </button>
                 {move || if is_autostart_enabled.get() {view! {
-                    <button class="button_ok" on:click=disable_autostart title="Disable autostart">"Disable autostart"</button>
+                    <button class="button_ok" on:click=move |ev| disable_autostart.call(ev) title="Disable autostart">"Disable autostart"</button>
                 }} else {view! {
-                    <button class="button_ok" on:click=enable_autostart  title="Enable autostart">"Enable autostart"</button>
+                    <button class="button_ok" on:click=move |ev| enable_autostart.call(ev)  title="Enable autostart">"Enable autostart"</button>
                 }}}
             </div>
             {move || {

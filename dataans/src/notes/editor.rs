@@ -11,6 +11,8 @@ use crate::common::{Attachment, Files, TextArea};
 
 #[component]
 pub fn Editor(space_id: SpaceId, #[prop(into)] create_note: Callback<Note<'static>, ()>) -> impl IntoView {
+    let toaster = leptoaster::expect_toaster();
+
     let (draft_note, set_draft_note) =
         if let Ok(draft_note) = LocalStorage::get::<DraftNote>(space_id.inner().to_string()) {
             create_signal(draft_note)
@@ -59,16 +61,19 @@ pub fn Editor(space_id: SpaceId, #[prop(into)] create_note: Callback<Note<'stati
         }
     };
 
-    let remove_file = move |File { id, name: _, path: _ }| {
+    let toaster = toaster.clone();
+    let remove_file = Callback::new(move |File { id, name: _, path: _ }| {
+        let toaster = toaster.clone();
+
         let DraftNote { text, mut files } = draft_note.get();
 
         spawn_local(async move {
-            remove_file(id).await.expect("TODO: handle err");
+            try_exec!(remove_file(id).await, "File removing failed", toaster);
 
             files.retain(|file| file.id != id);
             set_draft_note(DraftNote { text, files });
         });
-    };
+    });
 
     let handle_files = move |files| {
         if let Some(DraftNote { text, files: _ }) = draft_note.try_get_untracked() {
