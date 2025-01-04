@@ -55,28 +55,13 @@ pub fn App() -> impl IntoView {
 
     let global_config = expect_context::<RwSignal<Config>>();
     spawn_local(async move {
-        let theme = match load_config().await {
-            Ok(config) => {
-                let theme = config.appearance.theme.clone();
+        let config = try_exec!(load_config().await, "Failed to load config", toaster);
+        let theme = config.appearance.theme.clone();
 
-                global_config.set(config.clone());
-                set_config.set(config);
+        global_config.set(config.clone());
+        set_config.set(config);
 
-                theme
-            }
-            Err(err) => {
-                toaster.error(&format!("Cannot load config: {:?}", err));
-                return;
-            }
-        };
-
-        match load_theme(&theme).await {
-            Ok(theme) => set_theme_css.set(theme.to_css()),
-            Err(err) => {
-                toaster.error(&format!("Cannot load theme: {:?}", err));
-                return;
-            }
-        }
+        set_theme_css.set(try_exec!(load_theme(&theme).await, "Failed to load theme", toaster).to_css());
     });
 
     let global_state = expect_context::<RwSignal<GlobalState>>();
