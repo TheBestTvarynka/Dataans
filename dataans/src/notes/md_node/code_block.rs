@@ -4,6 +4,8 @@ use crate::backend::parse_code;
 
 #[component]
 pub fn CodeBlock(code: String, lang: String) -> impl IntoView {
+    let toaster = leptoaster::expect_toaster();
+
     let language = lang.clone();
     let code_value = code.clone();
     let highlighted_code = create_resource(
@@ -26,6 +28,7 @@ pub fn CodeBlock(code: String, lang: String) -> impl IntoView {
                     on:click=move |_| {
                         let clipboard = window().navigator().clipboard();
                         let _ = clipboard.write_text(&code_value);
+                        toaster.success("Copied!");
                     }
                 >
                     <img alt="copy code" src="/public/icons/copy-dark.png" />

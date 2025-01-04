@@ -12,6 +12,8 @@ pub fn Attachment(
     files: Signal<Vec<File>>,
     #[prop(into)] set_files: Callback<Vec<File>, ()>,
 ) -> impl IntoView {
+    let toaster = leptoaster::expect_toaster();
+
     let handle_files_upload = move |ev: leptos::ev::Event| {
         let input: HtmlInputElement = ev.target().unwrap().unchecked_into();
         let mut attached_files = files.get();
@@ -25,9 +27,10 @@ pub fn Attachment(
 
                 async move { upload_file(blob, name, id).await }
             }));
+            let toaster = toaster.clone();
 
             spawn_local(async move {
-                let files = files.await.expect("TODO: handle err");
+                let files = try_exec!(files.await, "Failed to upload files", toaster);
                 attached_files.extend_from_slice(&files);
                 set_files.call(attached_files);
             });

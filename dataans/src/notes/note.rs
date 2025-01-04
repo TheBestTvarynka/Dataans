@@ -5,7 +5,6 @@ use markdown::mdast::{Node, Text};
 use markdown::ParseOptions;
 use time::OffsetDateTime;
 
-use crate::backend::file::remove_file;
 use crate::common::{Attachment, Confirm, Files, TextArea};
 use crate::notes::md_node::render_md_node;
 
@@ -59,30 +58,6 @@ pub fn Note(
         let mut files = updated_files.get();
         files.retain(|file| file.id != id);
         set_updated_files.set(files.clone());
-    };
-
-    let remove_file = move |file: File| {
-        let text = updated_note_text.get();
-        let mut files = updated_files.get();
-
-        let File { id, name: _, path: _ } = file;
-
-        spawn_local(async move {
-            remove_file(id).await.expect("TODO: handle err");
-
-            files.retain(|file| file.id != id);
-            set_updated_files.set(files.clone());
-
-            let new_note = UpdateNote {
-                id: note_id,
-                text: text.into(),
-                files,
-            };
-            crate::backend::notes::update_note(new_note.clone())
-                .await
-                .expect("note updating should not fail");
-            update_note.set(new_note);
-        });
     };
 
     view! {
@@ -161,7 +136,7 @@ pub fn Note(
                 view !{
                     <div class="vertical">
                         {render_md_node(&md)}
-                        {move || view! { <Files files=updated_files.get() remove_file edit_mode=false /> }}
+                        {move || view! { <Files files=updated_files.get() remove_file=|_| {} edit_mode=false /> }}
                     </div>
                 }.into_any()
             }}
