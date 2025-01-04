@@ -1,6 +1,6 @@
 [package]
 name = "dataans"
-version = "0.1.0"
+version = "0.2.1"
 description = "Take notes in the form of markdown snippets grouped into spaces."
 authors = ["Pavlo Myroniuk <the.best.tvarynka@gmail.com>"]
 edition = "2021"
