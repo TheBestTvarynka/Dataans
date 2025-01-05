@@ -9,4 +9,6 @@ repository.workspace = true
 authors.workspace = true
 
 [dependencies]
-rocket = "0.5"
+web-api-types.workspace = true
+
+rocket = { version = "0.5", features = ["json"] }

@@ -1,11 +1,13 @@
-use rocket::{routes, get, launch};
+mod routes;
 
-#[get("/")]
-fn index() -> &'static str {
-    "Hello, world!"
+use rocket::{get, launch, routes};
+
+#[get("/health")]
+fn health() -> &'static str {
+    "ok"
 }
 
 #[launch]
 fn rocket() -> _ {
-    rocket::build().mount("/", routes![index])
+    rocket::build().mount("/health", routes![health, routes::sign_up,])
 }
