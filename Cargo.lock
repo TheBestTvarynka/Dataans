@@ -6972,8 +6972,13 @@ name = "web-server"
 version = "0.1.0"
 dependencies = [
  "rocket",
+ "serde",
  "sqlx",
  "thiserror 2.0.9",
+ "time",
+ "tracing",
+ "tracing-subscriber",
+ "uuid",
  "web-api-types",
 ]
 

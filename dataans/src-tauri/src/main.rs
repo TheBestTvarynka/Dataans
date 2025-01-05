@@ -16,7 +16,7 @@ use tauri::{AppHandle, Manager, Result, RunEvent};
 use tauri_plugin_global_shortcut::{GlobalShortcutExt, Shortcut, ShortcutState};
 
 const LOGGING_ENV_VAR_NAME: &str = "DATAANS_LOG";
-const DEFAULT_LOG_LEVEL: &str = "dataans=warn";
+const DEFAULT_LOG_LEVEL: &str = "dataans=trace";
 
 const MAIN_WINDOW_NAME: &str = "main";
 

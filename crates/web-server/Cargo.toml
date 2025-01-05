@@ -10,8 +10,13 @@ authors.workspace = true
 
 [dependencies]
 web-api-types.workspace = true
+serde = { workspace = true, features = ["derive"] }
 sqlx = { workspace = true, features = ["runtime-tokio", "sqlite", "uuid", "postgres"] }
 thiserror.workspace = true
 uuid = { workspace = true, features = ["serde", "v4"] }
+tracing.workspace = true
+time = { workspace = true }
 
 rocket = { version = "0.5", features = ["json"] }
+
+tracing-subscriber = { version = "0.3", features = ["std", "fmt", "ansi", "env-filter"] }

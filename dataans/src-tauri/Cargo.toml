@@ -14,7 +14,7 @@ time = { workspace = true, features = ["macros", "formatting"] }
 uuid = { workspace = true, features = ["serde", "v4"] }
 serde = { workspace = true, features = ["derive"] }
 sqlx = { workspace = true, features = ["runtime-tokio", "sqlite", "uuid", "time"] }
-tracing = { workspace = true }
+tracing.workspace = true
 thiserror.workspace = true
 
 tauri = { version = "2", features = [
