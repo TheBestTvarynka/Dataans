@@ -1,9 +1,12 @@
 [package]
 name = "dataans-ui"
 version = "0.2.1"
-authors = ["Pavlo Myroniuk <the.best.tvarynka@gmail.com>"]
-edition = "2021"
-repository = "https://github.com/TheBestTvarynka/dataans"
+readme = "README.md"
+edition.workspace = true
+license.workspace = true
+homepage.workspace = true
+repository.workspace = true
+authors.workspace = true
 
 [dependencies]
 serde = { workspace = true, features = ["derive"] }
@@ -45,13 +48,3 @@ web-sys = { version = "0.3", features = [
     "HtmlSelectElement",
 ] }
 futures = { version = "0.3", features = ["std", "alloc"] }
-
-[workspace]
-resolver = "2"
-members = ["common", "src-tauri"]
-
-[workspace.dependencies]
-time = { version = "0.3" , default-features = false }
-uuid = { version = "1.16", default-features = false }
-tracing = "0.1"
-serde = "1"
