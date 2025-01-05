@@ -1,7 +1,7 @@
 use rocket::serde::json::Json;
 use rocket::{post, State};
 use uuid::Uuid;
-use web_api_types::{Result, SignUpRequest};
+use web_api_types::{Result, SignInRequest, SignUpRequest};
 
 use crate::WebServerState;
 
@@ -19,4 +19,11 @@ pub async fn sign_up(server: &State<WebServerState>, data: Json<SignUpRequest>) 
             .sign_up(invitation_token, &username, &password)
             .await?,
     ))
+}
+
+#[post("/sign-in", data = "<data>")]
+pub async fn sign_in(server: &State<WebServerState>, data: Json<SignInRequest>) -> Result<Json<String>> {
+    let SignInRequest { username, password } = data.into_inner();
+
+    Ok(Json(server.auth_service.sign_in(&username, &password).await?))
 }

@@ -1,4 +1,6 @@
 use serde::{Deserialize, Serialize};
+use time::PrimitiveDateTime;
+use uuid::Uuid;
 
 use super::*;
 
@@ -8,6 +10,20 @@ pub struct SignUpRequest {
     pub invitation_token: InvitationToken,
     pub username: Username,
     pub password: Password,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct SignInRequest {
+    pub username: Username,
+    pub password: Password,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Session {
+    pub id: Uuid,
+    pub user_id: Uuid,
+    pub created_at: PrimitiveDateTime,
+    pub expiration_date: PrimitiveDateTime,
 }
 
 #[cfg(test)]

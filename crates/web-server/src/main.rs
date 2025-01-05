@@ -18,6 +18,8 @@ use crate::db::PostgresDb;
 use crate::services::Auth as AuthService;
 
 const DATABASE_URL: &str = "DATAANS_WEB_SERVER_DATABASE_URL";
+const DATAANS_SERVER_ENCRYPTION_KEY: &str = "DATAANS_SERVER_ENCRYPTION_KEY";
+const SERVER_ENCRYPTION_KEY_SIZE: usize = 32;
 
 pub struct State<D> {
     pub auth_service: AuthService<D>,
@@ -36,8 +38,15 @@ impl WebServerState {
 
         let db = Arc::new(PostgresDb::new(pool));
 
+        let server_encryption_key = hex::decode(
+            std::env::var(DATAANS_SERVER_ENCRYPTION_KEY).expect("server encryption key env var should be set"),
+        )
+        .expect("server encryption key should be a valid hex string")
+        .try_into()
+        .expect("invalid server encryption key length");
+
         Self {
-            auth_service: AuthService::new(db),
+            auth_service: AuthService::new(db, server_encryption_key),
         }
     }
 }
@@ -48,10 +57,10 @@ async fn main() -> std::result::Result<(), rocket::Error> {
 
     let _rocket = rocket::build()
         .manage(WebServerState::new())
-        .mount("/auth", routes![routes::sign_up])
+        .mount("/auth", routes![routes::sign_up, routes::sign_in])
         .mount("/health", routes![routes::health])
         .launch()
         .await?;
-        
+
     Ok(())
 }

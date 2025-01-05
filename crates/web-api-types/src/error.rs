@@ -7,10 +7,19 @@ pub enum Error {
     DbError(String),
 
     #[cfg_attr(feature = "server", response(status = 404, content_type = "json"))]
-    InvitationTokenNotFound(Vec<u8>),
+    NotFound(String),
 
     #[cfg_attr(feature = "server", response(status = 500, content_type = "json"))]
     PasswordHashingError(String),
+
+    #[cfg_attr(feature = "server", response(status = 500, content_type = "json"))]
+    UnableToVerifyCredentials(String),
+
+    #[cfg_attr(feature = "server", response(status = 401, content_type = "json"))]
+    InvalidCredentials(String),
+
+    #[cfg_attr(feature = "server", response(status = 500, content_type = "json"))]
+    Internal(String),
 }
 
 pub type Result<T> = std::result::Result<T, Error>;

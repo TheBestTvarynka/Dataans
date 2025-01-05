@@ -52,4 +52,34 @@ impl AuthDb for PostgresDb {
 
         Ok(())
     }
+
+    async fn find_user_by_username(&self, username: &[u8]) -> Result<User, DbError> {
+        let user = sqlx::query_as("select id, username, password from \"user\" where username=$1")
+            .bind(username)
+            .fetch_one(&self.pool)
+            .await?;
+
+        Ok(user)
+    }
+
+    async fn add_session(&self, session: &Session) -> Result<(), DbError> {
+        let Session {
+            id,
+            user_id,
+            created_at,
+            expiration_date,
+        } = session;
+
+        sqlx::query!(
+            "insert into session (id, user_id, created_at, expiration_date) values ($1, $2, $3, $4)",
+            id,
+            user_id,
+            created_at,
+            expiration_date
+        )
+        .execute(&self.pool)
+        .await?;
+
+        Ok(())
+    }
 }
