@@ -6972,6 +6972,8 @@ name = "web-server"
 version = "0.1.0"
 dependencies = [
  "rocket",
+ "sqlx",
+ "thiserror 2.0.9",
  "web-api-types",
 ]
 

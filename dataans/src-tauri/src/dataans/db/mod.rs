@@ -8,7 +8,7 @@ use self::model::*;
 
 #[derive(Error, Debug)]
 pub enum DbError {
-    #[error("slx error: {0:?}")]
+    #[error("sqlx error: {0:?}")]
     SqlxError(#[from] sqlx::Error),
 }
 

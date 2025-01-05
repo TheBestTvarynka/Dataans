@@ -1,5 +1,9 @@
+pub mod db;
+mod error;
 mod routes;
+pub mod services;
 
+pub use error::{Error, Result};
 use rocket::{get, launch, routes};
 
 #[get("/health")]

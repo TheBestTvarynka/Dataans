@@ -10,5 +10,8 @@ authors.workspace = true
 
 [dependencies]
 web-api-types.workspace = true
+sqlx = { workspace = true, features = ["runtime-tokio", "sqlite", "uuid", "postgres"] }
+thiserror.workspace = true
+uuid = { workspace = true, features = ["serde", "v4"] }
 
 rocket = { version = "0.5", features = ["json"] }

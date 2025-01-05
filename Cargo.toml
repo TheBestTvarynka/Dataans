@@ -12,6 +12,8 @@ authors = ["Pavlo Myroniuk <the.best.tvarynka@gmail.com>"]
 [workspace.dependencies]
 web-api-types = { path = "crates/web-api-types" }
 
+sqlx = "0.8"
+thiserror = "2.0"
 time = { version = "0.3" , default-features = false }
 uuid = { version = "1.11", default-features = false }
 tracing = "0.1"
