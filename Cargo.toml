@@ -1,6 +1,13 @@
 [workspace]
 resolver = "2"
-members = ["dataans/common", "dataans/src-tauri", "dataans"]
+members = ["dataans/common", "dataans/src-tauri", "dataans", "crates/web-server"]
+
+[workspace.package]
+edition = "2021"
+license = "MIT"
+homepage = "https://github.com/TheBestTvarynka/Dataans"
+repository = "https://github.com/TheBestTvarynka/Dataans"
+authors = ["Pavlo Myroniuk <the.best.tvarynka@gmail.com>"]
 
 [workspace.dependencies]
 time = { version = "0.3" , default-features = false }
