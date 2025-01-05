@@ -3,6 +3,7 @@ use serde::{Deserialize, Serialize};
 use super::*;
 
 #[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct SignUpRequest {
     pub invitation_token: InvitationToken,
     pub username: Username,

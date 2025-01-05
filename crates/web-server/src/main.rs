@@ -11,7 +11,7 @@ pub mod services;
 use std::sync::Arc;
 
 pub use error::{Error, Result};
-use rocket::{launch, routes};
+use rocket::routes;
 use sqlx::postgres::PgPoolOptions;
 
 use crate::db::PostgresDb;
@@ -42,11 +42,16 @@ impl WebServerState {
     }
 }
 
-#[launch]
-fn rocket() -> _ {
+#[rocket::main]
+async fn main() -> std::result::Result<(), rocket::Error> {
     logging::init_tracing();
 
-    rocket::build()
+    let _rocket = rocket::build()
         .manage(WebServerState::new())
-        .mount("/health", routes![routes::health, routes::sign_up,])
+        .mount("/auth", routes![routes::sign_up])
+        .mount("/health", routes![routes::health])
+        .launch()
+        .await?;
+        
+    Ok(())
 }

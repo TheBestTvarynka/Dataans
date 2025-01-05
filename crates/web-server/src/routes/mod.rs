@@ -3,7 +3,7 @@ mod auth;
 pub use auth::*;
 use rocket::get;
 
-#[get("/health")]
+#[get("/")]
 pub fn health() -> &'static str {
     "ok"
 }
