@@ -45,13 +45,3 @@ web-sys = { version = "0.3", features = [
     "HtmlSelectElement",
 ] }
 futures = { version = "0.3", features = ["std", "alloc"] }
-
-[workspace]
-resolver = "2"
-members = ["common", "src-tauri"]
-
-[workspace.dependencies]
-time = { version = "0.3" , default-features = false }
-uuid = { version = "1.11", default-features = false }
-tracing = "0.1"
-serde = "1"

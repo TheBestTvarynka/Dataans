@@ -1,0 +1,9 @@
+[workspace]
+resolver = "2"
+members = ["dataans/common", "dataans/src-tauri", "dataans"]
+
+[workspace.dependencies]
+time = { version = "0.3" , default-features = false }
+uuid = { version = "1.11", default-features = false }
+tracing = "0.1"
+serde = "1"
