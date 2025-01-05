@@ -1,9 +1,13 @@
 [package]
 name = "common"
 version = "0.2.1"
-authors = ["Pavlo Myroniuk <the.best.tvarynka@gmail.com>"]
-edition = "2021"
-repository = "https://github.com/TheBestTvarynka/dataans"
+description = "Common code between Tauri backend and frontend"
+readme = "README.md"
+edition.workspace = true
+license.workspace = true
+homepage.workspace = true
+repository.workspace = true
+authors.workspace = true
 
 [dependencies]
 serde = { workspace = true, features = ["derive"] }
