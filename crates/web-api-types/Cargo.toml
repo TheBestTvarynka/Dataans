@@ -8,8 +8,13 @@ homepage.workspace = true
 repository.workspace = true
 authors.workspace = true
 
+[features]
+server = ["dep:rocket"]
+
 [dependencies]
 serde = { workspace = true, features = ["derive"] }
+rocket = { workspace = true, optional = true }
+uuid.workspace = true
 
 nutype = { version = "0.5", features = ["serde"] }
 

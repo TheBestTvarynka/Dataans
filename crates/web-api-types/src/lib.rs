@@ -1,6 +1,8 @@
 mod auth;
+mod error;
 
 pub use auth::*;
+pub use error::*;
 use nutype::nutype;
 
 #[nutype(validate(not_empty), derive(Debug, Serialize, Deserialize, AsRef, Deref, TryFrom))]

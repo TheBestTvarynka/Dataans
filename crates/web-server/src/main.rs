@@ -1,45 +1,52 @@
 #[macro_use]
 extern crate tracing;
 
+mod crypto;
 pub mod db;
 mod error;
+mod logging;
 mod routes;
 pub mod services;
 
-use std::io;
+use std::sync::Arc;
 
 pub use error::{Error, Result};
-use rocket::{get, launch, routes};
+use rocket::{launch, routes};
+use sqlx::postgres::PgPoolOptions;
 
-const LOGGING_ENV_VAR_NAME: &str = "DATAANS_WEB_SERVER_LOG";
-const DEFAULT_LOG_LEVEL: &str = "trace";
+use crate::db::PostgresDb;
+use crate::services::Auth as AuthService;
 
-fn init_tracing() {
-    use tracing_subscriber::prelude::*;
-    use tracing_subscriber::EnvFilter;
+const DATABASE_URL: &str = "DATAANS_WEB_SERVER_DATABASE_URL";
 
-    let logging_filter: EnvFilter = EnvFilter::builder()
-        .with_default_directive(DEFAULT_LOG_LEVEL.parse().expect("Default log level constant is bad."))
-        .with_env_var(LOGGING_ENV_VAR_NAME)
-        .from_env_lossy();
-
-    let stdout_layer = tracing_subscriber::fmt::layer().pretty().with_writer(io::stdout);
-
-    // TODO: add log file layer.
-    tracing_subscriber::registry()
-        .with(stdout_layer)
-        .with(logging_filter)
-        .init();
+pub struct State<D> {
+    pub auth_service: AuthService<D>,
 }
 
-#[get("/health")]
-fn health() -> &'static str {
-    "ok"
+pub type WebServerState = State<PostgresDb>;
+
+impl WebServerState {
+    pub fn new() -> WebServerState {
+        let pool = PgPoolOptions::new()
+            .max_connections(16)
+            .min_connections(1)
+            .acquire_timeout(std::time::Duration::from_secs(3))
+            .connect_lazy(&std::env::var(DATABASE_URL).expect("database url env var should be set"))
+            .expect("can not connect to postgresql db");
+
+        let db = Arc::new(PostgresDb::new(pool));
+
+        Self {
+            auth_service: AuthService::new(db),
+        }
+    }
 }
 
 #[launch]
 fn rocket() -> _ {
-    init_tracing();
+    logging::init_tracing();
 
-    rocket::build().mount("/health", routes![health, routes::sign_up,])
+    rocket::build()
+        .manage(WebServerState::new())
+        .mount("/health", routes![routes::health, routes::sign_up,])
 }

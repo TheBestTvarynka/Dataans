@@ -16,18 +16,20 @@ impl PostgresDb {
 
 impl AuthDb for PostgresDb {
     #[instrument(ret, skip(self))]
-    async fn find_invitation_token(&self, token: &[u8]) -> Result<Option<InvitationToken>, DbError> {
+    async fn find_invitation_token(&self, token: &[u8]) -> Result<InvitationToken, DbError> {
         let token = sqlx::query_as("select id, data from invitation_token where data=$1")
             .bind(token)
             .fetch_one(&self.pool)
             .await?;
 
-        Ok(Some(token))
+        Ok(token)
     }
 
     #[instrument(ret, skip(self))]
-    async fn add_user(&self, user: &User) -> Result<(), DbError> {
+    async fn add_user(&self, user: &User, token_id: Uuid) -> Result<(), DbError> {
         let User { id, username, password } = user;
+
+        let mut transaction = self.pool.begin().await?;
 
         sqlx::query!(
             "insert into \"user\" (id, username, password) values ($1, $2, $3)",
@@ -35,21 +37,18 @@ impl AuthDb for PostgresDb {
             username,
             password
         )
-        .execute(&self.pool)
+        .execute(&mut *transaction)
         .await?;
 
-        Ok(())
-    }
-
-    #[instrument(ret, skip(self))]
-    async fn assign_invitation_token(&self, token_id: Uuid, user_id: Uuid) -> Result<(), DbError> {
         sqlx::query!(
             "insert into used_invitation_token (token_id, user_id, used_at) values ($1, $2, now())",
             token_id,
-            user_id
+            id
         )
-        .execute(&self.pool)
+        .execute(&mut *transaction)
         .await?;
+
+        transaction.commit().await?;
 
         Ok(())
     }

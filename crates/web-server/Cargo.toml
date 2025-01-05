@@ -9,14 +9,18 @@ repository.workspace = true
 authors.workspace = true
 
 [dependencies]
-web-api-types.workspace = true
+web-api-types = { workspace = true, features = ["server"] }
 serde = { workspace = true, features = ["derive"] }
 sqlx = { workspace = true, features = ["runtime-tokio", "sqlite", "uuid", "postgres"] }
 thiserror.workspace = true
 uuid = { workspace = true, features = ["serde", "v4"] }
 tracing.workspace = true
 time = { workspace = true }
+rocket = { workspace = true, features = ["json"] }
 
-rocket = { version = "0.5", features = ["json"] }
-
+# logging
 tracing-subscriber = { version = "0.3", features = ["std", "fmt", "ansi", "env-filter"] }
+
+# crypto
+sha2 = "0.10"
+argon2 = { version = "0.5", features = ["std"] }
