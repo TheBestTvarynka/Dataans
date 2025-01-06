@@ -13,9 +13,9 @@ server = ["dep:rocket"]
 
 [dependencies]
 serde = { workspace = true, features = ["derive"] }
-rocket = { workspace = true, optional = true }
-uuid.workspace = true
-time = { workspace = true, features = ["serde"] }
+rocket = { workspace = true, optional = true, features = ["json"] }
+uuid = { workspace = true, features = ["serde"] }
+time = { workspace = true, features = ["serde", "formatting", "parsing"] }
 
 nutype = { version = "0.5", features = ["serde"] }
 

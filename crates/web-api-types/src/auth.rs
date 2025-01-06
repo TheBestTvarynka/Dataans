@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
-use time::PrimitiveDateTime;
+use time::serde::rfc3339;
+use time::OffsetDateTime;
 use uuid::Uuid;
 
 use super::*;
@@ -19,11 +20,54 @@ pub struct SignInRequest {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
+pub struct SignInResponse {
+    pub token: String,
+    #[serde(with = "rfc3339")]
+    pub expiration_date: OffsetDateTime,
+}
+
+#[cfg(feature = "server")]
+mod impl_responder {
+    use rocket::http::{ContentType, Cookie, Status};
+    use rocket::request::Request;
+    use rocket::response::{self, Responder, Response};
+    use rocket::serde::json::to_string;
+
+    use super::SignInResponse;
+
+    impl<'r> Responder<'r, 'static> for SignInResponse {
+        fn respond_to(self, req: &'r Request<'_>) -> response::Result<'static> {
+            let SignInResponse {
+                token,
+                expiration_date: _,
+            } = &self;
+
+            let body = to_string(&self).map_err(|_| Status::InternalServerError)?.into_bytes();
+
+            Response::build_from(body.respond_to(req)?)
+                .status(Status::Ok)
+                .header(ContentType::JSON)
+                .header(
+                    Cookie::build(("Set-Cookie", token.as_str()))
+                        .domain(env!("DATAANS_SERVER_DOMAIN"))
+                        .path("/")
+                        .secure(true)
+                        .http_only(true)
+                        .build(),
+                )
+                .ok()
+        }
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Session {
     pub id: Uuid,
     pub user_id: Uuid,
-    pub created_at: PrimitiveDateTime,
-    pub expiration_date: PrimitiveDateTime,
+    #[serde(with = "rfc3339")]
+    pub created_at: OffsetDateTime,
+    #[serde(with = "rfc3339")]
+    pub expiration_date: OffsetDateTime,
 }
 
 #[cfg(test)]

@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
-use time::PrimitiveDateTime;
+use time::OffsetDateTime;
 use uuid::Uuid;
 
 #[derive(Debug, FromRow, Serialize, Deserialize)]
@@ -20,6 +20,6 @@ pub struct User {
 pub struct Session {
     pub id: Uuid,
     pub user_id: Uuid,
-    pub created_at: PrimitiveDateTime,
-    pub expiration_date: PrimitiveDateTime,
+    pub created_at: OffsetDateTime,
+    pub expiration_date: OffsetDateTime,
 }
