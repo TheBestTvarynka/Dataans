@@ -52,6 +52,11 @@ impl DataansState {
             ))
             .expect("can not connect to sqlite db");
 
+        sqlx::migrate!("./migrations")
+            .run(&pool)
+            .await
+            .expect("Looks like migration should not fail");
+
         let sqlite = Arc::new(SqliteDb::new(pool));
 
         let space_service = Arc::new(SpaceService::new(Arc::clone(&sqlite)));
