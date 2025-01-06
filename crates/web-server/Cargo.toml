@@ -9,3 +9,23 @@ repository.workspace = true
 authors.workspace = true
 
 [dependencies]
+web-api-types = { workspace = true, features = ["server"] }
+serde = { workspace = true, features = ["derive"] }
+sqlx = { workspace = true, features = ["runtime-tokio", "time", "uuid", "postgres"] }
+thiserror.workspace = true
+uuid = { workspace = true, features = ["serde", "v4"] }
+tracing.workspace = true
+time = { workspace = true }
+rocket = { workspace = true, features = ["json"] }
+
+# logging
+tracing-subscriber = { version = "0.3", features = ["std", "fmt", "ansi", "env-filter"] }
+
+# utils
+hex = "0.4"
+
+# crypto
+sha2 = "0.10"
+argon2 = { version = "0.5", features = ["std"] }
+aes-gcm = { version = "0.10", features = ["std"] }
+hmac = "0.12"

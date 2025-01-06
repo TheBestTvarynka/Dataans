@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["dataans/common", "dataans/src-tauri", "dataans", "crates/web-server"]
+members = ["dataans/common", "dataans/src-tauri", "dataans", "crates/web-server", "crates/web-api-types"]
 
 [workspace.package]
 edition = "2021"
@@ -10,7 +10,12 @@ repository = "https://github.com/TheBestTvarynka/Dataans"
 authors = ["Pavlo Myroniuk <the.best.tvarynka@gmail.com>"]
 
 [workspace.dependencies]
+web-api-types = { path = "crates/web-api-types" }
+
+sqlx = "0.8"
+thiserror = "2.0"
 time = { version = "0.3" , default-features = false }
 uuid = { version = "1.11", default-features = false }
 tracing = "0.1"
 serde = "1"
+rocket = "0.5"
