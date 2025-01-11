@@ -36,7 +36,7 @@ impl<A: AuthDb> Auth<A> {
         Ok(user_id)
     }
 
-    pub async fn sign_in(&self, username: &Username, password: &Password) -> Result<(String, OffsetDateTime)> {
+    pub async fn sign_in(&self, username: &Username, password: &Password) -> Result<(Uuid, String, OffsetDateTime)> {
         let user = self
             .auth_db
             .find_user_by_username(crypto::sha256(username.as_bytes()).as_ref())
@@ -56,6 +56,6 @@ impl<A: AuthDb> Auth<A> {
         self.auth_db.add_session(&session).await?;
 
         let token = hex::encode(crypto::encrypt(session.id.as_bytes(), &self.encryption_key)?);
-        Ok((token, expiration_date))
+        Ok((user.id, token, expiration_date))
     }
 }

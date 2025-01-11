@@ -25,7 +25,11 @@ pub async fn sign_up(server: &State<WebServerState>, data: Json<SignUpRequest>) 
 pub async fn sign_in(server: &State<WebServerState>, data: Json<SignInRequest>) -> Result<SignInResponse> {
     let SignInRequest { username, password } = data.into_inner();
 
-    let (token, expiration_date) = server.auth_service.sign_in(&username, &password).await?;
+    let (user_id, token, expiration_date) = server.auth_service.sign_in(&username, &password).await?;
 
-    Ok(SignInResponse { token, expiration_date })
+    Ok(SignInResponse {
+        user_id,
+        token,
+        expiration_date,
+    })
 }
