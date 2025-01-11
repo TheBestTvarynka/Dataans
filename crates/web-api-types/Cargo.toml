@@ -16,8 +16,7 @@ serde = { workspace = true, features = ["derive"] }
 rocket = { workspace = true, optional = true, features = ["json"] }
 uuid = { workspace = true, features = ["serde"] }
 time = { workspace = true, features = ["serde", "formatting", "parsing"] }
-
-nutype = { version = "0.5", features = ["serde"] }
+nutype = { workspace = true, features = ["serde"] }
 
 [dev-dependencies]
 serde_json = "1.0"

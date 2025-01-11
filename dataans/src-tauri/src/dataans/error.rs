@@ -34,6 +34,15 @@ pub enum DataansError {
 
     #[error("Can not create an image from raw image data")]
     ImageFromRaw,
+
+    #[error("Failed to register the user: {0:?}")]
+    SignUpFailed(reqwest::StatusCode),
+
+    #[error("Failed to parse the url: {0:?}")]
+    ParseUrl(#[from] url::ParseError),
+
+    #[error("Failed to send a request: {0:?}")]
+    Reqwest(#[from] reqwest::Error),
 }
 
 impl From<DataansError> for CommandError {

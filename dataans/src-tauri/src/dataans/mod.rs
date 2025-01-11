@@ -7,6 +7,7 @@ use sqlx::sqlite::SqlitePoolOptions;
 use tauri::async_runtime::block_on;
 use tauri::plugin::{Builder, TauriPlugin};
 use tauri::{Manager, Runtime};
+use url::Url;
 
 use crate::dataans::db::sqlite::SqliteDb;
 use crate::{CONFIGS_DIR, CONFIG_FILE_NAME, FILES_DIR, IMAGES_DIR};
@@ -20,12 +21,14 @@ use crate::dataans::error::DataansError;
 use crate::dataans::service::file::FileService;
 use crate::dataans::service::note::NoteService;
 use crate::dataans::service::space::SpaceService;
+use crate::dataans::service::web::WebService;
 
 pub struct State<D> {
     app_data_dir: PathBuf,
     space_service: Arc<SpaceService<D>>,
     note_service: Arc<NoteService<D>>,
     file_service: Arc<FileService<D>>,
+    web_service: Arc<WebService>,
 }
 
 pub type DataansState = State<SqliteDb>;
@@ -56,13 +59,15 @@ impl DataansState {
 
         let space_service = Arc::new(SpaceService::new(Arc::clone(&sqlite)));
         let note_service = Arc::new(NoteService::new(Arc::clone(&sqlite), Arc::clone(&space_service)));
-        let file_service = Arc::new(FileService::new(sqlite));
+        let file_service = Arc::new(FileService::new(Arc::clone(&sqlite)));
+        let web_service = Arc::new(WebService::new(Url::parse("http://127.0.0.1:8080/").unwrap()));
 
         Self {
             app_data_dir,
             space_service,
             note_service,
             file_service,
+            web_service,
         }
     }
 }
@@ -87,6 +92,8 @@ pub fn init_dataans_plugin<R: Runtime>() -> TauriPlugin<R> {
             command::file::gen_random_avatar,
             command::file::handle_clipboard_image,
             command::export::export_app_data,
+            command::web::sign_up,
+            command::web::sign_in,
         ])
         .setup(|app_handle, _api| {
             info!("Starting app setup...");

@@ -7,6 +7,8 @@ pub mod error;
 pub mod export;
 /// Contains all note-related structures.
 pub mod note;
+/// User's profile.
+pub mod profile;
 /// Contains all space-related structures.
 pub mod space;
 
