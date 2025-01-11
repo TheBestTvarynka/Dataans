@@ -17,12 +17,10 @@ uuid = { workspace = true, features = ["serde", "v4"] }
 tracing.workspace = true
 time = { workspace = true }
 rocket = { workspace = true, features = ["json"] }
+hex.workspace = true
 
 # logging
 tracing-subscriber = { version = "0.3", features = ["std", "fmt", "ansi", "env-filter"] }
-
-# utils
-hex = "0.4"
 
 # crypto
 sha2 = "0.10"

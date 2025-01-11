@@ -29,7 +29,7 @@ pub async fn sign_in(server: &State<WebServerState>, data: Json<SignInRequest>) 
 
     Ok(SignInResponse {
         user_id,
-        token,
+        token: token.into(),
         expiration_date,
     })
 }

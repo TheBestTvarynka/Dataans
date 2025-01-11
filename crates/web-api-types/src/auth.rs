@@ -19,10 +19,13 @@ pub struct SignInRequest {
     pub password: Password,
 }
 
+#[nutype(derive(Debug, Serialize, Deserialize, AsRef, Deref, From))]
+pub struct AuthToken(String);
+
 #[derive(Debug, Serialize, Deserialize)]
 pub struct SignInResponse {
     pub user_id: Uuid,
-    pub token: String,
+    pub token: AuthToken,
     #[serde(with = "rfc3339")]
     pub expiration_date: OffsetDateTime,
 }
