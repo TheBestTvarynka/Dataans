@@ -1,22 +1,28 @@
-use std::sync::Arc;
+use std::fs;
+use std::path::PathBuf;
+use std::sync::Mutex;
 
-use common::profile::UserProfile;
+use common::profile::{SecretKey, UserProfile};
+use rand::rngs::OsRng;
+use rand::Rng;
 use reqwest::Client;
 use url::Url;
 use uuid::Uuid;
-use web_api_types::{InvitationToken, Password, SignUpRequest, Username};
+use web_api_types::{InvitationToken, Password, SignInRequest, SignInResponse, SignUpRequest, Username};
 
 use crate::dataans::DataansError;
 
 pub struct WebService {
+    user_data_dir: PathBuf,
     web_server: Url,
-    user_profile: Option<UserProfile>,
+    user_profile: Mutex<Option<UserProfile>>,
 }
 
 impl WebService {
-    pub fn new(web_server: Url) -> Self {
+    pub fn new(user_data_dir: PathBuf, web_server: Url) -> Self {
         Self {
-            user_profile: None,
+            user_data_dir,
+            user_profile: Mutex::new(None),
             web_server,
         }
     }
@@ -41,11 +47,61 @@ impl WebService {
             return Err(DataansError::SignUpFailed(response.status()));
         }
 
-        Ok(response.json().await?)
+        let user_id = response.json::<Uuid>().await?;
+        let secret_key = SecretKey::from(hex::encode(OsRng.gen::<[u8; 32]>()));
+
+        fs::write(
+            self.user_data_dir.join(format!("{}.json", user_id)),
+            secret_key.as_ref(),
+        )?;
+
+        Ok(user_id)
     }
 
     pub async fn sign_in(&self, username: Username, password: Password) -> Result<(), DataansError> {
-        // TODO
+        let response = Client::new()
+            .post(self.web_server.join("auth/sign-in")?)
+            .json(&SignInRequest {
+                username: username.clone(),
+                password,
+            })
+            .send()
+            .await?;
+
+        if !response.status().is_success() {
+            return Err(DataansError::SignUpFailed(response.status()));
+        }
+
+        let SignInResponse {
+            user_id,
+            token,
+            expiration_date,
+        } = response.json::<SignInResponse>().await?;
+
+        let secret_key_file_path = self.user_data_dir.join(format!("{}.json", user_id));
+        let secret_key = SecretKey::from(
+            String::from_utf8(
+                fs::read(&secret_key_file_path)
+                    .map_err(|err| DataansError::SecretKeyFile(secret_key_file_path, err))?,
+            )
+            .map_err(|err| DataansError::ParseSecretKey(err))?,
+        );
+
+        let user_profile = UserProfile {
+            user_id,
+            username,
+            auth_token: token,
+            auth_token_expiration_date: expiration_date,
+            secret_key,
+        };
+
+        fs::write(
+            self.user_data_dir.join("profile.json"),
+            serde_json::to_vec(&user_profile)?,
+        )?;
+
+        *self.user_profile.lock().unwrap() = Some(user_profile);
+
         Ok(())
     }
 }

@@ -1,17 +1,13 @@
 use nutype::nutype;
 use serde::{Deserialize, Serialize};
+use time::serde::rfc3339;
+use time::OffsetDateTime;
 use uuid::Uuid;
-use web_api_types::Username;
+use web_api_types::{AuthToken, Username};
 
 /// User ID.
 #[nutype(derive(Debug, Serialize, Deserialize, AsRef, Deref, From))]
 pub struct UserId(Uuid);
-
-/// Auth token.
-///
-/// This token is used to authenticate the user. It is generated when the user logs in.
-#[nutype(derive(Debug, Serialize, Deserialize, AsRef, Deref, From))]
-pub struct AuthToken(String);
 
 /// Secret key.
 ///
@@ -30,6 +26,9 @@ pub struct UserProfile {
     pub username: Username,
     /// Auth token.
     pub auth_token: AuthToken,
+    /// Auth token expiration date.
+    #[serde(with = "rfc3339")]
+    pub auth_token_expiration_date: OffsetDateTime,
     /// Secret key.
     pub secret_key: SecretKey,
 }

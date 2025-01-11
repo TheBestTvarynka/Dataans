@@ -20,3 +20,4 @@ tracing = "0.1"
 serde = "1"
 rocket = "0.5"
 nutype = { version = "0.5" }
+hex = "0.4"

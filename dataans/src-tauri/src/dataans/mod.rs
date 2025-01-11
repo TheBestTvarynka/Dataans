@@ -10,7 +10,7 @@ use tauri::{Manager, Runtime};
 use url::Url;
 
 use crate::dataans::db::sqlite::SqliteDb;
-use crate::{CONFIGS_DIR, CONFIG_FILE_NAME, FILES_DIR, IMAGES_DIR};
+use crate::{CONFIGS_DIR, CONFIG_FILE_NAME, FILES_DIR, IMAGES_DIR, PROFILE_DIR};
 
 mod command;
 mod db;
@@ -60,7 +60,10 @@ impl DataansState {
         let space_service = Arc::new(SpaceService::new(Arc::clone(&sqlite)));
         let note_service = Arc::new(NoteService::new(Arc::clone(&sqlite), Arc::clone(&space_service)));
         let file_service = Arc::new(FileService::new(Arc::clone(&sqlite)));
-        let web_service = Arc::new(WebService::new(Url::parse("http://127.0.0.1:8080/").unwrap()));
+        let web_service = Arc::new(WebService::new(
+            app_data_dir.join(PROFILE_DIR),
+            Url::parse("http://127.0.0.1:8080/").unwrap(),
+        ));
 
         Self {
             app_data_dir,
@@ -112,6 +115,7 @@ pub fn init_dataans_plugin<R: Runtime>() -> TauriPlugin<R> {
             let files_dir = app_data.join(FILES_DIR);
             let images_dir = app_data.join(IMAGES_DIR);
             let configs_dir = app_data.join(CONFIGS_DIR);
+            let profile_dir = app_data.join(PROFILE_DIR);
 
             if !db_dir.exists() {
                 match fs::create_dir(&db_dir) {
@@ -138,6 +142,13 @@ pub fn init_dataans_plugin<R: Runtime>() -> TauriPlugin<R> {
                 match fs::create_dir(&configs_dir) {
                     Ok(()) => info!(?configs_dir, "Successfully created configs directory"),
                     Err(err) => error!(?err, ?configs_dir, "Filed to create configs directory"),
+                }
+            }
+
+            if !profile_dir.exists() {
+                match fs::create_dir(&profile_dir) {
+                    Ok(()) => info!(?profile_dir, "Successfully created profile directory"),
+                    Err(err) => error!(?err, ?profile_dir, "Filed to create profile directory"),
                 }
             }
 

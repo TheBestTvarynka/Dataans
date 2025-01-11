@@ -43,6 +43,15 @@ pub enum DataansError {
 
     #[error("Failed to send a request: {0:?}")]
     Reqwest(#[from] reqwest::Error),
+
+    #[error("Failed to sign in: {0:?}")]
+    SignInFailed(reqwest::StatusCode),
+
+    #[error("Failed to read secret-key file: path {0}, error: {1:?}")]
+    SecretKeyFile(PathBuf, IoError),
+
+    #[error("Failed to parse secret key: {0:?}")]
+    ParseSecretKey(std::string::FromUtf8Error),
 }
 
 impl From<DataansError> for CommandError {
