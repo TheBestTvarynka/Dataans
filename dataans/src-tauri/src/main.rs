@@ -7,6 +7,7 @@ extern crate tracing;
 mod code_block;
 mod config;
 mod dataans;
+mod window;
 
 use std::path::Path;
 use std::str::FromStr;
@@ -198,6 +199,7 @@ fn main() {
             config::open_config_file_folder,
             config::open_theme_file,
             code_block::parse_code,
+            window::open_auth_window,
         ])
         .build(
             {
