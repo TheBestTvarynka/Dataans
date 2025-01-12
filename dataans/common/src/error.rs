@@ -11,6 +11,8 @@ pub enum CommandError {
     Dataans(String),
     /// Error during deserialization from [JsValue] or serialization into [JsValue].
     JsValue(String),
+    /// Tauri error.
+    Tauri(String),
 }
 
 impl From<std::io::Error> for CommandError {

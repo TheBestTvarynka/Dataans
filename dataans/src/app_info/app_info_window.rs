@@ -45,6 +45,17 @@ pub fn AppInfoWindow(#[prop(into)] close: Callback<(), ()>) -> impl IntoView {
         })
     });
 
+    let show_auth_window = move |_| {
+        let t = toaster.clone();
+        spawn_local(async move {
+            try_exec!(
+                crate::backend::auth::show_auth_window().await,
+                "Failed to create auth window",
+                t
+            );
+        })
+    };
+
     view! {
         <div class="app-into-window">
             <button
@@ -72,6 +83,7 @@ pub fn AppInfoWindow(#[prop(into)] close: Callback<(), ()>) -> impl IntoView {
                 }} else {view! {
                     <button class="button_ok" on:click=move |ev| enable_autostart.call(ev)  title="Enable autostart">"Enable autostart"</button>
                 }}}
+                <button on:click=show_auth_window>"Tbt"</button>
             </div>
             {move || {
                 let Config { key_bindings, appearance, app } = global_config.get();
