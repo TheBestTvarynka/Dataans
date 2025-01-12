@@ -1,6 +1,6 @@
 pub mod editor;
 mod info;
-mod md_node;
+pub mod md_node;
 mod note;
 pub mod note_preview;
 

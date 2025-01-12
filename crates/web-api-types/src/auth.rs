@@ -19,9 +19,13 @@ pub struct SignInRequest {
     pub password: Password,
 }
 
+#[nutype(derive(Debug, Serialize, Deserialize, AsRef, Deref, From))]
+pub struct AuthToken(String);
+
 #[derive(Debug, Serialize, Deserialize)]
 pub struct SignInResponse {
-    pub token: String,
+    pub user_id: Uuid,
+    pub token: AuthToken,
     #[serde(with = "rfc3339")]
     pub expiration_date: OffsetDateTime,
 }
@@ -38,6 +42,7 @@ mod impl_responder {
     impl<'r> Responder<'r, 'static> for SignInResponse {
         fn respond_to(self, req: &'r Request<'_>) -> response::Result<'static> {
             let SignInResponse {
+                user_id: _,
                 token,
                 expiration_date: _,
             } = &self;

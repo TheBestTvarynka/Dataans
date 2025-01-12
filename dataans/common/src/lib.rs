@@ -7,6 +7,8 @@ pub mod error;
 pub mod export;
 /// Contains all note-related structures.
 pub mod note;
+/// User's profile.
+pub mod profile;
 /// Contains all space-related structures.
 pub mod space;
 
@@ -17,6 +19,7 @@ use std::path::PathBuf;
 use serde::{Deserialize, Serialize};
 use time::OffsetDateTime;
 use uuid::{uuid, Uuid};
+pub use web_api_types as common_api_types;
 
 use crate::export::SchemaVersion;
 

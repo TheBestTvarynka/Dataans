@@ -8,6 +8,7 @@ mod code_block;
 mod config;
 mod dataans;
 mod dialog;
+mod window;
 
 use std::path::Path;
 use std::str::FromStr;
@@ -26,6 +27,7 @@ const WINDOW_QUIT_MENU_ITEM_ID: &str = "quit";
 const WINDOW_VISIBILITY_TITLE: &str = "Toggle";
 const WINDOW_QUIT_TITLE: &str = "Quit";
 
+const PROFILE_DIR: &str = "profile";
 const IMAGES_DIR: &str = "images";
 const FILES_DIR: &str = "files";
 const CONFIGS_DIR: &str = "configs";
@@ -200,6 +202,7 @@ fn main() {
             config::open_theme_file,
             code_block::parse_code,
             dialog::select_file,
+            window::open_auth_window,
         ])
         .build(
             {

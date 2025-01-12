@@ -1,0 +1,36 @@
+
+.auth-window {
+    background-color: var(--note-background-color);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+.auth-form {
+    min-width: 50%;
+    padding: 0.5em;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 0.3em;
+}
+
+.auth-form-label {
+    color: var(--note-text-color);
+    width: 100%;
+}
+
+.auth-form-label-success {
+    color: var(--success-text-color);
+}
+
+.auth-form-button {
+    width: 100%;
+}
+
+.auth-form-input {
+    width: calc(100% - 0.8em);
+}

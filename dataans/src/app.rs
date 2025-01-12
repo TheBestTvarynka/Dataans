@@ -4,7 +4,9 @@ use common::Config;
 use leptoaster::*;
 use leptos::*;
 use leptos_hotkeys::{provide_hotkeys_context, scopes, HotkeysContext};
+use leptos_router::{Route, Router, Routes};
 
+use crate::auth::AuthWindow;
 use crate::backend::{load_config, load_theme};
 use crate::notes::Notes;
 use crate::spaces::Spaces;
@@ -73,10 +75,17 @@ pub fn App() -> impl IntoView {
     );
 
     view! {
-        <Toaster stacked=true />
-        <main class="app" style=move || theme_css.get() _ref=main_ref>
-            {move || view! { <Spaces config=config.get() spaces set_spaces /> }}
-            {move || view! { <Notes config=config.get() /> }}
-        </main>
+        <Router>
+            <Toaster stacked=true />
+            <main class="app" style=move || theme_css.get() _ref=main_ref>
+                <Routes>
+                    <Route path="/" view=move || view! {
+                        <Spaces config=config.get() spaces set_spaces />
+                        <Notes config=config.get() />
+                    } />
+                    <Route path="/auth" view=AuthWindow />
+                </Routes>
+            </main>
+        </Router>
     }
 }
