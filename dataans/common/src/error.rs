@@ -11,6 +11,10 @@ pub enum CommandError {
     Dataans(String),
     /// Error during deserialization from [JsValue] or serialization into [JsValue].
     JsValue(String),
+    /// Tauri error.
+    Tauri(String),
+    /// Invalid data,
+    InvalidData(String),
 }
 
 impl From<std::io::Error> for CommandError {
@@ -21,7 +25,12 @@ impl From<std::io::Error> for CommandError {
 
 impl fmt::Display for CommandError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{:?}", self)
+        match self {
+            CommandError::Dataans(m) => write!(f, "Dataans: {}", m),
+            CommandError::JsValue(m) => write!(f, "JS value: {}", m),
+            CommandError::Tauri(m) => write!(f, "Tauri: {}", m),
+            CommandError::InvalidData(m) => write!(f, "invalid data: {}", m),
+        }
     }
 }
 

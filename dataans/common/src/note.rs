@@ -2,7 +2,6 @@ use std::borrow::Cow;
 use std::fmt::Display;
 use std::path::PathBuf;
 
-use bson::Bson;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -78,12 +77,6 @@ pub struct File {
     pub name: String,
     /// Full path to the file in the local file system.
     pub path: PathBuf,
-}
-
-impl From<File> for Bson {
-    fn from(file: File) -> Bson {
-        bson::to_bson(&file).expect("should not fail")
-    }
 }
 
 /// Represent one note.

@@ -11,6 +11,7 @@ authors.workspace = true
 
 [dependencies]
 serde = { workspace = true, features = ["derive"] }
-time = { workspace = true, default-features = false, features = ["serde"] }
+time = { workspace = true, default-features = false, features = ["serde", "formatting", "parsing"] }
+nutype = { workspace = true, features = ["serde"] }
 uuid = { workspace = true, features = ["serde"] }
-bson = "2.10"
+web-api-types.workspace = true

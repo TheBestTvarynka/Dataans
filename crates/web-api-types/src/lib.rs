@@ -5,10 +5,16 @@ pub use auth::*;
 pub use error::*;
 use nutype::nutype;
 
-#[nutype(validate(not_empty), derive(Debug, Serialize, Deserialize, AsRef, Deref, TryFrom))]
+#[nutype(
+    validate(not_empty),
+    derive(Debug, Serialize, Deserialize, AsRef, Deref, TryFrom, Clone)
+)]
 pub struct Username(String);
 
-#[nutype(validate(not_empty), derive(Debug, Serialize, Deserialize, AsRef, Deref, TryFrom))]
+#[nutype(
+    validate(not_empty),
+    derive(Debug, Serialize, Deserialize, AsRef, Deref, TryFrom, Clone)
+)]
 pub struct Password(String);
 
 #[nutype(

@@ -12,12 +12,14 @@ authors.workspace = true
 serde = { workspace = true, features = ["derive"] }
 time = { workspace = true, features = ["macros", "wasm-bindgen"] }
 uuid = { workspace = true, features = ["v4"] }
+hex.workspace = true
 
 leptos = { version = "0.6", features = ["csr"] }
+leptos_router = { version = "0.6", features = ["csr"] }
 
 # TODO: The main branch contains an important fix which is not released yet.
-# Replace `git` link with proper version when a new releave will be published:
-leptos_hotkeys = { git = "https://github.com/gaucho-labs/leptos-hotkeys.git", rev = "05b1dcd" }
+# Replace `git` link with proper version when a new release will be published:
+leptos_hotkeys = { git = "https://github.com/TheBestTvarynka/leptos-hotkeys.git", rev = "1cf8461" }
 leptoaster = { git = "https://github.com/TheBestTvarynka/leptoaster.git", rev = "8c06d3f" }
 
 gloo-storage = "0.3"
