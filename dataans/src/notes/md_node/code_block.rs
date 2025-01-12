@@ -28,7 +28,11 @@ pub fn CodeBlock(code: String, lang: String) -> impl IntoView {
                     on:click=move |_| {
                         let clipboard = window().navigator().clipboard();
                         let _ = clipboard.write_text(&code_value);
-                        toaster.success("Copied!");
+                        toaster.toast(
+                            leptoaster::ToastBuilder::new("Copied!")
+                                .with_level(leptoaster::ToastLevel::Success)
+                                .with_position(leptoaster::ToastPosition::BottomRight),
+                        );
                     }
                 >
                     <img alt="copy code" src="/public/icons/copy-dark.png" />

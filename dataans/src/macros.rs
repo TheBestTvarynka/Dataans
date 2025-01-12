@@ -4,7 +4,12 @@ macro_rules! try_exec {
             Ok(data) => data,
             Err(err) => {
                 error!("{:?}", err);
-                $toaster.error(&format!("{}: {}", $msg, err));
+                $toaster.toast(
+                    leptoaster::ToastBuilder::new(&format!("{}: {}", $msg, err))
+                        .with_level(leptoaster::ToastLevel::Error)
+                        .with_position(leptoaster::ToastPosition::BottomRight)
+                        .with_expiry(Some(5000)),
+                );
                 return;
             }
         }

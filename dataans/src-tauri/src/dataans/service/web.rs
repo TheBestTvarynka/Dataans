@@ -76,7 +76,7 @@ impl WebService {
 
         if !response.status().is_success() {
             let err_msg = response.text().await?;
-            return Err(DataansError::SignUpFailed(err_msg));
+            return Err(DataansError::SignInFailed(err_msg));
         }
 
         let SignInResponse {

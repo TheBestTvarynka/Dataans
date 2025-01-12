@@ -10,7 +10,11 @@ pub fn InlineCode(code: String) -> impl IntoView {
         <span class="inline-code" on:click=move |_| {
             let clipboard = window().navigator().clipboard();
             let _ = clipboard.write_text(&code_value);
-            toaster.success("Copied!");
+            toaster.toast(
+                leptoaster::ToastBuilder::new("Copied!")
+                    .with_level(leptoaster::ToastLevel::Success)
+                    .with_position(leptoaster::ToastPosition::BottomRight),
+            );
         }>{code}</span>
     }
 }
