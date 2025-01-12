@@ -51,7 +51,7 @@ pub enum DataansError {
     SecretKeyFile(PathBuf, IoError),
 
     #[error("Failed to parse secret key: {0:?}")]
-    ParseSecretKey(std::string::FromUtf8Error),
+    ParseSecretKey(hex::FromHexError),
 }
 
 impl From<DataansError> for CommandError {

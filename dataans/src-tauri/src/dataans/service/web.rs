@@ -48,17 +48,22 @@ impl WebService {
         }
 
         let user_id = response.json::<Uuid>().await?;
-        let secret_key = SecretKey::from(hex::encode(OsRng.gen::<[u8; 32]>()));
+        let secret_key = SecretKey::from(OsRng.gen::<[u8; 32]>().to_vec());
 
         fs::write(
             self.user_data_dir.join(format!("{}.json", user_id)),
-            secret_key.as_ref(),
+            hex::encode(secret_key.as_ref()),
         )?;
 
         Ok(user_id)
     }
 
-    pub async fn sign_in(&self, username: Username, password: Password) -> Result<(), DataansError> {
+    pub async fn sign_in(
+        &self,
+        secret_key: Option<SecretKey>,
+        username: Username,
+        password: Password,
+    ) -> Result<(), DataansError> {
         let response = Client::new()
             .post(self.web_server.join("auth/sign-in")?)
             .json(&SignInRequest {
@@ -78,14 +83,18 @@ impl WebService {
             expiration_date,
         } = response.json::<SignInResponse>().await?;
 
-        let secret_key_file_path = self.user_data_dir.join(format!("{}.json", user_id));
-        let secret_key = SecretKey::from(
-            String::from_utf8(
-                fs::read(&secret_key_file_path)
-                    .map_err(|err| DataansError::SecretKeyFile(secret_key_file_path, err))?,
+        let secret_key = if let Some(key) = secret_key {
+            key
+        } else {
+            let secret_key_file_path = self.user_data_dir.join(format!("{}.json", user_id));
+            SecretKey::from(
+                hex::decode(
+                    fs::read(&secret_key_file_path)
+                        .map_err(|err| DataansError::SecretKeyFile(secret_key_file_path, err))?,
+                )
+                .map_err(|err| DataansError::ParseSecretKey(err))?,
             )
-            .map_err(|err| DataansError::ParseSecretKey(err))?,
-        );
+        };
 
         let user_profile = UserProfile {
             user_id,
