@@ -28,8 +28,6 @@
     "dataans:allow-delete-file",
     "dataans:allow-gen-random-avatar",
     "dataans:allow-handle-clipboard-image",
-    "dataans:allow-sign-up",
-    "dataans:allow-sign-in",
     "global-shortcut:default",
     "global-shortcut:allow-is-registered",
     "global-shortcut:allow-register",

@@ -1,0 +1,15 @@
+{
+  "identifier": "auth-and-async-capability",
+  "platforms": [
+    "macOS",
+    "windows",
+    "linux"
+  ],
+  "windows": [
+    "Auth-and-Sync"
+  ],
+  "permissions": [
+    "dataans:allow-sign-up",
+    "dataans:allow-sign-in"
+  ]
+}
