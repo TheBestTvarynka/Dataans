@@ -13,6 +13,8 @@ pub enum CommandError {
     JsValue(String),
     /// Tauri error.
     Tauri(String),
+    /// Invalid data,
+    InvalidData(String),
 }
 
 impl From<std::io::Error> for CommandError {

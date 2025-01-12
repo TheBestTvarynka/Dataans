@@ -1,8 +1,10 @@
 mod code_block;
+mod inline_code;
 mod list_item;
 
 use std::path::Path;
 
+pub use inline_code::InlineCode;
 use leptos::html::AnyElement;
 use leptos::*;
 use markdown::mdast::Node;
@@ -67,16 +69,12 @@ pub fn render_md_node(node: &Node) -> HtmlElement<AnyElement> {
                 .into_any(),
             }
         }
-        Node::InlineCode(code) => {
-            let code_value = code.value.clone();
-            view! {
-                <span class="inline-code" on:click=move |_| {
-                    let clipboard = window().navigator().clipboard();
-                    let _ = clipboard.write_text(&code_value);
-                }>{&code.value}</span>
-            }
-            .into_any()
+        Node::InlineCode(code) => view! {
+            <span>
+                <InlineCode code={code.value.clone()} />
+            </span>
         }
+        .into_any(),
         Node::Text(text) => view! { <span class="text">{&text.value}</span> }.into_any(),
         Node::Delete(delete) => view! {
             <s>

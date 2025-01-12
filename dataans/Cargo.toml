@@ -12,6 +12,7 @@ authors.workspace = true
 serde = { workspace = true, features = ["derive"] }
 time = { workspace = true, features = ["macros", "wasm-bindgen"] }
 uuid = { workspace = true, features = ["v4"] }
+hex.workspace = true
 
 leptos = { version = "0.6", features = ["csr"] }
 leptos_router = { version = "0.6", features = ["csr"] }

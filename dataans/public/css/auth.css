@@ -1,6 +1,6 @@
 
 .auth-window {
-    background-color: var(--notes-background-color);
+    background-color: var(--note-background-color);
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -20,6 +20,11 @@
 
 .auth-form-label {
     color: var(--note-text-color);
+    width: 100%;
+}
+
+.auth-form-label-success {
+    color: var(--success-text-color);
     width: 100%;
 }
 
