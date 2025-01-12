@@ -13,7 +13,7 @@ pub struct UserId(Uuid);
 ///
 /// This key is used to encrypt the user's data.
 #[nutype(derive(Debug, Serialize, Deserialize, AsRef, Deref, From))]
-pub struct SecretKey(String);
+pub struct SecretKey(Vec<u8>);
 
 /// User profile.
 ///

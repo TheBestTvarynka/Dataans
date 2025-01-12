@@ -25,7 +25,6 @@
 
 .auth-form-label-success {
     color: var(--success-text-color);
-    width: 100%;
 }
 
 .auth-form-button {
