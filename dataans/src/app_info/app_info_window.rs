@@ -83,7 +83,9 @@ pub fn AppInfoWindow(#[prop(into)] close: Callback<(), ()>) -> impl IntoView {
                 }} else {view! {
                     <button class="button_ok" on:click=move |ev| enable_autostart.call(ev)  title="Enable autostart">"Enable autostart"</button>
                 }}}
-                <button on:click=show_auth_window>"Tbt"</button>
+                <button on:click=show_auth_window title="Set up back up & sync" class="tool">
+                    <img alt="cloud-icon" src="/public/icons/cloud-backup-light.png" />
+                </button>
             </div>
             {move || {
                 let Config { key_bindings, appearance, app } = global_config.get();
