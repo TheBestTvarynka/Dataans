@@ -4,7 +4,7 @@ macro_rules! try_exec {
             Ok(data) => data,
             Err(err) => {
                 error!("{:?}", err);
-                $toaster.error(&format!("{}: {:?}", $msg, err));
+                $toaster.error(&format!("{}: {}", $msg, err));
                 return;
             }
         }

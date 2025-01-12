@@ -44,7 +44,8 @@ impl WebService {
             .await?;
 
         if !response.status().is_success() {
-            return Err(DataansError::SignUpFailed(response.status()));
+            let err_msg = response.text().await?;
+            return Err(DataansError::SignUpFailed(err_msg));
         }
 
         let user_id = response.json::<Uuid>().await?;
@@ -74,7 +75,8 @@ impl WebService {
             .await?;
 
         if !response.status().is_success() {
-            return Err(DataansError::SignUpFailed(response.status()));
+            let err_msg = response.text().await?;
+            return Err(DataansError::SignUpFailed(err_msg));
         }
 
         let SignInResponse {
