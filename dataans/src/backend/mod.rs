@@ -4,6 +4,7 @@ pub mod export;
 pub mod file;
 pub mod notes;
 pub mod spaces;
+pub mod sync;
 pub mod window;
 
 use std::path::Path;

@@ -15,6 +15,8 @@ pub enum CommandError {
     Tauri(String),
     /// Invalid data,
     InvalidData(String),
+    /// Event error,
+    TauriEvent(String),
 }
 
 impl From<std::io::Error> for CommandError {
@@ -30,6 +32,7 @@ impl fmt::Display for CommandError {
             CommandError::JsValue(m) => write!(f, "JS value: {}", m),
             CommandError::Tauri(m) => write!(f, "Tauri: {}", m),
             CommandError::InvalidData(m) => write!(f, "invalid data: {}", m),
+            CommandError::TauriEvent(_) => write!(f, "Tauri event error"),
         }
     }
 }
