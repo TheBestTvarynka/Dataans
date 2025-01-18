@@ -5,6 +5,7 @@ pub mod file;
 pub mod import;
 pub mod notes;
 pub mod spaces;
+pub mod window;
 
 use std::path::Path;
 
