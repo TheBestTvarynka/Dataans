@@ -91,11 +91,8 @@ h4 {
 
 .icons-by-icons8 {
     width: 100%;
-    text-align: center;
+    text-align: left;
     display: block;
-    color: var(--space-text-color);
-    border-top: 2px solid var(--notes-border-color);
-    padding-top: 0.4em;
 }
 
 .icons-by-icons8 a {

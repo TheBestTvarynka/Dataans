@@ -1,12 +1,12 @@
 
 .app-into-window {
+    width: 100%;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
     align-items: start;
     gap: 0.2em;
     padding: 0.5em;
-    border-radius: 0.5em;
     color: var(--note-text-color);
     background-color: var(--note-background-color);
     position: relative;
@@ -30,12 +30,6 @@
     width: 100%;
     text-align: center;
     font-size: 1.3em;
-}
-
-.app-window-close-button {
-    top: 0.2em;
-    right: 0.2em;
-    position: absolute;
 }
 
 .app-into-window table, th, td {

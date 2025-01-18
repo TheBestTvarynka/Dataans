@@ -5,11 +5,7 @@ use common::APP_PLUGIN_NAME;
 use serde::Serialize;
 use uuid::Uuid;
 
-use crate::backend::{invoke_command, EmptyArgs};
-
-pub async fn show_auth_window() -> CommandResultEmpty {
-    invoke_command("open_auth_window", &EmptyArgs {}).await
-}
+use crate::backend::invoke_command;
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -49,7 +45,7 @@ pub async fn sign_in(secret_key: Option<Vec<u8>>, username: String, password: St
     invoke_command(
         &format!("plugin:{}|sign_in", APP_PLUGIN_NAME),
         &SignInArgs {
-            secret_key: secret_key.map(|key| key.try_into().expect("Secret key should not be empty")),
+            secret_key: secret_key.map(|key| key.into()),
             username: username
                 .try_into()
                 .map_err(|_| CommandError::InvalidData("Invalid username".into()))?,
