@@ -45,7 +45,7 @@ pub async fn sign_in(secret_key: Option<Vec<u8>>, username: String, password: St
     invoke_command(
         &format!("plugin:{}|sign_in", APP_PLUGIN_NAME),
         &SignInArgs {
-            secret_key: secret_key.map(|key| key.try_into().expect("Secret key should not be empty")),
+            secret_key: secret_key.map(|key| key.into()),
             username: username
                 .try_into()
                 .map_err(|_| CommandError::InvalidData("Invalid username".into()))?,
