@@ -15,7 +15,6 @@ use self::space::Space;
 use self::spaces_list::SpacesList;
 use self::tools::Tools;
 use crate::app::GlobalState;
-use crate::app_info::AppInfo;
 use crate::backend::notes::list_notes;
 use crate::backend::spaces::list_spaces;
 use crate::utils::focus_element;
@@ -72,6 +71,18 @@ pub fn Spaces(
 
     let (query, set_query) = create_signal(String::new());
 
+    let toaster = leptoaster::expect_toaster();
+    let show_app_info_window = move |_| {
+        let t = toaster.clone();
+        spawn_local(async move {
+            try_exec!(
+                crate::backend::window::show_app_info_window().await,
+                "Failed to create auth window",
+                t
+            );
+        })
+    };
+
     view! {
         <div class="spaces-container">
             <Tools set_spaces spaces_minimized set_spaces_minimized set_find_node_mode set_query=set_query.into() set_selected_space config=config.clone() />
@@ -102,7 +113,11 @@ pub fn Spaces(
                         <span class="icons-by-icons8">"Icons by: "<a href="https://icons8.com" target="_blank">"icons8.com"</a></span>
                     }.into_any()
                 }}
-                <AppInfo />
+                <div style="display: inline-flex; width: 100%; justify-content: center; margin-bottom: 0.2em;">
+                    <button class="button_cancel" on:click=show_app_info_window>
+                        {format!("{}.{}", env!("CARGO_PKG_VERSION_MAJOR"), env!("CARGO_PKG_VERSION_MINOR"))}
+                    </button>
+                </div>
             </div>
         </div>
     }

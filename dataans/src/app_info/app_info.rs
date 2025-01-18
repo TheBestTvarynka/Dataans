@@ -2,16 +2,13 @@ use std::path::PathBuf;
 
 use common::{App, Appearance, Config, KeyBindings};
 use leptos::*;
-use leptos_hotkeys::use_hotkeys;
 
 use crate::app_info::export::Export;
 use crate::backend::{open_config_file, open_config_file_folder, open_theme_file};
 
 #[component]
-pub fn AppInfoWindow(#[prop(into)] close: Callback<(), ()>) -> impl IntoView {
+pub fn AppInfo() -> impl IntoView {
     let toaster = leptoaster::expect_toaster();
-
-    use_hotkeys!(("Escape") => move |_| close.call(()));
 
     let global_config = expect_context::<RwSignal<Config>>();
 
@@ -49,7 +46,7 @@ pub fn AppInfoWindow(#[prop(into)] close: Callback<(), ()>) -> impl IntoView {
         let t = toaster.clone();
         spawn_local(async move {
             try_exec!(
-                crate::backend::auth::show_auth_window().await,
+                crate::backend::window::show_auth_window().await,
                 "Failed to create auth window",
                 t
             );
@@ -58,13 +55,6 @@ pub fn AppInfoWindow(#[prop(into)] close: Callback<(), ()>) -> impl IntoView {
 
     view! {
         <div class="app-into-window">
-            <button
-                class="tool app-window-close-button"
-                title="Close window"
-                on:click=move |_| close.call(())
-            >
-                <img alt="edit note" src="/public/icons/cancel.png" />
-            </button>
             <span class="app-into-window-title">{format!("Dataans v.{}", env!("CARGO_PKG_VERSION"))}</span>
             <span>"Take notes in the form of markdown snippets grouped into spaces."</span>
             <span>"Source code: "<a href="https://github.com/TheBestTvarynka/Dataans" target="_blank">"GitHub/TbeBestTvarynka/Dataans"</a></span>

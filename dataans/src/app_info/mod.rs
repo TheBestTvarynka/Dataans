@@ -1,5 +1,4 @@
-mod app_info_window;
+mod app_info;
 mod export;
-mod toggle;
 
-pub use toggle::AppInfo;
+pub use app_info::AppInfo;

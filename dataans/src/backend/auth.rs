@@ -5,11 +5,7 @@ use common::APP_PLUGIN_NAME;
 use serde::Serialize;
 use uuid::Uuid;
 
-use crate::backend::{invoke_command, EmptyArgs};
-
-pub async fn show_auth_window() -> CommandResultEmpty {
-    invoke_command("open_auth_window", &EmptyArgs {}).await
-}
+use crate::backend::invoke_command;
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]

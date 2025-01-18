@@ -200,6 +200,7 @@ fn main() {
             config::open_theme_file,
             code_block::parse_code,
             window::open_auth_window,
+            window::open_app_info_window,
         ])
         .build(
             {
