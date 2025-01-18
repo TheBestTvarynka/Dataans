@@ -57,7 +57,8 @@ pub fn AppInfo() -> impl IntoView {
         <div class="app-into-window">
             <span class="app-into-window-title">{format!("Dataans v.{}", env!("CARGO_PKG_VERSION"))}</span>
             <span>"Take notes in the form of markdown snippets grouped into spaces."</span>
-            <span>"Source code: "<a href="https://github.com/TheBestTvarynka/Dataans" target="_blank">"GitHub/TbeBestTvarynka/Dataans"</a></span>
+            <span>"Source code: "<a href="https://github.com/TheBestTvarynka/Dataans" target="_blank">"GitHub/TbeBestTvarynka/Dataans"</a>"."</span>
+            <span class="icons-by-icons8">"Icons by "<a href="https://icons8.com" target="_blank">"Icons8"</a>"."</span>
             <hr style="width: 80%" />
             <div class="horizontal">
                 <button class="button_ok" on:click=open_config_file>"Edit config file"</button>
