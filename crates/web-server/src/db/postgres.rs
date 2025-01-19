@@ -2,7 +2,7 @@ use sqlx::PgPool;
 use uuid::Uuid;
 
 use super::model::*;
-use super::{AuthDb, DbError};
+use super::{AuthDb, DbError, NoteDb, SpaceDb};
 
 pub struct PostgresDb {
     pool: PgPool,
@@ -81,5 +81,66 @@ impl AuthDb for PostgresDb {
         .await?;
 
         Ok(())
+    }
+}
+
+impl SpaceDb for PostgresDb {
+    async fn add_space(&self, space: &Space) -> Result<(), DbError> {
+        let Space {
+            id,
+            data,
+            checksum,
+            user_id,
+        } = space;
+
+        sqlx::query!(
+            "insert into space (id, data, checksum, user_id) values ($1, $2, $3, $4)",
+            id,
+            data,
+            checksum,
+            user_id,
+        )
+        .execute(&self.pool)
+        .await?;
+
+        Ok(())
+    }
+
+    async fn update_space(&self, space: &Space) -> Result<(), DbError> {
+        let Space {
+            id,
+            data,
+            checksum,
+            user_id: _,
+        } = space;
+
+        sqlx::query!(
+            "update space set data = $1, checksum = $2 where id = $3",
+            data,
+            checksum,
+            id,
+        )
+        .execute(&self.pool)
+        .await?;
+
+        Ok(())
+    }
+
+    async fn delete_space(&self, _space_id: Uuid) -> Result<(), DbError> {
+        Err(DbError::Unsupported("space deletion"))
+    }
+}
+
+impl NoteDb for PostgresDb {
+    async fn add_note(&self, note: &Note) -> Result<(), DbError> {
+        Ok(())
+    }
+
+    async fn update_note(&self, note: &Note) -> Result<(), DbError> {
+        Ok(())
+    }
+
+    async fn delete_note(&self, note_id: Uuid) -> Result<(), DbError> {
+        Err(DbError::Unsupported("node deletion"))
     }
 }
