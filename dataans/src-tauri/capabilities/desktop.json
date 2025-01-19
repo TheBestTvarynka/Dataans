@@ -23,6 +23,7 @@
     "dataans:allow-delete-file",
     "dataans:allow-gen-random-avatar",
     "dataans:allow-handle-clipboard-image",
+    "dataans:allow-sync",
     "global-shortcut:default",
     "global-shortcut:allow-is-registered",
     "global-shortcut:allow-register",

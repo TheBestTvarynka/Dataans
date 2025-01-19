@@ -55,6 +55,9 @@ pub enum DataansError {
 
     #[error("failed to parse secret key: {0:?}")]
     ParseSecretKey(hex::FromHexError),
+
+    #[error(transparent)]
+    Tauri(#[from] tauri::Error),
 }
 
 impl From<DataansError> for CommandError {
