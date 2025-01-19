@@ -19,6 +19,7 @@ fn main() {
             "handle_clipboard_image",
             "sign_up",
             "sign_in",
+            "sync",
         ]),
     ))
     .expect("Tauri app build should not fail")
