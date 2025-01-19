@@ -84,6 +84,18 @@ pub fn Spaces(
         });
     };
 
+    let t = toaster.clone();
+    let trigger_sync = move |_| {
+        let t = t.clone();
+        spawn_local(async move {
+            try_exec!(
+                crate::backend::sync::trigger_sync().await,
+                "Failed to create auth window",
+                t
+            );
+        });
+    };
+
     let wow = move |_| {
         let t = toaster.clone();
         spawn_local(async move {
@@ -118,6 +130,7 @@ pub fn Spaces(
                 },
             }}
             <button on:click=wow>"wow!"</button>
+            <button on:click=trigger_sync>"sync!"</button>
             <div style="flex-grow: 1; align-content: end;">
                 <div style="display: inline-flex; width: 100%; justify-content: center; margin-bottom: 0.2em;">
                     <button class="button_cancel" on:click=show_app_info_window>
