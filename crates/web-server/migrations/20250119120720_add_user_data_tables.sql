@@ -18,15 +18,8 @@ create table note (
     id uuid primary key,
     data bytea not null,
     checksum bytea not null,
-    space_id uuid not null references space(id)
-);
-
-create table sync_block_note (
-    note_id uuid not null references note(id),
-    number_in_block int not null,
-    block_id uuid not null references sync_block(id),
-    unique (note_id, number_in_block),
-    primary key (note_id, block_id)
+    space_id uuid not null references space(id),
+    block_id uuid not null references sync_block(id)
 );
 
 create table file (

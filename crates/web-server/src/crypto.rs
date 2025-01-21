@@ -5,9 +5,12 @@ use argon2::password_hash::SaltString;
 use argon2::{Argon2, PasswordHash, PasswordHasher, PasswordVerifier};
 use sha2::{Digest, Sha256};
 
+pub type SHA256Checksum = [u8; 32];
+pub const EMPTY_SHA256_CHECKSUM: &[u8] = &[0; 32];
+
 use crate::{Error, Result};
 
-pub fn sha256(data: &[u8]) -> [u8; 32] {
+pub fn sha256(data: &[u8]) -> SHA256Checksum {
     let mut hasher = Sha256::new();
     hasher.update(data);
 
