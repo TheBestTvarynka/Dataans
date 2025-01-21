@@ -41,18 +41,12 @@ pub struct SyncBlock {
 }
 
 #[derive(Debug, FromRow, Serialize, Deserialize)]
-pub struct SyncBlockNote {
-    pub note_id: Uuid,
-    pub number_in_block: i32,
-    pub block_id: Uuid,
-}
-
-#[derive(Debug, FromRow, Serialize, Deserialize)]
 pub struct Note {
     pub id: Uuid,
     pub data: Vec<u8>,
     pub checksum: Vec<u8>,
     pub space_id: Uuid,
+    pub block_id: Uuid,
 }
 
 #[derive(Debug, FromRow, Serialize, Deserialize)]

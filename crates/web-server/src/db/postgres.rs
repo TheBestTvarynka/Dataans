@@ -185,6 +185,7 @@ impl NoteDb for PostgresDb {
             data,
             checksum,
             space_id,
+            block_id: note_block_id,
         } = note;
 
         let mut transaction = self.pool.begin().await?;
@@ -204,12 +205,11 @@ impl NoteDb for PostgresDb {
         let block_id = if notes_in_block >= MAX_NOTES_IN_BLOCK {
             trace!("Creating new block");
 
-            let block_id = Uuid::new_v4();
             let block_number = block_number + 1;
 
             sqlx::query!(
                 "insert into sync_block (id, number, checksum, space_id) values ($1, $2, $3, $4)",
-                block_id,
+                note_block_id,
                 block_number,
                 // We are going to update the checksum later anyway
                 EMPTY_SHA256_CHECKSUM,
@@ -218,7 +218,7 @@ impl NoteDb for PostgresDb {
             .execute(&mut *transaction)
             .await?;
 
-            block_id
+            *note_block_id
         } else {
             trace!("Adding note to existing block");
 
@@ -243,7 +243,30 @@ impl NoteDb for PostgresDb {
         Ok(())
     }
 
-    async fn update_note(&self, _note: &Note) -> Result<(), DbError> {
+    async fn update_note(&self, note: &Note) -> Result<(), DbError> {
+        let Note {
+            id: node_id,
+            data,
+            checksum,
+            space_id: _,
+            block_id,
+        } = note;
+
+        let mut transaction = self.pool.begin().await?;
+
+        sqlx::query!(
+            "update note set data = $1, checksum = $2 where id = $3",
+            data,
+            checksum,
+            node_id,
+        )
+        .execute(&mut *transaction)
+        .await?;
+
+        self.update_block_checksum(*block_id, &mut transaction).await?;
+
+        transaction.commit().await?;
+
         Ok(())
     }
 
