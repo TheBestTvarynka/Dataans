@@ -179,7 +179,7 @@ impl SpaceDb for PostgresDb {
 }
 
 impl NoteDb for PostgresDb {
-    async fn add_note(&self, note: &Note) -> Result<(), DbError> {
+    async fn add_note(&self, note: &Note) -> Result<Uuid, DbError> {
         let Note {
             id: node_id,
             data,
@@ -191,10 +191,10 @@ impl NoteDb for PostgresDb {
         let mut transaction = self.pool.begin().await?;
 
         let (notes_in_block, block_id, block_number): (i64, Uuid, i32) = sqlx::query_as(
-            "select count(note.id), sync_block.id, sync_block.number from note
-                left join sync_block on note.block_id = sync_block.id
+            "select count(note.id), sync_block.id, sync_block.number
+                from sync_block left join note on note.block_id = sync_block.id
                 where sync_block.space_id = $1
-                group by sync_block.id order by sync_block.number desc limit 1",
+                group by sync_block.id order by number desc limit 1",
         )
         .bind(space_id)
         .fetch_one(&mut *transaction)
@@ -240,7 +240,7 @@ impl NoteDb for PostgresDb {
 
         transaction.commit().await?;
 
-        Ok(())
+        Ok(block_id)
     }
 
     async fn update_note(&self, note: &Note) -> Result<(), DbError> {
