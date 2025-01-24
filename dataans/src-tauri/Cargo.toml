@@ -18,6 +18,7 @@ tracing.workspace = true
 thiserror.workspace = true
 web-api-types.workspace = true
 hex.workspace = true
+futures.workspace = true
 
 tauri = { version = "2", features = [
     "protocol-asset", "tray-icon",
@@ -25,8 +26,6 @@ tauri = { version = "2", features = [
 tauri-plugin-fs = "2"
 tauri-plugin-shell = "2"
 tauri-plugin-autostart = "2"
-
-futures = "0.3"
 
 # logging
 tracing-subscriber = { version = "0.3", features = ["std", "fmt", "ansi", "env-filter"] }
