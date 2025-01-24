@@ -1,13 +1,7 @@
 use derive_more::{AsRef, From};
 use serde::{Deserialize, Serialize};
 
-use crate::{BlockId, NoteId, SpaceId};
-
-#[derive(Debug, Serialize, Deserialize, AsRef, From)]
-pub struct NoteChecksumValue(Vec<u8>);
-
-#[derive(Debug, Serialize, Deserialize, AsRef, From)]
-pub struct BlockChecksumValue(Vec<u8>);
+use crate::{BlockChecksumValue, BlockId, NoteChecksumValue, NoteId, SpaceId};
 
 #[derive(Debug, Serialize, Deserialize, AsRef, From)]
 pub struct BlockNumber(i32);
