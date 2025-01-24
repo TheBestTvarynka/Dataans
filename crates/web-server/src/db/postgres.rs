@@ -3,7 +3,7 @@ use sqlx::{PgPool, Transaction};
 use uuid::Uuid;
 
 use super::model::*;
-use super::{AuthDb, DbError, NoteDb, SpaceDb};
+use super::{AuthDb, DbError, NoteDb, SpaceDb, SyncDb};
 use crate::crypto::{SHA256Checksum, EMPTY_SHA256_CHECKSUM};
 
 const MAX_NOTES_IN_BLOCK: i64 = 32;
@@ -179,6 +179,15 @@ impl SpaceDb for PostgresDb {
 }
 
 impl NoteDb for PostgresDb {
+    async fn notes(&self, note_ids: &[Uuid]) -> Result<Vec<Note>, DbError> {
+        let notes = sqlx::query_as("select id, data, checksum, space_id, block_id from note where id = any($1)")
+            .bind(note_ids)
+            .fetch_all(&self.pool)
+            .await?;
+
+        Ok(notes)
+    }
+
     async fn add_note(&self, note: &Note) -> Result<Uuid, DbError> {
         let Note {
             id: node_id,
@@ -272,5 +281,25 @@ impl NoteDb for PostgresDb {
 
     async fn delete_note(&self, _note_id: Uuid) -> Result<(), DbError> {
         Err(DbError::Unsupported("node deletion"))
+    }
+}
+
+impl SyncDb for PostgresDb {
+    async fn blocks(&self, space_id: Uuid) -> Result<Vec<SyncBlock>, DbError> {
+        let blocks = sqlx::query_as("select id, number, checksum, space_id from sync_block where space_id = $1")
+            .bind(space_id)
+            .fetch_all(&self.pool)
+            .await?;
+
+        Ok(blocks)
+    }
+
+    async fn block_notes(&self, block_id: Uuid) -> Result<Vec<NoteChecksum>, DbError> {
+        let notes = sqlx::query_as("select id, checksum from note where block_id = $1")
+            .bind(block_id)
+            .fetch_all(&self.pool)
+            .await?;
+
+        Ok(notes)
     }
 }

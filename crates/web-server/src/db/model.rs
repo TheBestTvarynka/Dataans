@@ -50,6 +50,12 @@ pub struct Note {
 }
 
 #[derive(Debug, FromRow, Serialize, Deserialize)]
+pub struct NoteChecksum {
+    pub id: Uuid,
+    pub checksum: Vec<u8>,
+}
+
+#[derive(Debug, FromRow, Serialize, Deserialize)]
 pub struct File {
     pub id: Uuid,
     pub data: Vec<u8>,

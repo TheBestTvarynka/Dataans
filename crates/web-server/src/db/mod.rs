@@ -31,7 +31,13 @@ pub trait SpaceDb: Send + Sync {
 }
 
 pub trait NoteDb: Send + Sync {
+    async fn notes(&self, note_ids: &[Uuid]) -> Result<Vec<Note>, DbError>;
     async fn add_note(&self, note: &Note) -> Result<Uuid, DbError>;
     async fn update_note(&self, note: &Note) -> Result<(), DbError>;
     async fn delete_note(&self, note_id: Uuid) -> Result<(), DbError>;
+}
+
+pub trait SyncDb: Send + Sync {
+    async fn blocks(&self, space_id: Uuid) -> Result<Vec<SyncBlock>, DbError>;
+    async fn block_notes(&self, block_id: Uuid) -> Result<Vec<NoteChecksum>, DbError>;
 }
