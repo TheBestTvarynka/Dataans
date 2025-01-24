@@ -27,14 +27,14 @@ pub struct Password(String);
 )]
 pub struct InvitationToken(Vec<u8>);
 
-#[derive(Debug, Serialize, Deserialize, AsRef, From)]
+#[derive(Debug, Serialize, Deserialize, AsRef, From, Copy, Clone)]
 pub struct UserId(uuid::Uuid);
 
-#[derive(Debug, Serialize, Deserialize, AsRef, From)]
+#[derive(Debug, Serialize, Deserialize, AsRef, From, Copy, Clone)]
 pub struct BlockId(uuid::Uuid);
 
-#[derive(Debug, Serialize, Deserialize, AsRef, From)]
+#[derive(Debug, Serialize, Deserialize, AsRef, From, Copy, Clone)]
 pub struct NoteId(uuid::Uuid);
 
-#[derive(Debug, Serialize, Deserialize, AsRef, From)]
+#[derive(Debug, Serialize, Deserialize, AsRef, From, Copy, Clone)]
 pub struct SpaceId(uuid::Uuid);

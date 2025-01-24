@@ -21,6 +21,9 @@ pub enum Error {
 
     #[error("invalid encryption key or IV length")]
     InvalidKeyLength,
+
+    #[error("access denied")]
+    AccessDenied,
 }
 
 impl From<DbError> for Error {
@@ -58,6 +61,7 @@ impl From<Error> for web_api_types::Error {
             }
             Error::InvalidKeyLength => Self::Internal("internal error".into()),
             Error::PasswordHashParsingError => Self::PasswordHashingError("unable to verify credentials".into()),
+            Error::AccessDenied => Self::AccessDenied("access denied".into()),
         }
     }
 }
