@@ -24,6 +24,9 @@ pub enum Error {
 
     #[error("access denied")]
     AccessDenied,
+
+    #[error("invalid {0}")]
+    InvalidData(&'static str),
 }
 
 impl From<DbError> for Error {
@@ -62,6 +65,7 @@ impl From<Error> for web_api_types::Error {
             Error::InvalidKeyLength => Self::Internal("internal error".into()),
             Error::PasswordHashParsingError => Self::PasswordHashingError("unable to verify credentials".into()),
             Error::AccessDenied => Self::AccessDenied("access denied".into()),
+            Error::InvalidData(name) => Self::InvalidData(name.into()),
         }
     }
 }
