@@ -25,6 +25,7 @@ pub trait AuthDb: Send + Sync {
 }
 
 pub trait SpaceDb: Send + Sync {
+    async fn space(&self, space_id: Uuid) -> Result<Space, DbError>;
     async fn add_space(&self, space: &Space) -> Result<(), DbError>;
     async fn update_space(&self, space: &Space) -> Result<(), DbError>;
     async fn delete_space(&self, space_id: Uuid) -> Result<(), DbError>;
@@ -40,4 +41,6 @@ pub trait NoteDb: Send + Sync {
 pub trait SyncDb: Send + Sync {
     async fn blocks(&self, space_id: Uuid) -> Result<Vec<SyncBlock>, DbError>;
     async fn block_notes(&self, block_id: Uuid) -> Result<Vec<NoteChecksum>, DbError>;
+    /// Returns the id of the user who owns the block.
+    async fn block_owner(&self, block_id: Uuid) -> Result<Uuid, DbError>;
 }

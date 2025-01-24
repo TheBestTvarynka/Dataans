@@ -119,6 +119,15 @@ impl AuthDb for PostgresDb {
 }
 
 impl SpaceDb for PostgresDb {
+    async fn space(&self, space_id: Uuid) -> Result<Space, DbError> {
+        let space = sqlx::query_as("select id, data, checksum, user_id from space where id = $1")
+            .bind(space_id)
+            .fetch_one(&self.pool)
+            .await?;
+
+        Ok(space)
+    }
+
     async fn add_space(&self, space: &Space) -> Result<(), DbError> {
         let Space {
             id: space_id,
@@ -301,5 +310,14 @@ impl SyncDb for PostgresDb {
             .await?;
 
         Ok(notes)
+    }
+
+    async fn block_owner(&self, block_id: Uuid) -> Result<Uuid, DbError> {
+        let user_id: (Uuid,) = sqlx::query_as("select space.user_id from sync_block join space on sync_block.space_id = space.id where sync_block.id = $1")
+            .bind(block_id)
+            .fetch_one(&self.pool)
+            .await?;
+
+        Ok(user_id.0)
     }
 }
