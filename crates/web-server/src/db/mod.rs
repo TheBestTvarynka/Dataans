@@ -10,7 +10,7 @@ use uuid::Uuid;
 
 #[derive(Error, Debug)]
 pub enum DbError {
-    #[error("sqlx error: {0:?}")]
+    #[error("sqlx error: {0}")]
     SqlxError(#[from] sqlx::Error),
 
     #[error("{0} operation is unsupported")]
