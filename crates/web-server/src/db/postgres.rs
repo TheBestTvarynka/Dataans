@@ -125,6 +125,18 @@ impl AuthDb for PostgresDb {
 
         Ok(session)
     }
+
+    async fn remove_user(&self, user_id: Uuid) -> Result<(), DbError> {
+        let mut transaction = self.pool.begin().await?;
+
+        sqlx::query!("delete from \"user\" where id = $1", user_id)
+            .execute(&mut *transaction)
+            .await?;
+
+        transaction.commit().await?;
+
+        Ok(())
+    }
 }
 
 impl SpaceDb for PostgresDb {
@@ -191,8 +203,16 @@ impl SpaceDb for PostgresDb {
         Ok(())
     }
 
-    async fn delete_space(&self, _space_id: Uuid) -> Result<(), DbError> {
-        Err(DbError::Unsupported("space deletion"))
+    async fn remove_space(&self, space_id: Uuid) -> Result<(), DbError> {
+        let mut transaction = self.pool.begin().await?;
+
+        sqlx::query!("delete from space where id = $1", space_id)
+            .execute(&mut *transaction)
+            .await?;
+
+        transaction.commit().await?;
+
+        Ok(())
     }
 }
 
@@ -297,8 +317,23 @@ impl NoteDb for PostgresDb {
         Ok(())
     }
 
-    async fn delete_note(&self, _note_id: Uuid) -> Result<(), DbError> {
-        Err(DbError::Unsupported("node deletion"))
+    async fn remove_note(&self, note_id: Uuid) -> Result<(), DbError> {
+        let mut transaction = self.pool.begin().await?;
+
+        let block_id: (Uuid,) = sqlx::query_as("select block_id from note where id = $1")
+            .bind(note_id)
+            .fetch_one(&mut *transaction)
+            .await?;
+
+        sqlx::query!("delete from note where id = $1", note_id)
+            .execute(&mut *transaction)
+            .await?;
+
+        self.update_block_checksum(block_id.0, &mut transaction).await?;
+
+        transaction.commit().await?;
+
+        Ok(())
     }
 }
 

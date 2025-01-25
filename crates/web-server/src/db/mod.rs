@@ -23,20 +23,21 @@ pub trait AuthDb: Send + Sync {
     async fn find_user_by_username(&self, username: &[u8]) -> Result<User, DbError>;
     async fn add_session(&self, session: &Session) -> Result<(), DbError>;
     async fn session(&self, session_id: Uuid) -> Result<Session, DbError>;
+    async fn remove_user(&self, user_id: Uuid) -> Result<(), DbError>;
 }
 
 pub trait SpaceDb: Send + Sync {
     async fn space(&self, space_id: Uuid) -> Result<Space, DbError>;
     async fn add_space(&self, space: &Space) -> Result<(), DbError>;
     async fn update_space(&self, space: &Space) -> Result<(), DbError>;
-    async fn delete_space(&self, space_id: Uuid) -> Result<(), DbError>;
+    async fn remove_space(&self, space_id: Uuid) -> Result<(), DbError>;
 }
 
 pub trait NoteDb: Send + Sync {
     async fn notes(&self, note_ids: &[Uuid]) -> Result<Vec<Note>, DbError>;
     async fn add_note(&self, note: &Note) -> Result<Uuid, DbError>;
     async fn update_note(&self, note: &Note) -> Result<(), DbError>;
-    async fn delete_note(&self, note_id: Uuid) -> Result<(), DbError>;
+    async fn remove_note(&self, note_id: Uuid) -> Result<(), DbError>;
 }
 
 pub trait SyncDb: Send + Sync {
