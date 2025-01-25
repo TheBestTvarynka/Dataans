@@ -33,6 +33,9 @@ pub enum Error {
 
     #[error("invalid {0}")]
     InvalidData(&'static str),
+
+    #[error("internal error: {0}")]
+    Internal(&'static str),
 }
 
 impl From<DbError> for Error {
@@ -66,6 +69,10 @@ impl From<Error> for web_api_types::Error {
             }
             Error::Encryption(err) => {
                 error!(?err);
+                Self::Internal("internal error".into())
+            }
+            Error::Internal(err) => {
+                error!(err);
                 Self::Internal("internal error".into())
             }
             Error::InvalidKeyLength => Self::Internal("internal error".into()),

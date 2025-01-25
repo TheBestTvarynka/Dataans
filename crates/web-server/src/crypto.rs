@@ -6,7 +6,6 @@ use argon2::{Argon2, PasswordHash, PasswordHasher, PasswordVerifier};
 use sha2::{Digest, Sha256};
 
 pub type Sha256Checksum = [u8; 32];
-pub type HmacSha256Checksum = [u8; 32];
 pub type EncryptionKey = [u8; SERVER_ENCRYPTION_KEY_SIZE];
 
 const NONCE_LENGTH: usize = 12;

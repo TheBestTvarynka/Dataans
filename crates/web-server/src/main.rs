@@ -61,6 +61,15 @@ async fn main() -> std::result::Result<(), rocket::Error> {
     let _rocket = rocket::build()
         .manage(WebServerState::new())
         .mount("/auth", routes![routes::sign_up, routes::sign_in])
+        .mount(
+            "/data",
+            routes![
+                routes::add_space,
+                routes::update_space,
+                routes::add_note,
+                routes::update_note
+            ],
+        )
         .mount("/health", routes![routes::health])
         .launch()
         .await?;
