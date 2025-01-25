@@ -4,7 +4,7 @@ use uuid::Uuid;
 
 use super::model::*;
 use super::{AuthDb, DbError, NoteDb, SpaceDb, SyncDb};
-use crate::crypto::{SHA256Checksum, EMPTY_SHA256_CHECKSUM};
+use crate::crypto::{Sha256Checksum, EMPTY_SHA256_CHECKSUM};
 
 const MAX_NOTES_IN_BLOCK: i64 = 32;
 
@@ -34,7 +34,7 @@ impl PostgresDb {
             .into_iter()
             .for_each(|note_checksum| hasher.update(note_checksum.0));
 
-        let block_checksum: SHA256Checksum = hasher.finalize().into();
+        let block_checksum: Sha256Checksum = hasher.finalize().into();
 
         sqlx::query!(
             "update sync_block set checksum = $1 where id = $2",
@@ -115,6 +115,15 @@ impl AuthDb for PostgresDb {
         .await?;
 
         Ok(())
+    }
+
+    async fn session(&self, session_id: Uuid) -> Result<Session, DbError> {
+        let session = sqlx::query_as("select id, user_id, created_at, expiration_date from session where id = $1")
+            .bind(session_id)
+            .fetch_one(&self.pool)
+            .await?;
+
+        Ok(session)
     }
 }
 

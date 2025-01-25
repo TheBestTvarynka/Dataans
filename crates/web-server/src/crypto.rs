@@ -7,10 +7,12 @@ use sha2::{Digest, Sha256};
 
 pub type Sha256Checksum = [u8; 32];
 pub type HmacSha256Checksum = [u8; 32];
+pub type EncryptionKey = [u8; SERVER_ENCRYPTION_KEY_SIZE];
 
 const NONCE_LENGTH: usize = 12;
 const HMAC_SHA256_CHECKSUM_LENGTH: usize = 32;
 pub const EMPTY_SHA256_CHECKSUM: &[u8] = &[0; 32];
+pub const SERVER_ENCRYPTION_KEY_SIZE: usize = 32;
 
 use crate::{Error, Result};
 
@@ -42,7 +44,7 @@ pub fn verify_password(password: &[u8], hash: &[u8]) -> Result<()> {
     Ok(argon2.verify_password(&password, &parsed_hash)?)
 }
 
-pub fn encrypt(data: &[u8], key: &[u8]) -> Result<Vec<u8>> {
+pub fn encrypt(data: &[u8], key: &EncryptionKey) -> Result<Vec<u8>> {
     // Encryption
     let key = Key::<Aes256Gcm>::from_slice(key);
     let nonce = Aes256Gcm::generate_nonce(&mut OsRng);
@@ -74,7 +76,7 @@ pub fn encrypt(data: &[u8], key: &[u8]) -> Result<Vec<u8>> {
     Ok(result)
 }
 
-pub fn decrypt(data: &[u8], key: &[u8]) -> Result<Vec<u8>> {
+pub fn decrypt(data: &[u8], key: &EncryptionKey) -> Result<Vec<u8>> {
     // data = nonce + cipher_text + checksum
 
     if data.len() < NONCE_LENGTH + HMAC_SHA256_CHECKSUM_LENGTH {

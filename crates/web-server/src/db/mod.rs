@@ -22,6 +22,7 @@ pub trait AuthDb: Send + Sync {
     async fn add_user(&self, user: &User, token_id: Uuid) -> Result<(), DbError>;
     async fn find_user_by_username(&self, username: &[u8]) -> Result<User, DbError>;
     async fn add_session(&self, session: &Session) -> Result<(), DbError>;
+    async fn session(&self, session_id: Uuid) -> Result<Session, DbError>;
 }
 
 pub trait SpaceDb: Send + Sync {

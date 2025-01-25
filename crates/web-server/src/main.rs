@@ -15,14 +15,15 @@ use rocket::routes;
 use sqlx::postgres::PgPoolOptions;
 
 use crate::db::PostgresDb;
-use crate::services::Auth as AuthService;
+use crate::services::{Auth as AuthService, Data as DataService, Sync as SyncService};
 
 const DATABASE_URL: &str = "DATAANS_WEB_SERVER_DATABASE_URL";
 const DATAANS_SERVER_ENCRYPTION_KEY: &str = "DATAANS_SERVER_ENCRYPTION_KEY";
-const SERVER_ENCRYPTION_KEY_SIZE: usize = 32;
 
 pub struct State<D> {
     pub auth_service: AuthService<D>,
+    pub data_service: DataService<D>,
+    pub sync_service: SyncService<D>,
 }
 
 pub type WebServerState = State<PostgresDb>;
@@ -46,7 +47,9 @@ impl WebServerState {
         .expect("invalid server encryption key length");
 
         Self {
-            auth_service: AuthService::new(db, server_encryption_key),
+            auth_service: AuthService::new(Arc::clone(&db), server_encryption_key),
+            data_service: DataService::new(Arc::clone(&db)),
+            sync_service: SyncService::new(db),
         }
     }
 }

@@ -4,18 +4,19 @@ use time::{Duration, OffsetDateTime};
 use uuid::Uuid;
 use web_api_types::{InvitationToken, Password, Username};
 
-use crate::db::{AuthDb, Session, User};
-use crate::{crypto, Result, SERVER_ENCRYPTION_KEY_SIZE};
+use crate::crypto::EncryptionKey;
+use crate::db::{AuthDb, DbError, Session, User};
+use crate::{crypto, Error, Result};
 
 const SESSION_DURATION: Duration = Duration::days(30);
 
 pub struct Auth<A> {
-    encryption_key: [u8; SERVER_ENCRYPTION_KEY_SIZE],
+    encryption_key: EncryptionKey,
     auth_db: Arc<A>,
 }
 
 impl<A: AuthDb> Auth<A> {
-    pub fn new(auth_db: Arc<A>, encryption_key: [u8; SERVER_ENCRYPTION_KEY_SIZE]) -> Self {
+    pub fn new(auth_db: Arc<A>, encryption_key: EncryptionKey) -> Self {
         Self {
             auth_db,
             encryption_key,
@@ -57,5 +58,35 @@ impl<A: AuthDb> Auth<A> {
 
         let token = hex::encode(crypto::encrypt(session.id.as_bytes(), &self.encryption_key)?);
         Ok((user.id, token, expiration_date))
+    }
+
+    pub async fn verify_session(&self, token: &str) -> Result<Uuid> {
+        let token = crypto::decrypt(
+            &hex::decode(token).map_err(|_err| Error::Session("invalid token"))?,
+            &self.encryption_key,
+        )?;
+
+        let session_id = Uuid::from_slice(&token).map_err(|err| {
+            error!(
+                ?err,
+                "Failed to construct session id from decrypted token. Possible internal data corruption."
+            );
+
+            Error::Session("invalid token")
+        })?;
+
+        let session = self.auth_db.session(session_id).await.map_err(|err| {
+            if let DbError::SqlxError(sqlx::Error::RowNotFound) = err {
+                Error::Session("not found")
+            } else {
+                err.into()
+            }
+        })?;
+
+        if session.expiration_date < OffsetDateTime::now_utc() {
+            return Err(Error::Session("expired"));
+        }
+
+        Ok(session.user_id)
     }
 }
