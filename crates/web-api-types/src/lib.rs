@@ -41,6 +41,22 @@ pub struct NoteId(uuid::Uuid);
 #[derive(Debug, Serialize, Deserialize, AsRef, From, Copy, Clone, Into, PartialEq, Eq)]
 pub struct SpaceId(uuid::Uuid);
 
+#[cfg(feature = "server")]
+mod impl_from_param {
+    use rocket::request::FromParam;
+    use uuid::Uuid;
+
+    use crate::SpaceId;
+
+    impl<'a> FromParam<'a> for SpaceId {
+        type Error = <Uuid as FromParam<'a>>::Error;
+
+        fn from_param(param: &str) -> Result<Self, Self::Error> {
+            Uuid::from_param(param).map(SpaceId::from)
+        }
+    }
+}
+
 #[derive(Debug, Serialize, Deserialize, AsRef, From, Into)]
 pub struct NoteChecksumValue(Vec<u8>);
 

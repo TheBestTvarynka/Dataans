@@ -28,3 +28,9 @@ pub struct SyncBlock {
     pub checksum: BlockChecksumValue,
     pub space_id: SpaceId,
 }
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct BlocksIds {
+    pub ids: Vec<BlockId>,
+}

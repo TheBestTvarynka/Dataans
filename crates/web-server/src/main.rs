@@ -70,6 +70,7 @@ async fn main() -> std::result::Result<(), rocket::Error> {
                 routes::update_note
             ],
         )
+        .mount("/sync", routes![routes::blocks, routes::blocks_notes])
         .mount("/health", routes![routes::health])
         .launch()
         .await?;
