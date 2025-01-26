@@ -1,6 +1,6 @@
 use rocket::serde::json::Json;
 use rocket::{delete, post, put, State};
-use web_api_types::{Note, NoteId, Result, Space, SpaceId};
+use web_api_types::{Note, NoteId, NoteIds, Result, Space, SpaceId};
 
 use crate::routes::UserContext;
 use crate::WebServerState;
@@ -45,4 +45,13 @@ pub async fn update_note(server: &State<WebServerState>, user_context: UserConte
 #[delete("/note/<note_id>")]
 pub async fn remove_note(server: &State<WebServerState>, user_context: UserContext, note_id: NoteId) -> Result<()> {
     Ok(server.data_service.remove_note(note_id, user_context.user_id).await?)
+}
+
+#[post("/notes", data = "<data>")]
+pub async fn notes(
+    server: &State<WebServerState>,
+    user_context: UserContext,
+    data: Json<NoteIds>,
+) -> Result<Json<Vec<Note>>> {
+    Ok(Json(server.data_service.notes(&data.ids, user_context.user_id).await?))
 }

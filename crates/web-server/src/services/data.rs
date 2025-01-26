@@ -1,5 +1,6 @@
 use std::sync::Arc;
 
+use futures::future::try_join_all;
 use web_api_types::{Note, NoteId, Space, SpaceId, UserId};
 
 use crate::db::{Note as NoteModel, NoteDb, Space as SpaceModel, SpaceDb};
@@ -138,5 +139,40 @@ impl<D: NoteDb + SpaceDb> Data<D> {
         self.db.remove_note(note_id.into()).await?;
 
         Ok(())
+    }
+
+    pub async fn notes(&self, note_ids: &[NoteId], user_id: UserId) -> Result<Vec<Note>> {
+        let notes = self
+            .db
+            .notes(
+                &try_join_all(note_ids.iter().cloned().map(|note_id| async move {
+                    self.check_note_owner(note_id, user_id).await?;
+
+                    Result::Ok(note_id.into())
+                }))
+                .await?,
+            )
+            .await?;
+
+        Ok(notes
+            .into_iter()
+            .map(|note| {
+                let NoteModel {
+                    id,
+                    data,
+                    checksum,
+                    space_id,
+                    block_id,
+                } = note;
+
+                Note {
+                    id: id.into(),
+                    data: data.into(),
+                    checksum: checksum.into(),
+                    space_id: space_id.into(),
+                    block_id: block_id.into(),
+                }
+            })
+            .collect())
     }
 }

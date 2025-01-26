@@ -31,6 +31,6 @@ pub struct SyncBlock {
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct BlocksIds {
+pub struct BlockIds {
     pub ids: Vec<BlockId>,
 }

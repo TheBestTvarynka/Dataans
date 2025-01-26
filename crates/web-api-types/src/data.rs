@@ -20,3 +20,9 @@ pub struct Note {
     pub space_id: SpaceId,
     pub block_id: BlockId,
 }
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct NoteIds {
+    pub ids: Vec<NoteId>,
+}
