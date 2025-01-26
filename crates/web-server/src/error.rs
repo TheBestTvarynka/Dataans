@@ -7,20 +7,35 @@ pub enum Error {
     #[error("DbError: {0:?}")]
     DbError(DbError),
 
-    #[error("The requested resource not found")]
+    #[error("the requested resource not found")]
     NotFound,
 
-    #[error("Cannot hash password: {0:?}")]
+    #[error("cannot hash password: {0}")]
     Argon2Hash(#[from] argon2::password_hash::Error),
 
-    #[error("Cannot parse password hash")]
+    #[error("cannot parse password hash")]
     PasswordHashParsingError,
 
-    #[error("Encryption error: {0:?}")]
+    #[error("encryption error: {0}")]
     Encryption(#[from] aes_gcm::Error),
 
-    #[error("Invalid encryption key or IV length")]
+    #[error("invalid encryption key or IV length")]
     InvalidKeyLength,
+
+    #[error("failed to decrypt the data: {0}")]
+    DecryptionFailed(&'static str),
+
+    #[error("session error: {0}")]
+    Session(&'static str),
+
+    #[error("access denied")]
+    AccessDenied,
+
+    #[error("invalid {0}")]
+    InvalidData(&'static str),
+
+    #[error("internal error: {0}")]
+    Internal(&'static str),
 }
 
 impl From<DbError> for Error {
@@ -40,24 +55,32 @@ impl From<Error> for web_api_types::Error {
         match error {
             Error::DbError(err) => {
                 error!(?err);
-                Self::DbError("Interaction with the database failed".into())
+                Self::DbError("interaction with the database failed".into())
             }
-            Error::NotFound => Self::NotFound("The requested resource not found".into()),
+            Error::NotFound => Self::NotFound("the requested resource not found".into()),
             Error::Argon2Hash(err) => {
                 error!(?err);
 
                 if let argon2::password_hash::Error::Password = err {
-                    Self::InvalidCredentials("Invalid credentials".into())
+                    Self::InvalidCredentials("invalid credentials".into())
                 } else {
-                    Self::PasswordHashingError("Failed to hash password".into())
+                    Self::PasswordHashingError("failed to hash password".into())
                 }
             }
             Error::Encryption(err) => {
                 error!(?err);
-                Self::Internal("Internal error".into())
+                Self::Internal("internal error".into())
             }
-            Error::InvalidKeyLength => Self::Internal("Internal error".into()),
-            Error::PasswordHashParsingError => Self::PasswordHashingError("Unable to verify credentials".into()),
+            Error::Internal(err) => {
+                error!(err);
+                Self::Internal("internal error".into())
+            }
+            Error::InvalidKeyLength => Self::Internal("internal error".into()),
+            Error::PasswordHashParsingError => Self::PasswordHashingError("unable to verify credentials".into()),
+            Error::AccessDenied => Self::AccessDenied("access denied".into()),
+            Error::InvalidData(_) => Self::InvalidData(error.to_string()),
+            Error::DecryptionFailed(reason) => Self::Internal(reason.into()),
+            Error::Session(_) => Self::Unauthorized(error.to_string()),
         }
     }
 }
