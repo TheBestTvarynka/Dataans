@@ -1,7 +1,11 @@
+use std::str;
+
 use leptos::ev::SubmitEvent;
 use leptos::{
-    component, create_signal, html, view, Action, IntoView, NodeRef, Show, SignalGet, SignalSet, WriteSignal,
+    component, create_signal, html, view, Action, IntoView, NodeRef, Params, Show, SignalGet, SignalSet, WriteSignal,
 };
+use leptos_router::{use_params, Params};
+use url::Url;
 
 use crate::backend::auth::{sign_in, sign_up};
 use crate::notes::md_node::InlineCode;
@@ -14,7 +18,7 @@ enum WindowMode {
 }
 
 #[component]
-fn SignIn(set_mode: WriteSignal<WindowMode>) -> impl IntoView {
+fn SignIn(set_mode: WriteSignal<WindowMode>, web_server_url: Url) -> impl IntoView {
     let toaster = leptoaster::expect_toaster();
 
     let (is_success, set_is_success) = create_signal(false);
@@ -23,14 +27,20 @@ fn SignIn(set_mode: WriteSignal<WindowMode>) -> impl IntoView {
     let username_input: NodeRef<html::Input> = NodeRef::new();
     let password_input: NodeRef<html::Input> = NodeRef::new();
 
+    let url = web_server_url.clone();
     let t = toaster.clone();
     let sign_in = Action::new(move |data: &(Option<Vec<u8>>, String, String)| {
         let t = t.clone();
+        let url = url.clone();
 
         let (secret_key, username, password) = data.clone();
 
         async move {
-            try_exec!(sign_in(secret_key, username, password).await, "Failed to sign in", t);
+            try_exec!(
+                sign_in(secret_key, username, password, url).await,
+                "Failed to sign in",
+                t
+            );
             set_is_success.set(true);
         }
     });
@@ -61,6 +71,7 @@ fn SignIn(set_mode: WriteSignal<WindowMode>) -> impl IntoView {
     view! {
         <form class="auth-form" on:submit=sign_in>
             <span class="auth-form-label">"Secret key:"</span>
+            <span class="auth-form-label">{web_server_url.to_string()}</span>
             <span
                 class="auth-form-label"
                 style="font-size: 0.8em; width: 100%"
@@ -92,7 +103,7 @@ fn SignIn(set_mode: WriteSignal<WindowMode>) -> impl IntoView {
 }
 
 #[component]
-fn SignUp(set_mode: WriteSignal<WindowMode>) -> impl IntoView {
+fn SignUp(set_mode: WriteSignal<WindowMode>, web_server_url: Url) -> impl IntoView {
     let toaster = leptoaster::expect_toaster();
 
     let (user_id, set_user_id) = create_signal(None);
@@ -101,15 +112,17 @@ fn SignUp(set_mode: WriteSignal<WindowMode>) -> impl IntoView {
     let username_input: NodeRef<html::Input> = NodeRef::new();
     let password_input: NodeRef<html::Input> = NodeRef::new();
 
+    let url = web_server_url.clone();
     let t = toaster.clone();
     let sign_up = Action::new(move |data: &(Vec<u8>, String, String)| {
         let t = t.clone();
+        let url = url.clone();
 
         let (invitation_token, username, password) = data.clone();
 
         async move {
             set_user_id.set(Some(try_exec!(
-                sign_up(invitation_token, username, password).await,
+                sign_up(invitation_token, username, password, url).await,
                 "Failed to sign up",
                 t
             )));
@@ -138,6 +151,7 @@ fn SignUp(set_mode: WriteSignal<WindowMode>) -> impl IntoView {
     view! {
         <form class="auth-form" on:submit=sign_up>
             <span class="auth-form-label">"Invitation token:"</span>
+            <span class="auth-form-label">{web_server_url.to_string()}</span>
             <input class="auth-form-input input" placeholder="invitation token" type="text" node_ref=invitation_token_input />
             <span class="auth-form-label">"Username:"</span>
             <input class="auth-form-input input" placeholder="username" type="text" node_ref=username_input />
@@ -171,15 +185,30 @@ fn SignUp(set_mode: WriteSignal<WindowMode>) -> impl IntoView {
     }
 }
 
+#[derive(Params, Clone, PartialEq)]
+pub struct AuthParams {
+    pub url: Option<String>,
+}
+
 #[component]
 pub fn AuthWindow() -> impl IntoView {
+    let query = use_params::<AuthParams>();
+
     let (mode, set_mode) = create_signal(WindowMode::default());
 
     view! {
         <div class="auth-window">
-            {move || match mode.get() {
-                WindowMode::SignIn => view! { <SignIn set_mode /> },
-                WindowMode::SignUp => view! { <SignUp set_mode /> },
+            {move || {
+                let web_server_url = query
+                    .get()
+                    .unwrap()
+                    .url
+                    .map(|url| Url::parse(str::from_utf8(&hex::decode(url).unwrap()).unwrap()).unwrap())
+                    .unwrap_or_else(|| Url::parse("http://127.0.0.1:8080").unwrap());
+                match mode.get() {
+                    WindowMode::SignIn => view! { <SignIn set_mode web_server_url /> },
+                    WindowMode::SignUp => view! { <SignUp set_mode web_server_url /> },
+                }
             }}
         </div>
     }

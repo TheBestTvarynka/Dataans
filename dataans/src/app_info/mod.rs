@@ -44,11 +44,14 @@ pub fn AppInfo() -> impl IntoView {
         })
     });
 
+    let web_server_url_ref: NodeRef<html::Input> = NodeRef::new();
     let show_auth_window = move |_| {
         let t = toaster.clone();
+        let url = web_server_url_ref.get().expect("<input> should be mounted").value();
+        let url = try_exec!(url.parse(), "Failed to parse the web server URL", t);
         spawn_local(async move {
             try_exec!(
-                crate::backend::window::show_auth_window().await,
+                crate::backend::window::show_auth_window(url).await,
                 "Failed to create auth window",
                 t
             );
@@ -61,6 +64,12 @@ pub fn AppInfo() -> impl IntoView {
             <span>"Take notes in the form of markdown snippets grouped into spaces."</span>
             <span>"Source code: "<a href="https://github.com/TheBestTvarynka/Dataans" target="_blank">"GitHub/TbeBestTvarynka/Dataans"</a>"."</span>
             <span class="icons-by-icons8">"Icons by "<a href="https://icons8.com" target="_blank">"Icons8"</a>"."</span>
+            <div class="horizontal">
+                <input type="text" class="input" value="http://127.0.0.1:8000/" style="flex-grow: 1;" node_ref=web_server_url_ref />
+                <button on:click=show_auth_window title="Set up back up & sync" class="tool">
+                    <img alt="cloud-icon" src="/public/icons/cloud-backup-light.png" />
+                </button>
+            </div>
             <hr style="width: 80%" />
             <div class="horizontal">
                 <button class="button_ok" on:click=open_config_file>"Edit config file"</button>
@@ -76,9 +85,6 @@ pub fn AppInfo() -> impl IntoView {
                 }} else {view! {
                     <button class="button_ok" on:click=move |ev| enable_autostart.call(ev)  title="Enable autostart">"Enable autostart"</button>
                 }}}
-                <button on:click=show_auth_window title="Set up back up & sync" class="tool">
-                    <img alt="cloud-icon" src="/public/icons/cloud-backup-light.png" />
-                </button>
             </div>
             {move || {
                 let Config { key_bindings, appearance, app } = global_config.get();

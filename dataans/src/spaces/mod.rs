@@ -72,45 +72,13 @@ pub fn Spaces(
     let (query, set_query) = create_signal(String::new());
 
     let toaster = leptoaster::expect_toaster();
-    let t = toaster.clone();
     let show_app_info_window = move |_| {
-        let t = t.clone();
+        let t = toaster.clone();
         spawn_local(async move {
             try_exec!(
                 crate::backend::window::show_app_info_window().await,
                 "Failed to create auth window",
                 t
-            );
-        });
-    };
-
-    let t = toaster.clone();
-    let trigger_sync = move |_| {
-        let t = t.clone();
-        spawn_local(async move {
-            try_exec!(
-                crate::backend::sync::trigger_sync().await,
-                "Failed to create auth window",
-                t
-            );
-        });
-    };
-
-    let wow = move |_| {
-        let t = toaster.clone();
-        spawn_local(async move {
-            t.toast(
-                leptoaster::ToastBuilder::new("Sync started...")
-                    .with_level(leptoaster::ToastLevel::Info)
-                    .with_position(leptoaster::ToastPosition::BottomRight)
-                    .with_expiry(Some(5000)),
-            );
-            try_exec!(crate::backend::sync::simple_listen().await, "Failed sync the data", t);
-            t.toast(
-                leptoaster::ToastBuilder::new("Sync finished!")
-                    .with_level(leptoaster::ToastLevel::Info)
-                    .with_position(leptoaster::ToastPosition::BottomRight)
-                    .with_expiry(Some(5000)),
             );
         });
     };
@@ -129,8 +97,6 @@ pub fn Spaces(
                     }
                 },
             }}
-            <button on:click=wow>"wow!"</button>
-            <button on:click=trigger_sync>"sync!"</button>
             <div style="flex-grow: 1; align-content: end;">
                 <div style="display: inline-flex; width: 100%; justify-content: center; margin-bottom: 0.2em;">
                     <button class="button_cancel" on:click=show_app_info_window>

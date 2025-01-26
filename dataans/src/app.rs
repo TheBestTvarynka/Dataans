@@ -84,7 +84,7 @@ pub fn App() -> impl IntoView {
                         <Spaces config=config.get() spaces set_spaces />
                         <Notes config=config.get() />
                     } />
-                    <Route path="/auth" view=AuthWindow />
+                    <Route path="/auth/:url" view=AuthWindow />
                     <Route path="/app-info" view=AppInfo />
                 </Routes>
             </main>
