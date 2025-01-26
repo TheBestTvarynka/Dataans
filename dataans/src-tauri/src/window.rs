@@ -2,7 +2,7 @@ use common::error::{CommandError, CommandResultEmpty};
 use tauri::{AppHandle, Manager, WebviewUrl, WebviewWindowBuilder};
 use url::Url;
 
-const AUTH_WINDOW_TITLE: &str = "Auth-and-Sync";
+pub const AUTH_WINDOW_TITLE: &str = "Auth-and-Sync";
 const APP_INFO_WINDOW_TITLE: &str = "App-Info";
 
 #[instrument(level = "trace", ret, skip(app))]
