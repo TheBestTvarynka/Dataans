@@ -2,11 +2,10 @@ use std::fs;
 use std::path::PathBuf;
 use std::sync::Mutex;
 
-use common::profile::{SecretKey, UserProfile};
+use common::profile::{SecretKey, Sync, UserProfile, WebServerUrl};
 use rand::rngs::OsRng;
 use rand::Rng;
 use reqwest::Client;
-use url::Url;
 use uuid::Uuid;
 use web_api_types::{InvitationToken, Password, SignInRequest, SignInResponse, SignUpRequest, Username};
 
@@ -14,16 +13,14 @@ use crate::dataans::DataansError;
 
 pub struct WebService {
     user_data_dir: PathBuf,
-    web_server: Url,
     user_profile: Mutex<Option<UserProfile>>,
 }
 
 impl WebService {
-    pub fn new(user_data_dir: PathBuf, web_server: Url) -> Self {
+    pub fn new(user_data_dir: PathBuf) -> Self {
         Self {
             user_data_dir,
             user_profile: Mutex::new(None),
-            web_server,
         }
     }
 
@@ -32,9 +29,10 @@ impl WebService {
         invitation_token: InvitationToken,
         username: Username,
         password: Password,
+        web_server_url: WebServerUrl,
     ) -> Result<Uuid, DataansError> {
         let response = Client::new()
-            .post(self.web_server.join("auth/sign-up")?)
+            .post(web_server_url.as_ref().join("auth/sign-up")?)
             .json(&SignUpRequest {
                 invitation_token,
                 username,
@@ -52,7 +50,7 @@ impl WebService {
         let secret_key = SecretKey::from(OsRng.gen::<[u8; 32]>().to_vec());
 
         fs::write(
-            self.user_data_dir.join(format!("{}.json", user_id)),
+            self.user_data_dir.join(format!("secret-key-{}.json", user_id)),
             hex::encode(secret_key.as_ref()),
         )?;
 
@@ -64,9 +62,10 @@ impl WebService {
         secret_key: Option<SecretKey>,
         username: Username,
         password: Password,
+        web_server_url: WebServerUrl,
     ) -> Result<(), DataansError> {
         let response = Client::new()
-            .post(self.web_server.join("auth/sign-in")?)
+            .post(web_server_url.as_ref().join("auth/sign-in")?)
             .json(&SignInRequest {
                 username: username.clone(),
                 password,
@@ -88,7 +87,7 @@ impl WebService {
         let secret_key = if let Some(key) = secret_key {
             key
         } else {
-            let secret_key_file_path = self.user_data_dir.join(format!("{}.json", user_id));
+            let secret_key_file_path = self.user_data_dir.join(format!("secret-key-{}.json", user_id.as_ref()));
             SecretKey::from(
                 hex::decode(
                     fs::read(&secret_key_file_path)
@@ -104,6 +103,7 @@ impl WebService {
             auth_token: token,
             auth_token_expiration_date: expiration_date,
             secret_key,
+            sync_config: Sync::Disabled { url: web_server_url },
         };
 
         fs::write(

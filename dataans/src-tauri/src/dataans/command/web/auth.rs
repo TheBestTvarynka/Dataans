@@ -1,5 +1,5 @@
 use common::error::{CommandResult, CommandResultEmpty};
-use common::profile::SecretKey;
+use common::profile::{SecretKey, WebServerUrl};
 use tauri::State;
 use uuid::Uuid;
 use web_api_types::{InvitationToken, Password, Username};
@@ -13,8 +13,12 @@ pub async fn sign_up(
     invitation_token: InvitationToken,
     username: Username,
     password: Password,
+    web_server_url: WebServerUrl,
 ) -> CommandResult<Uuid> {
-    Ok(state.web_service.sign_up(invitation_token, username, password).await?)
+    Ok(state
+        .web_service
+        .sign_up(invitation_token, username, password, web_server_url)
+        .await?)
 }
 
 #[instrument(ret, skip(state))]
@@ -24,6 +28,10 @@ pub async fn sign_in(
     secret_key: Option<SecretKey>,
     username: Username,
     password: Password,
+    web_server_url: WebServerUrl,
 ) -> CommandResultEmpty {
-    Ok(state.web_service.sign_in(secret_key, username, password).await?)
+    Ok(state
+        .web_service
+        .sign_in(secret_key, username, password, web_server_url)
+        .await?)
 }
