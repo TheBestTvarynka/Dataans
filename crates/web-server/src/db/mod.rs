@@ -38,6 +38,7 @@ pub trait NoteDb: Send + Sync {
     async fn add_note(&self, note: &Note) -> Result<Uuid, DbError>;
     async fn update_note(&self, note: &Note) -> Result<(), DbError>;
     async fn remove_note(&self, note_id: Uuid) -> Result<(), DbError>;
+    async fn note_owner(&self, note_id: Uuid) -> Result<Uuid, DbError>;
 }
 
 pub trait SyncDb: Send + Sync {

@@ -320,7 +320,7 @@ impl NoteDb for PostgresDb {
     async fn remove_note(&self, note_id: Uuid) -> Result<(), DbError> {
         let mut transaction = self.pool.begin().await?;
 
-        let block_id: (Uuid,) = sqlx::query_as("select block_id from note where id = $1")
+        let (block_id,): (Uuid,) = sqlx::query_as("select block_id from note where id = $1")
             .bind(note_id)
             .fetch_one(&mut *transaction)
             .await?;
@@ -329,11 +329,21 @@ impl NoteDb for PostgresDb {
             .execute(&mut *transaction)
             .await?;
 
-        self.update_block_checksum(block_id.0, &mut transaction).await?;
+        self.update_block_checksum(block_id, &mut transaction).await?;
 
         transaction.commit().await?;
 
         Ok(())
+    }
+
+    async fn note_owner(&self, note_id: Uuid) -> Result<Uuid, DbError> {
+        let (owner_id,): (Uuid,) =
+            sqlx::query_as("select user_id from note left join space on note.space_id = space.id where note.id = $1")
+                .bind(note_id)
+                .fetch_one(&self.pool)
+                .await?;
+
+        Ok(owner_id)
     }
 }
 
@@ -357,11 +367,11 @@ impl SyncDb for PostgresDb {
     }
 
     async fn block_owner(&self, block_id: Uuid) -> Result<Uuid, DbError> {
-        let user_id: (Uuid,) = sqlx::query_as("select space.user_id from sync_block join space on sync_block.space_id = space.id where sync_block.id = $1")
+        let (user_id,): (Uuid,) = sqlx::query_as("select space.user_id from sync_block join space on sync_block.space_id = space.id where sync_block.id = $1")
             .bind(block_id)
             .fetch_one(&self.pool)
             .await?;
 
-        Ok(user_id.0)
+        Ok(user_id)
     }
 }

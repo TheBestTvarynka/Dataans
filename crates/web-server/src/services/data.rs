@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use web_api_types::{Note, Space, UserId};
+use web_api_types::{Note, NoteId, Space, SpaceId, UserId};
 
 use crate::db::{Note as NoteModel, NoteDb, Space as SpaceModel, SpaceDb};
 use crate::{Error, Result};
@@ -12,6 +12,16 @@ pub struct Data<D> {
 impl<D: NoteDb + SpaceDb> Data<D> {
     pub fn new(db: Arc<D>) -> Self {
         Self { db }
+    }
+
+    async fn check_note_owner(&self, note_id: NoteId, user_id: UserId) -> Result<()> {
+        let note_owner_id = self.db.note_owner(note_id.into()).await?;
+
+        if note_owner_id != *user_id.as_ref() {
+            Err(Error::InvalidData("note space id"))
+        } else {
+            Ok(())
+        }
     }
 
     pub async fn add_space(&self, space: Space, user_id: UserId) -> Result<()> {
@@ -62,12 +72,20 @@ impl<D: NoteDb + SpaceDb> Data<D> {
         Ok(())
     }
 
-    pub async fn add_note(&self, note: Note, user_id: UserId) -> Result<()> {
-        let space = self.db.space(*note.space_id.as_ref()).await?;
+    pub async fn remove_space(&self, space_id: SpaceId, user_id: UserId) -> Result<()> {
+        let space = self.db.space(space_id.into()).await?;
 
         if space.user_id != *user_id.as_ref() {
-            return Err(Error::InvalidData("note space id"));
+            return Err(Error::InvalidData("space user id"));
         }
+
+        self.db.remove_space(space_id.into()).await?;
+
+        Ok(())
+    }
+
+    pub async fn add_note(&self, note: Note, user_id: UserId) -> Result<()> {
+        self.check_note_owner(note.id, user_id).await?;
 
         let Note {
             id,
@@ -91,11 +109,7 @@ impl<D: NoteDb + SpaceDb> Data<D> {
     }
 
     pub async fn update_note(&self, note: Note, user_id: UserId) -> Result<()> {
-        let space = self.db.space(*note.space_id.as_ref()).await?;
-
-        if space.user_id != *user_id.as_ref() {
-            return Err(Error::InvalidData("note space id"));
-        }
+        self.check_note_owner(note.id, user_id).await?;
 
         let Note {
             id,
@@ -114,6 +128,14 @@ impl<D: NoteDb + SpaceDb> Data<D> {
                 block_id: block_id.into(),
             })
             .await?;
+
+        Ok(())
+    }
+
+    pub async fn remove_note(&self, note_id: NoteId, user_id: UserId) -> Result<()> {
+        self.check_note_owner(note_id, user_id).await?;
+
+        self.db.remove_note(note_id.into()).await?;
 
         Ok(())
     }

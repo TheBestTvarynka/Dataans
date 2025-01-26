@@ -46,15 +46,21 @@ mod impl_from_param {
     use rocket::request::FromParam;
     use uuid::Uuid;
 
-    use crate::SpaceId;
+    macro_rules! impl_from_param {
+        (id: $id_type:ty) => {
+            impl<'a> FromParam<'a> for $id_type {
+                type Error = <Uuid as FromParam<'a>>::Error;
 
-    impl<'a> FromParam<'a> for SpaceId {
-        type Error = <Uuid as FromParam<'a>>::Error;
-
-        fn from_param(param: &str) -> Result<Self, Self::Error> {
-            Uuid::from_param(param).map(SpaceId::from)
-        }
+                fn from_param(param: &str) -> Result<Self, Self::Error> {
+                    Uuid::from_param(param).map(From::from)
+                }
+            }
+        };
     }
+
+    impl_from_param!(id: crate::SpaceId);
+    impl_from_param!(id: crate::NoteId);
+    impl_from_param!(id: crate::UserId);
 }
 
 #[derive(Debug, Serialize, Deserialize, AsRef, From, Into)]
