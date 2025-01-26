@@ -20,6 +20,15 @@ pub enum Error {
 
     #[cfg_attr(feature = "server", response(status = 500, content_type = "json"))]
     Internal(String),
+
+    #[cfg_attr(feature = "server", response(status = 403, content_type = "json"))]
+    AccessDenied(String),
+
+    #[cfg_attr(feature = "server", response(status = 400, content_type = "json"))]
+    InvalidData(String),
+
+    #[cfg_attr(feature = "server", response(status = 401, content_type = "json"))]
+    Unauthorized(String),
 }
 
 pub type Result<T> = std::result::Result<T, Error>;

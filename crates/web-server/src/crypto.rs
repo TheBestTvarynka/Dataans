@@ -1,13 +1,21 @@
 use aes_gcm::aead::Aead;
-use aes_gcm::{AeadCore, Aes256Gcm, Key};
+use aes_gcm::{AeadCore, Aes256Gcm, Key, KeyInit, Nonce};
 use argon2::password_hash::rand_core::OsRng;
 use argon2::password_hash::SaltString;
 use argon2::{Argon2, PasswordHash, PasswordHasher, PasswordVerifier};
 use sha2::{Digest, Sha256};
 
+pub type Sha256Checksum = [u8; 32];
+pub type EncryptionKey = [u8; SERVER_ENCRYPTION_KEY_SIZE];
+
+const NONCE_LENGTH: usize = 12;
+const HMAC_SHA256_CHECKSUM_LENGTH: usize = 32;
+pub const EMPTY_SHA256_CHECKSUM: &[u8] = &[0; 32];
+pub const SERVER_ENCRYPTION_KEY_SIZE: usize = 32;
+
 use crate::{Error, Result};
 
-pub fn sha256(data: &[u8]) -> [u8; 32] {
+pub fn sha256(data: &[u8]) -> Sha256Checksum {
     let mut hasher = Sha256::new();
     hasher.update(data);
 
@@ -35,22 +43,7 @@ pub fn verify_password(password: &[u8], hash: &[u8]) -> Result<()> {
     Ok(argon2.verify_password(&password, &parsed_hash)?)
 }
 
-pub fn hmac(data: &[u8], key: &[u8]) -> Result<Vec<u8>> {
-    use hmac::{Hmac, Mac};
-
-    let mut mac = Hmac::<Sha256>::new_from_slice(key).map_err(|err| {
-        error!(?err, "Failed to initialize HMAC-SHA256");
-        Error::InvalidKeyLength
-    })?;
-
-    mac.update(data);
-
-    Ok(mac.finalize().into_bytes().to_vec())
-}
-
-pub fn encrypt(data: &[u8], key: &[u8]) -> Result<Vec<u8>> {
-    use aes_gcm::KeyInit;
-
+pub fn encrypt(data: &[u8], key: &EncryptionKey) -> Result<Vec<u8>> {
     // Encryption
     let key = Key::<Aes256Gcm>::from_slice(key);
     let nonce = Aes256Gcm::generate_nonce(&mut OsRng);
@@ -63,9 +56,76 @@ pub fn encrypt(data: &[u8], key: &[u8]) -> Result<Vec<u8>> {
     result.extend_from_slice(&cipher_text);
 
     // Checksum
-    let checksum = hmac(&result, key)?;
+    let checksum = {
+        use hmac::{Hmac, Mac};
+
+        let mut mac = <Hmac<Sha256> as Mac>::new_from_slice(key).map_err(|err| {
+            error!(?err, "Failed to initialize HMAC-SHA256");
+            Error::InvalidKeyLength
+        })?;
+
+        mac.update(&nonce);
+        mac.update(data);
+
+        mac.finalize().into_bytes()
+    };
     result.extend_from_slice(&checksum);
 
     // result = nonce + cipher_text + checksum
     Ok(result)
+}
+
+pub fn decrypt(data: &[u8], key: &EncryptionKey) -> Result<Vec<u8>> {
+    // data = nonce + cipher_text + checksum
+
+    if data.len() < NONCE_LENGTH + HMAC_SHA256_CHECKSUM_LENGTH {
+        return Err(Error::DecryptionFailed("invalid data length"));
+    }
+
+    let nonce = Nonce::from_slice(&data[..12]);
+    let cipher_text = &data[12..data.len() - 32];
+    let checksum = &data[data.len() - 32..];
+
+    // Decryption
+    let key = Key::<Aes256Gcm>::from_slice(key);
+    let cipher = Aes256Gcm::new(key);
+
+    let decrypted = cipher.decrypt(nonce, cipher_text)?;
+
+    // Checksum verification
+    let expected_checksum = {
+        use hmac::{Hmac, Mac};
+
+        let mut mac = <Hmac<Sha256> as Mac>::new_from_slice(key).map_err(|err| {
+            error!(?err, "Failed to initialize HMAC-SHA256");
+            Error::InvalidKeyLength
+        })?;
+
+        mac.update(nonce);
+        mac.update(&decrypted);
+
+        mac.finalize().into_bytes().to_vec()
+    };
+
+    if expected_checksum != checksum {
+        return Err(Error::DecryptionFailed("message altered"));
+    }
+
+    Ok(decrypted)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{decrypt, encrypt};
+
+    #[test]
+    fn encrypt_decrypt() {
+        let key = b"oeifvncpfiejnvdjpvnwifvj12345678";
+        let data = b"tbt";
+
+        let cipher_text = encrypt(data, key).unwrap();
+        let decrypted = decrypt(&cipher_text, key).unwrap();
+
+        assert_eq!(data[..], decrypted[..]);
+    }
 }

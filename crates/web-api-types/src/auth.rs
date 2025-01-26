@@ -5,6 +5,8 @@ use uuid::Uuid;
 
 use super::*;
 
+pub const AUTH_COOKIE_NAME: &str = "dataans-auth";
+
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SignUpRequest {
@@ -53,7 +55,7 @@ mod impl_responder {
                 .status(Status::Ok)
                 .header(ContentType::JSON)
                 .header(
-                    Cookie::build(("Set-Cookie", token.as_str()))
+                    Cookie::build((crate::AUTH_COOKIE_NAME, token.as_str()))
                         .domain(env!("DATAANS_SERVER_DOMAIN"))
                         .path("/")
                         .secure(true)
