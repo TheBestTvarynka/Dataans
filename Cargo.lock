@@ -755,9 +755,10 @@ dependencies = [
 name = "common"
 version = "0.2.1"
 dependencies = [
- "nutype",
+ "derive_more 1.0.0",
  "serde",
  "time",
+ "url",
  "uuid",
  "web-api-types",
 ]
@@ -1159,6 +1160,7 @@ dependencies = [
  "serde",
  "serde-wasm-bindgen",
  "time",
+ "url",
  "uuid",
  "wasm-bindgen",
  "wasm-bindgen-futures",
