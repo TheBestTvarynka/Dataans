@@ -5,6 +5,7 @@ mod spaces_list;
 pub mod tools;
 
 use common::note::Id as NoteId;
+use common::profile::UserContext;
 use common::space::OwnedSpace;
 use common::Config;
 use leptos::*;
@@ -83,6 +84,8 @@ pub fn Spaces(
         });
     };
 
+    let user_context = expect_context::<RwSignal<Option<UserContext>>>();
+
     view! {
         <div class="spaces-container">
             <Tools set_spaces spaces_minimized set_spaces_minimized set_find_node_mode set_query=set_query.into() set_selected_space config=config.clone() />
@@ -98,6 +101,15 @@ pub fn Spaces(
                 },
             }}
             <div style="flex-grow: 1; align-content: end;">
+                {move || if let Some(user_context) = user_context.get() {
+                    view!{
+                        <span>{user_context.username.as_ref().to_string()}</span>
+                    }
+                } else {
+                    view! {
+                        <span>"none"</span>
+                    }
+                }}
                 <div style="display: inline-flex; width: 100%; justify-content: center; margin-bottom: 0.2em;">
                     <button class="button_cancel" on:click=show_app_info_window>
                         {format!("{}.{}", env!("CARGO_PKG_VERSION_MAJOR"), env!("CARGO_PKG_VERSION_MINOR"))}

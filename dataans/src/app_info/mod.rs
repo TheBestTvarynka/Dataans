@@ -2,6 +2,7 @@ mod export;
 
 use std::path::PathBuf;
 
+use common::profile::UserContext;
 use common::{App, Appearance, Config, KeyBindings};
 use leptos::*;
 
@@ -13,6 +14,7 @@ pub fn AppInfo() -> impl IntoView {
     let toaster = leptoaster::expect_toaster();
 
     let global_config = expect_context::<RwSignal<Config>>();
+    let user_context = expect_context::<RwSignal<Option<UserContext>>>();
 
     let open_config_file = move |_| spawn_local(open_config_file());
     let open_config_file_folder = move |_| spawn_local(open_config_file_folder());
@@ -45,7 +47,7 @@ pub fn AppInfo() -> impl IntoView {
     });
 
     let web_server_url_ref: NodeRef<html::Input> = NodeRef::new();
-    let show_auth_window = move |_| {
+    let show_auth_window = Callback::new(move |_: ()| {
         let t = toaster.clone();
         let url = web_server_url_ref.get().expect("<input> should be mounted").value();
         let url = try_exec!(url.parse(), "Failed to parse the web server URL", t);
@@ -56,20 +58,44 @@ pub fn AppInfo() -> impl IntoView {
                 t
             );
         })
-    };
+    });
 
     view! {
         <div class="app-into-window">
-            <span class="app-into-window-title">{format!("Dataans v.{}", env!("CARGO_PKG_VERSION"))}</span>
             <span>"Take notes in the form of markdown snippets grouped into spaces."</span>
             <span>"Source code: "<a href="https://github.com/TheBestTvarynka/Dataans" target="_blank">"GitHub/TbeBestTvarynka/Dataans"</a>"."</span>
             <span class="icons-by-icons8">"Icons by "<a href="https://icons8.com" target="_blank">"Icons8"</a>"."</span>
-            <div class="horizontal">
-                <input type="text" class="input" value="http://127.0.0.1:8000/" style="flex-grow: 1;" node_ref=web_server_url_ref />
-                <button on:click=show_auth_window title="Set up back up & sync" class="tool">
-                    <img alt="cloud-icon" src="/public/icons/cloud-backup-light.png" />
-                </button>
-            </div>
+            <hr style="width: 100%" />
+                {move || if let Some(user_context) = user_context.get() {
+                    let UserContext { user_id, username, sync_config } = user_context;
+                    //
+                    view! {
+                        <div class="vertical">
+                            <span class="app-into-window-title">{format!("Logged as {} (id: {}). Sync configuration:", username.as_ref(), user_id.as_ref())}</span>
+                            <form class="vertical">
+                                <div>
+                                    <input type="radio" id="manual" name="sync-move" value="manual" disabled=true />
+                                    <label for="manual">"Manual"</label>
+                                </div>
+                                <div>
+                                    <input type="radio" id="poll" name="sync-move" value="poll" />
+                                    <label for="poll">"Poll"</label>
+                                </div>
+                                <div>
+                                    <input type="radio" id="push" name="sync-move" value="push" />
+                                    <label for="push">"Push"</label>
+                                </div>
+                            </form>
+                        </div>
+                    }
+                } else { view! {
+                    <div class="horizontal">
+                        <input type="text" class="input" value="http://127.0.0.1:8000/" style="flex-grow: 1;" node_ref=web_server_url_ref />
+                        <button on:click=move |_| show_auth_window.call(()) title="Set up back up & sync" class="tool">
+                            <img alt="cloud-icon" src="/public/icons/cloud-backup-light.png" />
+                        </button>
+                    </div>
+                }} }
             <hr style="width: 80%" />
             <div class="horizontal">
                 <button class="button_ok" on:click=open_config_file>"Edit config file"</button>
