@@ -1,0 +1,14 @@
+{
+  "identifier": "app-info-capability",
+  "platforms": [
+    "macOS",
+    "windows",
+    "linux"
+  ],
+  "windows": [
+    "App-Info"
+  ],
+  "permissions": [
+    "core:event:allow-listen"
+  ]
+}

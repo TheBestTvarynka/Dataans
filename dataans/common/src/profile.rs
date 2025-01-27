@@ -14,13 +14,13 @@ pub struct SecretKey(Vec<u8>);
 /// Web server URL.
 ///
 /// The authentication and synchronization server URL.
-#[derive(Debug, Serialize, Deserialize, AsRef, From)]
+#[derive(Debug, Serialize, Deserialize, AsRef, From, Clone)]
 pub struct WebServerUrl(Url);
 
 /// Synchronization mode.
 ///
 /// It represents how the user wants to synchronize the data.
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 pub enum SyncMode {
     /// The user manually synchronizes the data by pressing the sync button.
     Manual,
@@ -34,7 +34,7 @@ pub enum SyncMode {
 }
 
 /// Synchronization configuration.
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum Sync {
     /// No synchronization enabled.
     ///
@@ -69,6 +69,19 @@ pub struct UserProfile {
     pub auth_token_expiration_date: OffsetDateTime,
     /// Secret key.
     pub secret_key: SecretKey,
+    /// Synchronization configuration.
+    pub sync_config: Sync,
+}
+
+/// User context.
+///
+/// The user context is returned by the backend and used only on frontend.
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct UserContext {
+    /// User ID.
+    pub user_id: UserId,
+    /// Username.
+    pub username: Username,
     /// Synchronization configuration.
     pub sync_config: Sync,
 }

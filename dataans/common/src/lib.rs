@@ -3,6 +3,8 @@
 
 /// Contains general error and result types for Tauri commands.
 pub mod error;
+/// Events names and types.
+pub mod event;
 /// Contains schema definitions for data export.
 pub mod export;
 /// Contains all note-related structures.

@@ -1,10 +1,11 @@
-use common::error::{CommandResult, CommandResultEmpty, CommandError};
-use common::profile::{SecretKey, WebServerUrl};
-use tauri::{State, AppHandle, Runtime, Manager};
+use common::error::{CommandError, CommandResult, CommandResultEmpty};
+use common::event::{UserContextEvent, USER_CONTEXT_EVENT};
+use common::profile::{SecretKey, UserContext, WebServerUrl};
+use tauri::{AppHandle, Emitter, Manager, Runtime, State};
 use uuid::Uuid;
 use web_api_types::{InvitationToken, Password, Username};
 
-use crate::dataans::DataansState;
+use crate::dataans::{DataansError, DataansState};
 
 #[instrument(ret, skip(state))]
 #[tauri::command]
@@ -21,6 +22,12 @@ pub async fn sign_up(
         .await?)
 }
 
+fn emit_user_context<R: Runtime>(app: AppHandle<R>, user_context: UserContext) -> Result<(), DataansError> {
+    app.emit(USER_CONTEXT_EVENT, UserContextEvent::SignedIn(user_context))?;
+
+    Ok(())
+}
+
 #[instrument(ret, skip(state))]
 #[tauri::command]
 pub async fn sign_in<R: Runtime>(
@@ -31,7 +38,7 @@ pub async fn sign_in<R: Runtime>(
     password: Password,
     web_server_url: WebServerUrl,
 ) -> CommandResultEmpty {
-    state
+    let user_context = state
         .web_service
         .sign_in(secret_key, username, password, web_server_url)
         .await?;
@@ -42,6 +49,8 @@ pub async fn sign_in<R: Runtime>(
         window.close().map_err(|err| CommandError::Tauri(err.to_string()))?;
         window.destroy().map_err(|err| CommandError::Tauri(err.to_string()))?;
     }
+
+    emit_user_context(app, user_context)?;
 
     Ok(())
 }

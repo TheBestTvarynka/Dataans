@@ -9,6 +9,7 @@
     "Auth-and-Sync"
   ],
   "permissions": [
+    "core:event:allow-listen",
     "dataans:allow-sign-up",
     "dataans:allow-sign-in"
   ]

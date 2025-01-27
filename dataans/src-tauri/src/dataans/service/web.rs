@@ -2,7 +2,7 @@ use std::fs;
 use std::path::PathBuf;
 use std::sync::Mutex;
 
-use common::profile::{SecretKey, Sync, UserProfile, WebServerUrl};
+use common::profile::{SecretKey, Sync, UserContext, UserProfile, WebServerUrl};
 use rand::rngs::OsRng;
 use rand::Rng;
 use reqwest::Client;
@@ -63,7 +63,7 @@ impl WebService {
         username: Username,
         password: Password,
         web_server_url: WebServerUrl,
-    ) -> Result<(), DataansError> {
+    ) -> Result<UserContext, DataansError> {
         let response = Client::new()
             .post(web_server_url.as_ref().join("auth/sign-in")?)
             .json(&SignInRequest {
@@ -111,8 +111,14 @@ impl WebService {
             serde_json::to_vec(&user_profile)?,
         )?;
 
+        let user_context = UserContext {
+            user_id: user_profile.user_id,
+            username: user_profile.username.clone(),
+            sync_config: user_profile.sync_config.clone(),
+        };
+
         *self.user_profile.lock().unwrap() = Some(user_profile);
 
-        Ok(())
+        Ok(user_context)
     }
 }
