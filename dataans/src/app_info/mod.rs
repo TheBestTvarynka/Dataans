@@ -8,6 +8,7 @@ use leptos::*;
 
 use crate::app_info::export::Export;
 use crate::backend::{open_config_file, open_config_file_folder, open_theme_file};
+use crate::notes::md_node::InlineCode;
 
 #[component]
 pub fn AppInfo() -> impl IntoView {
@@ -70,19 +71,25 @@ pub fn AppInfo() -> impl IntoView {
                     let UserContext { user_id, username, sync_config } = user_context;
                     //
                     view! {
-                        <div class="vertical">
-                            <span class="app-into-window-title">{format!("Logged as {} (id: {}). Sync configuration:", username.as_ref(), user_id.as_ref())}</span>
-                            <form class="vertical">
+                        <div class="app-info-sync-config">
+                            <span>
+                                "Signed in as "
+                                <InlineCode code={username.as_ref().to_string()} />
+                                " (id: "
+                                <InlineCode code={user_id.as_ref().to_string()} />
+                                ")"
+                            </span>
+                            <form>
                                 <div>
                                     <input type="radio" id="manual" name="sync-move" value="manual" disabled=true />
                                     <label for="manual">"Manual"</label>
                                 </div>
                                 <div>
-                                    <input type="radio" id="poll" name="sync-move" value="poll" />
+                                    <input type="radio" id="poll" name="sync-move" value="poll" disabled=true />
                                     <label for="poll">"Poll"</label>
                                 </div>
                                 <div>
-                                    <input type="radio" id="push" name="sync-move" value="push" />
+                                    <input type="radio" id="push" name="sync-move" value="push" disabled=true />
                                     <label for="push">"Push"</label>
                                 </div>
                             </form>
@@ -128,25 +135,25 @@ pub fn AppInfo() -> impl IntoView {
                         <tr>
                             <td>"App window toggle"</td>
                             <td>
-                                <span class="inline-code">{app_toggle}</span>
+                                <InlineCode code=app_toggle />
                             </td>
                         </tr>
                         <tr>
                             <td>"Always on top"</td>
                             <td>
-                                <span class="inline-code">{always_on_top}</span>
+                                <InlineCode code=always_on_top.to_string() />
                             </td>
                         </tr>
                         <tr>
                             <td>"Hide window decorations"</td>
                             <td>
-                                <span class="inline-code">{hide_window_decorations}</span>
+                                <InlineCode code=hide_window_decorations.to_string() />
                             </td>
                         </tr>
                         <tr>
                             <td>"Hide app taskbar icon"</td>
                             <td>
-                                <span class="inline-code">{hide_taskbar_icon}</span>
+                                <InlineCode code=hide_taskbar_icon.to_string() />
                             </td>
                         </tr>
 
@@ -157,7 +164,7 @@ pub fn AppInfo() -> impl IntoView {
                         <tr>
                             <td>"Theme file"</td>
                             <td class="horizontal">
-                                <span class="inline-code">{theme.display().to_string()}</span>
+                                <InlineCode code=theme.display().to_string() />
                                 <button
                                     class="tool"
                                     title="Open theme file location"
@@ -175,61 +182,61 @@ pub fn AppInfo() -> impl IntoView {
                         <tr>
                             <td>"Toggle side bar"</td>
                             <td>
-                                <span class="inline-code">{toggle_spaces_bar}</span>
+                                <InlineCode code=toggle_spaces_bar />
                             </td>
                         </tr>
                         <tr>
                             <td>"Create a new space"</td>
                             <td>
-                                <span class="inline-code">{create_space}</span>
+                                <InlineCode code=create_space />
                             </td>
                         </tr>
                         <tr>
                             <td>"Edit current space"</td>
                             <td>
-                                <span class="inline-code">{edit_current_space}</span>
+                                <InlineCode code=edit_current_space />
                             </td>
                         </tr>
                         <tr>
                             <td>"Delete current space"</td>
                             <td>
-                                <span class="inline-code">{delete_current_space}</span>
+                                <InlineCode code=delete_current_space />
                             </td>
                         </tr>
                         <tr>
                             <td>"Select next item in the side bar list"</td>
                             <td>
-                                <span class="inline-code">{select_next_list_item}</span>
+                                <InlineCode code=select_next_list_item />
                             </td>
                         </tr>
                         <tr>
                             <td>"Select previous item in the side bar list"</td>
                             <td>
-                                <span class="inline-code">{select_prev_list_item}</span>
+                                <InlineCode code=select_prev_list_item />
                             </td>
                         </tr>
                         <tr>
                             <td>"Search notes globally"</td>
                             <td>
-                                <span class="inline-code">{find_note}</span>
+                                <InlineCode code=find_note />
                             </td>
                         </tr>
                         <tr>
                             <td>"Search notes in the current space"</td>
                             <td>
-                                <span class="inline-code">{find_note_in_selected_space}</span>
+                                <InlineCode code=find_note_in_selected_space />
                             </td>
                         </tr>
                         <tr>
                             <td>"Regenerate space avatar image"</td>
                             <td>
-                                <span class="inline-code">{regenerate_space_avatar}</span>
+                                <InlineCode code=regenerate_space_avatar />
                             </td>
                         </tr>
                     </table>
                 }
             }}
-            <hr style="width: 80%" />
+            <hr style="width: 100%" />
             <Export />
         </div>
     }

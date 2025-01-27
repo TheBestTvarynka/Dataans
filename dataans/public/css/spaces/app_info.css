@@ -45,3 +45,10 @@
 .app-into-window td, th {
     padding: 0.2em;
 }
+
+.app-info-sync-config {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2em;
+    align-items: flex-start;
+}

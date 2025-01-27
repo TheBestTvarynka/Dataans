@@ -5,7 +5,7 @@ mod spaces_list;
 pub mod tools;
 
 use common::note::Id as NoteId;
-use common::profile::UserContext;
+use common::profile::{Sync, SyncMode, UserContext};
 use common::space::OwnedSpace;
 use common::Config;
 use leptos::*;
@@ -100,15 +100,15 @@ pub fn Spaces(
                     }
                 },
             }}
-            <div style="flex-grow: 1; align-content: end;">
-                {move || if let Some(user_context) = user_context.get() {
+            <div style="flex-grow: 1; align-content: end; display: flex; flex-direction: column; align-items: center; justify-content: flex-end;">
+                {move || if let Some(UserContext { sync_config: Sync::Enabled { mode: SyncMode::Manual, .. }, .. }) = user_context.get() {
                     view!{
-                        <span>{user_context.username.as_ref().to_string()}</span>
-                    }
+                        <button title="Sync data" class="tool">
+                            <img alt="sync-icon" src="/public/icons/synchronize-light.png" />
+                        </button>
+                    }.into_any()
                 } else {
-                    view! {
-                        <span>"none"</span>
-                    }
+                    view! { <span /> }.into()
                 }}
                 <div style="display: inline-flex; width: 100%; justify-content: center; margin-bottom: 0.2em;">
                     <button class="button_cancel" on:click=show_app_info_window>
