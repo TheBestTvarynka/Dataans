@@ -9,6 +9,7 @@ use leptos_router::{Route, Router, Routes};
 
 use crate::app_info::AppInfo;
 use crate::auth::AuthWindow;
+use crate::backend::auth::profile;
 use crate::backend::sync::on_user_context;
 use crate::backend::{load_config, load_theme};
 use crate::notes::Notes;
@@ -78,6 +79,10 @@ pub fn App() -> impl IntoView {
         set_config.set(config);
 
         set_theme_css.set(try_exec!(load_theme(&theme).await, "Failed to load theme", toaster).to_css());
+
+        if let Some(context) = try_exec!(profile().await, "Failed to load user profile", toaster) {
+            user_context.set(Some(context));
+        }
     });
 
     let global_state = expect_context::<RwSignal<GlobalState>>();

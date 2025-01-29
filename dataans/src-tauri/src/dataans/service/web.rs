@@ -121,4 +121,14 @@ impl WebService {
 
         Ok(user_context)
     }
+
+    pub fn profile(&self) -> Result<Option<UserContext>, DataansError> {
+        let profile_path = self.user_data_dir.join("profile.json");
+
+        if profile_path.exists() {
+            Ok(serde_json::from_slice(&fs::read(profile_path)?)?)
+        } else {
+            Ok(None)
+        }
+    }
 }

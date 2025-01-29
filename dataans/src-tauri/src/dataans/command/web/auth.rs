@@ -54,3 +54,8 @@ pub async fn sign_in<R: Runtime>(
 
     Ok(())
 }
+
+#[tauri::command]
+pub fn profile(state: State<'_, DataansState>) -> CommandResult<Option<UserContext>> {
+    Ok(state.web_service.profile()?)
+}

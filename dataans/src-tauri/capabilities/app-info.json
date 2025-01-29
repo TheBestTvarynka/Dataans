@@ -9,6 +9,7 @@
     "App-Info"
   ],
   "permissions": [
+    "dataans:allow-profile",
     "core:event:allow-listen"
   ]
 }

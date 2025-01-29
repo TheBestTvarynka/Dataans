@@ -1,12 +1,12 @@
 use common::common_api_types::{InvitationToken, Password, Username};
 use common::error::{CommandError, CommandResult, CommandResultEmpty};
-use common::profile::{SecretKey, WebServerUrl};
+use common::profile::{SecretKey, UserContext, WebServerUrl};
 use common::APP_PLUGIN_NAME;
 use serde::Serialize;
 use url::Url;
 use uuid::Uuid;
 
-use crate::backend::invoke_command;
+use crate::backend::{invoke_command, EmptyArgs};
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -70,4 +70,8 @@ pub async fn sign_in(
         },
     )
     .await
+}
+
+pub async fn profile() -> CommandResult<Option<UserContext>> {
+    invoke_command(&format!("plugin:{}|profile", APP_PLUGIN_NAME), &EmptyArgs {}).await
 }

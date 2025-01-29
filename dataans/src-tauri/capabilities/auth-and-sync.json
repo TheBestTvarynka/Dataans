@@ -11,6 +11,7 @@
   "permissions": [
     "core:event:allow-listen",
     "dataans:allow-sign-up",
+    "dataans:allow-profile",
     "dataans:allow-sign-in"
   ]
 }
