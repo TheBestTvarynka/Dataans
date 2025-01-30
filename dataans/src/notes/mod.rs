@@ -20,8 +20,9 @@ use crate::utils::focus_element;
 use crate::FindNoteMode;
 
 #[component]
-pub fn Notes(config: Config) -> impl IntoView {
+pub fn Notes() -> impl IntoView {
     let global_state = expect_context::<RwSignal<GlobalState>>();
+    let config = expect_context::<RwSignal<Config>>();
 
     let (current_space, set_selected_space_s) = create_slice(
         global_state,
@@ -125,20 +126,22 @@ pub fn Notes(config: Config) -> impl IntoView {
                 when=move || current_space.get().is_some()
                 fallback=|| view! { <div /> }
             >
-                <Info
-                    current_space=current_space.get().unwrap()
-                    set_spaces
-                    delete_state_space
-                    toggle_note_search=move |_| {
-                        set_spaces_minimized.set(false);
-                        set_find_node_mode.set(FindNoteMode::FindNote {
-                            space: Some(current_space.get().unwrap()),
-                        });
-                        focus_element(SEARCH_NOTE_INPUT_ID);
-                    }
-                    set_selected_space
-                    config=config.clone()
-                />
+                {move || view! {
+                    <Info
+                        current_space=current_space.get().unwrap()
+                        set_spaces
+                        delete_state_space
+                        toggle_note_search=move |_| {
+                            set_spaces_minimized.set(false);
+                            set_find_node_mode.set(FindNoteMode::FindNote {
+                                space: Some(current_space.get().unwrap()),
+                            });
+                            focus_element(SEARCH_NOTE_INPUT_ID);
+                        }
+                        set_selected_space
+                        config=config.get()
+                    />
+                }}
             </Show>
             <div class="notes-inner">
                 <div class="notes" id="notes">

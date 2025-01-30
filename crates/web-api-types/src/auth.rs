@@ -1,7 +1,6 @@
 use serde::{Deserialize, Serialize};
 use time::serde::rfc3339;
 use time::OffsetDateTime;
-use uuid::Uuid;
 
 use super::*;
 
@@ -26,7 +25,7 @@ pub struct AuthToken(String);
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct SignInResponse {
-    pub user_id: Uuid,
+    pub user_id: UserId,
     pub token: AuthToken,
     #[serde(with = "rfc3339")]
     pub expiration_date: OffsetDateTime,
@@ -69,8 +68,8 @@ mod impl_responder {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Session {
-    pub id: Uuid,
-    pub user_id: Uuid,
+    pub id: SessionId,
+    pub user_id: UserId,
     #[serde(with = "rfc3339")]
     pub created_at: OffsetDateTime,
     #[serde(with = "rfc3339")]

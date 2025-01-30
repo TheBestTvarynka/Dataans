@@ -755,9 +755,10 @@ dependencies = [
 name = "common"
 version = "0.2.1"
 dependencies = [
- "nutype",
+ "derive_more 1.0.0",
  "serde",
  "time",
+ "url",
  "uuid",
  "web-api-types",
 ]
@@ -1159,6 +1160,7 @@ dependencies = [
  "serde",
  "serde-wasm-bindgen",
  "time",
+ "url",
  "uuid",
  "wasm-bindgen",
  "wasm-bindgen-futures",
@@ -3148,9 +3150,10 @@ dependencies = [
 [[package]]
 name = "leptos_hotkeys"
 version = "0.2.2"
-source = "git+https://github.com/TheBestTvarynka/leptos-hotkeys.git?rev=1cf8461#1cf8461048ae2cfba16cb1ccf2130b43c8c4a407"
+source = "git+https://github.com/TheBestTvarynka/leptos-hotkeys.git?rev=1a3cebb#1a3cebb7fcba3c609e09167002dd58a510ec2032"
 dependencies = [
  "leptos",
+ "log",
  "wasm-bindgen",
  "web-sys",
 ]

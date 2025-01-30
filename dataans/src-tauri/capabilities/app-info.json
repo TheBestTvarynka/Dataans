@@ -1,0 +1,16 @@
+{
+  "identifier": "app-info-capability",
+  "platforms": [
+    "macOS",
+    "windows",
+    "linux"
+  ],
+  "windows": [
+    "App-Info"
+  ],
+  "permissions": [
+    "dataans:allow-profile",
+    "dataans:allow-set-sync-options",
+    "core:event:allow-listen"
+  ]
+}

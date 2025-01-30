@@ -7,7 +7,6 @@ use sqlx::sqlite::SqlitePoolOptions;
 use tauri::async_runtime::block_on;
 use tauri::plugin::{Builder, TauriPlugin};
 use tauri::{Manager, Runtime};
-use url::Url;
 
 use crate::dataans::db::sqlite::SqliteDb;
 use crate::{CONFIGS_DIR, CONFIG_FILE_NAME, FILES_DIR, IMAGES_DIR, PROFILE_DIR};
@@ -60,11 +59,8 @@ impl DataansState {
         let space_service = Arc::new(SpaceService::new(Arc::clone(&sqlite)));
         let note_service = Arc::new(NoteService::new(Arc::clone(&sqlite), Arc::clone(&space_service)));
         let file_service = Arc::new(FileService::new(Arc::clone(&sqlite)));
-        let web_service = Arc::new(WebService::new(
-            app_data_dir.join(PROFILE_DIR),
-            // TODO:
-            Url::parse("http://127.0.0.1:8000/").unwrap(),
-        ));
+        let web_service =
+            Arc::new(WebService::new(app_data_dir.join(PROFILE_DIR)).expect("can not initiate web service"));
 
         Self {
             app_data_dir,
@@ -98,7 +94,9 @@ pub fn init_dataans_plugin<R: Runtime>() -> TauriPlugin<R> {
             command::export::export_app_data,
             command::web::sign_up,
             command::web::sign_in,
+            command::web::profile,
             command::sync::sync,
+            command::sync::set_sync_options,
         ])
         .setup(|app_handle, _api| {
             info!("Starting app setup...");
