@@ -2,11 +2,10 @@ use std::fs;
 use std::path::PathBuf;
 use std::sync::Mutex;
 
-use common::profile::{SecretKey, UserProfile};
+use common::profile::{SecretKey, Sync, UserContext, UserProfile, WebServerUrl};
 use rand::rngs::OsRng;
 use rand::Rng;
 use reqwest::Client;
-use url::Url;
 use uuid::Uuid;
 use web_api_types::{InvitationToken, Password, SignInRequest, SignInResponse, SignUpRequest, Username};
 
@@ -14,17 +13,23 @@ use crate::dataans::DataansError;
 
 pub struct WebService {
     user_data_dir: PathBuf,
-    web_server: Url,
     user_profile: Mutex<Option<UserProfile>>,
 }
 
 impl WebService {
-    pub fn new(user_data_dir: PathBuf, web_server: Url) -> Self {
-        Self {
+    pub fn new(user_data_dir: PathBuf) -> Result<Self, DataansError> {
+        let profile_path = user_data_dir.join("profile.json");
+
+        let user_profile = if profile_path.exists() {
+            Some(serde_json::from_slice(&fs::read(profile_path)?)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
             user_data_dir,
-            user_profile: Mutex::new(None),
-            web_server,
-        }
+            user_profile: Mutex::new(user_profile),
+        })
     }
 
     pub async fn sign_up(
@@ -32,9 +37,10 @@ impl WebService {
         invitation_token: InvitationToken,
         username: Username,
         password: Password,
+        web_server_url: WebServerUrl,
     ) -> Result<Uuid, DataansError> {
         let response = Client::new()
-            .post(self.web_server.join("auth/sign-up")?)
+            .post(web_server_url.as_ref().join("auth/sign-up")?)
             .json(&SignUpRequest {
                 invitation_token,
                 username,
@@ -52,7 +58,7 @@ impl WebService {
         let secret_key = SecretKey::from(OsRng.gen::<[u8; 32]>().to_vec());
 
         fs::write(
-            self.user_data_dir.join(format!("{}.json", user_id)),
+            self.user_data_dir.join(format!("secret-key-{}.json", user_id)),
             hex::encode(secret_key.as_ref()),
         )?;
 
@@ -64,9 +70,10 @@ impl WebService {
         secret_key: Option<SecretKey>,
         username: Username,
         password: Password,
-    ) -> Result<(), DataansError> {
+        web_server_url: WebServerUrl,
+    ) -> Result<UserContext, DataansError> {
         let response = Client::new()
-            .post(self.web_server.join("auth/sign-in")?)
+            .post(web_server_url.as_ref().join("auth/sign-in")?)
             .json(&SignInRequest {
                 username: username.clone(),
                 password,
@@ -88,7 +95,7 @@ impl WebService {
         let secret_key = if let Some(key) = secret_key {
             key
         } else {
-            let secret_key_file_path = self.user_data_dir.join(format!("{}.json", user_id));
+            let secret_key_file_path = self.user_data_dir.join(format!("secret-key-{}.json", user_id.as_ref()));
             SecretKey::from(
                 hex::decode(
                     fs::read(&secret_key_file_path)
@@ -104,6 +111,7 @@ impl WebService {
             auth_token: token,
             auth_token_expiration_date: expiration_date,
             secret_key,
+            sync_config: Sync::Disabled { url: web_server_url },
         };
 
         fs::write(
@@ -111,8 +119,56 @@ impl WebService {
             serde_json::to_vec(&user_profile)?,
         )?;
 
+        let user_context = UserContext {
+            user_id: user_profile.user_id,
+            username: user_profile.username.clone(),
+            sync_config: user_profile.sync_config.clone(),
+        };
+
         *self.user_profile.lock().unwrap() = Some(user_profile);
 
-        Ok(())
+        Ok(user_context)
+    }
+
+    pub fn user_context(&self) -> Result<Option<UserContext>, DataansError> {
+        let profile_path = self.user_data_dir.join("profile.json");
+
+        if profile_path.exists() {
+            let UserProfile {
+                user_id,
+                username,
+                sync_config,
+                auth_token: _,
+                auth_token_expiration_date: _,
+                secret_key: _,
+            } = serde_json::from_slice(&fs::read(profile_path)?)?;
+
+            Ok(Some(UserContext {
+                user_id,
+                username,
+                sync_config,
+            }))
+        } else {
+            Ok(None)
+        }
+    }
+
+    pub fn set_sync_options(&self, sync_config: Sync) -> Result<UserContext, DataansError> {
+        let profile_path = self.user_data_dir.join("profile.json");
+
+        let mut user_profile: UserProfile = serde_json::from_slice(&fs::read(&profile_path)?)?;
+        user_profile.sync_config = sync_config;
+
+        fs::write(profile_path, serde_json::to_vec(&user_profile)?)?;
+
+        let user_context = UserContext {
+            user_id: user_profile.user_id,
+            username: user_profile.username.clone(),
+            sync_config: user_profile.sync_config.clone(),
+        };
+
+        *self.user_profile.lock().unwrap() = Some(user_profile);
+
+        Ok(user_context)
     }
 }

@@ -46,9 +46,31 @@ th {
     padding: 0.2em;
 }
 
-.app-into-window-data-actions {
+.app-info-sync-config {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 90%;
+    flex-direction: column;
+    gap: 0.2em;
+    align-items: flex-start;
+}
+
+.app-info-sync-mode {
+    display: flex;
+    flex-direction: row;
+    gap: 0.2em;
+}
+
+.small-input {
+    border-radius: 3px;
+    margin: 0;
+    padding: 0.2em;
+    transition: all 0.2s;
+    border: 3px solid transparent;
+    background: var(--input-background-color);
+    width: 3em;
+    color: var(--input-text-color);
+}
+
+.small-input:focus {
+    border-color: var(--input-border-color);
+    outline: none;
 }

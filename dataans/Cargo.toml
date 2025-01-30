@@ -13,13 +13,14 @@ serde = { workspace = true, features = ["derive"] }
 time = { workspace = true, features = ["macros", "wasm-bindgen"] }
 uuid = { workspace = true, features = ["v4", "js"] }
 hex.workspace = true
+url = { workspace = true, features = ["serde"]}
 
 leptos = { version = "0.6", features = ["csr"] }
 leptos_router = { version = "0.6", features = ["csr"] }
 
 # TODO: The main branch contains an important fix which is not released yet.
 # Replace `git` link with proper version when a new release will be published:
-leptos_hotkeys = { git = "https://github.com/TheBestTvarynka/leptos-hotkeys.git", rev = "1cf8461" }
+leptos_hotkeys = { git = "https://github.com/TheBestTvarynka/leptos-hotkeys.git", rev = "1a3cebb", features = ["debug"] }
 leptoaster = { git = "https://github.com/TheBestTvarynka/leptoaster.git", rev = "8c06d3f" }
 
 gloo-storage = "0.3"
@@ -50,3 +51,6 @@ web-sys = { version = "0.3", features = [
     "HtmlSelectElement",
 ] }
 futures = { version = "0.3", features = ["std", "alloc"] }
+
+[dev-dependencies]
+leptos_hotkeys = { git = "https://github.com/TheBestTvarynka/leptos-hotkeys.git", rev = "1a3cebb", features = ["debug"] }

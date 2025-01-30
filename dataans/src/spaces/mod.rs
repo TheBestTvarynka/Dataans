@@ -5,6 +5,7 @@ mod spaces_list;
 pub mod tools;
 
 use common::note::Id as NoteId;
+use common::profile::{Sync, SyncMode, UserContext};
 use common::space::OwnedSpace;
 use common::Config;
 use leptos::*;
@@ -72,9 +73,8 @@ pub fn Spaces(
     let (query, set_query) = create_signal(String::new());
 
     let toaster = leptoaster::expect_toaster();
-    let t = toaster.clone();
     let show_app_info_window = move |_| {
-        let t = t.clone();
+        let t = toaster.clone();
         spawn_local(async move {
             try_exec!(
                 crate::backend::window::show_app_info_window().await,
@@ -84,36 +84,7 @@ pub fn Spaces(
         });
     };
 
-    let t = toaster.clone();
-    let trigger_sync = move |_| {
-        let t = t.clone();
-        spawn_local(async move {
-            try_exec!(
-                crate::backend::sync::trigger_sync().await,
-                "Failed to create auth window",
-                t
-            );
-        });
-    };
-
-    let wow = move |_| {
-        let t = toaster.clone();
-        spawn_local(async move {
-            t.toast(
-                leptoaster::ToastBuilder::new("Sync started...")
-                    .with_level(leptoaster::ToastLevel::Info)
-                    .with_position(leptoaster::ToastPosition::BottomRight)
-                    .with_expiry(Some(5000)),
-            );
-            try_exec!(crate::backend::sync::simple_listen().await, "Failed sync the data", t);
-            t.toast(
-                leptoaster::ToastBuilder::new("Sync finished!")
-                    .with_level(leptoaster::ToastLevel::Info)
-                    .with_position(leptoaster::ToastPosition::BottomRight)
-                    .with_expiry(Some(5000)),
-            );
-        });
-    };
+    let user_context = expect_context::<RwSignal<Option<UserContext>>>();
 
     view! {
         <div class="spaces-container">
@@ -129,9 +100,16 @@ pub fn Spaces(
                     }
                 },
             }}
-            <button on:click=wow>"wow!"</button>
-            <button on:click=trigger_sync>"sync!"</button>
-            <div style="flex-grow: 1; align-content: end;">
+            <div style="flex-grow: 1; align-content: end; display: flex; flex-direction: column; align-items: center; justify-content: flex-end;">
+                {move || if let Some(UserContext { sync_config: Sync::Enabled { mode: SyncMode::Manual, .. }, .. }) = user_context.get() {
+                    view!{
+                        <button title="Sync data" class="tool">
+                            <img alt="sync-icon" src="/public/icons/synchronize-light.png" />
+                        </button>
+                    }.into_any()
+                } else {
+                    view! { <span /> }.into()
+                }}
                 <div style="display: inline-flex; width: 100%; justify-content: center; margin-bottom: 0.2em;">
                     <button class="button_cancel" on:click=show_app_info_window>
                         {format!("{}.{}", env!("CARGO_PKG_VERSION_MAJOR"), env!("CARGO_PKG_VERSION_MINOR"))}

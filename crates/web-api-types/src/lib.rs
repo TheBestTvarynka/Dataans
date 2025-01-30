@@ -41,6 +41,9 @@ pub struct NoteId(uuid::Uuid);
 #[derive(Debug, Serialize, Deserialize, AsRef, From, Copy, Clone, Into, PartialEq, Eq)]
 pub struct SpaceId(uuid::Uuid);
 
+#[derive(Debug, Serialize, Deserialize, AsRef, From, Copy, Clone, Into, PartialEq, Eq)]
+pub struct SessionId(uuid::Uuid);
+
 #[cfg(feature = "server")]
 mod impl_from_param {
     use rocket::request::FromParam;
@@ -61,6 +64,7 @@ mod impl_from_param {
     impl_from_param!(id: crate::SpaceId);
     impl_from_param!(id: crate::NoteId);
     impl_from_param!(id: crate::UserId);
+    impl_from_param!(id: crate::SessionId);
 }
 
 #[derive(Debug, Serialize, Deserialize, AsRef, From, Into)]
