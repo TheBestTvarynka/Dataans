@@ -14,6 +14,8 @@ pub const USER_CONTEXT_EVENT: &str = "user-context";
 pub enum UserContextEvent {
     /// User signed in.
     SignedIn(UserContext),
+    /// User context has been updates.
+    ContextUpdated(UserContext),
     /// User signed out.
     SignedOut,
 }

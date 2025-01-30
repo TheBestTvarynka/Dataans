@@ -22,7 +22,7 @@ pub async fn sign_up(
         .await?)
 }
 
-fn emit_user_context<R: Runtime>(app: AppHandle<R>, user_context: UserContext) -> Result<(), DataansError> {
+pub fn emit_user_context<R: Runtime>(app: AppHandle<R>, user_context: UserContext) -> Result<(), DataansError> {
     app.emit(USER_CONTEXT_EVENT, UserContextEvent::SignedIn(user_context))?;
 
     Ok(())
@@ -57,5 +57,5 @@ pub async fn sign_in<R: Runtime>(
 
 #[tauri::command]
 pub fn profile(state: State<'_, DataansState>) -> CommandResult<Option<UserContext>> {
-    Ok(state.web_service.profile()?)
+    Ok(state.web_service.user_context()?)
 }
