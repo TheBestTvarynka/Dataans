@@ -1,5 +1,6 @@
 use common::profile::{Sync, SyncMode, UserContext};
 use leptos::*;
+use time::Duration;
 use wasm_bindgen::JsCast;
 use web_sys::HtmlInputElement;
 
@@ -7,7 +8,7 @@ use crate::notes::md_node::InlineCode;
 
 #[component]
 pub fn SyncSettings(context: UserContext) -> impl IntoView {
-    let user_context = expect_context::<RwSignal<Option<UserContext>>>();
+    let toaster = leptoaster::expect_toaster();
 
     let UserContext {
         user_id,
@@ -15,25 +16,25 @@ pub fn SyncSettings(context: UserContext) -> impl IntoView {
         sync_config,
     } = context;
 
-    let name = username.clone();
     let url = sync_config.get_web_server_url();
+    let t = toaster.clone();
     let toggle_sync_availability = Callback::new(move |sync_enabled| {
-        if sync_enabled {
-            user_context.set(Some(UserContext {
-                user_id,
-                username: name.clone(),
-                sync_config: Sync::Enabled {
-                    url: url.clone(),
-                    mode: SyncMode::Manual,
-                },
-            }));
+        let sync_config = if sync_enabled {
+            Sync::Enabled {
+                url: url.clone(),
+                mode: SyncMode::Manual,
+            }
         } else {
-            user_context.set(Some(UserContext {
-                user_id,
-                username: name.clone(),
-                sync_config: Sync::Disabled { url: url.clone() },
-            }));
-        }
+            Sync::Disabled { url: url.clone() }
+        };
+        let t = t.clone();
+        spawn_local(async move {
+            try_exec!(
+                crate::backend::sync::set_sync_options(&sync_config).await,
+                "Failed to set sync options",
+                t
+            );
+        });
     });
 
     view! {
@@ -63,32 +64,28 @@ pub fn SyncSettings(context: UserContext) -> impl IntoView {
                 }}}
             </div>
             {if let Some(mode) = sync_config.mode() {
-                let name = username.clone();
                 let url = sync_config.get_web_server_url();
-                let set_sync_mode = move |mode| {
-                    user_context.set(Some(UserContext {
-                        user_id,
-                        username: name.clone(),
-                        sync_config: Sync::Enabled {
-                            url: url.clone(),
-                            mode,
-                        }
-                    }));
-                };
                 let on_change = Callback::new(move |ev: leptos::ev::Event| {
                     let mode: HtmlInputElement = ev.target().unwrap().unchecked_into();
-                    let value = mode.value();
-                    if value == "manual" {
-                        set_sync_mode(SyncMode::Manual);
-                    }
-                    if value == "poll" {
-                        set_sync_mode(SyncMode::Poll {
-                            period: time::Duration::hours(2),
-                        });
-                    }
-                    if value == "push" {
-                        set_sync_mode(SyncMode::Push);
-                    }
+                    let mode = match mode.value().as_str() {
+                        "manual" => SyncMode::Manual,
+                        "poll" => SyncMode::Poll { period: Duration::hours(1) },
+                        "push" => SyncMode::Push,
+                        _ => unreachable!(),
+                    };
+
+                    let sync_config = Sync::Enabled {
+                        url: url.clone(),
+                        mode,
+                    };
+                    let t = toaster.clone();
+                    spawn_local(async move {
+                        try_exec!(
+                            crate::backend::sync::set_sync_options(&sync_config).await,
+                            "Failed to set sync options",
+                            t
+                        );
+                    });
                 });
 
                 view! {

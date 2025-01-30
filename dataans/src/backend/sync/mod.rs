@@ -1,10 +1,11 @@
 mod event;
 
-use common::error::CommandResultEmpty;
+use common::error::{CommandResult, CommandResultEmpty};
 use common::event::{UserContextEvent, USER_CONTEXT_EVENT};
-use common::profile::UserContext;
+use common::profile::{Sync, UserContext};
 use common::APP_PLUGIN_NAME;
 use futures::StreamExt;
+use serde::Serialize;
 
 use crate::backend::{invoke_command, EmptyArgs};
 
@@ -18,6 +19,9 @@ pub async fn on_user_context(set_user_context: impl Fn(Option<UserContext>) -> (
             UserContextEvent::SignedIn(user_context) => {
                 set_user_context(Some(user_context));
             }
+            UserContextEvent::ContextUpdated(user_context) => {
+                set_user_context(Some(user_context));
+            }
             UserContextEvent::SignedOut => {
                 set_user_context(None);
             }
@@ -29,4 +33,20 @@ pub async fn on_user_context(set_user_context: impl Fn(Option<UserContext>) -> (
 
 pub async fn trigger_sync() -> CommandResultEmpty {
     invoke_command(&format!("plugin:{}|sync", APP_PLUGIN_NAME), &EmptyArgs {}).await
+}
+
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SyncConfigArgs<'a> {
+    pub sync_config: &'a Sync,
+}
+
+pub async fn set_sync_options(sync_config: &Sync) -> CommandResult<UserContext> {
+    invoke_command(
+        &format!("plugin:{}|set_sync_options", APP_PLUGIN_NAME),
+        &SyncConfigArgs {
+            sync_config: &sync_config,
+        },
+    )
+    .await
 }
