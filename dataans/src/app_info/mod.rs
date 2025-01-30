@@ -1,10 +1,13 @@
 mod export;
+mod sync_settings;
 
 use std::path::PathBuf;
 
-use common::profile::UserContext;
+use common::profile::{Sync, SyncMode, UserContext};
 use common::{App, Appearance, Config, KeyBindings};
 use leptos::*;
+use wasm_bindgen::JsCast;
+use web_sys::HtmlInputElement;
 
 use crate::app_info::export::Export;
 use crate::backend::{open_config_file, open_config_file_folder, open_theme_file};
@@ -67,32 +70,104 @@ pub fn AppInfo() -> impl IntoView {
             <span>"Source code: "<a href="https://github.com/TheBestTvarynka/Dataans" target="_blank">"GitHub/TbeBestTvarynka/Dataans"</a>"."</span>
             <span class="icons-by-icons8">"Icons by "<a href="https://icons8.com" target="_blank">"Icons8"</a>"."</span>
             <hr style="width: 100%" />
-                {move || if let Some(user_context) = user_context.get() {
-                    let UserContext { user_id, username, sync_config } = user_context;
-                    //
+                {move || if let Some(context) = user_context.get() {
+                    let UserContext { user_id, username, sync_config } = context;
+
+                    let name = username.clone();
+                    let url = sync_config.get_web_server_url();
+                    let toggle_sync_availability = Callback::new(move |sync_enabled| {
+                        if sync_enabled {
+                            user_context.set(Some(UserContext {
+                                user_id,
+                                username: name.clone(),
+                                sync_config: Sync::Enabled {
+                                    url: url.clone(),
+                                    mode: SyncMode::Manual,
+                                },
+                            }));
+                        } else {
+                            user_context.set(Some(UserContext {
+                                user_id,
+                                username: name.clone(),
+                                sync_config: Sync::Disabled { url: url.clone(), },
+                            }));
+                        }
+                    });
+
                     view! {
                         <div class="app-info-sync-config">
-                            <span>
-                                "Signed in as "
-                                <InlineCode code={username.as_ref().to_string()} />
-                                " (id: "
-                                <InlineCode code={user_id.as_ref().to_string()} />
-                                ")"
-                            </span>
-                            <form>
-                                <div>
-                                    <input type="radio" id="manual" name="sync-move" value="manual" disabled=true />
-                                    <label for="manual">"Manual"</label>
-                                </div>
-                                <div>
-                                    <input type="radio" id="poll" name="sync-move" value="poll" disabled=true />
-                                    <label for="poll">"Poll"</label>
-                                </div>
-                                <div>
-                                    <input type="radio" id="push" name="sync-move" value="push" disabled=true />
-                                    <label for="push">"Push"</label>
-                                </div>
-                            </form>
+                            <div class="horizontal">
+                                <span>
+                                    "Signed in as "
+                                    <InlineCode code={username.as_ref().to_string()} />
+                                    " (id: "
+                                    <InlineCode code={user_id.as_ref().to_string()} />
+                                    "). "
+                                </span>
+                                {if sync_config.is_enabled() { view! {
+                                    <button
+                                        class="button_ok"
+                                        on:click=move |_| toggle_sync_availability.call(false)
+                                    >
+                                        "Disable sync"
+                                    </button>
+                                }} else { view! {
+                                    <button
+                                        class="button_ok"
+                                        on:click=move |_| toggle_sync_availability.call(true)
+                                    >
+                                        "Enable sync"
+                                    </button>
+                                }}}
+                            </div>
+                            {if let Some(mode) = sync_config.mode() {
+                                let name = username.clone();
+                                let url = sync_config.get_web_server_url();
+                                let set_sync_mode = move |mode| {
+                                    user_context.set(Some(UserContext {
+                                        user_id,
+                                        username: name.clone(),
+                                        sync_config: Sync::Enabled {
+                                            url: url.clone(),
+                                            mode,
+                                        }
+                                    }));
+                                };
+                                let on_change = Callback::new(move |ev: leptos::ev::Event| {
+                                    let mode: HtmlInputElement = ev.target().unwrap().unchecked_into();
+                                    let value = mode.value();
+                                    if value == "manual" {
+                                        set_sync_mode(SyncMode::Manual);
+                                    }
+                                    if value == "poll" {
+                                        set_sync_mode(SyncMode::Poll {
+                                            period: time::Duration::hours(2),
+                                        });
+                                    }
+                                    if value == "push" {
+                                        set_sync_mode(SyncMode::Push);
+                                    }
+                                });
+
+                                view! {
+                                    <form>
+                                        <div>
+                                            <input type="radio" id="manual" name="sync-move" value="manual" on:change=move |ev| on_change.call(ev) checked=mode == SyncMode::Manual />
+                                            <label for="manual">"Manual"</label>
+                                        </div>
+                                        <div>
+                                            <input type="radio" id="poll" name="sync-move" value="poll" on:change=move |ev| on_change.call(ev) checked=matches!(mode, SyncMode::Poll { .. }) />
+                                            <label for="poll">"Poll"</label>
+                                        </div>
+                                        <div>
+                                            <input type="radio" id="push" name="sync-move" value="push" on:change=move |ev| on_change.call(ev) checked=mode == SyncMode::Push />
+                                            <label for="push">"Push"</label>
+                                        </div>
+                                    </form>
+                                }
+                            } else { view! {
+                                <form />
+                            }}}
                         </div>
                     }
                 } else { view! {

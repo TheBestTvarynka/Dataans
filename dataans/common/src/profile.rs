@@ -20,7 +20,7 @@ pub struct WebServerUrl(Url);
 /// Synchronization mode.
 ///
 /// It represents how the user wants to synchronize the data.
-#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
 pub enum SyncMode {
     /// The user manually synchronizes the data by pressing the sync button.
     Manual,
@@ -29,7 +29,7 @@ pub enum SyncMode {
     /// The app periodically polls the server to check if there are any changes.
     Poll {
         /// The polling interval. Basically, how often the app should check for changes.
-        delay: Duration,
+        period: Duration,
     },
 }
 
@@ -51,6 +51,34 @@ pub enum Sync {
         /// The synchronization mode. It represents how the user wants to synchronize the data.
         mode: SyncMode,
     },
+}
+
+impl Sync {
+    /// Returns web server url.
+    pub fn get_web_server_url(&self) -> WebServerUrl {
+        match self {
+            Sync::Disabled { url } => url.clone(),
+            Sync::Enabled { url, mode: _ } => url.clone(),
+        }
+    }
+
+    /// Checks synchronization is enabled.
+    pub fn is_enabled(&self) -> bool {
+        if matches!(self, Sync::Disabled { .. }) {
+            false
+        } else {
+            true
+        }
+    }
+
+    /// Returns [SyncMode] if the sync is enabled.
+    pub fn mode(&self) -> Option<SyncMode> {
+        if let Sync::Enabled { url: _, mode } = self {
+            Some(*mode)
+        } else {
+            None
+        }
+    }
 }
 
 /// User profile.

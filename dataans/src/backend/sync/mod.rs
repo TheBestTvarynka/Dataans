@@ -5,7 +5,6 @@ use common::event::{UserContextEvent, USER_CONTEXT_EVENT};
 use common::profile::UserContext;
 use common::APP_PLUGIN_NAME;
 use futures::StreamExt;
-use leptos::{Callable, Callback};
 
 use crate::backend::{invoke_command, EmptyArgs};
 
