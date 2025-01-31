@@ -1,7 +1,7 @@
 use derive_more::{AsRef, From};
 use serde::{Deserialize, Serialize};
 use time::serde::rfc3339;
-use time::{Duration, OffsetDateTime};
+use time::OffsetDateTime;
 use url::Url;
 use web_api_types::{AuthToken, UserId, Username};
 
@@ -26,11 +26,6 @@ pub enum SyncMode {
     Manual,
     /// The app maintains the websocket connection with the server and automatically synchronize the data.
     Push,
-    /// The app periodically polls the server to check if there are any changes.
-    Poll {
-        /// The polling interval. Basically, how often the app should check for changes.
-        period: Duration,
-    },
 }
 
 /// Synchronization configuration.
