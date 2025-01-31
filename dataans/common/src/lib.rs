@@ -18,6 +18,7 @@ use std::collections::HashMap;
 use std::fmt;
 use std::path::PathBuf;
 
+use derive_more::{From, Into};
 use serde::{Deserialize, Serialize};
 use time::OffsetDateTime;
 use uuid::{uuid, Uuid};
@@ -312,3 +313,7 @@ impl Default for DataExportConfig {
         Self::Json(Default::default())
     }
 }
+
+/// Indicates if the item was synced with the back up server.
+#[derive(Debug, Clone, Copy, From, Into, Serialize, Deserialize, PartialEq, Eq)]
+pub struct IsSynced(bool);

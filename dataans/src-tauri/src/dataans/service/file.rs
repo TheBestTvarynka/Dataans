@@ -31,6 +31,7 @@ impl<D: Db> FileService<D> {
                         id: common::DEFAULT_SPACE_AVATAR_ID,
                         name: "default_space_avatar.png".into(),
                         path: common::DEFAULT_SPACE_AVATAR_PATH.into(),
+                        is_synced: false,
                     })
                     .await?;
 
@@ -64,6 +65,7 @@ impl<D: Db> FileService<D> {
                     .to_str()
                     .ok_or_else(|| DataansError::PathIsNotUtf8(file_path.clone()))?
                     .to_owned(),
+                is_synced: false,
             })
             .await?;
 
@@ -105,6 +107,7 @@ impl<D: Db> FileService<D> {
                     .to_str()
                     .ok_or_else(|| DataansError::PathIsNotUtf8(avatar_path.clone()))?
                     .to_owned(),
+                is_synced: false,
             })
             .await?;
 
@@ -140,6 +143,7 @@ impl<D: Db> FileService<D> {
                     .to_str()
                     .ok_or_else(|| DataansError::PathIsNotUtf8(image_path.clone()))?
                     .to_owned(),
+                is_synced: false,
             })
             .await?;
 

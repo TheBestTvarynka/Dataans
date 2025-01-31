@@ -37,12 +37,14 @@ async fn write_space_notes_per_file<D: Db>(
                     created_at,
                     space_id: _,
                     files,
+                    is_synced: _,
                 } = note;
                 let OwnedSpace {
                     id: space_id,
                     name,
                     avatar,
                     created_at: space_created_at,
+                    is_synced: _,
                 } = &space;
 
                 let mut file = File::create(notes_dir.join(format!("{}.md", id.inner())))?;
@@ -83,6 +85,7 @@ fn write_space_notes(notes: &[OwnedNote], file: &mut File) -> Result<(), Dataans
             created_at,
             space_id,
             files,
+            is_synced: _,
         } = note;
 
         writeln!(file, "### `{}`\n", id.inner())?;
@@ -111,6 +114,7 @@ fn write_space(space: &OwnedSpace, file: &mut File) -> Result<(), DataansError> 
         name,
         created_at,
         avatar,
+        is_synced: _,
     } = space;
     writeln!(file, "# {}\n", name.as_ref())?;
 

@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use common::note::{File, Id as NoteId, Note, NoteFullOwned, OwnedNote, UpdateNote};
+use common::note::{CreateNoteOwned, File, Id as NoteId, Note, NoteFullOwned, OwnedNote, UpdateNote};
 use common::space::Id as SpaceId;
 use futures::future::try_join_all;
 
@@ -25,6 +25,7 @@ impl<D: Db> NoteService<D> {
             text,
             space_id,
             created_at,
+            is_synced,
         } = note;
 
         let files = db
@@ -32,7 +33,12 @@ impl<D: Db> NoteService<D> {
             .await?
             .into_iter()
             .map(|file| {
-                let FileModel { id, name, path } = file;
+                let FileModel {
+                    id,
+                    name,
+                    path,
+                    is_synced: _,
+                } = file;
                 File {
                     id,
                     name,
@@ -47,6 +53,7 @@ impl<D: Db> NoteService<D> {
             space_id: space_id.into(),
             created_at: created_at.into(),
             files,
+            is_synced: is_synced.into(),
         })
     }
 
@@ -76,8 +83,8 @@ impl<D: Db> NoteService<D> {
         Ok(notes)
     }
 
-    pub async fn create_note(&self, note: OwnedNote) -> Result<(), DataansError> {
-        let OwnedNote {
+    pub async fn create_note(&self, note: CreateNoteOwned) -> Result<(), DataansError> {
+        let CreateNoteOwned {
             id,
             text,
             files,
@@ -91,6 +98,7 @@ impl<D: Db> NoteService<D> {
                 text: text.into(),
                 created_at: created_at.into(),
                 space_id: space_id.inner(),
+                is_synced: false,
             })
             .await?;
 
@@ -102,13 +110,19 @@ impl<D: Db> NoteService<D> {
     }
 
     pub async fn update_note(&self, note: UpdateNote<'_>) -> Result<(), DataansError> {
-        let UpdateNote { id, text, files } = note;
+        let UpdateNote {
+            id,
+            text,
+            files,
+            is_synced,
+        } = note;
 
         let NoteModel {
             id,
             text: _,
             created_at,
             space_id,
+            is_synced: _,
         } = self.db.note_by_id(id.inner()).await?;
 
         self.db
@@ -117,6 +131,7 @@ impl<D: Db> NoteService<D> {
                 text: text.into(),
                 created_at,
                 space_id,
+                is_synced: is_synced.into(),
             })
             .await?;
 
@@ -150,6 +165,7 @@ impl<D: Db> NoteService<D> {
                         created_at,
                         space_id,
                         files,
+                        is_synced,
                     } = note;
                     Result::<NoteFullOwned, DataansError>::Ok(NoteFullOwned {
                         id,
@@ -157,6 +173,7 @@ impl<D: Db> NoteService<D> {
                         created_at,
                         files,
                         space: self.space_service.space_by_id(space_id).await?,
+                        is_synced,
                     })
                 }),
         )
@@ -176,6 +193,7 @@ impl<D: Db> NoteService<D> {
                         created_at,
                         space_id,
                         files,
+                        is_synced,
                     } = note;
                     Result::<NoteFullOwned, DataansError>::Ok(NoteFullOwned {
                         id,
@@ -183,6 +201,7 @@ impl<D: Db> NoteService<D> {
                         created_at,
                         files,
                         space: self.space_service.space_by_id(space_id).await?,
+                        is_synced,
                     })
                 }),
         )

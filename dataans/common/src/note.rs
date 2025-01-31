@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 use crate::space::{Id as SpaceId, Space};
-use crate::CreationDate;
+use crate::{CreationDate, IsSynced};
 
 /// Represent a note ID.
 #[derive(Serialize, Deserialize, Debug, Default, Copy, Clone, Eq, PartialEq)]
@@ -92,6 +92,8 @@ pub struct Note<'text> {
     pub space_id: SpaceId,
     /// Attached files.
     pub files: Vec<File>,
+    /// Flag that indicates if the note is synced.
+    pub is_synced: IsSynced,
 }
 
 /// Owned version of [Note].
@@ -119,10 +121,30 @@ pub struct NoteFull<'text, 'space_name, 'space_avatar> {
     pub space: Space<'space_name, 'space_avatar>,
     /// Attached files.
     pub files: Vec<File>,
+    /// Flag that indicates if the note is synced.
+    pub is_synced: IsSynced,
 }
 
 /// Owned version of the [NoteFull] type.
 pub type NoteFullOwned = NoteFull<'static, 'static, 'static>;
+
+/// Represent one note.
+#[derive(Serialize, Deserialize, Debug, Clone, Eq, PartialEq)]
+pub struct CreateNote<'text> {
+    /// Note id.
+    pub id: Id,
+    /// Note data in MD format.
+    pub text: MdText<'text>,
+    /// Creation date.
+    pub created_at: CreationDate,
+    /// Space ID this note belongs.
+    pub space_id: SpaceId,
+    /// Attached files.
+    pub files: Vec<File>,
+}
+
+/// Owned version of [CreateNote].
+pub type CreateNoteOwned = CreateNote<'static>;
 
 /// Represent note to update.
 #[derive(Serialize, Deserialize, Debug, Clone, Eq, PartialEq)]
@@ -133,4 +155,6 @@ pub struct UpdateNote<'text> {
     pub text: MdText<'text>,
     /// Attached files.
     pub files: Vec<File>,
+    /// Flag that indicates if the note is synced.
+    pub is_synced: IsSynced,
 }

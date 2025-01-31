@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use common::space::{Avatar, DeleteSpace, Id as SpaceId, OwnedSpace, UpdateSpace};
+use common::space::{Avatar, CreateSpaceOwned, DeleteSpace, Id as SpaceId, OwnedSpace, UpdateSpace};
 use futures::future::try_join_all;
 
 use crate::dataans::db::model::{File as FileModel, Space as SpaceModel};
@@ -16,8 +16,8 @@ impl<D: Db> SpaceService<D> {
         Self { db }
     }
 
-    pub async fn create_space(&self, space: OwnedSpace) -> Result<(), DataansError> {
-        let OwnedSpace {
+    pub async fn create_space(&self, space: CreateSpaceOwned) -> Result<(), DataansError> {
+        let CreateSpaceOwned {
             id,
             name,
             avatar,
@@ -30,6 +30,7 @@ impl<D: Db> SpaceService<D> {
                 name: name.into(),
                 avatar_id: avatar.id(),
                 created_at: created_at.into(),
+                is_synced: false,
             })
             .await?;
 
@@ -37,13 +38,19 @@ impl<D: Db> SpaceService<D> {
     }
 
     pub async fn update_space(&self, space_data: UpdateSpace<'static>) -> Result<(), DataansError> {
-        let UpdateSpace { id, name, avatar } = space_data;
+        let UpdateSpace {
+            id,
+            name,
+            avatar,
+            is_synced,
+        } = space_data;
 
         let SpaceModel {
             id,
             name: _,
             avatar_id: _,
             created_at,
+            is_synced: _,
         } = self.db.space_by_id(id.inner()).await?;
 
         Ok(self
@@ -53,6 +60,7 @@ impl<D: Db> SpaceService<D> {
                 name: name.into(),
                 avatar_id: avatar.id(),
                 created_at,
+                is_synced: is_synced.into(),
             })
             .await?)
     }
@@ -69,12 +77,14 @@ impl<D: Db> SpaceService<D> {
             name,
             avatar_id,
             created_at,
+            is_synced,
         } = space;
 
         let FileModel {
             id: avatar_id,
             name: _,
             path: avatar_path,
+            is_synced: _,
         } = db.file_by_id(avatar_id).await?;
 
         Ok(OwnedSpace {
@@ -82,6 +92,7 @@ impl<D: Db> SpaceService<D> {
             name: name.into(),
             avatar: Avatar::new(avatar_id, avatar_path),
             created_at: created_at.into(),
+            is_synced: is_synced.into(),
         })
     }
 
