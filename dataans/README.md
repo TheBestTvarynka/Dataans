@@ -14,10 +14,12 @@ Thus, everything starting from the back end and up to the front end is written i
 > This is a temporary solutions. One day we will have a proper flow of app installing and releases publishing.
 
 0. Tauri Prerequisites: https://v2.tauri.app/start/prerequisites/.
-1. Install Tauri cli:
+1. Install needed cli utilities:
 ```bash
 # https://v2.tauri.app/reference/cli/
 cargo install tauri-cli --version "^2.0.0" --locked
+# https://trunkrs.dev/#install
+cargo install --locked trunk
 ```
 2. Clone the repo:
 ```bash
