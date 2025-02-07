@@ -39,8 +39,10 @@ mkdir -p ~/.local/share/com.tbt.dataans/configs/
 cp src-tauri/resources/configs/* ~/.local/share/com.tbt.dataans/configs/
 ```
 4. Run the app. You have two options how to run it:
+
   1. Install the app using the installation package and run from application launcher/start menu. The installation package is located in `target/release/bundle`.
   2. Do not install the app globally but run the app executable file. The app executable file is the following file: `target/release/dataans`.
+
 5. _(Optional)._ Additional app configuration:
   * You can set the logging level using the `DATAANS_LOG` environment variable. For example, `DATAANS_LOG=trace`.
 
