@@ -48,27 +48,30 @@ The steps are almost the same as in previous chapter.
 
 0. Tauri Prerequisites: https://v2.tauri.app/start/prerequisites/.
 1. Install Tauri cli:
-```bash
-# https://v2.tauri.app/reference/cli/
-cargo install tauri-cli --version "^2.0.0" --locked
-```
+  ```bash
+  # https://v2.tauri.app/reference/cli/
+  cargo install tauri-cli --version "^2.0.0" --locked
+  ```
 2. Clone the repo:
-```bash
-git clone https://github.com/TheBestTvarynka/Dataans.git
-cd Dataans/dataans
-```
+  ```bash
+  git clone https://github.com/TheBestTvarynka/Dataans.git
+  cd Dataans/dataans
+  ```
 3. Configure:
-```bash
-# Create directory for the app data
-mkdir -p ~/.local/share/com.tbt.dataans/configs/
-# Initialize default app configs
-cp src-tauri/resources/configs/* ~/.local/share/com.tbt.dataans/configs/
-```
+  ```bash
+  # Create directory for the app data
+  mkdir -p ~/.local/share/com.tbt.dataans/configs/
+  # Initialize default app configs
+  cp src-tauri/resources/configs/* ~/.local/share/com.tbt.dataans/configs/
+  ```
 4. Run the development server:
-```bash
-# Logging
-export DATAANS_LOG=dataans=trace
+  ```bash
+  # Logging
+  export DATAANS_LOG=dataans=trace
 
-# Run the development server
-cargo tauri dev
-```
+  # Optional: if you want, you can overrite the local batabase file with the following environment variable:
+  export BATABASE_URL=<path/to/file.sqlite>
+
+  # Run the development server
+  cargo tauri dev
+  ```

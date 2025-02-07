@@ -36,7 +36,7 @@ Read more in the [`CONTRIBUTING.md`](/doc/CONTRIBUTING.md) document.
 
 ## App philosophy
 
-## The worse is better
+### The worse is better
 
 Did you hear about [the _worse-is-better_ philosophy](https://www.dreamsongs.com/RiseOfWorseIsBetter.html)? If not I encourage you to read [The Rise of Worse is Better](https://www.dreamsongs.com/RiseOfWorseIsBetter.html) article.
 
