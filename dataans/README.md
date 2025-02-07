@@ -63,15 +63,15 @@ The steps are almost the same as in previous chapter.
   mkdir -p ~/.local/share/com.tbt.dataans/configs/
   # Initialize default app configs
   cp src-tauri/resources/configs/* ~/.local/share/com.tbt.dataans/configs/
+
+  # Optinoal: logging
+  export DATAANS_LOG=dataans=trace
+
+  # Optional: if you want, you can overrite the local batabase location file with the environment variable:
+  export BATABASE_URL=<path/to/file.sqlite>
   ```
 4. Run the development server:
   ```bash
-  # Logging
-  export DATAANS_LOG=dataans=trace
-
-  # Optional: if you want, you can overrite the local batabase file with the following environment variable:
-  export BATABASE_URL=<path/to/file.sqlite>
-
   # Run the development server
   cargo tauri dev
   ```
