@@ -42,23 +42,11 @@ The desktop app is divided into two main parts: backend and frontend.
 
 ## Desktop app backend
 
-### Overview
-
 * Main programming language: [`Rust`](https://www.rust-lang.org/).
-* Storage: [`PoloDb`](https://www.polodb.org/).
-* Logging: [`tracing`](https://docs.rs/tracing/).
-
-### Storage
-
-The [`PoloDb`](https://www.polodb.org/) is used for the local data storage. [Why](https://www.polodb.org/docs/):
-
-> `PoloDB` aims to offer a modern alternative to `SQLite`, which is currently the almost exclusive option for client-side data storage. Although `SQLite` is an old and stable software, it lacks some modern features. That's why we developed `PoloDB`, which is NoSQL, supports multi-threading and multi-sessions, and retains the embedded and lightweight features of `SQLite`.
-
-This is why the `PoloDb` was chosen. The `PoloDb` functionality is enough for the current app requirements.
+* Storage: [`sqlite`](https://www.sqlite.org/).
+* Logging: [`tracing`](https://docs.rs/tracing/) and [`tracing-subscriber`](https://docs.rs/tracing-subscriber/).
 
 ## Desktop app frontend
-
-### Overview
 
 * Frontend framework: [`Leptos`](https://leptos.dev/).
 * Logging: [`log`](https://docs.rs/log/) + [`wasm-logger`](https://docs.rs/wasm-logger/).
@@ -71,7 +59,7 @@ The chosen frontend framework is [`Leptos`](https://leptos.dev/). Why:
 * Fast.
 * Easy to write and maintain projects.
 
-Keep in mind that **only Rust frontend frameworks were considered** for this project. We don't want to deal with `JS`/`TS` and want to implement everything in `Rust`. `Rust` has a lot of interesting and worth-trying [frontend frameworks](https://www.arewewebyet.org/topics/frameworks/). The `create-tauri-app` has a [limited template list](https://tauri.app/start/create-project/), so our list of candidates was shrunk to 3 ones: [Yew](https://yew.rs/), [Leptos](https://leptos.dev/), and [Sycamore](https://sycamore-rs.netlify.app/).
+Keep in mind that **only Rust frontend frameworks were considered** for this project. We don't want to deal with `JS`/`TS` and want to implement everything in `Rust`. `Rust` has a lot of interesting and worth-trying [frontend frameworks](https://www.arewewebyet.org/topics/frameworks/). The `create-tauri-app` *had* (at the moment of the project creation) a [limited template list](https://tauri.app/start/create-project/), so our list of candidates was shrunk to 3 ones: [Yew](https://yew.rs/), [Leptos](https://leptos.dev/), and [Sycamore](https://sycamore-rs.netlify.app/).
 
 All of them are popular, fast, and interesting: [`Yew` vs `Dioxus` vs `Leptos` vs `Sycamore`](https://www.reddit.com/r/rust/comments/1526qo3/comment/jsdq72u/). We chose `Leptos` because of:
 
@@ -79,4 +67,4 @@ All of them are popular, fast, and interesting: [`Yew` vs `Dioxus` vs `Leptos` v
 > * Entirely safe Rust.
 > * Very, very good performance.
 
-It doesn't mean that the `Leptos` is the best. We just like it more and it's enough for us.
+It doesn't mean that the `Leptos` is the best. We just like it more and it's enough for us :stuck_out_tongue_closed_eyes:.
