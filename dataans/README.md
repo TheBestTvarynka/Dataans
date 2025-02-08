@@ -49,10 +49,12 @@ Thus, everything starting from the back end and up to the front end is written i
 The steps are almost the same as in the previous chapter.
 
 1. Tauri Prerequisites: https://v2.tauri.app/start/prerequisites/.
-2. Install Tauri cli:
+2. Install needed cli tools:
    ```bash
    # https://v2.tauri.app/reference/cli/
    cargo install tauri-cli --version "^2.0.0" --locked
+   # https://trunkrs.dev/#install
+   cargo install --locked trunk
    ```
 3. Clone the repo:
    ```bash
