@@ -358,6 +358,7 @@ mod tests {
             id: file_id,
             name: "cat.jpg".into(),
             path: "/home/tbt/cat-01.jpg".into(),
+            is_synced: false,
         };
 
         db.add_file(&file).await.unwrap();
@@ -367,6 +368,7 @@ mod tests {
             id: new_avatar_id,
             name: "cat-2.jpg".into(),
             path: "/home/tbt/cat-02.jpg".into(),
+            is_synced: false,
         };
 
         db.add_file(&new_avatar).await.unwrap();
@@ -380,6 +382,7 @@ mod tests {
             name: "Tbt".into(),
             avatar_id: file_id,
             created_at,
+            is_synced: false,
         };
 
         db.create_space(&space).await.unwrap();
@@ -392,6 +395,7 @@ mod tests {
             name: "TheBestTvarynka".into(),
             avatar_id: new_avatar_id,
             created_at,
+            is_synced: false,
         };
         db.update_space(&updated_space).await.unwrap();
 
@@ -418,6 +422,7 @@ mod tests {
             id,
             name: "cat.jpg".into(),
             path: "/home/tbt/cat-01.jpg".into(),
+            is_synced: false,
         };
 
         db.add_file(&file).await.unwrap();
@@ -429,6 +434,7 @@ mod tests {
             id,
             name: "cat-2.jpg".into(),
             path: "/home/tbt/cat-02.jpg".into(),
+            is_synced: false,
         };
         db.update_file(&updated_file).await.unwrap();
 
@@ -450,6 +456,7 @@ mod tests {
             id: file_id,
             name: "cat.jpg".into(),
             path: "/home/tbt/cat-01.jpg".into(),
+            is_synced: false,
         };
 
         db.add_file(&file).await.unwrap();
@@ -460,6 +467,7 @@ mod tests {
             name: "Test Notes CRUD".into(),
             avatar_id: file_id,
             created_at: OffsetDateTime::now_utc(),
+            is_synced: false,
         };
 
         db.create_space(&space).await.unwrap();
@@ -473,6 +481,7 @@ mod tests {
             text: "some text 1".into(),
             space_id,
             created_at,
+            is_synced: false,
         };
 
         db.create_note(&note).await.unwrap();
@@ -485,6 +494,7 @@ mod tests {
             text: "some text 2".into(),
             space_id,
             created_at,
+            is_synced: false,
         };
         db.update_note(&updated_note).await.unwrap();
 

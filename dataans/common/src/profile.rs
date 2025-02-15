@@ -59,11 +59,7 @@ impl Sync {
 
     /// Checks synchronization is enabled.
     pub fn is_enabled(&self) -> bool {
-        if matches!(self, Sync::Disabled { .. }) {
-            false
-        } else {
-            true
-        }
+        !matches!(self, Sync::Disabled { .. })
     }
 
     /// Returns [SyncMode] if the sync is enabled.
