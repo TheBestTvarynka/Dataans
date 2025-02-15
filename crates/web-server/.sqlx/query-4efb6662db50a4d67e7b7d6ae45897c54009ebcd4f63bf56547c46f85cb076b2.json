@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "insert into sync_block (id, number, checksum, space_id) values (gen_random_uuid(), 1, $1, $2)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Bytea",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "4efb6662db50a4d67e7b7d6ae45897c54009ebcd4f63bf56547c46f85cb076b2"
+}

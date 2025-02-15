@@ -54,6 +54,12 @@ impl WebServerState {
     }
 }
 
+impl Default for WebServerState {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 #[rocket::main]
 async fn main() -> std::result::Result<(), rocket::Error> {
     logging::init_tracing();

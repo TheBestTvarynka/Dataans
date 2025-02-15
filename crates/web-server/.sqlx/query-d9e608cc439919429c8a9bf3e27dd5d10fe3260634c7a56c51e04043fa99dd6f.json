@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "update space set data = $1, checksum = $2 where id = $3",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Bytea",
+        "Bytea",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "d9e608cc439919429c8a9bf3e27dd5d10fe3260634c7a56c51e04043fa99dd6f"
+}
