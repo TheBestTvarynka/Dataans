@@ -53,8 +53,6 @@ impl<'r> FromRequest<'r> for UserContext {
             Err(err) => return Outcome::Error((Status::Unauthorized, err)),
         };
 
-        Outcome::Success(UserContext {
-            user_id: user_id.into(),
-        })
+        Outcome::Success(UserContext { user_id })
     }
 }
