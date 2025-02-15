@@ -1,9 +1,4 @@
 fn main() {
-    println!(
-        "cargo::rustc-env=DATABASE_URL={}",
-        std::env::var("DESKTOP_DATABASE_URL").unwrap(),
-    );
-
     tauri_build::try_build(tauri_build::Attributes::new().plugin(
         "dataans",
         tauri_build::InlinedPlugin::new().commands(&[
