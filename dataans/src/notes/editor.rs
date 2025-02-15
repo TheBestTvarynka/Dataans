@@ -1,4 +1,4 @@
-use common::note::{DraftNote, File, Note};
+use common::note::{CreateNote, DraftNote, File, Note, OwnedNote};
 use common::space::Id as SpaceId;
 use gloo_storage::{LocalStorage, Storage};
 use leptos::*;
@@ -40,7 +40,7 @@ pub fn Editor(space_id: SpaceId, #[prop(into)] create_note: Callback<Note<'stati
         set_draft_note(DraftNote::default());
 
         spawn_local(async move {
-            let new_note = Note {
+            let new_note = CreateNote {
                 id: Uuid::new_v4().into(),
                 text: note_text.as_ref().trim().to_string().into(),
                 created_at: OffsetDateTime::now_utc().into(),
@@ -50,6 +50,21 @@ pub fn Editor(space_id: SpaceId, #[prop(into)] create_note: Callback<Note<'stati
             crate::backend::notes::create_note(new_note.clone())
                 .await
                 .expect("Note creating should not fail.");
+            let CreateNote {
+                id,
+                text,
+                files,
+                created_at,
+                space_id,
+            } = new_note;
+            let new_note = OwnedNote {
+                id,
+                text,
+                files,
+                created_at,
+                space_id,
+                is_synced: false.into(),
+            };
             create_note.call(new_note);
         });
     };

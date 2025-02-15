@@ -1,4 +1,4 @@
-use common::space::{Avatar, OwnedSpace, Space, UpdateSpace};
+use common::space::{Avatar, CreateSpace, OwnedSpace, UpdateSpace};
 use common::Config;
 use leptos::*;
 use leptos_hotkeys::{use_hotkeys, use_hotkeys_scoped};
@@ -60,6 +60,7 @@ pub fn SpaceForm(
                     id,
                     name: name.into(),
                     avatar,
+                    is_synced: false.into(),
                 })
                 .await
                 .expect("Space updating should not fail");
@@ -67,7 +68,7 @@ pub fn SpaceForm(
                 None
             } else {
                 let new_space_id = Uuid::new_v4();
-                create_space(Space {
+                create_space(CreateSpace {
                     id: new_space_id.into(),
                     name: name.into(),
                     created_at: OffsetDateTime::now_utc().into(),

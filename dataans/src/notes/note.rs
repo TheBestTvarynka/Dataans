@@ -45,6 +45,7 @@ pub fn Note(
                 id: note_id,
                 text: text.into(),
                 files,
+                is_synced: false.into(),
             };
             crate::backend::notes::update_note(new_note.clone())
                 .await
