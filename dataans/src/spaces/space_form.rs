@@ -59,7 +59,6 @@ pub fn SpaceForm(
                     id,
                     name: name.into(),
                     avatar,
-                    is_synced: false.into(),
                 })
                 .await
                 .expect("Space updating should not fail");

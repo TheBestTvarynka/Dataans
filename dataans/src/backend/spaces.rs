@@ -29,7 +29,7 @@ struct UpdateSpaceArgs<'name> {
     space_data: UpdateSpace<'name>,
 }
 
-pub async fn update_space(space_data: UpdateSpace<'_>) -> CommandResultEmpty {
+pub async fn update_space(space_data: UpdateSpace<'_>) -> CommandResult<OwnedSpace> {
     invoke_command(
         &format!("plugin:{}|update_space", APP_PLUGIN_NAME),
         &UpdateSpaceArgs { space_data },

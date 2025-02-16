@@ -1,4 +1,4 @@
-use common::note::{File, Id as NoteId, Note as NoteData, UpdateNote};
+use common::note::{File, Id as NoteId, Note as NoteData, OwnedNote, UpdateNote};
 use leptos::web_sys::KeyboardEvent;
 use leptos::*;
 use markdown::mdast::{Node, Text};
@@ -12,7 +12,7 @@ use crate::notes::md_node::render_md_node;
 pub fn Note(
     note: NoteData<'static>,
     delete_note: SignalSetter<NoteId>,
-    update_note: SignalSetter<UpdateNote<'static>>,
+    update_note: SignalSetter<OwnedNote>,
 ) -> impl IntoView {
     let (show_modal, set_show_modal) = create_signal(false);
     let (edit_mode, set_edit_mode) = create_signal(false);
@@ -45,9 +45,8 @@ pub fn Note(
                 id: note_id,
                 text: text.into(),
                 files,
-                is_synced: false.into(),
             };
-            crate::backend::notes::update_note(new_note.clone())
+            let new_note = crate::backend::notes::update_note(new_note.clone())
                 .await
                 .expect("note updating should not fail");
             update_note.set(new_note);

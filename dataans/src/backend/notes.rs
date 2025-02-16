@@ -40,7 +40,7 @@ struct UpdateNoteArgs<'text> {
     pub note_data: UpdateNote<'text>,
 }
 
-pub async fn update_note(note_data: UpdateNote<'_>) -> CommandResultEmpty {
+pub async fn update_note(note_data: UpdateNote<'_>) -> CommandResult<OwnedNote> {
     invoke_command(
         &format!("plugin:{}|update_note", APP_PLUGIN_NAME),
         &UpdateNoteArgs { note_data },
