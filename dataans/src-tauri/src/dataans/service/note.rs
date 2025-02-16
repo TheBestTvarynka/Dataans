@@ -122,12 +122,11 @@ impl<D: Db> NoteService<D> {
         })
     }
 
-    pub async fn update_note(&self, note: UpdateNote<'_>) -> Result<(), DataansError> {
+    pub async fn update_note(&self, note: UpdateNote<'static>) -> Result<OwnedNote, DataansError> {
         let UpdateNote {
-            id,
+            id: note_id,
             text,
             files,
-            is_synced,
         } = note;
 
         let NoteModel {
@@ -137,24 +136,34 @@ impl<D: Db> NoteService<D> {
             updated_at: _,
             space_id,
             is_synced: _,
-        } = self.db.note_by_id(id.inner()).await?;
+        } = self.db.note_by_id(note_id.inner()).await?;
+
+        let updated_at = OffsetDateTime::now_utc();
 
         self.db
             .update_note(&NoteModel {
                 id,
-                text: text.into(),
+                text: text.clone().into(),
                 created_at,
-                updated_at: OffsetDateTime::now_utc(),
+                updated_at,
                 space_id,
-                is_synced: is_synced.into(),
+                is_synced: false.into(),
             })
             .await?;
 
         self.db
-            .set_note_files(id, &files.into_iter().map(|file| file.id).collect::<Vec<_>>())
+            .set_note_files(id, &files.iter().map(|file| file.id).collect::<Vec<_>>())
             .await?;
 
-        Ok(())
+        Ok(Note {
+            id: note_id,
+            text,
+            files,
+            created_at: created_at.into(),
+            updated_at: updated_at.into(),
+            space_id: space_id.into(),
+            is_synced: false.into(),
+        })
     }
 
     pub async fn delete_note(&self, note_id: NoteId) -> Result<(), DataansError> {

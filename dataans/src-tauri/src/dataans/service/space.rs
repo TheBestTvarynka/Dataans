@@ -43,12 +43,11 @@ impl<D: Db> SpaceService<D> {
         })
     }
 
-    pub async fn update_space(&self, space_data: UpdateSpace<'static>) -> Result<(), DataansError> {
+    pub async fn update_space(&self, space_data: UpdateSpace<'static>) -> Result<OwnedSpace, DataansError> {
         let UpdateSpace {
-            id,
+            id: space_id,
             name,
             avatar,
-            is_synced,
         } = space_data;
 
         let SpaceModel {
@@ -58,19 +57,29 @@ impl<D: Db> SpaceService<D> {
             created_at,
             updated_at: _,
             is_synced: _,
-        } = self.db.space_by_id(id.inner()).await?;
+        } = self.db.space_by_id(space_id.inner()).await?;
 
-        Ok(self
-            .db
+        let updated_at = OffsetDateTime::now_utc();
+
+        self.db
             .update_space(&SpaceModel {
                 id,
-                name: name.into(),
+                name: name.clone().into(),
                 avatar_id: avatar.id(),
                 created_at,
-                updated_at: OffsetDateTime::now_utc(),
-                is_synced: is_synced.into(),
+                updated_at,
+                is_synced: false,
             })
-            .await?)
+            .await?;
+
+        Ok(OwnedSpace {
+            id: space_id,
+            name,
+            avatar,
+            created_at: created_at.into(),
+            updated_at: updated_at.into(),
+            is_synced: false.into(),
+        })
     }
 
     pub async fn delete_space(&self, id: DeleteSpace) -> Result<(), DataansError> {

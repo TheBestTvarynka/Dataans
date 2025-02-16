@@ -157,6 +157,4 @@ pub struct UpdateNote<'text> {
     pub text: MdText<'text>,
     /// Attached files.
     pub files: Vec<File>,
-    /// Flag that indicates if the note is synced.
-    pub is_synced: IsSynced,
 }

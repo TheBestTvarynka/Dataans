@@ -19,7 +19,7 @@ pub async fn create_note(state: State<'_, DataansState>, note: CreateNoteOwned) 
 
 #[instrument(ret, skip(state))]
 #[tauri::command]
-pub async fn update_note(state: State<'_, DataansState>, note_data: UpdateNote<'_>) -> CommandResultEmpty {
+pub async fn update_note(state: State<'_, DataansState>, note_data: UpdateNote<'static>) -> CommandResult<OwnedNote> {
     Ok(state.note_service.update_note(note_data).await?)
 }
 

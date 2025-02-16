@@ -148,8 +148,6 @@ pub struct UpdateSpace<'name> {
     pub name: Name<'name>,
     /// Space avatar.
     pub avatar: Avatar<'static>,
-    /// Flag that indicates if the space is synced.
-    pub is_synced: IsSynced,
 }
 
 /// Data that the app need to delete the space.

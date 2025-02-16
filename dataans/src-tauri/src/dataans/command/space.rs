@@ -18,7 +18,7 @@ pub async fn create_space(state: State<'_, DataansState>, space_data: CreateSpac
 
 #[instrument(level = "trace", ret, skip(state))]
 #[tauri::command]
-pub async fn update_space(state: State<'_, DataansState>, space_data: UpdateSpace<'static>) -> CommandResultEmpty {
+pub async fn update_space(state: State<'_, DataansState>, space_data: UpdateSpace<'static>) -> CommandResult<OwnedSpace> {
     Ok(state.space_service.update_space(space_data).await?)
 }
 
