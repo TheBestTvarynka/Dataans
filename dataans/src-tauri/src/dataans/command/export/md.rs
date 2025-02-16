@@ -35,6 +35,7 @@ async fn write_space_notes_per_file<D: Db>(
                     id,
                     text,
                     created_at,
+                    updated_at,
                     space_id: _,
                     files,
                     is_synced: _,
@@ -44,6 +45,7 @@ async fn write_space_notes_per_file<D: Db>(
                     name,
                     avatar,
                     created_at: space_created_at,
+                    updated_at: space_updated_at,
                     is_synced: _,
                 } = &space;
 
@@ -56,8 +58,10 @@ async fn write_space_notes_per_file<D: Db>(
                 writeln!(file, "Space Avatar Id: `{}`", avatar.id())?;
                 writeln!(file, "Space Avatar Path: `{}`", avatar.path())?;
                 writeln!(file, "Space Created at: `{}`", format_time(space_created_at.as_ref())?)?;
+                writeln!(file, "Space Updated at: `{}`", format_time(space_updated_at.as_ref())?)?;
 
                 writeln!(file, "Created at: {}\n", format_time(created_at.as_ref())?)?;
+                writeln!(file, "Updated at: {}\n", format_time(updated_at.as_ref())?)?;
                 writeln!(file, "{}\n", text.as_ref())?;
 
                 writeln!(file, "## Files\n")?;
@@ -83,6 +87,7 @@ fn write_space_notes(notes: &[OwnedNote], file: &mut File) -> Result<(), Dataans
             id,
             text,
             created_at,
+            updated_at,
             space_id,
             files,
             is_synced: _,
@@ -91,6 +96,7 @@ fn write_space_notes(notes: &[OwnedNote], file: &mut File) -> Result<(), Dataans
         writeln!(file, "### `{}`\n", id.inner())?;
         writeln!(file, "Space Id: `{}`", space_id.inner())?;
         writeln!(file, "Created at: {}\n", format_time(created_at.as_ref())?)?;
+        writeln!(file, "Updated at: {}\n", format_time(updated_at.as_ref())?)?;
         writeln!(file, "{}\n", text.as_ref())?;
 
         writeln!(file, "#### Files\n")?;
@@ -113,6 +119,7 @@ fn write_space(space: &OwnedSpace, file: &mut File) -> Result<(), DataansError> 
         id,
         name,
         created_at,
+        updated_at,
         avatar,
         is_synced: _,
     } = space;
@@ -120,6 +127,7 @@ fn write_space(space: &OwnedSpace, file: &mut File) -> Result<(), DataansError> 
 
     writeln!(file, "Id: `{}`", id.inner())?;
     writeln!(file, "Created at: {}\n", format_time(created_at.as_ref())?)?;
+    writeln!(file, "Updated at: {}\n", format_time(updated_at.as_ref())?)?;
     writeln!(file, "Avatar id: `{}`\n", avatar.id())?;
     writeln!(file, "Avatar path: `{}`\n", avatar.path())?;
 

@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 use crate::space::{Id as SpaceId, Space};
-use crate::{CreationDate, IsSynced};
+use crate::{CreationDate, IsSynced, UpdateDate};
 
 /// Represent a note ID.
 #[derive(Serialize, Deserialize, Debug, Default, Copy, Clone, Eq, PartialEq)]
@@ -88,6 +88,8 @@ pub struct Note<'text> {
     pub text: MdText<'text>,
     /// Creation date.
     pub created_at: CreationDate,
+    /// Update date.
+    pub updated_at: UpdateDate,
     /// Space ID this note belongs.
     pub space_id: SpaceId,
     /// Attached files.
@@ -117,6 +119,8 @@ pub struct NoteFull<'text, 'space_name, 'space_avatar> {
     pub text: MdText<'text>,
     /// Creation date.
     pub created_at: CreationDate,
+    /// Update date.
+    pub updated_at: UpdateDate,
     /// Space ID this note belongs.
     pub space: Space<'space_name, 'space_avatar>,
     /// Attached files.
@@ -135,8 +139,6 @@ pub struct CreateNote<'text> {
     pub id: Id,
     /// Note data in MD format.
     pub text: MdText<'text>,
-    /// Creation date.
-    pub created_at: CreationDate,
     /// Space ID this note belongs.
     pub space_id: SpaceId,
     /// Attached files.

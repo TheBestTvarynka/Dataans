@@ -189,9 +189,13 @@ pub struct Config {
     pub app: App,
 }
 
-/// Date and time when note was created.
+/// Date and time when the item was created.
 #[derive(Serialize, Deserialize, Debug, Clone, Eq, PartialEq, From, Into, AsRef)]
 pub struct CreationDate(OffsetDateTime);
+
+/// Date and time when the item was updated.
+#[derive(Serialize, Deserialize, Debug, Clone, Eq, PartialEq, From, Into, AsRef)]
+pub struct UpdateDate(OffsetDateTime);
 
 /// Option that describes how to export notes.
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone, Default)]

@@ -98,30 +98,8 @@ impl Db for SqliteDb {
     }
 
     #[instrument(ret, skip(self))]
-    async fn update_file(&self, file: &File) -> Result<(), DbError> {
-        let File {
-            id,
-            name,
-            path,
-            is_synced,
-        } = file;
-
-        sqlx::query!(
-            "UPDATE files SET name = ?1, path = ?2, is_synced = ?3 WHERE id = ?4",
-            name,
-            path,
-            is_synced,
-            id
-        )
-        .execute(&self.pool)
-        .await?;
-
-        Ok(())
-    }
-
-    #[instrument(ret, skip(self))]
     async fn spaces(&self) -> Result<Vec<Space>, DbError> {
-        let spaces = sqlx::query_as("SELECT id, name, avatar_id, created_at, is_synced FROM spaces")
+        let spaces = sqlx::query_as("SELECT id, name, avatar_id, created_at, updated_at, is_synced FROM spaces")
             .fetch_all(&self.pool)
             .await?;
 
@@ -130,10 +108,11 @@ impl Db for SqliteDb {
 
     #[instrument(ret, skip(self))]
     async fn space_by_id(&self, space_id: Uuid) -> Result<Space, DbError> {
-        let space = sqlx::query_as("SELECT id, name, avatar_id, created_at, is_synced FROM spaces WHERE id = ?1")
-            .bind(space_id)
-            .fetch_one(&self.pool)
-            .await?;
+        let space =
+            sqlx::query_as("SELECT id, name, avatar_id, created_at, updated_at, is_synced FROM spaces WHERE id = ?1")
+                .bind(space_id)
+                .fetch_one(&self.pool)
+                .await?;
 
         Ok(space)
     }
@@ -145,15 +124,17 @@ impl Db for SqliteDb {
             name,
             avatar_id,
             created_at,
+            updated_at,
             is_synced,
         } = space;
 
         sqlx::query!(
-            "INSERT INTO spaces (id, name, avatar_id, created_at, is_synced) VALUES (?1, ?2, ?3, ?4, ?5)",
+            "INSERT INTO spaces (id, name, avatar_id, created_at, updated_at, is_synced) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
             id,
             name,
             avatar_id,
             created_at,
+            updated_at,
             is_synced,
         )
         .execute(&self.pool)
@@ -166,20 +147,22 @@ impl Db for SqliteDb {
     async fn remove_space(&self, space_id: Uuid) -> Result<(), DbError> {
         let mut transaction = self.pool.begin().await?;
 
-        let notes: Vec<Note> = sqlx::query_as("SELECT id, text, created_at, space_id FROM notes WHERE space_id = ?1")
-            .bind(space_id)
-            .fetch_all(&mut *transaction)
-            .await?;
+        let notes: Vec<Note> =
+            sqlx::query_as("SELECT id, text, created_at, updated_at, space_id FROM notes WHERE space_id = ?1")
+                .bind(space_id)
+                .fetch_all(&mut *transaction)
+                .await?;
 
         // TODO: replace manual deleting with `ON CASCADE` constraint.
         for note in notes {
             SqliteDb::remove_note_inner(note.id, &mut transaction).await?;
         }
 
-        let space: Space = sqlx::query_as("SELECT id, name, avatar_id, created_at FROM spaces WHERE id = ?1")
-            .bind(space_id)
-            .fetch_one(&mut *transaction)
-            .await?;
+        let space: Space =
+            sqlx::query_as("SELECT id, name, avatar_id, created_at, updated_at, is_synced FROM spaces WHERE id = ?1")
+                .bind(space_id)
+                .fetch_one(&mut *transaction)
+                .await?;
 
         sqlx::query!("DELETE FROM spaces WHERE id = ?1", space_id)
             .execute(&mut *transaction)
@@ -201,14 +184,16 @@ impl Db for SqliteDb {
             name,
             avatar_id,
             created_at: _,
+            updated_at,
             is_synced,
         } = space;
 
         sqlx::query!(
-            "UPDATE spaces SET name = ?1, avatar_id = ?2, is_synced = ?3 WHERE id = ?4",
+            "UPDATE spaces SET name = ?1, avatar_id = ?2, is_synced = ?3, updated_at = ?4 WHERE id = ?5",
             name,
             avatar_id,
             is_synced,
+            updated_at,
             id,
         )
         .execute(&self.pool)
@@ -219,7 +204,7 @@ impl Db for SqliteDb {
 
     #[instrument(ret, skip(self))]
     async fn notes(&self) -> Result<Vec<Note>, DbError> {
-        let notes = sqlx::query_as("SELECT id, text, created_at, space_id, is_synced FROM notes")
+        let notes = sqlx::query_as("SELECT id, text, created_at, updated_at, space_id, is_synced FROM notes")
             .fetch_all(&self.pool)
             .await?;
 
@@ -228,20 +213,23 @@ impl Db for SqliteDb {
 
     #[instrument(ret, skip(self))]
     async fn space_notes(&self, space_id: Uuid) -> Result<Vec<Note>, DbError> {
-        let notes = sqlx::query_as("SELECT id, text, created_at, space_id, is_synced FROM notes WHERE space_id = ?1")
-            .bind(space_id)
-            .fetch_all(&self.pool)
-            .await?;
+        let notes = sqlx::query_as(
+            "SELECT id, text, created_at, updated_at, space_id, is_synced FROM notes WHERE space_id = ?1",
+        )
+        .bind(space_id)
+        .fetch_all(&self.pool)
+        .await?;
 
         Ok(notes)
     }
 
     #[instrument(ret, skip(self))]
     async fn note_by_id(&self, note_id: Uuid) -> Result<Note, DbError> {
-        let note = sqlx::query_as("SELECT id, text, created_at, space_id, is_synced FROM notes WHERE id = ?1")
-            .bind(note_id)
-            .fetch_one(&self.pool)
-            .await?;
+        let note =
+            sqlx::query_as("SELECT id, text, created_at, updated_at, space_id, is_synced FROM notes WHERE id = ?1")
+                .bind(note_id)
+                .fetch_one(&self.pool)
+                .await?;
 
         Ok(note)
     }
@@ -252,15 +240,17 @@ impl Db for SqliteDb {
             id,
             text,
             created_at,
+            updated_at,
             space_id,
             is_synced,
         } = note;
 
         sqlx::query!(
-            "INSERT INTO notes (id, text, created_at, space_id, is_synced) VALUES (?1, ?2, ?3, ?4, ?5)",
+            "INSERT INTO notes (id, text, created_at,  updated_at, space_id, is_synced) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
             id,
             text,
             created_at,
+            updated_at,
             space_id,
             is_synced,
         )
@@ -287,14 +277,16 @@ impl Db for SqliteDb {
             id,
             text,
             created_at: _,
+            updated_at,
             space_id: _,
             is_synced,
         } = note;
 
         sqlx::query!(
-            "UPDATE notes SET text = ?1, is_synced = ?2 WHERE id = ?3",
+            "UPDATE notes SET text = ?1, is_synced = ?2, updated_at = ?3 WHERE id = ?4",
             text,
             is_synced,
+            updated_at,
             id
         )
         .execute(&self.pool)
@@ -377,11 +369,13 @@ mod tests {
 
         let id = Uuid::new_v4();
         let created_at = OffsetDateTime::now_utc();
+        let updated_at = OffsetDateTime::now_utc();
         let space = Space {
             id,
             name: "Tbt".into(),
             avatar_id: file_id,
             created_at,
+            updated_at,
             is_synced: false,
         };
 
@@ -395,6 +389,7 @@ mod tests {
             name: "TheBestTvarynka".into(),
             avatar_id: new_avatar_id,
             created_at,
+            updated_at,
             is_synced: false,
         };
         db.update_space(&updated_space).await.unwrap();
@@ -467,6 +462,7 @@ mod tests {
             name: "Test Notes CRUD".into(),
             avatar_id: file_id,
             created_at: OffsetDateTime::now_utc(),
+            updated_at: OffsetDateTime::now_utc(),
             is_synced: false,
         };
 
@@ -476,11 +472,13 @@ mod tests {
 
         let id = Uuid::new_v4();
         let created_at = OffsetDateTime::now_utc();
+        let updated_at = OffsetDateTime::now_utc();
         let note = Note {
             id,
             text: "some text 1".into(),
             space_id,
             created_at,
+            updated_at,
             is_synced: false,
         };
 
@@ -494,6 +492,7 @@ mod tests {
             text: "some text 2".into(),
             space_id,
             created_at,
+            updated_at,
             is_synced: false,
         };
         db.update_note(&updated_note).await.unwrap();

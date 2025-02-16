@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 use crate::note::File;
-use crate::{CreationDate, IsSynced};
+use crate::{CreationDate, IsSynced, UpdateDate};
 
 /// Represent a space ID.
 #[derive(Serialize, Deserialize, Debug, Default, Copy, Clone, Eq, PartialEq, Hash)]
@@ -114,6 +114,8 @@ pub struct Space<'name, 'avatar> {
     pub name: Name<'name>,
     /// Creation date.
     pub created_at: CreationDate,
+    /// Update date.
+    pub updated_at: UpdateDate,
     /// Avatar image name.
     pub avatar: Avatar<'avatar>,
     /// Flag that indicates if the space is synced.
@@ -130,8 +132,6 @@ pub struct CreateSpace<'name, 'avatar> {
     pub id: Id,
     /// Space name.
     pub name: Name<'name>,
-    /// Creation date.
-    pub created_at: CreationDate,
     /// Avatar image name.
     pub avatar: Avatar<'avatar>,
 }

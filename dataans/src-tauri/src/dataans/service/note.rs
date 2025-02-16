@@ -3,6 +3,7 @@ use std::sync::Arc;
 use common::note::{CreateNoteOwned, File, Id as NoteId, Note, NoteFullOwned, OwnedNote, UpdateNote};
 use common::space::Id as SpaceId;
 use futures::future::try_join_all;
+use time::OffsetDateTime;
 
 use crate::dataans::db::model::{File as FileModel, Note as NoteModel};
 use crate::dataans::db::Db;
@@ -25,6 +26,7 @@ impl<D: Db> NoteService<D> {
             text,
             space_id,
             created_at,
+            updated_at,
             is_synced,
         } = note;
 
@@ -52,6 +54,7 @@ impl<D: Db> NoteService<D> {
             text: text.into(),
             space_id: space_id.into(),
             created_at: created_at.into(),
+            updated_at: updated_at.into(),
             files,
             is_synced: is_synced.into(),
         })
@@ -88,15 +91,17 @@ impl<D: Db> NoteService<D> {
             id,
             text,
             files,
-            created_at,
             space_id,
         } = note;
+
+        let created_at = OffsetDateTime::now_utc();
 
         self.db
             .create_note(&NoteModel {
                 id: id.inner(),
                 text: text.into(),
-                created_at: created_at.into(),
+                created_at,
+                updated_at: created_at,
                 space_id: space_id.inner(),
                 is_synced: false,
             })
@@ -121,6 +126,7 @@ impl<D: Db> NoteService<D> {
             id,
             text: _,
             created_at,
+            updated_at: _,
             space_id,
             is_synced: _,
         } = self.db.note_by_id(id.inner()).await?;
@@ -130,6 +136,7 @@ impl<D: Db> NoteService<D> {
                 id,
                 text: text.into(),
                 created_at,
+                updated_at: OffsetDateTime::now_utc(),
                 space_id,
                 is_synced: is_synced.into(),
             })
@@ -163,6 +170,7 @@ impl<D: Db> NoteService<D> {
                         id,
                         text,
                         created_at,
+                        updated_at,
                         space_id,
                         files,
                         is_synced,
@@ -171,6 +179,7 @@ impl<D: Db> NoteService<D> {
                         id,
                         text,
                         created_at,
+                        updated_at,
                         files,
                         space: self.space_service.space_by_id(space_id).await?,
                         is_synced,
@@ -191,6 +200,7 @@ impl<D: Db> NoteService<D> {
                         id,
                         text,
                         created_at,
+                        updated_at,
                         space_id,
                         files,
                         is_synced,
@@ -199,6 +209,7 @@ impl<D: Db> NoteService<D> {
                         id,
                         text,
                         created_at,
+                        updated_at,
                         files,
                         space: self.space_service.space_by_id(space_id).await?,
                         is_synced,

@@ -2,6 +2,7 @@ use std::sync::Arc;
 
 use common::space::{Avatar, CreateSpaceOwned, DeleteSpace, Id as SpaceId, OwnedSpace, UpdateSpace};
 use futures::future::try_join_all;
+use time::OffsetDateTime;
 
 use crate::dataans::db::model::{File as FileModel, Space as SpaceModel};
 use crate::dataans::db::Db;
@@ -17,19 +18,17 @@ impl<D: Db> SpaceService<D> {
     }
 
     pub async fn create_space(&self, space: CreateSpaceOwned) -> Result<(), DataansError> {
-        let CreateSpaceOwned {
-            id,
-            name,
-            avatar,
-            created_at,
-        } = space;
+        let CreateSpaceOwned { id, name, avatar } = space;
+
+        let created_at = OffsetDateTime::now_utc();
 
         self.db
             .create_space(&SpaceModel {
                 id: id.inner(),
                 name: name.into(),
                 avatar_id: avatar.id(),
-                created_at: created_at.into(),
+                created_at,
+                updated_at: created_at,
                 is_synced: false,
             })
             .await?;
@@ -50,6 +49,7 @@ impl<D: Db> SpaceService<D> {
             name: _,
             avatar_id: _,
             created_at,
+            updated_at: _,
             is_synced: _,
         } = self.db.space_by_id(id.inner()).await?;
 
@@ -60,6 +60,7 @@ impl<D: Db> SpaceService<D> {
                 name: name.into(),
                 avatar_id: avatar.id(),
                 created_at,
+                updated_at: OffsetDateTime::now_utc(),
                 is_synced: is_synced.into(),
             })
             .await?)
@@ -77,6 +78,7 @@ impl<D: Db> SpaceService<D> {
             name,
             avatar_id,
             created_at,
+            updated_at,
             is_synced,
         } = space;
 
@@ -92,6 +94,7 @@ impl<D: Db> SpaceService<D> {
             name: name.into(),
             avatar: Avatar::new(avatar_id, avatar_path),
             created_at: created_at.into(),
+            updated_at: updated_at.into(),
             is_synced: is_synced.into(),
         })
     }
