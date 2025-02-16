@@ -12,7 +12,7 @@ pub async fn list_spaces(state: State<'_, DataansState>) -> CommandResult<Vec<Ow
 
 #[instrument(level = "trace", ret, skip(state))]
 #[tauri::command]
-pub async fn create_space(state: State<'_, DataansState>, space_data: CreateSpaceOwned) -> CommandResultEmpty {
+pub async fn create_space(state: State<'_, DataansState>, space_data: CreateSpaceOwned) -> CommandResult<OwnedSpace> {
     Ok(state.space_service.create_space(space_data).await?)
 }
 

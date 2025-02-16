@@ -86,7 +86,7 @@ impl<D: Db> NoteService<D> {
         Ok(notes)
     }
 
-    pub async fn create_note(&self, note: CreateNoteOwned) -> Result<(), DataansError> {
+    pub async fn create_note(&self, note: CreateNoteOwned) -> Result<OwnedNote, DataansError> {
         let CreateNoteOwned {
             id,
             text,
@@ -99,7 +99,7 @@ impl<D: Db> NoteService<D> {
         self.db
             .create_note(&NoteModel {
                 id: id.inner(),
-                text: text.into(),
+                text: text.clone().into(),
                 created_at,
                 updated_at: created_at,
                 space_id: space_id.inner(),
@@ -108,10 +108,18 @@ impl<D: Db> NoteService<D> {
             .await?;
 
         self.db
-            .set_note_files(id.inner(), &files.into_iter().map(|file| file.id).collect::<Vec<_>>())
+            .set_note_files(id.inner(), &files.iter().map(|file| file.id).collect::<Vec<_>>())
             .await?;
 
-        Ok(())
+        Ok(Note {
+            id,
+            text,
+            files,
+            created_at: created_at.into(),
+            updated_at: created_at.into(),
+            space_id,
+            is_synced: false.into(),
+        })
     }
 
     pub async fn update_note(&self, note: UpdateNote<'_>) -> Result<(), DataansError> {

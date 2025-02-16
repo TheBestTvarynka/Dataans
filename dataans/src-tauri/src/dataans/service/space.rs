@@ -17,7 +17,7 @@ impl<D: Db> SpaceService<D> {
         Self { db }
     }
 
-    pub async fn create_space(&self, space: CreateSpaceOwned) -> Result<(), DataansError> {
+    pub async fn create_space(&self, space: CreateSpaceOwned) -> Result<OwnedSpace, DataansError> {
         let CreateSpaceOwned { id, name, avatar } = space;
 
         let created_at = OffsetDateTime::now_utc();
@@ -25,7 +25,7 @@ impl<D: Db> SpaceService<D> {
         self.db
             .create_space(&SpaceModel {
                 id: id.inner(),
-                name: name.into(),
+                name: name.clone().into(),
                 avatar_id: avatar.id(),
                 created_at,
                 updated_at: created_at,
@@ -33,7 +33,14 @@ impl<D: Db> SpaceService<D> {
             })
             .await?;
 
-        Ok(())
+        Ok(OwnedSpace {
+            id,
+            name,
+            avatar,
+            created_at: created_at.into(),
+            updated_at: created_at.into(),
+            is_synced: false.into(),
+        })
     }
 
     pub async fn update_space(&self, space_data: UpdateSpace<'static>) -> Result<(), DataansError> {

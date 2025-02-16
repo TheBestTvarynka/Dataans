@@ -13,7 +13,7 @@ pub async fn list_notes(state: State<'_, DataansState>, space_id: SpaceId) -> Co
 
 #[instrument(ret, skip(state))]
 #[tauri::command]
-pub async fn create_note(state: State<'_, DataansState>, note: CreateNoteOwned) -> CommandResultEmpty {
+pub async fn create_note(state: State<'_, DataansState>, note: CreateNoteOwned) -> CommandResult<OwnedNote> {
     Ok(state.note_service.create_note(note).await?)
 }
 
