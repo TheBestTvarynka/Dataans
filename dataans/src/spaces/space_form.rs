@@ -2,7 +2,6 @@ use common::space::{Avatar, CreateSpace, OwnedSpace, UpdateSpace};
 use common::Config;
 use leptos::*;
 use leptos_hotkeys::{use_hotkeys, use_hotkeys_scoped};
-use time::OffsetDateTime;
 use uuid::Uuid;
 
 use crate::backend::convert_file_src;
@@ -71,7 +70,6 @@ pub fn SpaceForm(
                 create_space(CreateSpace {
                     id: new_space_id.into(),
                     name: name.into(),
-                    created_at: OffsetDateTime::now_utc().into(),
                     avatar,
                 })
                 .await

@@ -15,7 +15,7 @@ struct CreateSpaceArgs<'name, 'avatar> {
     space_data: CreateSpace<'name, 'avatar>,
 }
 
-pub async fn create_space(space_data: CreateSpace<'_, '_>) -> CommandResultEmpty {
+pub async fn create_space(space_data: CreateSpace<'_, '_>) -> CommandResult<OwnedSpace> {
     invoke_command(
         &format!("plugin:{}|create_space", APP_PLUGIN_NAME),
         &CreateSpaceArgs { space_data },

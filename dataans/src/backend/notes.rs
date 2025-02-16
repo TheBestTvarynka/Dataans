@@ -26,7 +26,7 @@ struct CreateNoteArgs<'text> {
     pub note: CreateNote<'text>,
 }
 
-pub async fn create_note(note: CreateNote<'_>) -> CommandResultEmpty {
+pub async fn create_note(note: CreateNote<'_>) -> CommandResult<OwnedNote> {
     invoke_command(
         &format!("plugin:{}|create_note", APP_PLUGIN_NAME),
         &CreateNoteArgs { note },
