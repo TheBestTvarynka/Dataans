@@ -69,7 +69,15 @@ pub fn Note(
         >
             <div class="note-meta">
                 <div class="center-span">
-                    <span class="note-time">{format_date(note.created_at.as_ref())}</span>
+                    {if note.created_at.as_ref() == note.updated_at.as_ref() { view! {
+                        <span class="note-time">{format_date(note.created_at.as_ref())}</span>
+                        <span />
+                    }} else { view! {
+                        <span class="note-time" style="white-space: pre-wrap;">" UPD: "</span>
+                        <span class="note-time" title=format!("Created at: {}", format_date(note.created_at.as_ref()))>
+                            {format_date(note.updated_at.as_ref())}
+                        </span>
+                    }}}
                 </div>
                 <div class="note-tools">
                     <button
