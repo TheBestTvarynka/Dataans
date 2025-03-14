@@ -27,13 +27,11 @@ impl<D: Db> FileService<D> {
                 warn!(?err);
 
                 self.db
-                    .add_file(&FileModel {
-                        id: common::DEFAULT_SPACE_AVATAR_ID,
-                        name: "default_space_avatar.png".into(),
-                        path: common::DEFAULT_SPACE_AVATAR_PATH.into(),
-                        // TODO
-                        checksum: Vec::new(),
-                    })
+                    .add_file(&FileModel::new(
+                        common::DEFAULT_SPACE_AVATAR_ID,
+                        "default_space_avatar.png".into(),
+                        common::DEFAULT_SPACE_AVATAR_PATH.into(),
+                    ))
                     .await?;
 
                 Ok(())
@@ -59,16 +57,14 @@ impl<D: Db> FileService<D> {
         fs::write(&file_path, data)?;
 
         self.db
-            .add_file(&FileModel {
+            .add_file(&FileModel::new(
                 id,
-                name: name.clone(),
-                path: file_path
+                name.clone(),
+                file_path
                     .to_str()
                     .ok_or_else(|| DataansError::PathIsNotUtf8(file_path.clone()))?
                     .to_owned(),
-                // TODO
-                checksum: Vec::new(),
-            })
+            ))
             .await?;
 
         Ok(File {
@@ -102,16 +98,14 @@ impl<D: Db> FileService<D> {
         info!("Avatar image path: {:?}", avatar_path);
 
         self.db
-            .add_file(&FileModel {
-                id: avatar_id,
-                name: avatar_name.clone(),
-                path: avatar_path
+            .add_file(&FileModel::new(
+                avatar_id,
+                avatar_name.clone(),
+                avatar_path
                     .to_str()
                     .ok_or_else(|| DataansError::PathIsNotUtf8(avatar_path.clone()))?
                     .to_owned(),
-                // TODO
-                checksum: Vec::new(),
-            })
+            ))
             .await?;
 
         Ok(File {
@@ -139,16 +133,14 @@ impl<D: Db> FileService<D> {
         img.save(&image_path)?;
 
         self.db
-            .add_file(&FileModel {
+            .add_file(&FileModel::new(
                 id,
-                name: name.clone(),
-                path: image_path
+                name.clone(),
+                image_path
                     .to_str()
                     .ok_or_else(|| DataansError::PathIsNotUtf8(image_path.clone()))?
                     .to_owned(),
-                // TODO
-                checksum: Vec::new(),
-            })
+            ))
             .await?;
 
         Ok(File {

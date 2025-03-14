@@ -20,6 +20,7 @@ web-api-types.workspace = true
 hex.workspace = true
 futures.workspace = true
 url.workspace = true
+sync-common.workspace = true
 
 tauri = { version = "2", features = [
     "protocol-asset", "tray-icon",

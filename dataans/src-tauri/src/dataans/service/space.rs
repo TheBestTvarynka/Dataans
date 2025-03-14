@@ -23,15 +23,13 @@ impl<D: Db> SpaceService<D> {
         let created_at = OffsetDateTime::now_utc();
 
         self.db
-            .create_space(&SpaceModel {
-                id: id.inner(),
-                name: name.clone().into(),
-                avatar_id: avatar.id(),
+            .create_space(&SpaceModel::new(
+                id.inner(),
+                name.clone().into(),
+                avatar.id(),
                 created_at,
-                updated_at: created_at,
-                // TODO
-                checksum: Vec::new(),
-            })
+                created_at,
+            ))
             .await?;
 
         Ok(OwnedSpace {
@@ -62,15 +60,13 @@ impl<D: Db> SpaceService<D> {
         let updated_at = OffsetDateTime::now_utc();
 
         self.db
-            .update_space(&SpaceModel {
+            .update_space(&SpaceModel::new(
                 id,
-                name: name.clone().into(),
-                avatar_id: avatar.id(),
+                name.clone().into(),
+                avatar.id(),
                 created_at,
                 updated_at,
-                // TODO
-                checksum: Vec::new(),
-            })
+            ))
             .await?;
 
         Ok(OwnedSpace {

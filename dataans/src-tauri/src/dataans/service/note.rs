@@ -97,16 +97,14 @@ impl<D: Db> NoteService<D> {
         let created_at = OffsetDateTime::now_utc();
 
         self.db
-            .create_note(&NoteModel {
-                id: id.inner(),
-                text: text.clone().into(),
+            .create_note(&NoteModel::new(
+                id.inner(),
+                text.clone().into(),
                 created_at,
-                updated_at: created_at,
-                space_id: space_id.inner(),
-                // TODO
-                checksum: Vec::new(),
-                block_id: None,
-            })
+                created_at,
+                space_id.inner(),
+                None,
+            ))
             .await?;
 
         self.db
@@ -143,16 +141,14 @@ impl<D: Db> NoteService<D> {
         let updated_at = OffsetDateTime::now_utc();
 
         self.db
-            .update_note(&NoteModel {
+            .update_note(&NoteModel::new(
                 id,
-                text: text.clone().into(),
+                text.clone().into(),
                 created_at,
                 updated_at,
                 space_id,
-                // TODO
-                checksum: Vec::new(),
                 block_id,
-            })
+            ))
             .await?;
 
         self.db
