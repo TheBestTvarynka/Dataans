@@ -299,7 +299,3 @@ impl Default for DataExportConfig {
         Self::Json(Default::default())
     }
 }
-
-/// Indicates if the item was synced with the back up server.
-#[derive(Debug, Clone, Copy, From, Into, Serialize, Deserialize, PartialEq, Eq)]
-pub struct IsSynced(bool);

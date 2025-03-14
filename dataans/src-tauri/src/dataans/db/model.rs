@@ -9,7 +9,7 @@ pub struct Space {
     pub avatar_id: Uuid,
     pub created_at: OffsetDateTime,
     pub updated_at: OffsetDateTime,
-    pub is_synced: bool,
+    pub checksum: Vec<u8>,
 }
 
 #[derive(Debug, FromRow, PartialEq, Eq)]
@@ -19,7 +19,8 @@ pub struct Note {
     pub created_at: OffsetDateTime,
     pub updated_at: OffsetDateTime,
     pub space_id: Uuid,
-    pub is_synced: bool,
+    pub block_id: Option<Uuid>,
+    pub checksum: Vec<u8>,
 }
 
 #[derive(Debug, FromRow, PartialEq, Eq)]
@@ -27,5 +28,5 @@ pub struct File {
     pub id: Uuid,
     pub name: String,
     pub path: String,
-    pub is_synced: bool,
+    pub checksum: Vec<u8>,
 }

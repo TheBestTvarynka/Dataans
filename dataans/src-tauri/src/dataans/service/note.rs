@@ -27,7 +27,8 @@ impl<D: Db> NoteService<D> {
             space_id,
             created_at,
             updated_at,
-            is_synced,
+            checksum: _,
+            block_id: _,
         } = note;
 
         let files = db
@@ -39,7 +40,7 @@ impl<D: Db> NoteService<D> {
                     id,
                     name,
                     path,
-                    is_synced: _,
+                    checksum: _,
                 } = file;
                 File {
                     id,
@@ -56,7 +57,6 @@ impl<D: Db> NoteService<D> {
             created_at: created_at.into(),
             updated_at: updated_at.into(),
             files,
-            is_synced: is_synced.into(),
         })
     }
 
@@ -103,7 +103,9 @@ impl<D: Db> NoteService<D> {
                 created_at,
                 updated_at: created_at,
                 space_id: space_id.inner(),
-                is_synced: false,
+                // TODO
+                checksum: Vec::new(),
+                block_id: None,
             })
             .await?;
 
@@ -118,7 +120,6 @@ impl<D: Db> NoteService<D> {
             created_at: created_at.into(),
             updated_at: created_at.into(),
             space_id,
-            is_synced: false.into(),
         })
     }
 
@@ -135,7 +136,8 @@ impl<D: Db> NoteService<D> {
             created_at,
             updated_at: _,
             space_id,
-            is_synced: _,
+            checksum: _,
+            block_id,
         } = self.db.note_by_id(note_id.inner()).await?;
 
         let updated_at = OffsetDateTime::now_utc();
@@ -147,7 +149,9 @@ impl<D: Db> NoteService<D> {
                 created_at,
                 updated_at,
                 space_id,
-                is_synced: false.into(),
+                // TODO
+                checksum: Vec::new(),
+                block_id,
             })
             .await?;
 
@@ -162,7 +166,6 @@ impl<D: Db> NoteService<D> {
             created_at: created_at.into(),
             updated_at: updated_at.into(),
             space_id: space_id.into(),
-            is_synced: false.into(),
         })
     }
 
@@ -190,7 +193,6 @@ impl<D: Db> NoteService<D> {
                         updated_at,
                         space_id,
                         files,
-                        is_synced,
                     } = note;
                     Result::<NoteFullOwned, DataansError>::Ok(NoteFullOwned {
                         id,
@@ -199,7 +201,6 @@ impl<D: Db> NoteService<D> {
                         updated_at,
                         files,
                         space: self.space_service.space_by_id(space_id).await?,
-                        is_synced,
                     })
                 }),
         )
@@ -220,7 +221,6 @@ impl<D: Db> NoteService<D> {
                         updated_at,
                         space_id,
                         files,
-                        is_synced,
                     } = note;
                     Result::<NoteFullOwned, DataansError>::Ok(NoteFullOwned {
                         id,
@@ -229,7 +229,6 @@ impl<D: Db> NoteService<D> {
                         updated_at,
                         files,
                         space: self.space_service.space_by_id(space_id).await?,
-                        is_synced,
                     })
                 }),
         )

@@ -29,7 +29,8 @@ impl<D: Db> SpaceService<D> {
                 avatar_id: avatar.id(),
                 created_at,
                 updated_at: created_at,
-                is_synced: false,
+                // TODO
+                checksum: Vec::new(),
             })
             .await?;
 
@@ -39,7 +40,6 @@ impl<D: Db> SpaceService<D> {
             avatar,
             created_at: created_at.into(),
             updated_at: created_at.into(),
-            is_synced: false.into(),
         })
     }
 
@@ -56,7 +56,7 @@ impl<D: Db> SpaceService<D> {
             avatar_id: _,
             created_at,
             updated_at: _,
-            is_synced: _,
+            checksum: _,
         } = self.db.space_by_id(space_id.inner()).await?;
 
         let updated_at = OffsetDateTime::now_utc();
@@ -68,7 +68,8 @@ impl<D: Db> SpaceService<D> {
                 avatar_id: avatar.id(),
                 created_at,
                 updated_at,
-                is_synced: false,
+                // TODO
+                checksum: Vec::new(),
             })
             .await?;
 
@@ -78,7 +79,6 @@ impl<D: Db> SpaceService<D> {
             avatar,
             created_at: created_at.into(),
             updated_at: updated_at.into(),
-            is_synced: false.into(),
         })
     }
 
@@ -95,14 +95,14 @@ impl<D: Db> SpaceService<D> {
             avatar_id,
             created_at,
             updated_at,
-            is_synced,
+            checksum: _,
         } = space;
 
         let FileModel {
             id: avatar_id,
             name: _,
             path: avatar_path,
-            is_synced: _,
+            checksum: _,
         } = db.file_by_id(avatar_id).await?;
 
         Ok(OwnedSpace {
@@ -111,7 +111,6 @@ impl<D: Db> SpaceService<D> {
             avatar: Avatar::new(avatar_id, avatar_path),
             created_at: created_at.into(),
             updated_at: updated_at.into(),
-            is_synced: is_synced.into(),
         })
     }
 

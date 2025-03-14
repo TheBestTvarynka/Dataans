@@ -15,6 +15,7 @@ mod command;
 mod db;
 pub mod error;
 mod service;
+mod sync;
 
 use crate::dataans::error::DataansError;
 use crate::dataans::service::file::FileService;

@@ -18,7 +18,7 @@ impl SqliteDb {
     #[instrument(ret, skip(transaction))]
     async fn remove_note_inner(note_id: Uuid, transaction: &mut Transaction<'_, sqlx::Sqlite>) -> Result<(), DbError> {
         let note_files: Vec<File> = sqlx::query_as(
-            "SELECT files.id, files.name, files.path
+            "SELECT files.id, files.name, files.path, files.checksum
             FROM files
                 LEFT JOIN notes_files ON files.id = notes_files.file_id
             WHERE notes_files.note_id = ?1",
@@ -49,7 +49,7 @@ impl SqliteDb {
 impl Db for SqliteDb {
     #[instrument(ret, skip(self))]
     async fn files(&self) -> Result<Vec<File>, DbError> {
-        let files = sqlx::query_as("SELECT id, name, path, is_synced FROM files")
+        let files = sqlx::query_as("SELECT id, name, path, checksum FROM files")
             .fetch_all(&self.pool)
             .await?;
 
@@ -58,7 +58,7 @@ impl Db for SqliteDb {
 
     #[instrument(ret, skip(self))]
     async fn file_by_id(&self, file_id: Uuid) -> Result<File, DbError> {
-        let files = sqlx::query_as("SELECT id, name, path, is_synced FROM files WHERE id=?1")
+        let files = sqlx::query_as("SELECT id, name, path, checksum FROM files WHERE id=?1")
             .bind(file_id)
             .fetch_one(&self.pool)
             .await?;
@@ -72,15 +72,15 @@ impl Db for SqliteDb {
             id,
             name,
             path,
-            is_synced,
+            checksum,
         } = file;
 
         sqlx::query!(
-            "INSERT INTO files (id, name, path, is_synced) VALUES (?1, ?2, ?3, ?4)",
+            "INSERT INTO files (id, name, path, checksum) VALUES (?1, ?2, ?3, ?4)",
             id,
             name,
             path,
-            is_synced
+            checksum
         )
         .execute(&self.pool)
         .await?;
@@ -99,7 +99,7 @@ impl Db for SqliteDb {
 
     #[instrument(ret, skip(self))]
     async fn spaces(&self) -> Result<Vec<Space>, DbError> {
-        let spaces = sqlx::query_as("SELECT id, name, avatar_id, created_at, updated_at, is_synced FROM spaces")
+        let spaces = sqlx::query_as("SELECT id, name, avatar_id, created_at, updated_at, checksum FROM spaces")
             .fetch_all(&self.pool)
             .await?;
 
@@ -109,7 +109,7 @@ impl Db for SqliteDb {
     #[instrument(ret, skip(self))]
     async fn space_by_id(&self, space_id: Uuid) -> Result<Space, DbError> {
         let space =
-            sqlx::query_as("SELECT id, name, avatar_id, created_at, updated_at, is_synced FROM spaces WHERE id = ?1")
+            sqlx::query_as("SELECT id, name, avatar_id, created_at, updated_at, checksum FROM spaces WHERE id = ?1")
                 .bind(space_id)
                 .fetch_one(&self.pool)
                 .await?;
@@ -125,17 +125,17 @@ impl Db for SqliteDb {
             avatar_id,
             created_at,
             updated_at,
-            is_synced,
+            checksum,
         } = space;
 
         sqlx::query!(
-            "INSERT INTO spaces (id, name, avatar_id, created_at, updated_at, is_synced) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
+            "INSERT INTO spaces (id, name, avatar_id, created_at, updated_at, checksum) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
             id,
             name,
             avatar_id,
             created_at,
             updated_at,
-            is_synced,
+            checksum,
         )
         .execute(&self.pool)
         .await?;
@@ -147,11 +147,12 @@ impl Db for SqliteDb {
     async fn remove_space(&self, space_id: Uuid) -> Result<(), DbError> {
         let mut transaction = self.pool.begin().await?;
 
-        let notes: Vec<Note> =
-            sqlx::query_as("SELECT id, text, created_at, updated_at, space_id FROM notes WHERE space_id = ?1")
-                .bind(space_id)
-                .fetch_all(&mut *transaction)
-                .await?;
+        let notes: Vec<Note> = sqlx::query_as(
+            "SELECT id, text, created_at, updated_at, space_id, checksum, block_id FROM notes WHERE space_id = ?1",
+        )
+        .bind(space_id)
+        .fetch_all(&mut *transaction)
+        .await?;
 
         // TODO: replace manual deleting with `ON CASCADE` constraint.
         for note in notes {
@@ -159,7 +160,7 @@ impl Db for SqliteDb {
         }
 
         let space: Space =
-            sqlx::query_as("SELECT id, name, avatar_id, created_at, updated_at, is_synced FROM spaces WHERE id = ?1")
+            sqlx::query_as("SELECT id, name, avatar_id, created_at, updated_at, checksum FROM spaces WHERE id = ?1")
                 .bind(space_id)
                 .fetch_one(&mut *transaction)
                 .await?;
@@ -185,14 +186,14 @@ impl Db for SqliteDb {
             avatar_id,
             created_at: _,
             updated_at,
-            is_synced,
+            checksum,
         } = space;
 
         sqlx::query!(
-            "UPDATE spaces SET name = ?1, avatar_id = ?2, is_synced = ?3, updated_at = ?4 WHERE id = ?5",
+            "UPDATE spaces SET name = ?1, avatar_id = ?2, checksum = ?3, updated_at = ?4 WHERE id = ?5",
             name,
             avatar_id,
-            is_synced,
+            checksum,
             updated_at,
             id,
         )
@@ -204,7 +205,7 @@ impl Db for SqliteDb {
 
     #[instrument(ret, skip(self))]
     async fn notes(&self) -> Result<Vec<Note>, DbError> {
-        let notes = sqlx::query_as("SELECT id, text, created_at, updated_at, space_id, is_synced FROM notes")
+        let notes = sqlx::query_as("SELECT id, text, created_at, updated_at, space_id, checksum, block_id FROM notes")
             .fetch_all(&self.pool)
             .await?;
 
@@ -214,7 +215,7 @@ impl Db for SqliteDb {
     #[instrument(ret, skip(self))]
     async fn space_notes(&self, space_id: Uuid) -> Result<Vec<Note>, DbError> {
         let notes = sqlx::query_as(
-            "SELECT id, text, created_at, updated_at, space_id, is_synced FROM notes WHERE space_id = ?1",
+            "SELECT id, text, created_at, updated_at, space_id, checksum, block_id FROM notes WHERE space_id = ?1",
         )
         .bind(space_id)
         .fetch_all(&self.pool)
@@ -225,11 +226,12 @@ impl Db for SqliteDb {
 
     #[instrument(ret, skip(self))]
     async fn note_by_id(&self, note_id: Uuid) -> Result<Note, DbError> {
-        let note =
-            sqlx::query_as("SELECT id, text, created_at, updated_at, space_id, is_synced FROM notes WHERE id = ?1")
-                .bind(note_id)
-                .fetch_one(&self.pool)
-                .await?;
+        let note = sqlx::query_as(
+            "SELECT id, text, created_at, updated_at, space_id, checksum, block_id FROM notes WHERE id = ?1",
+        )
+        .bind(note_id)
+        .fetch_one(&self.pool)
+        .await?;
 
         Ok(note)
     }
@@ -242,17 +244,18 @@ impl Db for SqliteDb {
             created_at,
             updated_at,
             space_id,
-            is_synced,
+            checksum,
+            block_id: _,
         } = note;
 
         sqlx::query!(
-            "INSERT INTO notes (id, text, created_at,  updated_at, space_id, is_synced) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
+            "INSERT INTO notes (id, text, created_at,  updated_at, space_id, checksum) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
             id,
             text,
             created_at,
             updated_at,
             space_id,
-            is_synced,
+            checksum,
         )
         .execute(&self.pool)
         .await?;
@@ -279,15 +282,17 @@ impl Db for SqliteDb {
             created_at: _,
             updated_at,
             space_id: _,
-            is_synced,
+            checksum,
+            block_id,
         } = note;
 
         sqlx::query!(
-            "UPDATE notes SET text = ?1, is_synced = ?2, updated_at = ?3 WHERE id = ?4",
+            "UPDATE notes SET text = ?1, checksum = ?2, updated_at = ?3, block_id = ?4 WHERE id = ?5",
             text,
-            is_synced,
+            checksum,
             updated_at,
-            id
+            block_id,
+            id,
         )
         .execute(&self.pool)
         .await?;
@@ -298,7 +303,7 @@ impl Db for SqliteDb {
     #[instrument(ret, skip(self))]
     async fn note_files(&self, note_id: Uuid) -> Result<Vec<File>, DbError> {
         let files = sqlx::query_as(
-            "SELECT files.id, files.name, files.path, files.is_synced
+            "SELECT files.id, files.name, files.path, files.checksum
             FROM files
                 LEFT JOIN notes_files ON files.id = notes_files.file_id
             WHERE notes_files.note_id = ?1",
