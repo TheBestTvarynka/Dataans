@@ -310,7 +310,6 @@ impl NoteDb for PostgresDb {
         .execute(&mut *transaction)
         .await?;
 
-
         self.update_block_checksum(*block_id, &mut transaction).await?;
 
         transaction.commit().await?;

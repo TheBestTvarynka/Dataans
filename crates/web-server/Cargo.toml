@@ -19,12 +19,12 @@ time = { workspace = true }
 rocket = { workspace = true, features = ["json"] }
 hex.workspace = true
 futures.workspace = true
+sha2.workspace = true
 
 # logging
 tracing-subscriber = { version = "0.3", features = ["std", "fmt", "ansi", "env-filter"] }
 
 # crypto
-sha2 = "0.10"
 argon2 = { version = "0.5", features = ["std"] }
 aes-gcm = { version = "0.10", features = ["std"] }
 hmac = "0.12"

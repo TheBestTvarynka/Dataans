@@ -8,7 +8,7 @@ use rocket::get;
 use rocket::http::Status;
 use rocket::request::{FromRequest, Outcome, Request};
 pub use sync::*;
-use web_api_types::{UserId, AUTH_COOKIE_NAME};
+use web_api_types::{UserId, AUTH_COOKIE_NAME, AUTH_HEADER_NAME};
 
 use crate::{Error, WebServerState};
 
@@ -32,7 +32,7 @@ impl<'r> FromRequest<'r> for UserContext {
         } else {
             match req
                 .headers()
-                .get_one("Authorization")
+                .get_one(AUTH_HEADER_NAME)
                 .ok_or_else(|| Error::Session("missing token"))
             {
                 Ok(token) => token,

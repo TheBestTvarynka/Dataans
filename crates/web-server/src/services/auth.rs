@@ -62,7 +62,7 @@ impl<A: AuthDb> Auth<A> {
 
     pub async fn verify_session(&self, token: &str) -> Result<UserId> {
         let token = crypto::decrypt(
-            &hex::decode(token).map_err(|_err| Error::Session("invalid token"))?,
+            &hex::decode(token).map_err(|_err| Error::Session("invalid auth token"))?,
             &self.encryption_key,
         )?;
 
