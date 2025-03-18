@@ -24,6 +24,7 @@ pub struct BlockNotes {
 #[serde(rename_all = "camelCase")]
 pub struct SyncBlock {
     pub id: BlockId,
+    // TODO: remove block number.
     pub number: BlockNumber,
     pub checksum: BlockChecksumValue,
     pub space_id: SpaceId,

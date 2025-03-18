@@ -29,19 +29,19 @@ pub struct Password(String);
 )]
 pub struct InvitationToken(Vec<u8>);
 
-#[derive(Debug, Serialize, Deserialize, AsRef, From, Copy, Clone, Into, PartialEq, Eq)]
+#[derive(Debug, Serialize, Deserialize, AsRef, From, Copy, Clone, Into, PartialEq, Eq, Hash)]
 pub struct UserId(uuid::Uuid);
 
-#[derive(Debug, Serialize, Deserialize, AsRef, From, Copy, Clone, Into, PartialEq, Eq)]
+#[derive(Debug, Serialize, Deserialize, AsRef, From, Copy, Clone, Into, PartialEq, Eq, Hash)]
 pub struct BlockId(uuid::Uuid);
 
-#[derive(Debug, Serialize, Deserialize, AsRef, From, Copy, Clone, Into, PartialEq, Eq)]
+#[derive(Debug, Serialize, Deserialize, AsRef, From, Copy, Clone, Into, PartialEq, Eq, Hash)]
 pub struct NoteId(uuid::Uuid);
 
-#[derive(Debug, Serialize, Deserialize, AsRef, From, Copy, Clone, Into, PartialEq, Eq)]
+#[derive(Debug, Serialize, Deserialize, AsRef, From, Copy, Clone, Into, PartialEq, Eq, Hash)]
 pub struct SpaceId(uuid::Uuid);
 
-#[derive(Debug, Serialize, Deserialize, AsRef, From, Copy, Clone, Into, PartialEq, Eq)]
+#[derive(Debug, Serialize, Deserialize, AsRef, From, Copy, Clone, Into, PartialEq, Eq, Hash)]
 pub struct SessionId(uuid::Uuid);
 
 #[cfg(feature = "server")]
@@ -78,6 +78,9 @@ pub struct BlockChecksumValue(Vec<u8>);
 
 #[derive(Debug, Serialize, Deserialize, AsRef, From, Into)]
 pub struct SpaceChecksumValue(Vec<u8>);
+
+#[derive(Debug, Serialize, Deserialize, AsRef, From, Into)]
+pub struct FileChecksumValue(Vec<u8>);
 
 #[derive(Debug, Serialize, Deserialize, AsRef, From, Into)]
 pub struct SpaceData(Vec<u8>);

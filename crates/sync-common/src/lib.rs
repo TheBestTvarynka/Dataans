@@ -1,9 +1,8 @@
 use sha2::digest::generic_array::GenericArray;
 use sha2::Digest;
+pub use sha2::Sha256;
 use time::OffsetDateTime;
 use uuid::Uuid;
-
-pub use sha2::Sha256;
 
 pub trait Hasher: Digest {
     fn hash_str(&mut self, data: impl AsRef<str>) {
@@ -18,7 +17,7 @@ pub trait Hash {
 
     fn digest<H: Hasher>(&self) -> GenericArray<u8, H::OutputSize> {
         let mut hasher = H::new();
-        
+
         self.hash(&mut hasher);
 
         hasher.finalize()

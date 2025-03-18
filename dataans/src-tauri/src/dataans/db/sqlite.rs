@@ -336,6 +336,24 @@ impl Db for SqliteDb {
 
         Ok(())
     }
+
+    #[instrument(ret, skip(self))]
+    async fn blocks(&self) -> Result<Vec<SyncBlock>, DbError> {
+        let blocks = sqlx::query_as("SELECT id, checksum, space_id FROM sync_blocks")
+            .fetch_all(&self.pool)
+            .await?;
+
+        Ok(blocks)
+    }
+
+    async fn block_notes(&self, block_id: Uuid) -> Result<Vec<SyncBlockNote>, DbError> {
+        let notes = sqlx::query_as("SELECT id, checksum, block_id FROM notes WHERE block_id = ?1")
+            .bind(block_id)
+            .fetch_all(&self.pool)
+            .await?;
+
+        Ok(notes)
+    }
 }
 
 #[cfg(test)]

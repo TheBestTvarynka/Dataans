@@ -14,7 +14,13 @@ pub struct Space {
 }
 
 impl Space {
-    pub fn new(id: Uuid, name: String, avatar_id: Uuid, created_at: OffsetDateTime, updated_at: OffsetDateTime) -> Self {
+    pub fn new(
+        id: Uuid,
+        name: String,
+        avatar_id: Uuid,
+        created_at: OffsetDateTime,
+        updated_at: OffsetDateTime,
+    ) -> Self {
         let mut space = Self {
             id,
             name,
@@ -52,7 +58,14 @@ pub struct Note {
 }
 
 impl Note {
-    pub fn new(id: Uuid, text: String, created_at: OffsetDateTime, updated_at: OffsetDateTime, space_id: Uuid, block_id: Option<Uuid>) -> Self {
+    pub fn new(
+        id: Uuid,
+        text: String,
+        created_at: OffsetDateTime,
+        updated_at: OffsetDateTime,
+        space_id: Uuid,
+        block_id: Option<Uuid>,
+    ) -> Self {
         let mut note = Self {
             id,
             text,
@@ -107,4 +120,18 @@ impl Hash for File {
         self.name.hash(state);
         self.path.hash(state);
     }
+}
+
+#[derive(Debug, FromRow, PartialEq, Eq)]
+pub struct SyncBlock {
+    pub id: Uuid,
+    pub checksum: Vec<u8>,
+    pub space_id: Uuid,
+}
+
+#[derive(Debug, FromRow, PartialEq, Eq)]
+pub struct SyncBlockNote {
+    pub id: Uuid,
+    pub block_id: Uuid,
+    pub checksum: Vec<u8>,
 }

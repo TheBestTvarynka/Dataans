@@ -4,7 +4,7 @@ pub mod sqlite;
 use thiserror::Error;
 use uuid::Uuid;
 
-use self::model::*;
+pub use self::model::*;
 
 #[derive(Error, Debug)]
 pub enum DbError {
@@ -12,6 +12,7 @@ pub enum DbError {
     SqlxError(#[from] sqlx::Error),
 }
 
+// TODO: split into separate traits (see the `web-server` crate).
 pub trait Db: Send + Sync {
     #[allow(dead_code)]
     async fn files(&self) -> Result<Vec<File>, DbError>;
@@ -33,4 +34,7 @@ pub trait Db: Send + Sync {
     async fn update_note(&self, note: &Note) -> Result<(), DbError>;
     async fn note_files(&self, note_id: Uuid) -> Result<Vec<File>, DbError>;
     async fn set_note_files(&self, note_id: Uuid, files: &[Uuid]) -> Result<(), DbError>;
+
+    async fn blocks(&self) -> Result<Vec<SyncBlock>, DbError>;
+    async fn block_notes(&self, block_id: Uuid) -> Result<Vec<SyncBlockNote>, DbError>;
 }
