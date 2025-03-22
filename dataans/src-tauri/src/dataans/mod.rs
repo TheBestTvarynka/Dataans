@@ -72,10 +72,10 @@ impl DataansState {
     }
 }
 
-pub fn init_dataans_plugin<R: Runtime>() -> TauriPlugin<R> {
+pub fn init_dataans_plugin<R: Runtime>() -> TauriPlugin<R, ()> {
     debug!("init_dataans_plugin");
 
-    Builder::new(APP_PLUGIN_NAME)
+    Builder::<R, ()>::new(APP_PLUGIN_NAME)
         .invoke_handler(tauri::generate_handler![
             command::space::list_spaces,
             command::space::create_space,
@@ -92,6 +92,7 @@ pub fn init_dataans_plugin<R: Runtime>() -> TauriPlugin<R> {
             command::file::gen_random_avatar,
             command::file::handle_clipboard_image,
             command::export::export_app_data,
+            command::import::import_app_data,
         ])
         .setup(|app_handle, _api| {
             info!("Starting app setup...");

@@ -7,6 +7,7 @@ extern crate tracing;
 mod code_block;
 mod config;
 mod dataans;
+mod dialog;
 
 use std::path::Path;
 use std::str::FromStr;
@@ -102,6 +103,7 @@ fn main() {
         ))
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_fs::init())
+        .plugin(tauri_plugin_dialog::init())
         .plugin(dataans::init_dataans_plugin())
         .setup(|app| {
             init_tracing(&app.path().app_data_dir()?);
@@ -197,6 +199,7 @@ fn main() {
             config::open_config_file_folder,
             config::open_theme_file,
             code_block::parse_code,
+            dialog::open_file_dialog,
         ])
         .build(
             {

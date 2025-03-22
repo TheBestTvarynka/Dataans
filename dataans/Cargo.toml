@@ -45,6 +45,7 @@ web-sys = { version = "0.3", features = [
     "HtmlSelectElement",
 ] }
 futures = { version = "0.3", features = ["std", "alloc"] }
+gloo-timers = "0.3.0"
 
 [workspace]
 resolver = "2"
@@ -52,6 +53,6 @@ members = ["common", "src-tauri"]
 
 [workspace.dependencies]
 time = { version = "0.3" , default-features = false }
-uuid = { version = "1.11", default-features = false }
+uuid = { version = "1.16", default-features = false, features = ["js"]}
 tracing = "0.1"
 serde = "1"

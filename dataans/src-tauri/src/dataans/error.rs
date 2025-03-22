@@ -34,6 +34,12 @@ pub enum DataansError {
 
     #[error("Can not create an image from raw image data")]
     ImageFromRaw,
+
+    #[error("Incorrect file type, should be json or md: {0}")]
+    IncorrectFileType(String),
+
+    #[error("Unsupported schema version")]
+    UnsupportedSchemaVersion,
 }
 
 impl From<DataansError> for CommandError {

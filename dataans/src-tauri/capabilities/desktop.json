@@ -1,13 +1,7 @@
 {
   "identifier": "desktop-capability",
-  "platforms": [
-    "macOS",
-    "windows",
-    "linux"
-  ],
-  "windows": [
-    "main"
-  ],
+  "platforms": ["macOS", "windows", "linux"],
+  "windows": ["main"],
   "permissions": [
     "autostart:default",
     "autostart:allow-enable",
@@ -24,6 +18,7 @@
     "dataans:allow-search-notes-in-space",
     "dataans:allow-search-notes",
     "dataans:allow-export-app-data",
+    "dataans:allow-import-app-data",
     "dataans:allow-upload-file",
     "dataans:allow-delete-file",
     "dataans:allow-gen-random-avatar",

@@ -5,6 +5,8 @@ use leptos::*;
 use leptos_hotkeys::use_hotkeys;
 
 use crate::app_info::export::Export;
+use crate::app_info::import::Import;
+
 use crate::backend::{open_config_file, open_config_file_folder, open_theme_file};
 
 #[component]
@@ -191,7 +193,10 @@ pub fn AppInfoWindow(#[prop(into)] close: Callback<(), ()>) -> impl IntoView {
                 }
             }}
             <hr style="width: 80%" />
-            <Export />
+            <div style="display: flex; justify-content: space-between; align-items: center; width: 90%;">
+                <Export />
+                <Import />
+            </div>
         </div>
     }
 }
