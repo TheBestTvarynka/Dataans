@@ -1,6 +1,8 @@
 use aes_gcm::aead::Aead;
 use aes_gcm::{AeadCore, Aes256Gcm, Key, KeyInit, Nonce};
 use rand::rngs::OsRng;
+use serde::de::DeserializeOwned;
+use serde::Serialize;
 use sha2::{Digest, Sha256};
 use thiserror::Error;
 
@@ -17,6 +19,9 @@ pub enum CryptoError {
 
     #[error("failed to decrypt the data: {0}")]
     DecryptionFailed(&'static str),
+
+    #[error("json error: {0}")]
+    Json(#[from] serde_json::Error),
 }
 
 type CryptoResult<T> = Result<T, CryptoError>;
@@ -50,7 +55,6 @@ pub fn encrypt_data(data: &[u8], key: &Key<Aes256Gcm>) -> CryptoResult<Vec<u8>> 
     // result = nonce + cipher_text + checksum
     Ok(result)
 }
-
 
 pub fn decrypt_data(data: &[u8], key: &Key<Aes256Gcm>) -> CryptoResult<Vec<u8>> {
     // data = nonce + cipher_text + checksum
@@ -91,6 +95,18 @@ pub fn decrypt_data(data: &[u8], key: &Key<Aes256Gcm>) -> CryptoResult<Vec<u8>> 
     Ok(decrypted)
 }
 
+pub fn encrypt<T: Serialize>(data: &T, key: &Key<Aes256Gcm>) -> CryptoResult<Vec<u8>> {
+    let data = serde_json::to_vec(data)?;
+
+    encrypt_data(&data, key)
+}
+
+pub fn decrypt<T: DeserializeOwned>(data: &[u8], key: &Key<Aes256Gcm>) -> CryptoResult<T> {
+    let data = decrypt_data(data, key)?;
+
+    Ok(serde_json::from_slice(&data)?)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -104,5 +120,27 @@ mod tests {
         let decrypted = decrypt_data(&cipher_text, key.into()).unwrap();
 
         assert_eq!(data[..], decrypted[..]);
+    }
+
+    #[test]
+    fn note_encryption() {
+        use common::note::Note;
+        use time::OffsetDateTime;
+        use uuid::Uuid;
+
+        let key = b"oeifvncpfiejnvdjpvnwifvj12345678";
+        let note = Note {
+            id: Uuid::new_v4().into(),
+            text: "tbt".into(),
+            created_at: OffsetDateTime::now_utc().into(),
+            updated_at: OffsetDateTime::now_utc().into(),
+            space_id: Uuid::new_v4().into(),
+            files: Vec::new(),
+        };
+
+        let cipher_text = encrypt(&note, key.into()).unwrap();
+        let decrypted_note = decrypt(&cipher_text, key.into()).unwrap();
+
+        assert_eq!(note, decrypted_note);
     }
 }
