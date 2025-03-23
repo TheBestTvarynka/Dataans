@@ -75,7 +75,7 @@ impl DataansState {
 pub fn init_dataans_plugin<R: Runtime>() -> TauriPlugin<R> {
     debug!("init_dataans_plugin");
 
-    Builder::<R>::new(APP_PLUGIN_NAME)
+    Builder::new(APP_PLUGIN_NAME)
         .invoke_handler(tauri::generate_handler![
             command::space::list_spaces,
             command::space::create_space,
