@@ -1,9 +1,9 @@
-use common::{error::CommandResult, APP_PLUGIN_NAME};
+use common::error::CommandResult;
+use common::APP_PLUGIN_NAME;
 use serde::Serialize;
 
-use crate::backend::invoke_command;
-
 use super::EmptyArgs;
+use crate::backend::invoke_command;
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]

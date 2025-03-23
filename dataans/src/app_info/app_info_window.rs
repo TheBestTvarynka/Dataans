@@ -6,7 +6,6 @@ use leptos_hotkeys::use_hotkeys;
 
 use crate::app_info::export::Export;
 use crate::app_info::import::Import;
-
 use crate::backend::{open_config_file, open_config_file_folder, open_theme_file};
 
 #[component]
