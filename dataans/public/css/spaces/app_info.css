@@ -1,4 +1,3 @@
-
 .app-into-window {
     display: flex;
     flex-direction: column;
@@ -38,7 +37,9 @@
     position: absolute;
 }
 
-.app-into-window table, th, td {
+.app-into-window table,
+th,
+td {
     border: 1px solid #dbcfbf;
     border-collapse: collapse;
 }
@@ -48,6 +49,14 @@
     width: 100%;
 }
 
-.app-into-window td, th {
+.app-into-window td,
+th {
     padding: 0.2em;
+}
+
+.app-into-window-data-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 90%;
 }

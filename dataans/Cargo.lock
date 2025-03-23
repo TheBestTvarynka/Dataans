@@ -1072,7 +1072,6 @@ dependencies = [
  "console_error_panic_hook",
  "futures",
  "gloo-storage",
- "gloo-timers",
  "js-sys",
  "leptoaster",
  "leptos",

@@ -1,27 +1,38 @@
+use common::error::{CommandError, CommandResult};
 use futures::channel::oneshot;
 use std::path::PathBuf;
 use tauri::{command, AppHandle};
 use tauri_plugin_dialog::{DialogExt, FilePath};
+use tracing::error;
 
 #[command]
-pub async fn open_file_dialog(app: AppHandle) -> Result<Option<PathBuf>, String> {
-    // Create a oneshot channel to receive the result
+pub async fn select_file(app: AppHandle) -> CommandResult<Option<PathBuf>> {
     let (tx, rx) = oneshot::channel();
 
-    // Spawn a task to open the dialog
     tauri::async_runtime::spawn(async move {
         app.dialog()
             .file()
-            .add_filter("Notes", &["json", "md"])
+            .add_filter("Notes", &["json"])
             .pick_file(move |file_path| {
-                let path = file_path.and_then(|fp| match fp {
-                    FilePath::Path(p) => Some(p),
-                    _ => None,
-                });
-                let _ = tx.send(path);
+                let result = match file_path {
+                    Some(FilePath::Path(p)) => Ok(Some(p)),
+                    Some(_) => {
+                        let err = CommandError::Dataans("Unsupported file type selected".to_string());
+                        error!("Failed to select file: {:?}", err);
+                        Err(err)
+                    }
+                    None => Ok(None),
+                };
+                let _ = tx.send(result);
             });
     });
 
-    // Wait for the result from the dialog
-    rx.await.map_err(|e| format!("Failed to get file path: {}", e))
+    match rx.await {
+        Ok(result) => result,
+        Err(e) => {
+            let err = CommandError::Dataans(format!("Failed to receive file path: {}", e));
+            error!("Failed to select file: {:?}", err);
+            Err(err)
+        }
+    }
 }

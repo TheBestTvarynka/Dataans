@@ -199,7 +199,7 @@ fn main() {
             config::open_config_file_folder,
             config::open_theme_file,
             code_block::parse_code,
-            dialog::open_file_dialog,
+            dialog::select_file,
         ])
         .build(
             {

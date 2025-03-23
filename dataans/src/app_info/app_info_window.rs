@@ -193,7 +193,7 @@ pub fn AppInfoWindow(#[prop(into)] close: Callback<(), ()>) -> impl IntoView {
                 }
             }}
             <hr style="width: 80%" />
-            <div style="display: flex; justify-content: space-between; align-items: center; width: 90%;">
+            <div class="app-into-window-data-actions">
                 <Export />
                 <Import />
             </div>
