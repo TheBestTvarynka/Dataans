@@ -1112,10 +1112,12 @@ dependencies = [
 name = "dataans"
 version = "0.2.1"
 dependencies = [
+ "aes-gcm",
  "arboard",
  "common",
  "futures",
  "hex",
+ "hmac",
  "image 0.25.5",
  "image 0.3.2",
  "opener",
@@ -1123,6 +1125,7 @@ dependencies = [
  "reqwest",
  "serde",
  "serde_json",
+ "sha2",
  "sqlx",
  "sync-common",
  "syntect",

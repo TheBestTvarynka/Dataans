@@ -12,6 +12,7 @@ use crate::dataans::db::sqlite::SqliteDb;
 use crate::{CONFIGS_DIR, CONFIG_FILE_NAME, FILES_DIR, IMAGES_DIR, PROFILE_DIR};
 
 mod command;
+mod crypto;
 mod db;
 pub mod error;
 mod service;

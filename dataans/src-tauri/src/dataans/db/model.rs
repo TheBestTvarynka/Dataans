@@ -129,7 +129,7 @@ pub struct SyncBlock {
     pub space_id: Uuid,
 }
 
-#[derive(Debug, FromRow, PartialEq, Eq)]
+#[derive(Debug, FromRow, PartialEq, Eq, Clone)]
 pub struct SyncBlockNote {
     pub id: Uuid,
     pub block_id: Uuid,

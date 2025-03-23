@@ -21,6 +21,9 @@ hex.workspace = true
 futures.workspace = true
 url.workspace = true
 sync-common.workspace = true
+aes-gcm.workspace = true
+hmac.workspace = true
+sha2.workspace = true
 
 tauri = { version = "2", features = [
     "protocol-asset", "tray-icon",
