@@ -1,14 +1,30 @@
 use std::sync::Arc;
 
+use common::error::CommandError;
 use common::note::{CreateNoteOwned, File, Id as NoteId, Note, NoteFullOwned, OwnedNote, UpdateNote};
 use common::space::Id as SpaceId;
 use futures::future::try_join_all;
+use thiserror::Error;
 use time::OffsetDateTime;
 
 use crate::dataans::db::model::{File as FileModel, Note as NoteModel};
-use crate::dataans::db::Db;
+use crate::dataans::db::{Db, DbError};
 use crate::dataans::service::space::SpaceService;
 use crate::dataans::DataansError;
+
+#[derive(Debug, Error)]
+pub enum NoteServiceError {
+    #[error(transparent)]
+    DbError(#[from] DbError),
+}
+
+impl From<NoteServiceError> for CommandError {
+    fn from(error: NoteServiceError) -> Self {
+        DataansError::NoteService(error).into()
+    }
+}
+
+type NoteServiceResult<T> = Result<T, NoteServiceError>;
 
 pub struct NoteService<D> {
     db: Arc<D>,
@@ -20,7 +36,7 @@ impl<D: Db> NoteService<D> {
         Self { db, space_service }
     }
 
-    async fn map_note_model_to_note(note: NoteModel, db: &D) -> Result<OwnedNote, DataansError> {
+    pub async fn map_note_model_to_note(note: NoteModel, db: &D) -> NoteServiceResult<OwnedNote> {
         let NoteModel {
             id,
             text,
@@ -60,7 +76,7 @@ impl<D: Db> NoteService<D> {
         })
     }
 
-    pub async fn space_notes(&self, space_id: SpaceId) -> Result<Vec<OwnedNote>, DataansError> {
+    pub async fn space_notes(&self, space_id: SpaceId) -> NoteServiceResult<Vec<OwnedNote>> {
         let notes = try_join_all(
             self.db
                 .space_notes(space_id.inner())
@@ -73,7 +89,7 @@ impl<D: Db> NoteService<D> {
         Ok(notes)
     }
 
-    pub async fn notes(&self) -> Result<Vec<OwnedNote>, DataansError> {
+    pub async fn notes(&self) -> NoteServiceResult<Vec<OwnedNote>> {
         let notes = try_join_all(
             self.db
                 .notes()
@@ -86,7 +102,7 @@ impl<D: Db> NoteService<D> {
         Ok(notes)
     }
 
-    pub async fn create_note(&self, note: CreateNoteOwned) -> Result<OwnedNote, DataansError> {
+    pub async fn create_note(&self, note: CreateNoteOwned) -> NoteServiceResult<OwnedNote> {
         let CreateNoteOwned {
             id,
             text,
@@ -121,7 +137,7 @@ impl<D: Db> NoteService<D> {
         })
     }
 
-    pub async fn update_note(&self, note: UpdateNote<'static>) -> Result<OwnedNote, DataansError> {
+    pub async fn update_note(&self, note: UpdateNote<'static>) -> NoteServiceResult<OwnedNote> {
         let UpdateNote {
             id: note_id,
             text,
@@ -165,7 +181,7 @@ impl<D: Db> NoteService<D> {
         })
     }
 
-    pub async fn delete_note(&self, note_id: NoteId) -> Result<(), DataansError> {
+    pub async fn delete_note(&self, note_id: NoteId) -> NoteServiceResult<()> {
         self.db.remove_note(note_id.inner()).await?;
 
         Ok(())

@@ -4,7 +4,9 @@ use std::path::PathBuf;
 use common::error::CommandError;
 use thiserror::Error;
 
+use crate::dataans::crypto::CryptoError;
 use crate::dataans::db::DbError;
+use crate::dataans::service::note::NoteServiceError;
 
 #[derive(Debug, Error)]
 pub enum DataansError {
@@ -16,6 +18,9 @@ pub enum DataansError {
 
     #[error("JSON error: {0:?}")]
     JsonError(#[from] serde_json::Error),
+
+    #[error(transparent)]
+    NoteService(#[from] NoteServiceError),
 
     #[error("time format error: {0:?}")]
     TimeFormatError(#[from] time::error::Format),

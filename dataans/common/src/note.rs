@@ -25,6 +25,12 @@ impl From<Uuid> for Id {
     }
 }
 
+impl From<Id> for Uuid {
+    fn from(value: Id) -> Self {
+        value.0
+    }
+}
+
 impl Display for Id {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.write_str(&self.0.to_string())

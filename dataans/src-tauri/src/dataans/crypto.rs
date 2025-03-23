@@ -9,6 +9,8 @@ use thiserror::Error;
 const NONCE_LENGTH: usize = 12;
 const HMAC_SHA256_CHECKSUM_LENGTH: usize = 32;
 
+pub type EncryptionKey = Key<Aes256Gcm>;
+
 #[derive(Debug, Error)]
 pub enum CryptoError {
     #[error("invalid encryption key or IV length")]
@@ -26,7 +28,7 @@ pub enum CryptoError {
 
 type CryptoResult<T> = Result<T, CryptoError>;
 
-pub fn encrypt_data(data: &[u8], key: &Key<Aes256Gcm>) -> CryptoResult<Vec<u8>> {
+pub fn encrypt_data(data: &[u8], key: &EncryptionKey) -> CryptoResult<Vec<u8>> {
     // Encryption
     let nonce = Aes256Gcm::generate_nonce(&mut OsRng);
     let cipher = Aes256Gcm::new(key);
@@ -56,7 +58,7 @@ pub fn encrypt_data(data: &[u8], key: &Key<Aes256Gcm>) -> CryptoResult<Vec<u8>> 
     Ok(result)
 }
 
-pub fn decrypt_data(data: &[u8], key: &Key<Aes256Gcm>) -> CryptoResult<Vec<u8>> {
+pub fn decrypt_data(data: &[u8], key: &EncryptionKey) -> CryptoResult<Vec<u8>> {
     // data = nonce + cipher_text + checksum
 
     if data.len() < NONCE_LENGTH + HMAC_SHA256_CHECKSUM_LENGTH {
@@ -95,13 +97,13 @@ pub fn decrypt_data(data: &[u8], key: &Key<Aes256Gcm>) -> CryptoResult<Vec<u8>> 
     Ok(decrypted)
 }
 
-pub fn encrypt<T: Serialize>(data: &T, key: &Key<Aes256Gcm>) -> CryptoResult<Vec<u8>> {
+pub fn encrypt<T: Serialize>(data: &T, key: &EncryptionKey) -> CryptoResult<Vec<u8>> {
     let data = serde_json::to_vec(data)?;
 
     encrypt_data(&data, key)
 }
 
-pub fn decrypt<T: DeserializeOwned>(data: &[u8], key: &Key<Aes256Gcm>) -> CryptoResult<T> {
+pub fn decrypt<T: DeserializeOwned>(data: &[u8], key: &EncryptionKey) -> CryptoResult<T> {
     let data = decrypt_data(data, key)?;
 
     Ok(serde_json::from_slice(&data)?)

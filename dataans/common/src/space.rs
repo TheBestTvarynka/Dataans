@@ -30,6 +30,12 @@ impl From<Uuid> for Id {
     }
 }
 
+impl From<Id> for Uuid {
+    fn from(value: Id) -> Self {
+        value.0
+    }
+}
+
 /// Represents a space name.
 #[derive(Serialize, Deserialize, Debug, Default, Clone, Eq, PartialEq)]
 pub struct Name<'name>(Cow<'name, str>);
