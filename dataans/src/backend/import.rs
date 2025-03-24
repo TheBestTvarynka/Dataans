@@ -12,7 +12,7 @@ struct ImportConfig {
 }
 
 pub async fn select_file() -> CommandResult<Option<String>> {
-    invoke_command(&format!("select_file"), &EmptyArgs {}).await
+    invoke_command("select_file", &EmptyArgs {}).await
 }
 
 pub async fn import_app_data(path: String) -> CommandResult<()> {
