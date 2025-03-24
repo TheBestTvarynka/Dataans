@@ -140,6 +140,8 @@ impl<D: Db> Synchronizer<D> {
             self.sync_blocks(blocks_to_sync).await?;
         }
 
+        self.upload_notes().await?;
+
         Ok(())
     }
 
@@ -258,6 +260,9 @@ impl<D: Db> Synchronizer<D> {
     async fn update_server_note(&self, note: NoteModel) -> Result<(), SyncError> {
         let checksum = note.checksum.clone();
         let block_id = note.block_id.ok_or(SyncError::InvalidNoteBlockId(note.id))?;
+        let id = note.id;
+        let space_id = note.space_id;
+
         let note = NoteService::map_note_model_to_note(note, &*self.db).await?;
         let encrypted_note = encrypt(&note, &self.encryption_key)?;
 
@@ -265,10 +270,10 @@ impl<D: Db> Synchronizer<D> {
             .client
             .put(self.sync_server_url.join("/data/note")?)
             .json(&ServerNote {
-                id: note.id.inner().into(),
+                id: id.into(),
                 data: encrypted_note.into(),
                 checksum: checksum.into(),
-                space_id: note.space_id.inner().into(),
+                space_id: space_id.into(),
                 block_id: block_id.into(),
             })
             .send()
@@ -277,7 +282,32 @@ impl<D: Db> Synchronizer<D> {
         Ok(())
     }
 
-    async fn upload_note(&self, note: NoteModel) -> Result<(), SyncError> {
+    async fn upload_notes(&self) -> Result<(), SyncError> {
+        try_join_all(self.db.unsynced_notes().await?.into_iter().map(|note| async {
+            let checksum = note.checksum.clone();
+            let id = note.id;
+            let space_id = note.space_id;
+
+            let note = NoteService::map_note_model_to_note(note, &*self.db).await?;
+            let encrypted_note = encrypt(&note, &self.encryption_key)?;
+
+            let server_notes = self
+                .client
+                .post(self.sync_server_url.join("/data/note")?)
+                .json(&ServerNote {
+                    id: id.into(),
+                    data: encrypted_note.into(),
+                    checksum: checksum.into(),
+                    space_id: space_id.into(),
+                    block_id: Uuid::new_v4().into(),
+                })
+                .send()
+                .await?;
+
+            Result::<(), SyncError>::Ok(())
+        }))
+        .await?;
+
         Ok(())
     }
 }

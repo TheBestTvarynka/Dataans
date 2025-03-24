@@ -37,4 +37,5 @@ pub trait Db: Send + Sync {
 
     async fn blocks(&self) -> Result<Vec<SyncBlock>, DbError>;
     async fn block_notes(&self, block_id: Uuid) -> Result<Vec<SyncBlockNote>, DbError>;
+    async fn unsynced_notes(&self) -> Result<Vec<Note>, DbError>;
 }
