@@ -1,6 +1,5 @@
 use std::fs::File;
 use std::path::Path;
-use std::sync::Arc;
 
 use common::export::{Schema, SchemaV1};
 use futures::future::try_join_all;
