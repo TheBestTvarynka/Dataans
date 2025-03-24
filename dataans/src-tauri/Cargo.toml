@@ -21,6 +21,7 @@ tauri = { version = "2", features = [
 tauri-plugin-fs = "2"
 tauri-plugin-shell = "2"
 tauri-plugin-autostart = "2"
+tauri-plugin-dialog = "2"
 
 futures = "0.3"
 sqlx = { version = "0.8", features = ["runtime-tokio", "sqlite", "uuid", "time"] }

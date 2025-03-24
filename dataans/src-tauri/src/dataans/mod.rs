@@ -92,6 +92,7 @@ pub fn init_dataans_plugin<R: Runtime>() -> TauriPlugin<R> {
             command::file::gen_random_avatar,
             command::file::handle_clipboard_image,
             command::export::export_app_data,
+            command::import::import_app_data,
         ])
         .setup(|app_handle, _api| {
             info!("Starting app setup...");

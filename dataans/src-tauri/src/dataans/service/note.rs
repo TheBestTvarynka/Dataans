@@ -76,6 +76,11 @@ impl<D: Db> NoteService<D> {
         Ok(notes)
     }
 
+    pub async fn note_by_id(&self, id: NoteId) -> Result<OwnedNote, DataansError> {
+        let note_model = self.db.note_by_id(id.inner()).await?;
+        Self::map_note_model_to_note(note_model, &self.db).await
+    }
+
     pub async fn create_note(&self, note: OwnedNote) -> Result<(), DataansError> {
         let OwnedNote {
             id,

@@ -34,6 +34,9 @@ pub enum DataansError {
 
     #[error("Can not create an image from raw image data")]
     ImageFromRaw,
+
+    #[error("Incorrect import file type: only `json` is supported: {0}")]
+    IncorrectImportFileType(String),
 }
 
 impl From<DataansError> for CommandError {

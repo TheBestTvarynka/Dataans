@@ -8,7 +8,7 @@ repository = "https://github.com/TheBestTvarynka/dataans"
 [dependencies]
 serde = { workspace = true, features = ["derive"] }
 time = { workspace = true, features = ["macros", "wasm-bindgen"] }
-uuid = { workspace = true, features = ["v4"] }
+uuid = { workspace = true, features = ["v4", "js"] }
 
 leptos = { version = "0.6", features = ["csr"] }
 
@@ -52,6 +52,6 @@ members = ["common", "src-tauri"]
 
 [workspace.dependencies]
 time = { version = "0.3" , default-features = false }
-uuid = { version = "1.11", default-features = false }
+uuid = { version = "1.16", default-features = false }
 tracing = "0.1"
 serde = "1"

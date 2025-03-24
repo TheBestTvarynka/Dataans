@@ -10,7 +10,7 @@ Thus, everything starting from the back end and up to the front end is written i
 
 ## Installation
 
-> [!NOTE]  
+> [!NOTE]
 > This is a temporary solution. One day we will have a proper flow of app installation and release publishing.
 
 1. Tauri Prerequisites: https://v2.tauri.app/start/prerequisites/.

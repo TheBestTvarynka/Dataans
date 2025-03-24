@@ -13,6 +13,7 @@ fn main() {
             "search_notes_in_space",
             "search_notes",
             "export_app_data",
+            "import_app_data",
             "upload_file",
             "delete_file",
             "gen_random_avatar",
