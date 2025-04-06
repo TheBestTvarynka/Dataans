@@ -22,7 +22,7 @@ pub struct SignInRequest {
     pub password: Password,
 }
 
-#[derive(Debug, Serialize, Deserialize, AsRef, Deref, From, Into)]
+#[derive(Debug, Serialize, Deserialize, AsRef, Deref, From, Into, Clone)]
 pub struct AuthToken(String);
 
 #[derive(Debug, Serialize, Deserialize)]

@@ -32,6 +32,10 @@ impl WebService {
         })
     }
 
+    pub fn user_profile(&self) -> Option<UserProfile> {
+        self.user_profile.lock().unwrap().clone()
+    }
+
     pub async fn sign_up(
         &self,
         invitation_token: InvitationToken,

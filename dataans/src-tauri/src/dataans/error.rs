@@ -4,7 +4,6 @@ use std::path::PathBuf;
 use common::error::CommandError;
 use thiserror::Error;
 
-use crate::dataans::crypto::CryptoError;
 use crate::dataans::db::DbError;
 use crate::dataans::service::note::NoteServiceError;
 use crate::dataans::service::space::SpaceServiceError;
@@ -64,6 +63,9 @@ pub enum DataansError {
 
     #[error(transparent)]
     Tauri(#[from] tauri::Error),
+
+    #[error("user is not signed in")]
+    UserNotSignedIn,
 }
 
 impl From<DataansError> for CommandError {

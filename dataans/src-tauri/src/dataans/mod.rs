@@ -30,6 +30,7 @@ pub struct State<D> {
     note_service: Arc<NoteService<D>>,
     file_service: Arc<FileService<D>>,
     web_service: Arc<WebService>,
+    db: Arc<D>,
 }
 
 pub type DataansState = State<SqliteDb>;
@@ -70,6 +71,7 @@ impl DataansState {
             note_service,
             file_service,
             web_service,
+            db: sqlite,
         }
     }
 }
@@ -99,6 +101,7 @@ pub fn init_dataans_plugin<R: Runtime>() -> TauriPlugin<R> {
             command::web::profile,
             command::sync::sync,
             command::sync::set_sync_options,
+            command::sync::full_sync,
         ])
         .setup(|app_handle, _api| {
             info!("Starting app setup...");

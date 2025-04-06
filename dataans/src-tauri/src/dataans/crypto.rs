@@ -3,7 +3,7 @@ use aes_gcm::{AeadCore, Aes256Gcm, Key, KeyInit, Nonce};
 use rand::rngs::OsRng;
 use serde::de::DeserializeOwned;
 use serde::Serialize;
-use sha2::{Digest, Sha256};
+use sha2::Sha256;
 use thiserror::Error;
 
 const NONCE_LENGTH: usize = 12;

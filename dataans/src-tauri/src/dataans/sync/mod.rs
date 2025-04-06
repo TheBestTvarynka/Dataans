@@ -16,9 +16,7 @@ use web_api_types::{
 };
 
 use crate::dataans::crypto::{decrypt, encrypt, CryptoError, EncryptionKey};
-use crate::dataans::db::{
-    Db, DbError, Note as NoteModel, Space as SpaceModel, SyncBlock as SyncBlockModel, SyncBlockNote,
-};
+use crate::dataans::db::{Db, DbError, Note as NoteModel, Space as SpaceModel, SyncBlock as SyncBlockModel};
 use crate::dataans::service::note::NoteServiceError;
 use crate::dataans::service::space::SpaceServiceError;
 use crate::dataans::{NoteService, SpaceService};
@@ -61,6 +59,8 @@ pub async fn sync_future<D: Db>(
     encryption_key: EncryptionKey,
 ) -> Result<(), SyncError> {
     let synchronizer = Synchronizer::new(user_id, db, sync_server_url, auth_token, encryption_key)?;
+
+    synchronizer.sync_full().await?;
 
     Ok(())
 }
@@ -289,7 +289,7 @@ impl<D: Db> Synchronizer<D> {
                     created_at,
                     updated_at,
                     space_id,
-                    files,
+                    files: _,
                 } = decrypt(note.data.as_ref(), &self.encryption_key)?;
                 Ok((
                     note.id.into(),
@@ -345,7 +345,7 @@ impl<D: Db> Synchronizer<D> {
         let note = NoteService::map_note_model_to_note(note, &*self.db).await?;
         let encrypted_note = encrypt(&note, &self.encryption_key)?;
 
-        let server_notes = self
+        let _server_notes = self
             .client
             .put(self.sync_server_url.join("/data/note")?)
             .json(&ServerNote {
@@ -368,7 +368,7 @@ impl<D: Db> Synchronizer<D> {
         let space = SpaceService::map_model_space_to_space(space, &*self.db).await?;
         let encrypted_space = encrypt(&space, &self.encryption_key)?;
 
-        let server_notes = self
+        let _server_spaces = self
             .client
             .put(self.sync_server_url.join("/data/space")?)
             .json(&ServerSpace {
@@ -392,7 +392,7 @@ impl<D: Db> Synchronizer<D> {
             let note = NoteService::map_note_model_to_note(note, &*self.db).await?;
             let encrypted_note = encrypt(&note, &self.encryption_key)?;
 
-            let server_notes = self
+            let _server_notes = self
                 .client
                 .post(self.sync_server_url.join("/data/note")?)
                 .json(&ServerNote {

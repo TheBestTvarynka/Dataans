@@ -8,7 +8,7 @@ use web_api_types::{AuthToken, UserId, Username};
 /// Secret key.
 ///
 /// This key is used to encrypt the user's data.
-#[derive(Debug, Serialize, Deserialize, AsRef, From)]
+#[derive(Debug, Serialize, Deserialize, AsRef, From, Clone)]
 pub struct SecretKey(Vec<u8>);
 
 /// Web server URL.
@@ -75,7 +75,7 @@ impl Sync {
 /// User profile.
 ///
 /// Represents the user's profile.
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct UserProfile {
     /// User ID.
     pub user_id: UserId,
