@@ -77,6 +77,7 @@ async fn main() -> std::result::Result<(), rocket::Error> {
                 routes::remove_space,
                 routes::remove_note,
                 routes::notes,
+                routes::spaces,
             ],
         )
         .mount("/sync", routes![routes::blocks, routes::blocks_notes])

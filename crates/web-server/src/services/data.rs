@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use futures::future::try_join_all;
-use web_api_types::{Note, NoteId, Space, SpaceId, UserId};
+use web_api_types::{BlockId, Note, NoteId, Space, SpaceId, UserId};
 
 use crate::db::{Note as NoteModel, NoteDb, Space as SpaceModel, SpaceDb};
 use crate::{Error, Result};
@@ -85,9 +85,30 @@ impl<D: NoteDb + SpaceDb> Data<D> {
         Ok(())
     }
 
-    pub async fn add_note(&self, note: Note, user_id: UserId) -> Result<()> {
-        self.check_note_owner(note.id, user_id).await?;
+    pub async fn spaces(&self, user_id: UserId) -> Result<Vec<Space>> {
+        let spaces = self.db.user_spaces(user_id.into()).await?;
 
+        Ok(spaces
+            .into_iter()
+            .map(|space| {
+                let SpaceModel {
+                    id,
+                    data,
+                    checksum,
+                    user_id,
+                } = space;
+
+                Space {
+                    id: id.into(),
+                    data: data.into(),
+                    checksum: checksum.into(),
+                    user_id: user_id.into(),
+                }
+            })
+            .collect())
+    }
+
+    pub async fn add_note(&self, note: Note, user_id: UserId) -> Result<BlockId> {
         let Note {
             id,
             data,
@@ -96,7 +117,13 @@ impl<D: NoteDb + SpaceDb> Data<D> {
             block_id,
         } = note;
 
-        self.db
+        let space = self.db.space(space_id.into()).await?;
+        if space.user_id != *user_id.as_ref() {
+            return Err(Error::AccessDenied);
+        }
+
+        let block_id = self
+            .db
             .add_note(&NoteModel {
                 id: id.into(),
                 data: data.into(),
@@ -104,9 +131,10 @@ impl<D: NoteDb + SpaceDb> Data<D> {
                 space_id: space_id.into(),
                 block_id: block_id.into(),
             })
-            .await?;
+            .await?
+            .into();
 
-        Ok(())
+        Ok(block_id)
     }
 
     pub async fn update_note(&self, note: Note, user_id: UserId) -> Result<()> {

@@ -28,6 +28,7 @@ pub trait AuthDb: Send + Sync {
 
 pub trait SpaceDb: Send + Sync {
     async fn space(&self, space_id: Uuid) -> Result<Space, DbError>;
+    async fn user_spaces(&self, user_id: Uuid) -> Result<Vec<Space>, DbError>;
     async fn add_space(&self, space: &Space) -> Result<(), DbError>;
     async fn update_space(&self, space: &Space) -> Result<(), DbError>;
     async fn remove_space(&self, space_id: Uuid) -> Result<(), DbError>;

@@ -149,6 +149,15 @@ impl SpaceDb for PostgresDb {
         Ok(space)
     }
 
+    async fn user_spaces(&self, user_id: Uuid) -> Result<Vec<Space>, DbError> {
+        let spaces = sqlx::query_as("select id, data, checksum, user_id from space where user_id = $1")
+            .bind(user_id)
+            .fetch_all(&self.pool)
+            .await?;
+
+        Ok(spaces)
+    }
+
     async fn add_space(&self, space: &Space) -> Result<(), DbError> {
         let Space {
             id: space_id,

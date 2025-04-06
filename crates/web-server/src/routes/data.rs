@@ -1,6 +1,6 @@
 use rocket::serde::json::Json;
-use rocket::{delete, post, put, State};
-use web_api_types::{Note, NoteId, NoteIds, Result, Space, SpaceId};
+use rocket::{delete, get, post, put, State};
+use web_api_types::{BlockId, Note, NoteId, NoteIds, Result, Space, SpaceId};
 
 use crate::routes::UserContext;
 use crate::WebServerState;
@@ -26,12 +26,23 @@ pub async fn remove_space(server: &State<WebServerState>, user_context: UserCont
     Ok(server.data_service.remove_space(space_id, user_context.user_id).await?)
 }
 
+#[get("/spaces")]
+pub async fn spaces(server: &State<WebServerState>, user_context: UserContext) -> Result<Json<Vec<Space>>> {
+    Ok(Json(server.data_service.spaces(user_context.user_id).await?))
+}
+
 #[post("/note", data = "<data>")]
-pub async fn add_note(server: &State<WebServerState>, user_context: UserContext, data: Json<Note>) -> Result<()> {
-    Ok(server
-        .data_service
-        .add_note(data.into_inner(), user_context.user_id)
-        .await?)
+pub async fn add_note(
+    server: &State<WebServerState>,
+    user_context: UserContext,
+    data: Json<Note>,
+) -> Result<Json<BlockId>> {
+    Ok(Json(
+        server
+            .data_service
+            .add_note(data.into_inner(), user_context.user_id)
+            .await?,
+    ))
 }
 
 #[put("/note", data = "<data>")]
