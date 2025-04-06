@@ -1,12 +1,28 @@
 use std::sync::Arc;
 
+use common::error::CommandError;
 use common::space::{Avatar, CreateSpaceOwned, DeleteSpace, Id as SpaceId, OwnedSpace, UpdateSpace};
 use futures::future::try_join_all;
+use thiserror::Error;
 use time::OffsetDateTime;
 
 use crate::dataans::db::model::{File as FileModel, Space as SpaceModel};
-use crate::dataans::db::Db;
+use crate::dataans::db::{Db, DbError};
 use crate::dataans::DataansError;
+
+#[derive(Debug, Error)]
+pub enum SpaceServiceError {
+    #[error(transparent)]
+    DbError(#[from] DbError),
+}
+
+impl From<SpaceServiceError> for CommandError {
+    fn from(error: SpaceServiceError) -> Self {
+        DataansError::SpaceService(error).into()
+    }
+}
+
+type SpaceServiceResult<T> = Result<T, SpaceServiceError>;
 
 pub struct SpaceService<D> {
     db: Arc<D>,
@@ -17,7 +33,7 @@ impl<D: Db> SpaceService<D> {
         Self { db }
     }
 
-    pub async fn create_space(&self, space: CreateSpaceOwned) -> Result<OwnedSpace, DataansError> {
+    pub async fn create_space(&self, space: CreateSpaceOwned) -> SpaceServiceResult<OwnedSpace> {
         let CreateSpaceOwned { id, name, avatar } = space;
 
         let created_at = OffsetDateTime::now_utc();
@@ -41,7 +57,7 @@ impl<D: Db> SpaceService<D> {
         })
     }
 
-    pub async fn update_space(&self, space_data: UpdateSpace<'static>) -> Result<OwnedSpace, DataansError> {
+    pub async fn update_space(&self, space_data: UpdateSpace<'static>) -> SpaceServiceResult<OwnedSpace> {
         let UpdateSpace {
             id: space_id,
             name,
@@ -78,13 +94,13 @@ impl<D: Db> SpaceService<D> {
         })
     }
 
-    pub async fn delete_space(&self, id: DeleteSpace) -> Result<(), DataansError> {
+    pub async fn delete_space(&self, id: DeleteSpace) -> SpaceServiceResult<()> {
         let DeleteSpace { id } = id;
 
         Ok(self.db.remove_space(id.inner()).await?)
     }
 
-    async fn map_model_space_to_space<T: Db>(space: SpaceModel, db: &T) -> Result<OwnedSpace, DataansError> {
+    pub async fn map_model_space_to_space(space: SpaceModel, db: &D) -> SpaceServiceResult<OwnedSpace> {
         let SpaceModel {
             id,
             name,
@@ -110,7 +126,7 @@ impl<D: Db> SpaceService<D> {
         })
     }
 
-    pub async fn spaces(&self) -> Result<Vec<OwnedSpace>, DataansError> {
+    pub async fn spaces(&self) -> SpaceServiceResult<Vec<OwnedSpace>> {
         let spaces = try_join_all(
             self.db
                 .spaces()
@@ -123,7 +139,7 @@ impl<D: Db> SpaceService<D> {
         Ok(spaces)
     }
 
-    pub async fn space_by_id(&self, space_id: SpaceId) -> Result<OwnedSpace, DataansError> {
+    pub async fn space_by_id(&self, space_id: SpaceId) -> SpaceServiceResult<OwnedSpace> {
         Self::map_model_space_to_space(self.db.space_by_id(space_id.inner()).await?, &*self.db).await
     }
 }

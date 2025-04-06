@@ -3,6 +3,7 @@ use std::sync::Arc;
 use std::time::Duration;
 
 use common::note::OwnedNote;
+use common::space::OwnedSpace;
 use futures::future::try_join_all;
 use reqwest::header::{HeaderMap, HeaderValue};
 use reqwest::{Client, ClientBuilder};
@@ -10,13 +11,17 @@ use thiserror::Error;
 use url::Url;
 use uuid::Uuid;
 use web_api_types::{
-    AuthToken, BlockId, BlockIds, BlockNotes, Note as ServerNote, NoteIds, SyncBlock, AUTH_HEADER_NAME,
+    AuthToken, BlockId, BlockIds, BlockNotes, Note as ServerNote, NoteIds, Space as ServerSpace, SyncBlock, UserId,
+    AUTH_HEADER_NAME,
 };
 
 use crate::dataans::crypto::{decrypt, encrypt, CryptoError, EncryptionKey};
-use crate::dataans::db::{Db, DbError, Note as NoteModel, SyncBlock as SyncBlockModel, SyncBlockNote};
+use crate::dataans::db::{
+    Db, DbError, Note as NoteModel, Space as SpaceModel, SyncBlock as SyncBlockModel, SyncBlockNote,
+};
 use crate::dataans::service::note::NoteServiceError;
-use crate::dataans::NoteService;
+use crate::dataans::service::space::SpaceServiceError;
+use crate::dataans::{NoteService, SpaceService};
 
 #[derive(Debug, Error)]
 pub enum SyncError {
@@ -43,20 +48,25 @@ pub enum SyncError {
 
     #[error(transparent)]
     NoteService(#[from] NoteServiceError),
+
+    #[error(transparent)]
+    SpaceService(#[from] SpaceServiceError),
 }
 
 pub async fn sync_future<D: Db>(
+    user_id: UserId,
     db: Arc<D>,
     sync_server_url: Url,
     auth_token: AuthToken,
     encryption_key: EncryptionKey,
 ) -> Result<(), SyncError> {
-    let synchronizer = Synchronizer::new(db, sync_server_url, auth_token, encryption_key)?;
+    let synchronizer = Synchronizer::new(user_id, db, sync_server_url, auth_token, encryption_key)?;
 
     Ok(())
 }
 
 struct Synchronizer<D> {
+    user_id: UserId,
     db: Arc<D>,
     client: Client,
     sync_server_url: Url,
@@ -65,6 +75,7 @@ struct Synchronizer<D> {
 
 impl<D: Db> Synchronizer<D> {
     pub fn new(
+        user_id: UserId,
         db: Arc<D>,
         sync_server_url: Url,
         auth_token: AuthToken,
@@ -82,6 +93,7 @@ impl<D: Db> Synchronizer<D> {
             .build()?;
 
         Ok(Self {
+            user_id,
             db,
             sync_server_url,
             client,
@@ -89,7 +101,74 @@ impl<D: Db> Synchronizer<D> {
         })
     }
 
+    pub async fn sync_spaces(&self) -> Result<(), SyncError> {
+        // TODO: run these features in parallel (`join_all`).
+        let server_spaces = self
+            .client
+            .get(self.sync_server_url.join("/data/spaces")?)
+            .send()
+            .await?
+            .json::<Vec<ServerSpace>>()
+            .await?
+            .into_iter()
+            .map(|space| {
+                let OwnedSpace {
+                    id,
+                    name,
+                    created_at,
+                    updated_at,
+                    avatar,
+                } = decrypt(space.data.as_ref(), &self.encryption_key)?;
+                Ok((
+                    space.id.into(),
+                    SpaceModel {
+                        id: id.into(),
+                        name: name.into(),
+                        created_at: created_at.into(),
+                        updated_at: updated_at.into(),
+                        avatar_id: avatar.id(),
+                        checksum: space.checksum.into(),
+                    },
+                ))
+            })
+            .collect::<Result<HashMap<Uuid, SpaceModel>, CryptoError>>()?;
+        let mut local_spaces = self
+            .db
+            .spaces()
+            .await?
+            .into_iter()
+            .map(|space| (space.id, space))
+            .collect::<HashMap<Uuid, SpaceModel>>();
+
+        // TODO: run these features in parallel (`join_all`).
+        for (space_id, server_space) in server_spaces {
+            if let Some(local_space) = local_spaces.remove(&space_id) {
+                if server_space.checksum != local_space.checksum {
+                    // We have a conflict. Server and local databases contain different versions of the same space.
+                    // Our current strategy is to prefer a space with the latest update time.
+                    if server_space.updated_at > local_space.updated_at {
+                        self.db.update_space(&server_space).await?;
+                    } else {
+                        self.update_server_space(local_space, self.user_id).await?;
+                    }
+                }
+            } else {
+                // The server has a new space the client doesn't have.
+                self.db.create_space(&server_space).await?;
+            }
+        }
+
+        if !local_spaces.is_empty() {
+            warn!("Something weird happens here. Such a case should not be possible.");
+        }
+
+        Ok(())
+    }
+
     pub async fn sync_full(&self) -> Result<(), SyncError> {
+        // TODO: make it less stupid.
+        self.sync_spaces().await?;
+
         // TODO: run these features in parallel (`join_all`).
         for space in self.db.spaces().await? {
             // TODO: run these features in parallel (`join_all`).
@@ -275,6 +354,28 @@ impl<D: Db> Synchronizer<D> {
                 checksum: checksum.into(),
                 space_id: space_id.into(),
                 block_id: block_id.into(),
+            })
+            .send()
+            .await?;
+
+        Ok(())
+    }
+
+    async fn update_server_space(&self, space: SpaceModel, user_id: UserId) -> Result<(), SyncError> {
+        let checksum = space.checksum.clone();
+        let id = space.id;
+
+        let space = SpaceService::map_model_space_to_space(space, &*self.db).await?;
+        let encrypted_space = encrypt(&space, &self.encryption_key)?;
+
+        let server_notes = self
+            .client
+            .put(self.sync_server_url.join("/data/space")?)
+            .json(&ServerSpace {
+                id: id.into(),
+                data: encrypted_space.into(),
+                checksum: checksum.into(),
+                user_id,
             })
             .send()
             .await?;

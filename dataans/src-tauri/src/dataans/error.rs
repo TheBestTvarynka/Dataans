@@ -7,6 +7,7 @@ use thiserror::Error;
 use crate::dataans::crypto::CryptoError;
 use crate::dataans::db::DbError;
 use crate::dataans::service::note::NoteServiceError;
+use crate::dataans::service::space::SpaceServiceError;
 
 #[derive(Debug, Error)]
 pub enum DataansError {
@@ -21,6 +22,9 @@ pub enum DataansError {
 
     #[error(transparent)]
     NoteService(#[from] NoteServiceError),
+
+    #[error(transparent)]
+    SpaceService(#[from] SpaceServiceError),
 
     #[error("time format error: {0:?}")]
     TimeFormatError(#[from] time::error::Format),
