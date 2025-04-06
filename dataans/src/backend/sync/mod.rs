@@ -7,7 +7,7 @@ use common::APP_PLUGIN_NAME;
 use futures::StreamExt;
 use serde::Serialize;
 
-use crate::backend::invoke_command;
+use crate::backend::{invoke_command, EmptyArgs};
 
 pub async fn on_user_context(set_user_context: impl Fn(Option<UserContext>)) -> CommandResultEmpty {
     let mut events = event::listen::<UserContextEvent>(USER_CONTEXT_EVENT).await?;
@@ -43,4 +43,8 @@ pub async fn set_sync_options(sync_config: &Sync) -> CommandResult<UserContext> 
         &SyncConfigArgs { sync_config },
     )
     .await
+}
+
+pub async fn trigger_full_sync() -> CommandResultEmpty {
+    invoke_command(&format!("plugin:{}|full_sync", APP_PLUGIN_NAME), &EmptyArgs {}).await
 }
