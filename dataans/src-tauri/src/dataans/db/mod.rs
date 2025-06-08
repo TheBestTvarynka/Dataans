@@ -10,6 +10,9 @@ pub use self::model::*;
 pub enum DbError {
     #[error("sqlx error: {0:?}")]
     SqlxError(#[from] sqlx::Error),
+
+    #[error("json error: {0}")]
+    Json(#[from] serde_json::Error),
 }
 
 // TODO: split into separate traits (see the `web-server` crate).

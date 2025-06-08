@@ -1,8 +1,12 @@
+mod operation;
+
+pub use operation::{Operation, OperationLogger};
+use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 use time::OffsetDateTime;
 use uuid::Uuid;
 
-#[derive(Debug, FromRow, PartialEq, Eq)]
+#[derive(Debug, FromRow, PartialEq, Eq, Serialize, Deserialize, Clone)]
 pub struct Space {
     pub id: Uuid,
     pub name: String,
@@ -29,7 +33,7 @@ impl Space {
     }
 }
 
-#[derive(Debug, FromRow, PartialEq, Eq)]
+#[derive(Debug, FromRow, PartialEq, Eq, Serialize, Deserialize, Clone)]
 pub struct Note {
     pub id: Uuid,
     pub text: String,
@@ -50,7 +54,7 @@ impl Note {
     }
 }
 
-#[derive(Debug, FromRow, PartialEq, Eq)]
+#[derive(Debug, FromRow, PartialEq, Eq, Serialize, Deserialize, Clone)]
 pub struct File {
     pub id: Uuid,
     pub name: String,
