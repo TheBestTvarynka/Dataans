@@ -1127,7 +1127,6 @@ dependencies = [
  "serde_json",
  "sha2",
  "sqlx",
- "sync-common",
  "syntect",
  "tauri",
  "tauri-build",
@@ -6221,15 +6220,6 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 2.0.96",
-]
-
-[[package]]
-name = "sync-common"
-version = "0.1.0"
-dependencies = [
- "sha2",
- "time",
- "uuid",
 ]
 
 [[package]]

@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["dataans/common", "dataans/src-tauri", "dataans", "crates/web-server", "crates/web-api-types", "crates/sync-common"]
+members = ["dataans/common", "dataans/src-tauri", "dataans", "crates/web-server", "crates/web-api-types"]
 
 [workspace.package]
 edition = "2021"
@@ -11,7 +11,6 @@ authors = ["Pavlo Myroniuk <the.best.tvarynka@gmail.com>"]
 
 [workspace.dependencies]
 web-api-types = { path = "crates/web-api-types" }
-sync-common = { path = "crates/sync-common" }
 sha2 = "0.10"
 aes-gcm = { version = "0.10", features = ["std"] }
 hmac = "0.12"

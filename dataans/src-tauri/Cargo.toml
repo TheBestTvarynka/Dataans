@@ -20,7 +20,6 @@ web-api-types.workspace = true
 hex.workspace = true
 futures.workspace = true
 url.workspace = true
-sync-common.workspace = true
 aes-gcm.workspace = true
 hmac.workspace = true
 sha2.workspace = true

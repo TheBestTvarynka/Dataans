@@ -18,7 +18,7 @@ impl SqliteDb {
     #[instrument(ret, skip(transaction))]
     async fn remove_note_inner(note_id: Uuid, transaction: &mut Transaction<'_, sqlx::Sqlite>) -> Result<(), DbError> {
         let note_files: Vec<File> = sqlx::query_as(
-            "SELECT files.id, files.name, files.path, files.checksum
+            "SELECT files.id, files.name, files.path
             FROM files
                 LEFT JOIN notes_files ON files.id = notes_files.file_id
             WHERE notes_files.note_id = ?1",
@@ -49,7 +49,7 @@ impl SqliteDb {
 impl Db for SqliteDb {
     #[instrument(ret, skip(self))]
     async fn files(&self) -> Result<Vec<File>, DbError> {
-        let files = sqlx::query_as("SELECT id, name, path, checksum FROM files")
+        let files = sqlx::query_as("SELECT id, name, path FROM files")
             .fetch_all(&self.pool)
             .await?;
 
@@ -58,7 +58,7 @@ impl Db for SqliteDb {
 
     #[instrument(ret, skip(self))]
     async fn file_by_id(&self, file_id: Uuid) -> Result<File, DbError> {
-        let files = sqlx::query_as("SELECT id, name, path, checksum FROM files WHERE id=?1")
+        let files = sqlx::query_as("SELECT id, name, path FROM files WHERE id=?1")
             .bind(file_id)
             .fetch_one(&self.pool)
             .await?;
@@ -68,22 +68,11 @@ impl Db for SqliteDb {
 
     #[instrument(ret, skip(self))]
     async fn add_file(&self, file: &File) -> Result<(), DbError> {
-        let File {
-            id,
-            name,
-            path,
-            checksum,
-        } = file;
+        let File { id, name, path } = file;
 
-        sqlx::query!(
-            "INSERT INTO files (id, name, path, checksum) VALUES (?1, ?2, ?3, ?4)",
-            id,
-            name,
-            path,
-            checksum
-        )
-        .execute(&self.pool)
-        .await?;
+        sqlx::query!("INSERT INTO files (id, name, path) VALUES (?1, ?2, ?3)", id, name, path,)
+            .execute(&self.pool)
+            .await?;
 
         Ok(())
     }
@@ -99,7 +88,7 @@ impl Db for SqliteDb {
 
     #[instrument(ret, skip(self))]
     async fn spaces(&self) -> Result<Vec<Space>, DbError> {
-        let spaces = sqlx::query_as("SELECT id, name, avatar_id, created_at, updated_at, checksum FROM spaces")
+        let spaces = sqlx::query_as("SELECT id, name, avatar_id, created_at, updated_at FROM spaces")
             .fetch_all(&self.pool)
             .await?;
 
@@ -108,11 +97,10 @@ impl Db for SqliteDb {
 
     #[instrument(ret, skip(self))]
     async fn space_by_id(&self, space_id: Uuid) -> Result<Space, DbError> {
-        let space =
-            sqlx::query_as("SELECT id, name, avatar_id, created_at, updated_at, checksum FROM spaces WHERE id = ?1")
-                .bind(space_id)
-                .fetch_one(&self.pool)
-                .await?;
+        let space = sqlx::query_as("SELECT id, name, avatar_id, created_at, updated_at FROM spaces WHERE id = ?1")
+            .bind(space_id)
+            .fetch_one(&self.pool)
+            .await?;
 
         Ok(space)
     }
@@ -125,17 +113,15 @@ impl Db for SqliteDb {
             avatar_id,
             created_at,
             updated_at,
-            checksum,
         } = space;
 
         sqlx::query!(
-            "INSERT INTO spaces (id, name, avatar_id, created_at, updated_at, checksum) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
+            "INSERT INTO spaces (id, name, avatar_id, created_at, updated_at) VALUES (?1, ?2, ?3, ?4, ?5)",
             id,
             name,
             avatar_id,
             created_at,
             updated_at,
-            checksum,
         )
         .execute(&self.pool)
         .await?;
@@ -147,12 +133,11 @@ impl Db for SqliteDb {
     async fn remove_space(&self, space_id: Uuid) -> Result<(), DbError> {
         let mut transaction = self.pool.begin().await?;
 
-        let notes: Vec<Note> = sqlx::query_as(
-            "SELECT id, text, created_at, updated_at, space_id, checksum, block_id FROM notes WHERE space_id = ?1",
-        )
-        .bind(space_id)
-        .fetch_all(&mut *transaction)
-        .await?;
+        let notes: Vec<Note> =
+            sqlx::query_as("SELECT id, text, created_at, updated_at, space_id FROM notes WHERE space_id = ?1")
+                .bind(space_id)
+                .fetch_all(&mut *transaction)
+                .await?;
 
         // TODO: replace manual deleting with `ON CASCADE` constraint.
         for note in notes {
@@ -160,7 +145,7 @@ impl Db for SqliteDb {
         }
 
         let space: Space =
-            sqlx::query_as("SELECT id, name, avatar_id, created_at, updated_at, checksum FROM spaces WHERE id = ?1")
+            sqlx::query_as("SELECT id, name, avatar_id, created_at, updated_at FROM spaces WHERE id = ?1")
                 .bind(space_id)
                 .fetch_one(&mut *transaction)
                 .await?;
@@ -186,14 +171,12 @@ impl Db for SqliteDb {
             avatar_id,
             created_at: _,
             updated_at,
-            checksum,
         } = space;
 
         sqlx::query!(
-            "UPDATE spaces SET name = ?1, avatar_id = ?2, checksum = ?3, updated_at = ?4 WHERE id = ?5",
+            "UPDATE spaces SET name = ?1, avatar_id = ?2, updated_at = ?3 WHERE id = ?4",
             name,
             avatar_id,
-            checksum,
             updated_at,
             id,
         )
@@ -205,7 +188,7 @@ impl Db for SqliteDb {
 
     #[instrument(ret, skip(self))]
     async fn notes(&self) -> Result<Vec<Note>, DbError> {
-        let notes = sqlx::query_as("SELECT id, text, created_at, updated_at, space_id, checksum, block_id FROM notes")
+        let notes = sqlx::query_as("SELECT id, text, created_at, updated_at, space_id FROM notes")
             .fetch_all(&self.pool)
             .await?;
 
@@ -214,24 +197,20 @@ impl Db for SqliteDb {
 
     #[instrument(ret, skip(self))]
     async fn space_notes(&self, space_id: Uuid) -> Result<Vec<Note>, DbError> {
-        let notes = sqlx::query_as(
-            "SELECT id, text, created_at, updated_at, space_id, checksum, block_id FROM notes WHERE space_id = ?1",
-        )
-        .bind(space_id)
-        .fetch_all(&self.pool)
-        .await?;
+        let notes = sqlx::query_as("SELECT id, text, created_at, updated_at, space_id FROM notes WHERE space_id = ?1")
+            .bind(space_id)
+            .fetch_all(&self.pool)
+            .await?;
 
         Ok(notes)
     }
 
     #[instrument(ret, skip(self))]
     async fn note_by_id(&self, note_id: Uuid) -> Result<Note, DbError> {
-        let note = sqlx::query_as(
-            "SELECT id, text, created_at, updated_at, space_id, checksum, block_id FROM notes WHERE id = ?1",
-        )
-        .bind(note_id)
-        .fetch_one(&self.pool)
-        .await?;
+        let note = sqlx::query_as("SELECT id, text, created_at, updated_at, space_id FROM notes WHERE id = ?1")
+            .bind(note_id)
+            .fetch_one(&self.pool)
+            .await?;
 
         Ok(note)
     }
@@ -244,18 +223,15 @@ impl Db for SqliteDb {
             created_at,
             updated_at,
             space_id,
-            checksum,
-            block_id: _,
         } = note;
 
         sqlx::query!(
-            "INSERT INTO notes (id, text, created_at,  updated_at, space_id, checksum) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
+            "INSERT INTO notes (id, text, created_at,  updated_at, space_id) VALUES (?1, ?2, ?3, ?4, ?5)",
             id,
             text,
             created_at,
             updated_at,
             space_id,
-            checksum,
         )
         .execute(&self.pool)
         .await?;
@@ -282,16 +258,12 @@ impl Db for SqliteDb {
             created_at: _,
             updated_at,
             space_id: _,
-            checksum,
-            block_id,
         } = note;
 
         sqlx::query!(
-            "UPDATE notes SET text = ?1, checksum = ?2, updated_at = ?3, block_id = ?4 WHERE id = ?5",
+            "UPDATE notes SET text = ?1, updated_at = ?2 WHERE id = ?3",
             text,
-            checksum,
             updated_at,
-            block_id,
             id,
         )
         .execute(&self.pool)
@@ -303,7 +275,7 @@ impl Db for SqliteDb {
     #[instrument(ret, skip(self))]
     async fn note_files(&self, note_id: Uuid) -> Result<Vec<File>, DbError> {
         let files = sqlx::query_as(
-            "SELECT files.id, files.name, files.path, files.checksum
+            "SELECT files.id, files.name, files.path
             FROM files
                 LEFT JOIN notes_files ON files.id = notes_files.file_id
             WHERE notes_files.note_id = ?1",
@@ -335,33 +307,5 @@ impl Db for SqliteDb {
         transaction.commit().await?;
 
         Ok(())
-    }
-
-    #[instrument(ret, skip(self))]
-    async fn blocks(&self) -> Result<Vec<SyncBlock>, DbError> {
-        let blocks = sqlx::query_as("SELECT id, checksum, space_id FROM sync_blocks")
-            .fetch_all(&self.pool)
-            .await?;
-
-        Ok(blocks)
-    }
-
-    async fn block_notes(&self, block_id: Uuid) -> Result<Vec<SyncBlockNote>, DbError> {
-        let notes = sqlx::query_as("SELECT id, checksum, block_id FROM notes WHERE block_id = ?1")
-            .bind(block_id)
-            .fetch_all(&self.pool)
-            .await?;
-
-        Ok(notes)
-    }
-
-    async fn unsynced_notes(&self) -> Result<Vec<Note>, DbError> {
-        let notes = sqlx::query_as(
-            "SELECT id, text, created_at, updated_at, space_id, checksum, block_id FROM notes WHERE block_id IS NULL",
-        )
-        .fetch_all(&self.pool)
-        .await?;
-
-        Ok(notes)
     }
 }
