@@ -43,6 +43,7 @@ impl<D: Db> NoteService<D> {
             space_id,
             created_at,
             updated_at,
+            is_deleted: _,
         } = note;
 
         let files = db
@@ -50,7 +51,12 @@ impl<D: Db> NoteService<D> {
             .await?
             .into_iter()
             .map(|file| {
-                let FileModel { id, name, path } = file;
+                let FileModel {
+                    id,
+                    name,
+                    path,
+                    is_deleted: _,
+                } = file;
                 File {
                     id,
                     name,
@@ -142,6 +148,7 @@ impl<D: Db> NoteService<D> {
             created_at,
             updated_at: _,
             space_id,
+            is_deleted: _,
         } = self.db.note_by_id(note_id.inner()).await?;
 
         let updated_at = OffsetDateTime::now_utc();

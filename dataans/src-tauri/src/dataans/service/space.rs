@@ -70,6 +70,7 @@ impl<D: Db> SpaceService<D> {
             avatar_id: _,
             created_at,
             updated_at: _,
+            is_deleted: _,
         } = self.db.space_by_id(space_id.inner()).await?;
 
         let updated_at = OffsetDateTime::now_utc();
@@ -106,12 +107,14 @@ impl<D: Db> SpaceService<D> {
             avatar_id,
             created_at,
             updated_at,
+            is_deleted: _,
         } = space;
 
         let FileModel {
             id: avatar_id,
             name: _,
             path: avatar_path,
+            is_deleted: _,
         } = db.file_by_id(avatar_id).await?;
 
         Ok(OwnedSpace {

@@ -54,7 +54,7 @@ impl Operation<'_> {
     }
 }
 
-impl<'r> FromRow<'r, SqliteRow> for OperationOwned {
+impl FromRow<'_, SqliteRow> for OperationOwned {
     fn from_row(row: &SqliteRow) -> Result<Self, SqlxError> {
         let name: String = row.try_get("name")?;
         let data: String = row.try_get("operation")?;
@@ -166,7 +166,7 @@ impl<'a> OperationLoggerGuard<'a> {
     }
 }
 
-impl<'a> Deref for OperationLoggerGuard<'a> {
+impl Deref for OperationLoggerGuard<'_> {
     type Target = <Sqlite as sqlx::Database>::Connection;
 
     #[inline]
@@ -175,7 +175,7 @@ impl<'a> Deref for OperationLoggerGuard<'a> {
     }
 }
 
-impl<'a> DerefMut for OperationLoggerGuard<'a> {
+impl DerefMut for OperationLoggerGuard<'_> {
     #[inline]
     fn deref_mut(&mut self) -> &mut Self::Target {
         self.transaction.deref_mut()

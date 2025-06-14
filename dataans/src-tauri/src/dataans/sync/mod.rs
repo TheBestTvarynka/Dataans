@@ -47,11 +47,11 @@ pub enum SyncError {
 pub async fn sync_future<D: Db>(
     user_id: UserId,
     db: Arc<D>,
-    sync_server_url: Url,
+    sync_server: Url,
     auth_token: AuthToken,
     encryption_key: EncryptionKey,
 ) -> Result<(), SyncError> {
-    let _synchronizer = Synchronizer::new(user_id, db, sync_server_url, auth_token, encryption_key)?;
+    let _synchronizer = Synchronizer::new(user_id, db, sync_server, auth_token, encryption_key)?;
 
     // TODO
 
@@ -62,7 +62,7 @@ struct Synchronizer<D> {
     user_id: UserId,
     db: Arc<D>,
     client: Client,
-    sync_server_url: Url,
+    sync_server: Url,
     encryption_key: EncryptionKey,
 }
 
@@ -70,7 +70,7 @@ impl<D: Db> Synchronizer<D> {
     pub fn new(
         user_id: UserId,
         db: Arc<D>,
-        sync_server_url: Url,
+        sync_server: Url,
         auth_token: AuthToken,
         encryption_key: EncryptionKey,
     ) -> Result<Self, SyncError> {
@@ -88,7 +88,7 @@ impl<D: Db> Synchronizer<D> {
         Ok(Self {
             user_id,
             db,
-            sync_server_url,
+            sync_server,
             client,
             encryption_key,
         })
