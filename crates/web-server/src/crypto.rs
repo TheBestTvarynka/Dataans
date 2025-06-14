@@ -10,7 +10,6 @@ pub type EncryptionKey = [u8; SERVER_ENCRYPTION_KEY_SIZE];
 
 const NONCE_LENGTH: usize = 12;
 const HMAC_SHA256_CHECKSUM_LENGTH: usize = 32;
-pub const EMPTY_SHA256_CHECKSUM: &[u8] = &[0; 32];
 pub const SERVER_ENCRYPTION_KEY_SIZE: usize = 32;
 
 use crate::{Error, Result};

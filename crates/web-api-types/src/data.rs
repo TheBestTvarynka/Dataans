@@ -1,28 +1,19 @@
+use derive_more::{Into, From, AsRef};
 use serde::{Deserialize, Serialize};
 
-use crate::{BlockId, NoteChecksumValue, NoteData, NoteId, SpaceChecksumValue, SpaceData, SpaceId, UserId};
+use crate::{OperationId, OperationData, OperationChecksumValue, CreationDate};
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct Space {
-    pub id: SpaceId,
-    pub data: SpaceData,
-    pub checksum: SpaceChecksumValue,
-    pub user_id: UserId,
+pub struct Operation {
+    pub id: OperationId,
+    pub created_at: CreationDate,
+    pub data: OperationData,
+    pub checksum: OperationChecksumValue,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct Note {
-    pub id: NoteId,
-    pub data: NoteData,
-    pub checksum: NoteChecksumValue,
-    pub space_id: SpaceId,
-    pub block_id: BlockId,
-}
+#[derive(Debug, Serialize, Deserialize, AsRef, From, Into)]
+pub struct BlockChecksum(Vec<u8>);
 
-#[derive(Debug, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct NoteIds {
-    pub ids: Vec<NoteId>,
-}
+#[derive(Debug, Serialize, Deserialize, AsRef, From, Into)]
+pub struct Blocks(Vec<BlockChecksum>);

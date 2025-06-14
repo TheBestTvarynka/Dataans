@@ -1,13 +1,11 @@
 mod auth;
 mod data;
-mod sync;
 
 pub use auth::*;
 pub use data::*;
 use rocket::get;
 use rocket::http::Status;
 use rocket::request::{FromRequest, Outcome, Request};
-pub use sync::*;
 use web_api_types::{UserId, AUTH_COOKIE_NAME, AUTH_HEADER_NAME};
 
 use crate::{Error, WebServerState};

@@ -1,15 +1,15 @@
 mod auth;
 mod data;
 mod error;
-mod sync;
 
 pub use auth::*;
 pub use data::*;
 use derive_more::{AsRef, From, Into};
 pub use error::*;
 use nutype::nutype;
+use time::serde::rfc3339;
+use time::OffsetDateTime;
 use serde::{Deserialize, Serialize};
-pub use sync::*;
 
 #[nutype(
     validate(not_empty),
@@ -33,13 +33,7 @@ pub struct InvitationToken(Vec<u8>);
 pub struct UserId(uuid::Uuid);
 
 #[derive(Debug, Serialize, Deserialize, AsRef, From, Copy, Clone, Into, PartialEq, Eq, Hash)]
-pub struct BlockId(uuid::Uuid);
-
-#[derive(Debug, Serialize, Deserialize, AsRef, From, Copy, Clone, Into, PartialEq, Eq, Hash)]
-pub struct NoteId(uuid::Uuid);
-
-#[derive(Debug, Serialize, Deserialize, AsRef, From, Copy, Clone, Into, PartialEq, Eq, Hash)]
-pub struct SpaceId(uuid::Uuid);
+pub struct OperationId(uuid::Uuid);
 
 #[derive(Debug, Serialize, Deserialize, AsRef, From, Copy, Clone, Into, PartialEq, Eq, Hash)]
 pub struct SessionId(uuid::Uuid);
@@ -61,26 +55,16 @@ mod impl_from_param {
         };
     }
 
-    impl_from_param!(id: crate::SpaceId);
-    impl_from_param!(id: crate::NoteId);
+    impl_from_param!(id: crate::OperationId);
     impl_from_param!(id: crate::UserId);
     impl_from_param!(id: crate::SessionId);
 }
 
 #[derive(Debug, Serialize, Deserialize, AsRef, From, Into)]
-pub struct NoteChecksumValue(Vec<u8>);
+pub struct OperationChecksumValue(Vec<u8>);
 
 #[derive(Debug, Serialize, Deserialize, AsRef, From, Into)]
-pub struct NoteData(Vec<u8>);
+pub struct OperationData(Vec<u8>);
 
 #[derive(Debug, Serialize, Deserialize, AsRef, From, Into)]
-pub struct BlockChecksumValue(Vec<u8>);
-
-#[derive(Debug, Serialize, Deserialize, AsRef, From, Into)]
-pub struct SpaceChecksumValue(Vec<u8>);
-
-#[derive(Debug, Serialize, Deserialize, AsRef, From, Into)]
-pub struct FileChecksumValue(Vec<u8>);
-
-#[derive(Debug, Serialize, Deserialize, AsRef, From, Into)]
-pub struct SpaceData(Vec<u8>);
+pub struct CreationDate(#[serde(with = "rfc3339")] OffsetDateTime);
