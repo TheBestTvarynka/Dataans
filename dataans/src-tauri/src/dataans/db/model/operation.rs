@@ -8,6 +8,7 @@ use time::OffsetDateTime;
 use uuid::Uuid;
 
 use crate::dataans::db::{DbError, File, Note, Space};
+use crate::dataans::sync::{Hasher, Hash};
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum Operation<'data> {
@@ -51,6 +52,27 @@ impl Operation<'_> {
             Operation::DeleteSpace(id) => serde_json::to_string(id)?,
             Operation::SetNoteFiles(note_id, files) => serde_json::to_string(&(note_id, files.as_ref()))?,
         })
+    }
+}
+
+impl Hash for Operation<'_> {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.name().hash(state);
+
+        match self {
+            Operation::CreateNote(note) => note.hash(state),
+            Operation::UpdateNote(note) => note.hash(state),
+            Operation::DeleteNote(id) => id.hash(state),
+            Operation::CreateFile(file) => file.hash(state),
+            Operation::DeleteFile(id) => id.hash(state),
+            Operation::CreateSpace(space) => space.hash(state),
+            Operation::UpdateSpace(space) => space.hash(state),
+            Operation::DeleteSpace(id) => id.hash(state),
+            Operation::SetNoteFiles(note_id, files) => {
+                note_id.hash(state);
+                files.as_ref().hash(state);
+            }
+        }
     }
 }
 

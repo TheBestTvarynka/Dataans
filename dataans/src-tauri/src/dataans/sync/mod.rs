@@ -2,9 +2,13 @@
 #![allow(unused_imports)]
 
 mod client;
+mod hash;
+
+pub use hash::{Hasher, Hash};
 
 use std::sync::Arc;
 
+use sha2::{Sha256, Digest};
 use thiserror::Error;
 use url::Url;
 use uuid::Uuid;
@@ -78,7 +82,27 @@ impl<D: Db + OperationDb> Synchronizer<D> {
     }
 
     async fn synchronize(&self) -> Result<(), SyncError> {
-        let remote_blocks = self.client.blocks(OPERATIONS_PER_BLOCK).await?;
+        let (local_operations, remote_blocks) = futures::join!(
+            self.db.operations(),
+            self.client.blocks(OPERATIONS_PER_BLOCK),
+        );
+
+        let local_blocks = local_operations?
+            .chunks(OPERATIONS_PER_BLOCK)
+            .map(|operations| {
+                let mut hasher = Sha256::new();
+
+                for operation in operations {
+                    operation.hash(&mut hasher);
+                }
+
+                hasher.finalize().to_vec()
+            })
+            .collect::<Vec<_>>();
+
+        trace!(?local_blocks, ?remote_blocks, "Syncing blocks");
+
+        //
 
         Ok(())
     }

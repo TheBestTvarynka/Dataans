@@ -68,7 +68,7 @@ pub async fn full_sync<R: Runtime>(_app: AppHandle<R>, state: State<'_, DataansS
     async_runtime::spawn(async move {
         let result = sync_future(
             db,
-            Url::parse("http://127.0.0.1:8080/").unwrap(),
+            Url::parse("http://127.0.0.1:8000/").unwrap(),
             auth_token,
             encryption_key.into(),
         )

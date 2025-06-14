@@ -29,7 +29,7 @@ impl Client {
     }
 
     pub async fn blocks(&self, items_per_block: usize) -> Result<Vec<Vec<u8>>, SyncError> {
-        let mut blocks_url = self.sync_server.join("block")?;
+        let mut blocks_url = self.sync_server.join("data/block")?;
         blocks_url
             .query_pairs_mut()
             .append_pair("items_per_block", &items_per_block.to_string());
@@ -42,7 +42,7 @@ impl Client {
     }
 
     pub async fn operations(&self, operations_to_skip: usize) -> Result<Vec<Operation>, SyncError> {
-        let mut operations_url = self.sync_server.join("operation")?;
+        let mut operations_url = self.sync_server.join("data/operation")?;
         operations_url
             .query_pairs_mut()
             .append_pair("operations_to_skip", &operations_to_skip.to_string());
@@ -54,7 +54,7 @@ impl Client {
 
     pub async fn add_operations(&self, operations: Vec<Operation>) -> Result<(), SyncError> {
         self.client
-            .post(self.sync_server.join("operation")?)
+            .post(self.sync_server.join("data/operation")?)
             .json(&operations)
             .send()
             .await?

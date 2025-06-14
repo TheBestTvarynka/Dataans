@@ -6,6 +6,8 @@ use sqlx::FromRow;
 use time::OffsetDateTime;
 use uuid::Uuid;
 
+use crate::dataans::sync::{Hasher, Hash};
+
 #[derive(Debug, FromRow, PartialEq, Eq, Serialize, Deserialize, Clone)]
 pub struct Space {
     pub id: Uuid,
@@ -35,6 +37,17 @@ impl Space {
     }
 }
 
+impl Hash for Space {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.id.hash(state);
+        self.name.hash(state);
+        self.avatar_id.hash(state);
+        self.created_at.hash(state);
+        self.updated_at.hash(state);
+        self.is_deleted.hash(state);
+    }
+}
+
 #[derive(Debug, FromRow, PartialEq, Eq, Serialize, Deserialize, Clone)]
 pub struct Note {
     pub id: Uuid,
@@ -43,6 +56,17 @@ pub struct Note {
     pub updated_at: OffsetDateTime,
     pub space_id: Uuid,
     pub is_deleted: bool,
+}
+
+impl Hash for Note {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.id.hash(state);
+        self.text.hash(state);
+        self.created_at.hash(state);
+        self.updated_at.hash(state);
+        self.space_id.hash(state);
+        self.is_deleted.hash(state);
+    }
 }
 
 impl Note {
@@ -64,6 +88,15 @@ pub struct File {
     pub name: String,
     pub path: String,
     pub is_deleted: bool,
+}
+
+impl Hash for File {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.id.hash(state);
+        self.name.hash(state);
+        self.path.hash(state);
+        self.is_deleted.hash(state);
+    }
 }
 
 impl File {
