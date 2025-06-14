@@ -1,6 +1,6 @@
 mod operation;
 
-pub use operation::{Operation, OperationLogger};
+pub use operation::{Operation, OperationLogger, OperationOwned};
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 use time::OffsetDateTime;

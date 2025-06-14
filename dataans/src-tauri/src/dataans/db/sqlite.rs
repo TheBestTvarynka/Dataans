@@ -370,3 +370,19 @@ impl Db for SqliteDb {
         Ok(())
     }
 }
+
+impl OperationDb for SqliteDb {
+    async fn operations(&self) -> Result<Vec<OperationOwned>, DbError> {
+        let mut connection = self.pool.read_only_connection().await?;
+
+        let operations = sqlx::query_as("SELECT id, created_at, name, operation FROM operations")
+            .fetch_all(&mut *connection)
+            .await?;
+
+        Ok(operations)
+    }
+
+    async fn add_operations(&self, operations: &[Operation<'_>]) -> Result<(), DbError> {
+        todo!()
+    }
+}

@@ -38,3 +38,8 @@ pub trait Db: Send + Sync {
     async fn note_files(&self, note_id: Uuid) -> Result<Vec<File>, DbError>;
     async fn set_note_files(&self, note_id: Uuid, files: &[Uuid]) -> Result<(), DbError>;
 }
+
+pub trait OperationDb: Send + Sync {
+    async fn operations(&self) -> Result<Vec<OperationOwned>, DbError>;
+    async fn add_operations(&self, operations: &[Operation<'_>]) -> Result<(), DbError>;
+}

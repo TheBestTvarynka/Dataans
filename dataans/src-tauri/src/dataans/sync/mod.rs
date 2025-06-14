@@ -1,21 +1,23 @@
 #![allow(dead_code)]
 #![allow(unused_imports)]
 
-use std::sync::Arc;
-use std::time::Duration;
+mod client;
 
-use reqwest::header::{HeaderMap, HeaderValue};
-use reqwest::{Client, ClientBuilder};
+use std::sync::Arc;
+
 use thiserror::Error;
 use url::Url;
 use uuid::Uuid;
 use web_api_types::{AuthToken, UserId, AUTH_HEADER_NAME};
 
 use crate::dataans::crypto::{decrypt, encrypt, CryptoError, EncryptionKey};
-use crate::dataans::db::{Db, DbError, Note as NoteModel, Space as SpaceModel};
+use crate::dataans::db::{Db, DbError, Note as NoteModel, OperationDb, Space as SpaceModel};
 use crate::dataans::service::note::NoteServiceError;
 use crate::dataans::service::space::SpaceServiceError;
+use crate::dataans::sync::client::Client;
 use crate::dataans::{NoteService, SpaceService};
+
+const OPERATIONS_PER_BLOCK: usize = 16;
 
 #[derive(Debug, Error)]
 pub enum SyncError {
@@ -44,53 +46,40 @@ pub enum SyncError {
     SpaceService(#[from] SpaceServiceError),
 }
 
-pub async fn sync_future<D: Db>(
-    user_id: UserId,
+pub async fn sync_future<D: Db + OperationDb>(
     db: Arc<D>,
     sync_server: Url,
     auth_token: AuthToken,
     encryption_key: EncryptionKey,
 ) -> Result<(), SyncError> {
-    let _synchronizer = Synchronizer::new(user_id, db, sync_server, auth_token, encryption_key)?;
+    let synchronizer = Synchronizer::new(db, sync_server, auth_token, encryption_key)?;
 
-    // TODO
-
-    Ok(())
+    synchronizer.synchronize().await
 }
 
 struct Synchronizer<D> {
-    user_id: UserId,
     db: Arc<D>,
-    client: Client,
-    sync_server: Url,
     encryption_key: EncryptionKey,
+    client: Client,
 }
 
-impl<D: Db> Synchronizer<D> {
+impl<D: Db + OperationDb> Synchronizer<D> {
     pub fn new(
-        user_id: UserId,
         db: Arc<D>,
         sync_server: Url,
         auth_token: AuthToken,
         encryption_key: EncryptionKey,
     ) -> Result<Self, SyncError> {
-        let client = ClientBuilder::new()
-            .default_headers({
-                let mut headers = HeaderMap::new();
-                headers.insert(AUTH_HEADER_NAME, HeaderValue::from_str(auth_token.as_ref())?);
-                headers
-            })
-            .http2_keep_alive_interval(Some(Duration::from_secs(30)))
-            .http2_keep_alive_timeout(Duration::from_secs(30))
-            .http2_keep_alive_while_idle(true)
-            .build()?;
-
         Ok(Self {
-            user_id,
             db,
-            sync_server,
-            client,
+            client: Client::new(sync_server, auth_token)?,
             encryption_key,
         })
+    }
+
+    async fn synchronize(&self) -> Result<(), SyncError> {
+        let remote_blocks = self.client.blocks(OPERATIONS_PER_BLOCK).await?;
+
+        Ok(())
     }
 }

@@ -7,9 +7,9 @@ pub use data::*;
 use derive_more::{AsRef, From, Into};
 pub use error::*;
 use nutype::nutype;
+use serde::{Deserialize, Serialize};
 use time::serde::rfc3339;
 use time::OffsetDateTime;
-use serde::{Deserialize, Serialize};
 
 #[nutype(
     validate(not_empty),

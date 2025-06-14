@@ -29,6 +29,7 @@
     "dataans:allow-gen-random-avatar",
     "dataans:allow-handle-clipboard-image",
     "dataans:allow-sync",
+    "dataans:allow-full-sync",
     "dataans:allow-profile",
     "dataans:allow-set-sync-options",
     "global-shortcut:default",

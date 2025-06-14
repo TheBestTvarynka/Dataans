@@ -1,7 +1,7 @@
-use derive_more::{Into, From, AsRef};
+use derive_more::{AsRef, From, Into};
 use serde::{Deserialize, Serialize};
 
-use crate::{OperationId, OperationData, OperationChecksumValue, CreationDate};
+use crate::{CreationDate, OperationChecksumValue, OperationData, OperationId};
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -13,7 +13,7 @@ pub struct Operation {
 }
 
 #[derive(Debug, Serialize, Deserialize, AsRef, From, Into)]
-pub struct BlockChecksum(Vec<u8>);
+pub struct BlockChecksum(pub Vec<u8>);
 
 #[derive(Debug, Serialize, Deserialize, AsRef, From, Into)]
-pub struct Blocks(Vec<BlockChecksum>);
+pub struct Blocks(pub Vec<BlockChecksum>);
