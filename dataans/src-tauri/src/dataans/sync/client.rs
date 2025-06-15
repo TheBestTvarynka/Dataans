@@ -2,18 +2,23 @@ use std::time::Duration;
 
 use reqwest::header::{HeaderMap, HeaderValue};
 use reqwest::ClientBuilder;
+use sha2::Sha256;
 use url::Url;
-use web_api_types::{AuthToken, UserId, AUTH_HEADER_NAME, Blocks, Operation};
+use web_api_types::{AuthToken, Blocks, Operation, UserId, AUTH_HEADER_NAME};
 
 use super::SyncError;
+use crate::dataans::crypto::{decrypt, encrypt, EncryptionKey};
+use crate::dataans::db::{OperationRecord, OperationRecordOwned};
+use crate::dataans::sync::hash::Hash;
 
 pub struct Client {
     client: reqwest::Client,
     sync_server: Url,
+    encryption_key: EncryptionKey,
 }
 
 impl Client {
-    pub fn new(sync_server: Url, auth_token: AuthToken) -> Result<Self, SyncError> {
+    pub fn new(sync_server: Url, auth_token: AuthToken, encryption_key: EncryptionKey) -> Result<Self, SyncError> {
         let client = ClientBuilder::new()
             .default_headers({
                 let mut headers = HeaderMap::new();
@@ -25,7 +30,11 @@ impl Client {
             .http2_keep_alive_while_idle(true)
             .build()?;
 
-        Ok(Self { client, sync_server })
+        Ok(Self {
+            client,
+            sync_server,
+            encryption_key,
+        })
     }
 
     pub async fn blocks(&self, items_per_block: usize) -> Result<Vec<Vec<u8>>, SyncError> {
@@ -41,18 +50,44 @@ impl Client {
         Ok(blocks)
     }
 
-    pub async fn operations(&self, operations_to_skip: usize) -> Result<Vec<Operation>, SyncError> {
+    pub async fn operations(&self, operations_to_skip: usize) -> Result<Vec<OperationRecordOwned>, SyncError> {
         let mut operations_url = self.sync_server.join("data/operation")?;
         operations_url
             .query_pairs_mut()
             .append_pair("operations_to_skip", &operations_to_skip.to_string());
 
-        let operations = self.client.get(operations_url).send().await?.json::<Vec<Operation>>().await?;
+        let operations = self
+            .client
+            .get(operations_url)
+            .send()
+            .await?
+            .json::<Vec<Operation>>()
+            .await?;
+
+        let operations = operations
+            .into_iter()
+            .map(|operation| {
+                Result::<OperationRecordOwned, SyncError>::Ok(decrypt(operation.data.as_ref(), &self.encryption_key)?)
+            })
+            .collect::<Result<Vec<_>, _>>()?;
 
         Ok(operations)
     }
 
-    pub async fn add_operations(&self, operations: Vec<Operation>) -> Result<(), SyncError> {
+    pub async fn upload_operations(&self, operations: &[&OperationRecord<'_>]) -> Result<(), SyncError> {
+        let operations = operations
+            .iter()
+            .map(|operation| {
+                let encrypted_data = encrypt(operation, &self.encryption_key)?;
+                Ok(Operation {
+                    id: operation.id.into(),
+                    created_at: operation.created_at.into(),
+                    data: encrypted_data.into(),
+                    checksum: operation.digest::<Sha256>().to_vec().into(),
+                })
+            })
+            .collect::<Result<Vec<_>, SyncError>>()?;
+
         self.client
             .post(self.sync_server.join("data/operation")?)
             .json(&operations)

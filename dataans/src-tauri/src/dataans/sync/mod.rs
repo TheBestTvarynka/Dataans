@@ -4,18 +4,19 @@
 mod client;
 mod hash;
 
-pub use hash::{Hasher, Hash};
-
 use std::sync::Arc;
 
-use sha2::{Sha256, Digest};
+pub use hash::{Hash, Hasher};
+use sha2::{Digest, Sha256};
 use thiserror::Error;
 use url::Url;
 use uuid::Uuid;
 use web_api_types::{AuthToken, UserId, AUTH_HEADER_NAME};
 
 use crate::dataans::crypto::{decrypt, encrypt, CryptoError, EncryptionKey};
-use crate::dataans::db::{Db, DbError, Note as NoteModel, OperationDb, Space as SpaceModel};
+use crate::dataans::db::{
+    Db, DbError, Note as NoteModel, Operation, OperationDb, OperationRecord, OperationRecordOwned, Space as SpaceModel,
+};
 use crate::dataans::service::note::NoteServiceError;
 use crate::dataans::service::space::SpaceServiceError;
 use crate::dataans::sync::client::Client;
@@ -63,7 +64,6 @@ pub async fn sync_future<D: Db + OperationDb>(
 
 struct Synchronizer<D> {
     db: Arc<D>,
-    encryption_key: EncryptionKey,
     client: Client,
 }
 
@@ -76,18 +76,19 @@ impl<D: Db + OperationDb> Synchronizer<D> {
     ) -> Result<Self, SyncError> {
         Ok(Self {
             db,
-            client: Client::new(sync_server, auth_token)?,
-            encryption_key,
+            client: Client::new(sync_server, auth_token, encryption_key)?,
         })
     }
 
     async fn synchronize(&self) -> Result<(), SyncError> {
-        let (local_operations, remote_blocks) = futures::join!(
-            self.db.operations(),
-            self.client.blocks(OPERATIONS_PER_BLOCK),
-        );
+        let (local_operations, remote_blocks) =
+            futures::join!(self.db.operations(), self.client.blocks(OPERATIONS_PER_BLOCK),);
 
-        let local_blocks = local_operations?
+        let mut local_operations = local_operations?;
+        local_operations.sort_by(|a, b| a.created_at.cmp(&b.created_at));
+        let remote_blocks = remote_blocks?;
+
+        let local_blocks = local_operations
             .chunks(OPERATIONS_PER_BLOCK)
             .map(|operations| {
                 let mut hasher = Sha256::new();
@@ -102,7 +103,51 @@ impl<D: Db + OperationDb> Synchronizer<D> {
 
         trace!(?local_blocks, ?remote_blocks, "Syncing blocks");
 
-        //
+        let mut blocks_to_skip = 0;
+
+        while let (Some(local_hash), Some(remote_hash)) =
+            (local_blocks.get(blocks_to_skip), remote_blocks.get(blocks_to_skip))
+        {
+            if local_hash == remote_hash {
+                blocks_to_skip += 1;
+            } else {
+                break;
+            }
+        }
+
+        if local_blocks.len() == remote_blocks.len() && local_blocks.len() == blocks_to_skip {
+            info!("Nothing to sync, all blocks are equal.");
+            return Ok(());
+        }
+
+        let mut local_operations = local_operations[blocks_to_skip * OPERATIONS_PER_BLOCK..].iter();
+        let remote_operations = self.client.operations(blocks_to_skip * OPERATIONS_PER_BLOCK).await?;
+        let mut remote_operations = remote_operations.iter();
+
+        let mut operations_to_upload = Vec::new();
+        let mut operations_to_apply = Vec::new();
+
+        while let (Some(local_operation), Some(remote_operation)) = (local_operations.next(), remote_operations.next())
+        {
+            if local_operation.id != remote_operation.id {
+                operations_to_upload.push(local_operation);
+                operations_to_apply.push(remote_operation);
+
+                break;
+            }
+        }
+
+        while let Some(local_operation) = local_operations.next() {
+            operations_to_upload.push(local_operation);
+        }
+
+        while let Some(remote_operation) = remote_operations.next() {
+            operations_to_apply.push(remote_operation);
+        }
+
+        // let (apply_result, upload_result) =
+        //     futures::join!(self.db.operations(), self.client.upload_operations(&operations_to_upload));
+        let _ = self.client.upload_operations(&operations_to_upload).await?;
 
         Ok(())
     }

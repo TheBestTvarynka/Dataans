@@ -372,17 +372,39 @@ impl Db for SqliteDb {
 }
 
 impl OperationDb for SqliteDb {
-    async fn operations(&self) -> Result<Vec<OperationOwned>, DbError> {
+    async fn operations(&self) -> Result<Vec<OperationRecordOwned>, DbError> {
+        #[derive(sqlx::FromRow)]
+        struct PlainOperationRecord {
+            pub id: Uuid,
+            pub created_at: time::OffsetDateTime,
+            pub name: String,
+            pub operation: String,
+        }
+
         let mut connection = self.pool.read_only_connection().await?;
 
-        let operations = sqlx::query_as("SELECT id, created_at, name, operation FROM operations")
-            .fetch_all(&mut *connection)
-            .await?;
+        let operations: Vec<PlainOperationRecord> =
+            sqlx::query_as("SELECT id, created_at, name, operation FROM operations")
+                .fetch_all(&mut *connection)
+                .await?;
+
+        let operations = operations
+            .into_iter()
+            .map(|op| {
+                let operation: OperationOwned = serde_json::from_str(&op.operation)?;
+
+                Result::<_, DbError>::Ok(OperationRecord {
+                    id: op.id,
+                    created_at: op.created_at,
+                    operation,
+                })
+            })
+            .collect::<Result<Vec<_>, _>>()?;
 
         Ok(operations)
     }
 
-    async fn add_operations(&self, operations: &[Operation<'_>]) -> Result<(), DbError> {
+    async fn add_operations(&self, operations: &[OperationRecord<'_>]) -> Result<(), DbError> {
         todo!()
     }
 }

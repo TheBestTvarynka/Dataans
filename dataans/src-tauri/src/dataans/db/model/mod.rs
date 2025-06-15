@@ -1,19 +1,22 @@
 mod operation;
 
-pub use operation::{Operation, OperationLogger, OperationOwned};
+pub use operation::{Operation, OperationLogger, OperationOwned, OperationRecord, OperationRecordOwned};
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
+use time::serde::rfc3339;
 use time::OffsetDateTime;
 use uuid::Uuid;
 
-use crate::dataans::sync::{Hasher, Hash};
+use crate::dataans::sync::{Hash, Hasher};
 
 #[derive(Debug, FromRow, PartialEq, Eq, Serialize, Deserialize, Clone)]
 pub struct Space {
     pub id: Uuid,
     pub name: String,
     pub avatar_id: Uuid,
+    #[serde(with = "rfc3339")]
     pub created_at: OffsetDateTime,
+    #[serde(with = "rfc3339")]
     pub updated_at: OffsetDateTime,
     pub is_deleted: bool,
 }
@@ -52,7 +55,9 @@ impl Hash for Space {
 pub struct Note {
     pub id: Uuid,
     pub text: String,
+    #[serde(with = "rfc3339")]
     pub created_at: OffsetDateTime,
+    #[serde(with = "rfc3339")]
     pub updated_at: OffsetDateTime,
     pub space_id: Uuid,
     pub is_deleted: bool,

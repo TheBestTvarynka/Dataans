@@ -1,16 +1,18 @@
 use std::borrow::Cow;
 use std::ops::{Deref, DerefMut};
 
+use serde::{Deserialize, Serialize};
 use sqlx::pool::PoolConnection;
 use sqlx::sqlite::SqliteRow;
 use sqlx::{Error as SqlxError, FromRow, Row, Sqlite, SqlitePool, SqliteTransaction};
+use time::serde::rfc3339;
 use time::OffsetDateTime;
 use uuid::Uuid;
 
 use crate::dataans::db::{DbError, File, Note, Space};
-use crate::dataans::sync::{Hasher, Hash};
+use crate::dataans::sync::{Hash, Hasher};
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub enum Operation<'data> {
     CreateNote(Cow<'data, Note>),
     UpdateNote(Cow<'data, Note>),
@@ -130,11 +132,22 @@ impl FromRow<'_, SqliteRow> for OperationOwned {
     }
 }
 
-#[derive(Debug, FromRow, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct OperationRecord<'data> {
     pub id: Uuid,
-    pub timestamp: OffsetDateTime,
+    #[serde(with = "rfc3339")]
+    pub created_at: OffsetDateTime,
     pub operation: Operation<'data>,
+}
+
+pub type OperationRecordOwned = OperationRecord<'static>;
+
+impl Hash for OperationRecord<'_> {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.id.hash(state);
+        self.created_at.hash(state);
+        self.operation.hash(state);
+    }
 }
 
 pub struct OperationLogger {
