@@ -92,6 +92,10 @@ pub struct File {
     pub id: Uuid,
     pub name: String,
     pub path: String,
+    #[serde(with = "rfc3339")]
+    pub created_at: OffsetDateTime,
+    #[serde(with = "rfc3339")]
+    pub updated_at: OffsetDateTime,
     pub is_deleted: bool,
 }
 
@@ -100,16 +104,20 @@ impl Hash for File {
         self.id.hash(state);
         self.name.hash(state);
         self.path.hash(state);
+        self.created_at.hash(state);
+        self.updated_at.hash(state);
         self.is_deleted.hash(state);
     }
 }
 
 impl File {
-    pub fn new(id: Uuid, name: String, path: String) -> Self {
+    pub fn new(id: Uuid, name: String, path: String, created_at: OffsetDateTime, updated_at: OffsetDateTime) -> Self {
         Self {
             id,
             name,
             path,
+            created_at,
+            updated_at,
             is_deleted: false,
         }
     }

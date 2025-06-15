@@ -114,6 +114,8 @@ impl<D: Db> SpaceService<D> {
             id: avatar_id,
             name: _,
             path: avatar_path,
+            created_at: _,
+            updated_at: _,
             is_deleted: _,
         } = db.file_by_id(avatar_id).await?;
 

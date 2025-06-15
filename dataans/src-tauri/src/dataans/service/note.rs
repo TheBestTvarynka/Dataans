@@ -55,6 +55,8 @@ impl<D: Db> NoteService<D> {
                     id,
                     name,
                     path,
+                    created_at: _,
+                    updated_at: _,
                     is_deleted: _,
                 } = file;
                 File {

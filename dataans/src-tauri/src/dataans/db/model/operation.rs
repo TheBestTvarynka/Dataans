@@ -165,6 +165,7 @@ impl OperationLogger {
 
     pub async fn begin<'a>(&self, operation: Operation<'a>) -> Result<OperationLoggerGuard<'a>, DbError> {
         Ok(OperationLoggerGuard {
+            now: OffsetDateTime::now_utc(),
             operation,
             transaction: self.pool.begin().await?,
         })
@@ -172,6 +173,7 @@ impl OperationLogger {
 }
 
 pub struct OperationLoggerGuard<'a> {
+    now: OffsetDateTime,
     operation: Operation<'a>,
     transaction: SqliteTransaction<'a>,
 }
@@ -181,15 +183,20 @@ impl<'a> OperationLoggerGuard<'a> {
         &mut self.transaction
     }
 
+    pub fn now(&self) -> OffsetDateTime {
+        self.now
+    }
+
     pub async fn commit(self) -> Result<(), DbError> {
         let OperationLoggerGuard {
+            now,
             operation,
             mut transaction,
         } = self;
 
         sqlx::query("INSERT INTO operations (id, created_at, name, operation) VALUES (?1, ?2, ?3, ?4)")
             .bind(Uuid::new_v4())
-            .bind(OffsetDateTime::now_utc())
+            .bind(now)
             .bind(operation.name())
             .bind(operation.data()?)
             .execute(&mut *transaction)
