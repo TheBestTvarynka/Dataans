@@ -1,6 +1,6 @@
 use std::borrow::Cow;
 
-use sqlx::{SqlitePool, Transaction};
+use sqlx::{Sqlite, SqliteConnection, SqlitePool, Transaction};
 use time::OffsetDateTime;
 use uuid::Uuid;
 
@@ -24,11 +24,10 @@ impl SqliteDb {
 }
 
 impl SqliteDb {
-    #[instrument(ret, skip(transaction))]
-    async fn remove_note_inner(
+    pub async fn remove_note_inner(
         note_id: Uuid,
         now: OffsetDateTime,
-        transaction: &mut Transaction<'_, sqlx::Sqlite>,
+        transaction: &mut Transaction<'_, Sqlite>,
     ) -> Result<(), DbError> {
         let note_files: Vec<File> = sqlx::query_as(NOTE_FILES)
             .bind(note_id)
@@ -56,6 +55,163 @@ impl SqliteDb {
             "UPDATE notes SET is_deleted = TRUE, updated_at = ?1 WHERE id = ?2",
             now,
             note_id
+        )
+        .execute(&mut **transaction)
+        .await?;
+
+        Ok(())
+    }
+
+    pub async fn space_by_id(space_id: Uuid, connection: &mut SqliteConnection) -> Result<Space, DbError> {
+        let space = sqlx::query_as("SELECT id, name, avatar_id, created_at, updated_at, is_deleted FROM spaces WHERE id = ?1 AND is_deleted = FALSE")
+            .bind(space_id)
+            .fetch_one(&mut *connection)
+            .await?;
+
+        Ok(space)
+    }
+
+    pub async fn add_space(
+        space: &Space,
+        now: OffsetDateTime,
+        transaction: &mut Transaction<'_, sqlx::Sqlite>,
+    ) -> Result<(), DbError> {
+        let Space {
+            id,
+            name,
+            avatar_id,
+            created_at: _,
+            updated_at: _,
+            is_deleted: _,
+        } = space;
+
+        sqlx::query!(
+            "INSERT INTO spaces (id, name, avatar_id, created_at, updated_at) VALUES (?1, ?2, ?3, ?4, ?5)",
+            id,
+            name,
+            avatar_id,
+            now,
+            now,
+        )
+        .execute(&mut **transaction)
+        .await?;
+
+        Ok(())
+    }
+
+    pub async fn update_space(
+        space: &Space,
+        now: OffsetDateTime,
+        transaction: &mut Transaction<'_, Sqlite>,
+    ) -> Result<(), DbError> {
+        let Space {
+            id,
+            name,
+            avatar_id,
+            created_at: _,
+            updated_at: _,
+            is_deleted,
+        } = space;
+
+        sqlx::query!(
+            "UPDATE spaces SET name = ?1, avatar_id = ?2, updated_at = ?3, is_deleted = ?4 WHERE id = ?5",
+            name,
+            avatar_id,
+            now,
+            is_deleted,
+            id,
+        )
+        .execute(&mut **transaction)
+        .await?;
+
+        Ok(())
+    }
+
+    pub async fn note_by_id(note_id: Uuid, connection: &mut SqliteConnection) -> Result<Note, DbError> {
+        let note = sqlx::query_as("SELECT id, text, created_at, updated_at, space_id, is_deleted FROM notes WHERE id = ?1 AND is_deleted = FALSE")
+            .bind(note_id)
+            .fetch_one(&mut *connection)
+            .await?;
+
+        Ok(note)
+    }
+
+    pub async fn add_note(
+        note: &Note,
+        now: OffsetDateTime,
+        transaction: &mut Transaction<'_, Sqlite>,
+    ) -> Result<(), DbError> {
+        let Note {
+            id,
+            text,
+            created_at: _,
+            updated_at: _,
+            space_id,
+            is_deleted: _,
+        } = note;
+
+        sqlx::query!(
+            "INSERT INTO notes (id, text, created_at,  updated_at, space_id) VALUES (?1, ?2, ?3, ?4, ?5)",
+            id,
+            text,
+            now,
+            now,
+            space_id,
+        )
+        .execute(&mut **transaction)
+        .await?;
+
+        Ok(())
+    }
+
+    pub async fn update_note(
+        note: &Note,
+        now: OffsetDateTime,
+        transaction: &mut Transaction<'_, Sqlite>,
+    ) -> Result<(), DbError> {
+        let Note {
+            id,
+            text,
+            created_at: _,
+            updated_at: _,
+            space_id: _,
+            is_deleted,
+        } = note;
+
+        sqlx::query!(
+            "UPDATE notes SET text = ?1, updated_at = ?2, is_deleted = ?3 WHERE id = ?4",
+            text,
+            now,
+            is_deleted,
+            id,
+        )
+        .execute(&mut **transaction)
+        .await?;
+
+        Ok(())
+    }
+
+    pub async fn add_file(
+        file: &File,
+        now: OffsetDateTime,
+        transaction: &mut Transaction<'_, Sqlite>,
+    ) -> Result<(), DbError> {
+        let File {
+            id,
+            name,
+            path,
+            created_at: _,
+            updated_at: _,
+            is_deleted: _,
+        } = file;
+
+        sqlx::query!(
+            "INSERT INTO files (id, name, path, created_at, updated_at) VALUES (?1, ?2, ?3, ?4, ?5)",
+            id,
+            name,
+            path,
+            now,
+            now,
         )
         .execute(&mut **transaction)
         .await?;
@@ -97,27 +253,7 @@ impl Db for SqliteDb {
         let mut transaction = self.pool.begin(Operation::CreateFile(Cow::Borrowed(file))).await?;
         let now = transaction.now();
 
-        let File {
-            id,
-            name,
-            path,
-            created_at: _,
-            updated_at: _,
-            // We explicitly ignore `is_deleted` because it is always TRUE for new files.
-            is_deleted: _,
-        } = file;
-
-        sqlx::query!(
-            "INSERT INTO files (id, name, path, created_at, updated_at) VALUES (?1, ?2, ?3, ?4, ?5)",
-            id,
-            name,
-            path,
-            now,
-            now,
-        )
-        .execute(&mut *transaction)
-        .await?;
-
+        Self::add_file(file, now, transaction.transaction()).await?;
         transaction.commit().await?;
 
         Ok(())
@@ -157,13 +293,7 @@ impl Db for SqliteDb {
     #[instrument(ret, skip(self))]
     async fn space_by_id(&self, space_id: Uuid) -> Result<Space, DbError> {
         let mut connection = self.pool.read_only_connection().await?;
-
-        let space = sqlx::query_as("SELECT id, name, avatar_id, created_at, updated_at, is_deleted FROM spaces WHERE id = ?1 AND is_deleted = FALSE")
-            .bind(space_id)
-            .fetch_one(&mut *connection)
-            .await?;
-
-        Ok(space)
+        SqliteDb::space_by_id(space_id, &mut connection).await
     }
 
     #[instrument(ret, skip(self))]
@@ -171,27 +301,7 @@ impl Db for SqliteDb {
         let mut transaction = self.pool.begin(Operation::CreateSpace(Cow::Borrowed(space))).await?;
         let now = transaction.now();
 
-        let Space {
-            id,
-            name,
-            avatar_id,
-            created_at: _,
-            updated_at: _,
-            // We explicitly ignore `is_deleted` because it is always FALSE for new spaces.
-            is_deleted: _,
-        } = space;
-
-        sqlx::query!(
-            "INSERT INTO spaces (id, name, avatar_id, created_at, updated_at) VALUES (?1, ?2, ?3, ?4, ?5)",
-            id,
-            name,
-            avatar_id,
-            now,
-            now,
-        )
-        .execute(&mut *transaction)
-        .await?;
-
+        SqliteDb::add_space(space, now, transaction.transaction()).await?;
         transaction.commit().await?;
 
         Ok(())
@@ -245,26 +355,7 @@ impl Db for SqliteDb {
         let mut transaction = self.pool.begin(Operation::UpdateSpace(Cow::Borrowed(space))).await?;
         let now = transaction.now();
 
-        let Space {
-            id,
-            name,
-            avatar_id,
-            created_at: _,
-            updated_at: _,
-            // We explicitly ignore `is_deleted` because it must be updated only on deletion.
-            is_deleted: _,
-        } = space;
-
-        sqlx::query!(
-            "UPDATE spaces SET name = ?1, avatar_id = ?2, updated_at = ?3 WHERE id = ?4",
-            name,
-            avatar_id,
-            now,
-            id,
-        )
-        .execute(&mut *transaction)
-        .await?;
-
+        SqliteDb::update_space(space, now, transaction.transaction()).await?;
         transaction.commit().await?;
 
         Ok(())
@@ -299,12 +390,7 @@ impl Db for SqliteDb {
     async fn note_by_id(&self, note_id: Uuid) -> Result<Note, DbError> {
         let mut connection = self.pool.read_only_connection().await?;
 
-        let note = sqlx::query_as("SELECT id, text, created_at, updated_at, space_id, is_deleted FROM notes WHERE id = ?1 AND is_deleted = FALSE")
-            .bind(note_id)
-            .fetch_one(&mut *connection)
-            .await?;
-
-        Ok(note)
+        SqliteDb::note_by_id(note_id, &mut connection).await
     }
 
     #[instrument(ret, skip(self))]
@@ -312,27 +398,7 @@ impl Db for SqliteDb {
         let mut transaction = self.pool.begin(Operation::CreateNote(Cow::Borrowed(note))).await?;
         let now = transaction.now();
 
-        let Note {
-            id,
-            text,
-            created_at: _,
-            updated_at: _,
-            space_id,
-            // We explicitly ignore `is_deleted` because it is always FALSE for new notes.
-            is_deleted: _,
-        } = note;
-
-        sqlx::query!(
-            "INSERT INTO notes (id, text, created_at,  updated_at, space_id) VALUES (?1, ?2, ?3, ?4, ?5)",
-            id,
-            text,
-            now,
-            now,
-            space_id,
-        )
-        .execute(&mut *transaction)
-        .await?;
-
+        SqliteDb::add_note(note, now, transaction.transaction()).await?;
         transaction.commit().await?;
 
         Ok(())
@@ -354,25 +420,7 @@ impl Db for SqliteDb {
         let mut transaction = self.pool.begin(Operation::UpdateNote(Cow::Borrowed(note))).await?;
         let now = transaction.now();
 
-        let Note {
-            id,
-            text,
-            created_at: _,
-            updated_at: _,
-            space_id: _,
-            // We explicitly ignore `is_deleted` because it must be updated only on deletion.
-            is_deleted: _,
-        } = note;
-
-        sqlx::query!(
-            "UPDATE notes SET text = ?1, updated_at = ?2 WHERE id = ?3",
-            text,
-            now,
-            id,
-        )
-        .execute(&mut *transaction)
-        .await?;
-
+        SqliteDb::update_note(note, now, transaction.transaction()).await?;
         transaction.commit().await?;
 
         Ok(())
@@ -449,7 +497,11 @@ impl OperationDb for SqliteDb {
         Ok(operations)
     }
 
-    async fn add_operations(&self, operations: &[OperationRecord<'_>]) -> Result<(), DbError> {
-        todo!()
+    async fn apply_operations(&self, operations: &[&OperationRecord<'_>]) -> Result<(), DbError> {
+        for operation in operations {
+            //
+        }
+
+        Ok(())
     }
 }

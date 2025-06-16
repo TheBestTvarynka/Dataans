@@ -49,6 +49,9 @@ pub enum SyncError {
 
     #[error(transparent)]
     SpaceService(#[from] SpaceServiceError),
+
+    #[error("sync failed: {0}")]
+    SyncFailed(&'static str),
 }
 
 pub async fn sync_future<D: Db + OperationDb>(
@@ -145,10 +148,38 @@ impl<D: Db + OperationDb> Synchronizer<D> {
             operations_to_apply.push(remote_operation);
         }
 
-        // let (apply_result, upload_result) =
-        //     futures::join!(self.db.operations(), self.client.upload_operations(&operations_to_upload));
-        let _ = self.client.upload_operations(&operations_to_upload).await?;
+        let result = futures::join!(
+            self.db.apply_operations(&operations_to_apply),
+            self.client.upload_operations(&operations_to_upload)
+        );
 
-        Ok(())
+        match result {
+            (Ok(_), Ok(_)) => {
+                info!("Synchronization successful.");
+
+                Ok(())
+            }
+            (Err(apply_err), Err(upload_err)) => {
+                error!(
+                    ?apply_err,
+                    ?upload_err,
+                    "Failed to apply remote operations and upload local operations"
+                );
+
+                Err(SyncError::SyncFailed(
+                    "failed to apply remote operations and upload local operations",
+                ))
+            }
+            (Err(err), _) => {
+                error!(?err, "Failed to apply remote operations");
+
+                Err(SyncError::SyncFailed("failed to apply remote operations"))
+            }
+            (_, Err(err)) => {
+                error!(?err, "Failed to upload remote operations");
+
+                Err(SyncError::SyncFailed("failed to upload remote operations"))
+            }
+        }
     }
 }

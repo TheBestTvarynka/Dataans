@@ -4,11 +4,12 @@ use std::ops::{Deref, DerefMut};
 use serde::{Deserialize, Serialize};
 use sqlx::pool::PoolConnection;
 use sqlx::sqlite::SqliteRow;
-use sqlx::{Error as SqlxError, FromRow, Row, Sqlite, SqlitePool, SqliteTransaction};
+use sqlx::{Error as SqlxError, FromRow, Row, Sqlite, SqlitePool, SqliteTransaction, Transaction};
 use time::serde::rfc3339;
 use time::OffsetDateTime;
 use uuid::Uuid;
 
+use crate::dataans::db::sqlite::SqliteDb;
 use crate::dataans::db::{DbError, File, Note, Space};
 use crate::dataans::sync::{Hash, Hasher};
 
@@ -54,6 +55,57 @@ impl Operation<'_> {
             Operation::DeleteSpace(id) => serde_json::to_string(id)?,
             Operation::SetNoteFiles(note_id, files) => serde_json::to_string(&(note_id, files.as_ref()))?,
         })
+    }
+
+    pub async fn apply(
+        &self,
+        operation_time: OffsetDateTime,
+        now: OffsetDateTime,
+        transaction: &mut Transaction<'_, sqlx::Sqlite>,
+    ) -> Result<(), DbError> {
+        match self {
+            Operation::CreateNote(note) => {
+                SqliteDb::add_note(note.as_ref(), now, transaction).await?;
+            }
+            Operation::UpdateNote(note) => {
+                let local_note = SqliteDb::note_by_id(note.id, transaction.as_mut()).await?;
+
+                if local_note.updated_at < operation_time {
+                    SqliteDb::update_note(note.as_ref(), now, transaction).await?;
+                }
+            }
+            Operation::DeleteNote(id) => {
+                let local_note = SqliteDb::note_by_id(*id, transaction.as_mut()).await?;
+
+                if local_note.updated_at < operation_time {
+                    SqliteDb::remove_note_inner(*id, now, transaction).await?;
+                }
+            }
+            Operation::CreateFile(file) => {
+                SqliteDb::add_file(file.as_ref(), now, transaction).await?;
+            }
+            Operation::DeleteFile(id) => {
+                todo!()
+            }
+            Operation::CreateSpace(space) => {
+                SqliteDb::add_space(space.as_ref(), now, transaction).await?;
+            }
+            Operation::UpdateSpace(space) => {
+                let local_space = SqliteDb::space_by_id(space.id, transaction.as_mut()).await?;
+
+                if local_space.updated_at < operation_time {
+                    SqliteDb::update_space(space.as_ref(), now, transaction).await?;
+                }
+            }
+            Operation::DeleteSpace(id) => {
+                todo!()
+            }
+            Operation::SetNoteFiles(note_id, files) => {
+                todo!()
+            }
+        }
+
+        Ok(())
     }
 }
 
