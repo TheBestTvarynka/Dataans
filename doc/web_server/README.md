@@ -237,7 +237,6 @@ The server stores hash blocks only for notes, not for spaces. The user will most
 This document implies the following possible synchronization options:
 
 * **_Manual sync_**. The user manually synchronize the data between client and server by pressing the sync button.
-* **_Poll sync_**. The client app will periodically sync the data.
 * **_Push sync_**. The client keeps the socket connection open and the server will automatically send updates to the client device.
 
 # Questions

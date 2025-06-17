@@ -1,8 +1,7 @@
-use common::note::{DraftNote, File, Note};
+use common::note::{CreateNote, DraftNote, File, Note};
 use common::space::Id as SpaceId;
 use gloo_storage::{LocalStorage, Storage};
 use leptos::*;
-use time::OffsetDateTime;
 use uuid::Uuid;
 use web_sys::KeyboardEvent;
 
@@ -40,14 +39,13 @@ pub fn Editor(space_id: SpaceId, #[prop(into)] create_note: Callback<Note<'stati
         set_draft_note(DraftNote::default());
 
         spawn_local(async move {
-            let new_note = Note {
+            let new_note = CreateNote {
                 id: Uuid::new_v4().into(),
                 text: note_text.as_ref().trim().to_string().into(),
-                created_at: OffsetDateTime::now_utc().into(),
                 space_id,
                 files,
             };
-            crate::backend::notes::create_note(new_note.clone())
+            let new_note = crate::backend::notes::create_note(new_note.clone())
                 .await
                 .expect("Note creating should not fail.");
             create_note.call(new_note);

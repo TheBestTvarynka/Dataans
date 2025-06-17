@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 use crate::space::{Id as SpaceId, Space};
-use crate::CreationDate;
+use crate::{CreationDate, UpdateDate};
 
 /// Represent a note ID.
 #[derive(Serialize, Deserialize, Debug, Default, Copy, Clone, Eq, PartialEq)]
@@ -22,6 +22,12 @@ impl Id {
 impl From<Uuid> for Id {
     fn from(value: Uuid) -> Self {
         Self(value)
+    }
+}
+
+impl From<Id> for Uuid {
+    fn from(value: Id) -> Self {
+        value.0
     }
 }
 
@@ -88,6 +94,8 @@ pub struct Note<'text> {
     pub text: MdText<'text>,
     /// Creation date.
     pub created_at: CreationDate,
+    /// Update date.
+    pub updated_at: UpdateDate,
     /// Space ID this note belongs.
     pub space_id: SpaceId,
     /// Attached files.
@@ -115,6 +123,8 @@ pub struct NoteFull<'text, 'space_name, 'space_avatar> {
     pub text: MdText<'text>,
     /// Creation date.
     pub created_at: CreationDate,
+    /// Update date.
+    pub updated_at: UpdateDate,
     /// Space ID this note belongs.
     pub space: Space<'space_name, 'space_avatar>,
     /// Attached files.
@@ -123,6 +133,22 @@ pub struct NoteFull<'text, 'space_name, 'space_avatar> {
 
 /// Owned version of the [NoteFull] type.
 pub type NoteFullOwned = NoteFull<'static, 'static, 'static>;
+
+/// Represent one note.
+#[derive(Serialize, Deserialize, Debug, Clone, Eq, PartialEq)]
+pub struct CreateNote<'text> {
+    /// Note id.
+    pub id: Id,
+    /// Note data in MD format.
+    pub text: MdText<'text>,
+    /// Space ID this note belongs.
+    pub space_id: SpaceId,
+    /// Attached files.
+    pub files: Vec<File>,
+}
+
+/// Owned version of [CreateNote].
+pub type CreateNoteOwned = CreateNote<'static>;
 
 /// Represent note to update.
 #[derive(Serialize, Deserialize, Debug, Clone, Eq, PartialEq)]

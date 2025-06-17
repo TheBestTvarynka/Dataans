@@ -10,7 +10,6 @@ pub type EncryptionKey = [u8; SERVER_ENCRYPTION_KEY_SIZE];
 
 const NONCE_LENGTH: usize = 12;
 const HMAC_SHA256_CHECKSUM_LENGTH: usize = 32;
-pub const EMPTY_SHA256_CHECKSUM: &[u8] = &[0; 32];
 pub const SERVER_ENCRYPTION_KEY_SIZE: usize = 32;
 
 use crate::{Error, Result};
@@ -82,9 +81,10 @@ pub fn decrypt(data: &[u8], key: &EncryptionKey) -> Result<Vec<u8>> {
         return Err(Error::DecryptionFailed("invalid data length"));
     }
 
-    let nonce = Nonce::from_slice(&data[..12]);
-    let cipher_text = &data[12..data.len() - 32];
-    let checksum = &data[data.len() - 32..];
+    let (nonce, data) = data.split_at(NONCE_LENGTH);
+    let (cipher_text, checksum) = data.split_at(data.len() - HMAC_SHA256_CHECKSUM_LENGTH);
+
+    let nonce = Nonce::from_slice(nonce);
 
     // Decryption
     let key = Key::<Aes256Gcm>::from_slice(key);

@@ -4,22 +4,24 @@ pub mod sqlite;
 use thiserror::Error;
 use uuid::Uuid;
 
-use self::model::*;
+pub use self::model::*;
 
 #[derive(Error, Debug)]
 pub enum DbError {
     #[error("sqlx error: {0:?}")]
     SqlxError(#[from] sqlx::Error),
+
+    #[error("json error: {0}")]
+    Json(#[from] serde_json::Error),
 }
 
+// TODO: split into separate traits (see the `web-server` crate).
 pub trait Db: Send + Sync {
     #[allow(dead_code)]
     async fn files(&self) -> Result<Vec<File>, DbError>;
     async fn file_by_id(&self, file_id: Uuid) -> Result<File, DbError>;
     async fn add_file(&self, file: &File) -> Result<(), DbError>;
     async fn remove_file(&self, file_id: Uuid) -> Result<(), DbError>;
-    #[allow(dead_code)]
-    async fn update_file(&self, file: &File) -> Result<(), DbError>;
 
     async fn spaces(&self) -> Result<Vec<Space>, DbError>;
     async fn space_by_id(&self, space_id: Uuid) -> Result<Space, DbError>;
@@ -35,4 +37,9 @@ pub trait Db: Send + Sync {
     async fn update_note(&self, note: &Note) -> Result<(), DbError>;
     async fn note_files(&self, note_id: Uuid) -> Result<Vec<File>, DbError>;
     async fn set_note_files(&self, note_id: Uuid, files: &[Uuid]) -> Result<(), DbError>;
+}
+
+pub trait OperationDb: Send + Sync {
+    async fn operations(&self) -> Result<Vec<OperationRecordOwned>, DbError>;
+    async fn apply_operations(&self, operations: &[&OperationRecord<'_>]) -> Result<(), DbError>;
 }

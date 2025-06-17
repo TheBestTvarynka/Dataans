@@ -25,39 +25,9 @@ pub struct Session {
 }
 
 #[derive(Debug, FromRow, Serialize, Deserialize)]
-pub struct Space {
+pub struct Operation {
     pub id: Uuid,
+    pub created_at: OffsetDateTime,
     pub data: Vec<u8>,
     pub checksum: Vec<u8>,
-    pub user_id: Uuid,
-}
-
-#[derive(Debug, FromRow, Serialize, Deserialize)]
-pub struct SyncBlock {
-    pub id: Uuid,
-    pub number: i32,
-    pub checksum: Vec<u8>,
-    pub space_id: Uuid,
-}
-
-#[derive(Debug, FromRow, Serialize, Deserialize)]
-pub struct Note {
-    pub id: Uuid,
-    pub data: Vec<u8>,
-    pub checksum: Vec<u8>,
-    pub space_id: Uuid,
-    pub block_id: Uuid,
-}
-
-#[derive(Debug, FromRow, Serialize, Deserialize)]
-pub struct NoteChecksum {
-    pub id: Uuid,
-    pub checksum: Vec<u8>,
-}
-
-#[derive(Debug, FromRow, Serialize, Deserialize)]
-pub struct File {
-    pub id: Uuid,
-    pub data: Vec<u8>,
-    pub note_id: Uuid,
 }

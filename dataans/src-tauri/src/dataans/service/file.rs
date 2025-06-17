@@ -5,6 +5,7 @@ use std::sync::Arc;
 use arboard::Clipboard;
 use common::note::File;
 use image::{ImageBuffer, Rgba};
+use time::OffsetDateTime;
 use uuid::Uuid;
 
 use crate::dataans::db::model::File as FileModel;
@@ -26,12 +27,15 @@ impl<D: Db> FileService<D> {
             if let sqlx::Error::RowNotFound = err {
                 warn!(?err);
 
+                let now = OffsetDateTime::now_utc();
                 self.db
-                    .add_file(&FileModel {
-                        id: common::DEFAULT_SPACE_AVATAR_ID,
-                        name: "default_space_avatar.png".into(),
-                        path: common::DEFAULT_SPACE_AVATAR_PATH.into(),
-                    })
+                    .add_file(&FileModel::new(
+                        common::DEFAULT_SPACE_AVATAR_ID,
+                        "default_space_avatar.png".into(),
+                        common::DEFAULT_SPACE_AVATAR_PATH.into(),
+                        now,
+                        now,
+                    ))
                     .await?;
 
                 Ok(())
@@ -56,15 +60,18 @@ impl<D: Db> FileService<D> {
 
         fs::write(&file_path, data)?;
 
+        let now = OffsetDateTime::now_utc();
         self.db
-            .add_file(&FileModel {
+            .add_file(&FileModel::new(
                 id,
-                name: name.clone(),
-                path: file_path
+                name.clone(),
+                file_path
                     .to_str()
                     .ok_or_else(|| DataansError::PathIsNotUtf8(file_path.clone()))?
                     .to_owned(),
-            })
+                now,
+                now,
+            ))
             .await?;
 
         Ok(File {
@@ -97,15 +104,18 @@ impl<D: Db> FileService<D> {
             .map_err(|err| DataansError::ImageGeneration(err.to_string()))?;
         info!("Avatar image path: {:?}", avatar_path);
 
+        let now = OffsetDateTime::now_utc();
         self.db
-            .add_file(&FileModel {
-                id: avatar_id,
-                name: avatar_name.clone(),
-                path: avatar_path
+            .add_file(&FileModel::new(
+                avatar_id,
+                avatar_name.clone(),
+                avatar_path
                     .to_str()
                     .ok_or_else(|| DataansError::PathIsNotUtf8(avatar_path.clone()))?
                     .to_owned(),
-            })
+                now,
+                now,
+            ))
             .await?;
 
         Ok(File {
@@ -132,15 +142,18 @@ impl<D: Db> FileService<D> {
         .ok_or_else(|| DataansError::ImageFromRaw)?;
         img.save(&image_path)?;
 
+        let now = OffsetDateTime::now_utc();
         self.db
-            .add_file(&FileModel {
+            .add_file(&FileModel::new(
                 id,
-                name: name.clone(),
-                path: image_path
+                name.clone(),
+                image_path
                     .to_str()
                     .ok_or_else(|| DataansError::PathIsNotUtf8(image_path.clone()))?
                     .to_owned(),
-            })
+                now,
+                now,
+            ))
             .await?;
 
         Ok(File {

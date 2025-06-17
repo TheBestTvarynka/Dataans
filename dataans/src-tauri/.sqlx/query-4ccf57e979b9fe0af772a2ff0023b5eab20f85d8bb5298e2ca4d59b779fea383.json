@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE spaces SET name = ?1, avatar_id = ?2, is_synced = ?3 WHERE id = ?4",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 4
+    },
+    "nullable": []
+  },
+  "hash": "4ccf57e979b9fe0af772a2ff0023b5eab20f85d8bb5298e2ca4d59b779fea383"
+}

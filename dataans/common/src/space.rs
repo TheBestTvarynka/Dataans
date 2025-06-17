@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 use crate::note::File;
-use crate::CreationDate;
+use crate::{CreationDate, UpdateDate};
 
 /// Represent a space ID.
 #[derive(Serialize, Deserialize, Debug, Default, Copy, Clone, Eq, PartialEq, Hash)]
@@ -27,6 +27,12 @@ impl AsRef<Uuid> for Id {
 impl From<Uuid> for Id {
     fn from(value: Uuid) -> Self {
         Self(value)
+    }
+}
+
+impl From<Id> for Uuid {
+    fn from(value: Id) -> Self {
+        value.0
     }
 }
 
@@ -114,12 +120,28 @@ pub struct Space<'name, 'avatar> {
     pub name: Name<'name>,
     /// Creation date.
     pub created_at: CreationDate,
+    /// Update date.
+    pub updated_at: UpdateDate,
     /// Avatar image name.
     pub avatar: Avatar<'avatar>,
 }
 
 /// Owned version of [Space].
 pub type OwnedSpace = Space<'static, 'static>;
+
+/// Data that the app need to create the space.
+#[derive(Serialize, Deserialize, Debug, Clone, Eq, PartialEq)]
+pub struct CreateSpace<'name, 'avatar> {
+    /// Space ID.
+    pub id: Id,
+    /// Space name.
+    pub name: Name<'name>,
+    /// Avatar image name.
+    pub avatar: Avatar<'avatar>,
+}
+
+/// Owned version of [CreateSpace];
+pub type CreateSpaceOwned = CreateSpace<'static, 'static>;
 
 /// Data that the app need to update the space.
 #[derive(Serialize, Deserialize, Debug, Clone)]

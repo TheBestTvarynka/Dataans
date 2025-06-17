@@ -1,57 +1,20 @@
 use rocket::serde::json::Json;
-use rocket::{delete, post, put, State};
-use web_api_types::{Note, NoteId, NoteIds, Result, Space, SpaceId};
+use rocket::{get, post, State};
+use web_api_types::{Blocks, Operation, Result};
 
-use crate::routes::UserContext;
 use crate::WebServerState;
 
-#[post("/space", data = "<data>")]
-pub async fn add_space(server: &State<WebServerState>, user_context: UserContext, data: Json<Space>) -> Result<()> {
-    Ok(server
-        .data_service
-        .add_space(data.into_inner(), user_context.user_id)
-        .await?)
+#[get("/block?<items_per_block>")]
+pub async fn blocks(server: &State<WebServerState>, items_per_block: usize) -> Result<Json<Blocks>> {
+    Ok(Json(server.data_service.blocks(items_per_block).await?))
 }
 
-#[put("/space", data = "<data>")]
-pub async fn update_space(server: &State<WebServerState>, user_context: UserContext, data: Json<Space>) -> Result<()> {
-    Ok(server
-        .data_service
-        .update_space(data.into_inner(), user_context.user_id)
-        .await?)
+#[get("/operation?<operations_to_skip>")]
+pub async fn operations(server: &State<WebServerState>, operations_to_skip: usize) -> Result<Json<Vec<Operation>>> {
+    Ok(Json(server.data_service.operations(operations_to_skip).await?))
 }
 
-#[delete("/space/<space_id>")]
-pub async fn remove_space(server: &State<WebServerState>, user_context: UserContext, space_id: SpaceId) -> Result<()> {
-    Ok(server.data_service.remove_space(space_id, user_context.user_id).await?)
-}
-
-#[post("/note", data = "<data>")]
-pub async fn add_note(server: &State<WebServerState>, user_context: UserContext, data: Json<Note>) -> Result<()> {
-    Ok(server
-        .data_service
-        .add_note(data.into_inner(), user_context.user_id)
-        .await?)
-}
-
-#[put("/note", data = "<data>")]
-pub async fn update_note(server: &State<WebServerState>, user_context: UserContext, data: Json<Note>) -> Result<()> {
-    Ok(server
-        .data_service
-        .update_note(data.into_inner(), user_context.user_id)
-        .await?)
-}
-
-#[delete("/note/<note_id>")]
-pub async fn remove_note(server: &State<WebServerState>, user_context: UserContext, note_id: NoteId) -> Result<()> {
-    Ok(server.data_service.remove_note(note_id, user_context.user_id).await?)
-}
-
-#[post("/notes", data = "<data>")]
-pub async fn notes(
-    server: &State<WebServerState>,
-    user_context: UserContext,
-    data: Json<NoteIds>,
-) -> Result<Json<Vec<Note>>> {
-    Ok(Json(server.data_service.notes(&data.ids, user_context.user_id).await?))
+#[post("/operation", data = "<data>")]
+pub async fn add_operations(server: &State<WebServerState>, data: Json<Vec<Operation>>) -> Result<()> {
+    Ok(server.data_service.add_operations(data.into_inner()).await?)
 }

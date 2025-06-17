@@ -20,6 +20,9 @@ web-api-types.workspace = true
 hex.workspace = true
 futures.workspace = true
 url.workspace = true
+aes-gcm.workspace = true
+hmac.workspace = true
+sha2.workspace = true
 
 tauri = { version = "2", features = [
     "protocol-asset", "tray-icon",
@@ -44,7 +47,7 @@ syntect = { version = "5.2", default-features = false, features = [
     "metadata",
 ] }
 serde_json = "1"
-reqwest = { version = "0.12", features = ["json"] }
+reqwest = { version = "0.12", features = ["json", "rustls-tls", "http2"] }
 rand = { version = "0.8", features = ["getrandom"] }
 
 [features]

@@ -1,6 +1,5 @@
 use common::profile::{Sync, SyncMode, UserContext};
 use leptos::*;
-use time::Duration;
 use wasm_bindgen::JsCast;
 use web_sys::HtmlInputElement;
 
@@ -70,7 +69,6 @@ pub fn SyncSettings(context: UserContext) -> impl IntoView {
                     let mode: HtmlInputElement = ev.target().unwrap().unchecked_into();
                     let mode = match mode.value().as_str() {
                         "manual" => SyncMode::Manual,
-                        "poll" => SyncMode::Poll { period: Duration::minutes(10) },
                         "push" => SyncMode::Push,
                         _ => unreachable!(),
                     };
@@ -97,46 +95,6 @@ pub fn SyncSettings(context: UserContext) -> impl IntoView {
                                 <b>"Manual."</b>
                                 <span>"You control when the sync happens. The data is being synchronized only when you press the button to sync it."</span>
                             </label>
-                        </div>
-                        <div class="vertical">
-                            <div class="horizontal">
-                                <input type="radio" id="poll" name="sync-move" value="poll" on:change=move |ev| on_change.call(ev) checked=matches!(mode, SyncMode::Poll { .. }) />
-                                <label for="poll" class="app-info-sync-mode">
-                                    <b>"Poll."</b>
-                                    <span>"The app syncs the data periodically. You can set a period."</span>
-                                </label>
-                            </div>
-                            {if let SyncMode::Poll { period, .. } = mode {
-                                let period_input: NodeRef<html::Input> = NodeRef::new();
-                                let url = sync_config.get_web_server_url();
-
-                                let handle_period = move |_| {
-                                    let minutes = period_input.get().expect("<input> should be mounted").value().parse::<i64>().expect("valid integer");
-
-                                    let sync_config = Sync::Enabled {
-                                        url: url.clone(),
-                                        mode: SyncMode::Poll {
-                                            period: Duration::minutes(minutes),
-                                        },
-                                    };
-                                    let t = toaster.clone();
-                                    spawn_local(async move {
-                                        try_exec!(
-                                            crate::backend::sync::set_sync_options(&sync_config).await,
-                                            "Failed to set sync options",
-                                            t
-                                        );
-                                    });
-                                };
-
-                                view! {
-                                    <div class="horizontal">
-                                        <span style="margin-left: 1.2em;">"Sync data every"</span>
-                                        <input type="number" class="small-input" value=period.whole_minutes() on:change=handle_period min="1" max="1440" node_ref=period_input />
-                                        <span>"minutes."</span>
-                                    </div>
-                                }
-                            } else { view! { <div /> }}}
                         </div>
                         <div class="horizontal">
                             <input type="radio" id="push" name="sync-move" value="push" on:change=move |ev| on_change.call(ev) checked=mode == SyncMode::Push />
