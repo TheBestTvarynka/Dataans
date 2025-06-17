@@ -1,4 +1,4 @@
-use common::note::{File, Id as NoteId, Note as NoteData, UpdateNote};
+use common::note::{File, Id as NoteId, Note as NoteData, OwnedNote, UpdateNote};
 use leptos::web_sys::KeyboardEvent;
 use leptos::*;
 use markdown::mdast::{Node, Text};
@@ -12,7 +12,7 @@ use crate::notes::md_node::render_md_node;
 pub fn Note(
     note: NoteData<'static>,
     delete_note: SignalSetter<NoteId>,
-    update_note: SignalSetter<UpdateNote<'static>>,
+    update_note: SignalSetter<OwnedNote>,
 ) -> impl IntoView {
     let (show_modal, set_show_modal) = create_signal(false);
     let (edit_mode, set_edit_mode) = create_signal(false);
@@ -46,7 +46,7 @@ pub fn Note(
                 text: text.into(),
                 files,
             };
-            crate::backend::notes::update_note(new_note.clone())
+            let new_note = crate::backend::notes::update_note(new_note.clone())
                 .await
                 .expect("note updating should not fail");
             update_note.set(new_note);
@@ -68,7 +68,15 @@ pub fn Note(
         >
             <div class="note-meta">
                 <div class="center-span">
-                    <span class="note-time">{format_date(note.created_at.as_ref())}</span>
+                    {if note.created_at.as_ref() == note.updated_at.as_ref() { view! {
+                        <span class="note-time">{format_date(note.created_at.as_ref())}</span>
+                        <span />
+                    }} else { view! {
+                        <span class="note-time" style="white-space: pre-wrap;">" UPD: "</span>
+                        <span class="note-time" title=format!("Created at: {}", format_date(note.created_at.as_ref()))>
+                            {format_date(note.updated_at.as_ref())}
+                        </span>
+                    }}}
                 </div>
                 <div class="note-tools">
                     <button

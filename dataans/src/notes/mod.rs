@@ -4,7 +4,7 @@ pub mod md_node;
 mod note;
 pub mod note_preview;
 
-use common::note::UpdateNote;
+use common::note::OwnedNote;
 use common::space::{OwnedSpace, Space as SpaceData};
 use common::Config;
 use leptos::*;
@@ -104,10 +104,9 @@ pub fn Notes() -> impl IntoView {
     let (_, update_note) = create_slice(
         global_state,
         |_state| (),
-        |state, new_note: UpdateNote<'static>| {
+        |state, new_note: OwnedNote| {
             if let Some(note) = state.notes.iter_mut().find(|note| note.id == new_note.id) {
-                note.text = new_note.text;
-                note.files = new_note.files;
+                *note = new_note
             }
         },
     );

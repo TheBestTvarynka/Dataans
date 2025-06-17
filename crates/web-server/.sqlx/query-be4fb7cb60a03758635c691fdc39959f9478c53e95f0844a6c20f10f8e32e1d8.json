@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "update sync_block set checksum = $1 where id = $2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Bytea",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "be4fb7cb60a03758635c691fdc39959f9478c53e95f0844a6c20f10f8e32e1d8"
+}

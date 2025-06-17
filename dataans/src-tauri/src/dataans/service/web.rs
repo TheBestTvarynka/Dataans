@@ -32,6 +32,10 @@ impl WebService {
         })
     }
 
+    pub fn user_profile(&self) -> Option<UserProfile> {
+        self.user_profile.lock().unwrap().clone()
+    }
+
     pub async fn sign_up(
         &self,
         invitation_token: InvitationToken,
@@ -101,7 +105,7 @@ impl WebService {
                     fs::read(&secret_key_file_path)
                         .map_err(|err| DataansError::SecretKeyFile(secret_key_file_path, err))?,
                 )
-                .map_err(|err| DataansError::ParseSecretKey(err))?,
+                .map_err(DataansError::ParseSecretKey)?,
             )
         };
 

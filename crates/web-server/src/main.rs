@@ -15,7 +15,7 @@ use rocket::routes;
 use sqlx::postgres::PgPoolOptions;
 
 use crate::db::PostgresDb;
-use crate::services::{Auth as AuthService, Data as DataService, Sync as SyncService};
+use crate::services::{Auth as AuthService, Data as DataService};
 
 const DATABASE_URL: &str = "DATAANS_WEB_SERVER_DATABASE_URL";
 const DATAANS_SERVER_ENCRYPTION_KEY: &str = "DATAANS_SERVER_ENCRYPTION_KEY";
@@ -23,7 +23,6 @@ const DATAANS_SERVER_ENCRYPTION_KEY: &str = "DATAANS_SERVER_ENCRYPTION_KEY";
 pub struct State<D> {
     pub auth_service: AuthService<D>,
     pub data_service: DataService<D>,
-    pub sync_service: SyncService<D>,
 }
 
 pub type WebServerState = State<PostgresDb>;
@@ -49,8 +48,13 @@ impl WebServerState {
         Self {
             auth_service: AuthService::new(Arc::clone(&db), server_encryption_key),
             data_service: DataService::new(Arc::clone(&db)),
-            sync_service: SyncService::new(db),
         }
+    }
+}
+
+impl Default for WebServerState {
+    fn default() -> Self {
+        Self::new()
     }
 }
 
@@ -63,17 +67,8 @@ async fn main() -> std::result::Result<(), rocket::Error> {
         .mount("/auth", routes![routes::sign_up, routes::sign_in])
         .mount(
             "/data",
-            routes![
-                routes::add_space,
-                routes::update_space,
-                routes::add_note,
-                routes::update_note,
-                routes::remove_space,
-                routes::remove_note,
-                routes::notes,
-            ],
+            routes![routes::blocks, routes::operations, routes::add_operations,],
         )
-        .mount("/sync", routes![routes::blocks, routes::blocks_notes])
         .mount("/health", routes![routes::health])
         .launch()
         .await?;

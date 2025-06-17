@@ -18,6 +18,7 @@ use std::collections::HashMap;
 use std::fmt;
 use std::path::PathBuf;
 
+use derive_more::{AsRef, From, Into};
 use serde::{Deserialize, Serialize};
 use time::OffsetDateTime;
 use uuid::{uuid, Uuid};
@@ -188,27 +189,13 @@ pub struct Config {
     pub app: App,
 }
 
-/// Date and time when note was created.
-#[derive(Serialize, Deserialize, Debug, Clone, Eq, PartialEq)]
+/// Date and time when the item was created.
+#[derive(Serialize, Deserialize, Debug, Clone, Eq, PartialEq, From, Into, AsRef)]
 pub struct CreationDate(OffsetDateTime);
 
-impl From<OffsetDateTime> for CreationDate {
-    fn from(value: OffsetDateTime) -> Self {
-        Self(value)
-    }
-}
-
-impl From<CreationDate> for OffsetDateTime {
-    fn from(value: CreationDate) -> Self {
-        value.0
-    }
-}
-
-impl AsRef<OffsetDateTime> for CreationDate {
-    fn as_ref(&self) -> &OffsetDateTime {
-        &self.0
-    }
-}
+/// Date and time when the item was updated.
+#[derive(Serialize, Deserialize, Debug, Clone, Eq, PartialEq, From, Into, AsRef)]
+pub struct UpdateDate(OffsetDateTime);
 
 /// Option that describes how to export notes.
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone, Default)]

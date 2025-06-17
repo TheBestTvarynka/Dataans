@@ -1,14 +1,14 @@
 use derive_more::{AsRef, From};
 use serde::{Deserialize, Serialize};
 use time::serde::rfc3339;
-use time::{Duration, OffsetDateTime};
+use time::OffsetDateTime;
 use url::Url;
 use web_api_types::{AuthToken, UserId, Username};
 
 /// Secret key.
 ///
 /// This key is used to encrypt the user's data.
-#[derive(Debug, Serialize, Deserialize, AsRef, From)]
+#[derive(Debug, Serialize, Deserialize, AsRef, From, Clone)]
 pub struct SecretKey(Vec<u8>);
 
 /// Web server URL.
@@ -26,11 +26,6 @@ pub enum SyncMode {
     Manual,
     /// The app maintains the websocket connection with the server and automatically synchronize the data.
     Push,
-    /// The app periodically polls the server to check if there are any changes.
-    Poll {
-        /// The polling interval. Basically, how often the app should check for changes.
-        period: Duration,
-    },
 }
 
 /// Synchronization configuration.
@@ -64,11 +59,7 @@ impl Sync {
 
     /// Checks synchronization is enabled.
     pub fn is_enabled(&self) -> bool {
-        if matches!(self, Sync::Disabled { .. }) {
-            false
-        } else {
-            true
-        }
+        !matches!(self, Sync::Disabled { .. })
     }
 
     /// Returns [SyncMode] if the sync is enabled.
@@ -84,7 +75,7 @@ impl Sync {
 /// User profile.
 ///
 /// Represents the user's profile.
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct UserProfile {
     /// User ID.
     pub user_id: UserId,

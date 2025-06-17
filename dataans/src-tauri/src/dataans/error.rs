@@ -5,6 +5,8 @@ use common::error::CommandError;
 use thiserror::Error;
 
 use crate::dataans::db::DbError;
+use crate::dataans::service::note::NoteServiceError;
+use crate::dataans::service::space::SpaceServiceError;
 
 #[derive(Debug, Error)]
 pub enum DataansError {
@@ -16,6 +18,12 @@ pub enum DataansError {
 
     #[error("JSON error: {0:?}")]
     JsonError(#[from] serde_json::Error),
+
+    #[error(transparent)]
+    NoteService(#[from] NoteServiceError),
+
+    #[error(transparent)]
+    SpaceService(#[from] SpaceServiceError),
 
     #[error("time format error: {0:?}")]
     TimeFormatError(#[from] time::error::Format),
@@ -55,6 +63,9 @@ pub enum DataansError {
 
     #[error(transparent)]
     Tauri(#[from] tauri::Error),
+
+    #[error("user is not signed in")]
+    UserNotSignedIn,
 }
 
 impl From<DataansError> for CommandError {

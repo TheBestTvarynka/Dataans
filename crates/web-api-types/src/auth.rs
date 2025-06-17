@@ -1,3 +1,4 @@
+use derive_more::{AsRef, Deref, From, Into};
 use serde::{Deserialize, Serialize};
 use time::serde::rfc3339;
 use time::OffsetDateTime;
@@ -5,6 +6,7 @@ use time::OffsetDateTime;
 use super::*;
 
 pub const AUTH_COOKIE_NAME: &str = "dataans-auth";
+pub const AUTH_HEADER_NAME: &str = "Authorization";
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -20,7 +22,7 @@ pub struct SignInRequest {
     pub password: Password,
 }
 
-#[nutype(derive(Debug, Serialize, Deserialize, AsRef, Deref, From))]
+#[derive(Debug, Serialize, Deserialize, AsRef, Deref, From, Into, Clone)]
 pub struct AuthToken(String);
 
 #[derive(Debug, Serialize, Deserialize)]

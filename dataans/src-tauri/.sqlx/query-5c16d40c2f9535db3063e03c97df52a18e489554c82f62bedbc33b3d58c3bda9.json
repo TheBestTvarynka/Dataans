@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE files SET name = ?1, path = ?2, is_synced = ?3 WHERE id = ?4",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 4
+    },
+    "nullable": []
+  },
+  "hash": "5c16d40c2f9535db3063e03c97df52a18e489554c82f62bedbc33b3d58c3bda9"
+}

@@ -18,6 +18,7 @@ use self::tools::Tools;
 use crate::app::GlobalState;
 use crate::backend::notes::list_notes;
 use crate::backend::spaces::list_spaces;
+use crate::backend::sync::trigger_full_sync;
 use crate::utils::focus_element;
 use crate::FindNoteMode;
 
@@ -73,8 +74,10 @@ pub fn Spaces(
     let (query, set_query) = create_signal(String::new());
 
     let toaster = leptoaster::expect_toaster();
+
+    let app_info_window_toaster = toaster.clone();
     let show_app_info_window = move |_| {
-        let t = toaster.clone();
+        let t = app_info_window_toaster.clone();
         spawn_local(async move {
             try_exec!(
                 crate::backend::window::show_app_info_window().await,
@@ -102,9 +105,21 @@ pub fn Spaces(
             }}
             <div style="flex-grow: 1; align-content: end; display: flex; flex-direction: column; align-items: center; justify-content: flex-end;">
                 {move || if let Some(UserContext { sync_config: Sync::Enabled { mode: SyncMode::Manual, .. }, .. }) = user_context.get() {
+                    let sync_toaster = toaster.clone();
+                    let start_full_sync = move |_| {
+                        let t = sync_toaster.clone();
+                        spawn_local(async move {
+                            try_exec!(
+                                trigger_full_sync().await,
+                                "Failed to start syncing...",
+                                t
+                            );
+                        });
+                    };
+
                     view!{
                         <button title="Sync data" class="tool">
-                            <img alt="sync-icon" src="/public/icons/synchronize-light.png" />
+                            <img alt="sync-icon" src="/public/icons/synchronize-light.png" on:click=start_full_sync />
                         </button>
                     }.into_any()
                 } else {

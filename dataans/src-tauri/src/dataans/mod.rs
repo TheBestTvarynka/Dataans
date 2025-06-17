@@ -9,12 +9,15 @@ use tauri::plugin::{Builder, TauriPlugin};
 use tauri::{Manager, Runtime};
 
 use crate::dataans::db::sqlite::SqliteDb;
+use crate::dataans::db::OperationLogger;
 use crate::{CONFIGS_DIR, CONFIG_FILE_NAME, FILES_DIR, IMAGES_DIR, PROFILE_DIR};
 
 mod command;
+mod crypto;
 mod db;
 pub mod error;
 mod service;
+mod sync;
 
 use crate::dataans::error::DataansError;
 use crate::dataans::service::file::FileService;
@@ -28,6 +31,7 @@ pub struct State<D> {
     note_service: Arc<NoteService<D>>,
     file_service: Arc<FileService<D>>,
     web_service: Arc<WebService>,
+    operation_logger: Arc<OperationLogger>,
 }
 
 pub type DataansState = State<SqliteDb>;
@@ -54,7 +58,8 @@ impl DataansState {
             ))
             .expect("can not connect to sqlite db");
 
-        let sqlite = Arc::new(SqliteDb::new(pool));
+        let operation_logger = Arc::new(OperationLogger::new(pool));
+        let sqlite = Arc::new(SqliteDb::new(Arc::clone(&operation_logger)));
 
         let space_service = Arc::new(SpaceService::new(Arc::clone(&sqlite)));
         let note_service = Arc::new(NoteService::new(Arc::clone(&sqlite), Arc::clone(&space_service)));
@@ -68,6 +73,7 @@ impl DataansState {
             note_service,
             file_service,
             web_service,
+            operation_logger,
         }
     }
 }
@@ -97,6 +103,7 @@ pub fn init_dataans_plugin<R: Runtime>() -> TauriPlugin<R> {
             command::web::profile,
             command::sync::sync,
             command::sync::set_sync_options,
+            command::sync::full_sync,
         ])
         .setup(|app_handle, _api| {
             info!("Starting app setup...");

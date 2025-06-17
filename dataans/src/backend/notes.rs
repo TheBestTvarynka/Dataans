@@ -1,5 +1,5 @@
 use common::error::{CommandResult, CommandResultEmpty};
-use common::note::{Id as NoteId, Note, NoteFullOwned, OwnedNote, UpdateNote};
+use common::note::{CreateNote, Id as NoteId, NoteFullOwned, OwnedNote, UpdateNote};
 use common::space::Id as SpaceId;
 use common::APP_PLUGIN_NAME;
 use serde::Serialize;
@@ -23,10 +23,10 @@ pub async fn list_notes(space_id: SpaceId) -> CommandResult<Vec<OwnedNote>> {
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 struct CreateNoteArgs<'text> {
-    pub note: Note<'text>,
+    pub note: CreateNote<'text>,
 }
 
-pub async fn create_note(note: Note<'_>) -> CommandResultEmpty {
+pub async fn create_note(note: CreateNote<'_>) -> CommandResult<OwnedNote> {
     invoke_command(
         &format!("plugin:{}|create_note", APP_PLUGIN_NAME),
         &CreateNoteArgs { note },
@@ -40,7 +40,7 @@ struct UpdateNoteArgs<'text> {
     pub note_data: UpdateNote<'text>,
 }
 
-pub async fn update_note(note_data: UpdateNote<'_>) -> CommandResultEmpty {
+pub async fn update_note(note_data: UpdateNote<'_>) -> CommandResult<OwnedNote> {
     invoke_command(
         &format!("plugin:{}|update_note", APP_PLUGIN_NAME),
         &UpdateNoteArgs { note_data },

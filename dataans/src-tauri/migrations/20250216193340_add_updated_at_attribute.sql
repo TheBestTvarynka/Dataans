@@ -1,0 +1,4 @@
+-- Add migration script here
+
+ALTER TABLE spaces ADD COLUMN updated_at TEXT DEFAULT '2025-02-16T23:20:50.52Z';
+ALTER TABLE notes ADD COLUMN updated_at TEXT DEFAULT '2025-02-16T23:20:50.52Z';

@@ -1,5 +1,5 @@
 use common::error::{CommandResult, CommandResultEmpty};
-use common::note::{Id as NoteId, NoteFullOwned, OwnedNote, UpdateNote};
+use common::note::{CreateNoteOwned, Id as NoteId, NoteFullOwned, OwnedNote, UpdateNote};
 use common::space::Id as SpaceId;
 use tauri::State;
 
@@ -13,13 +13,13 @@ pub async fn list_notes(state: State<'_, DataansState>, space_id: SpaceId) -> Co
 
 #[instrument(ret, skip(state))]
 #[tauri::command]
-pub async fn create_note(state: State<'_, DataansState>, note: OwnedNote) -> CommandResultEmpty {
+pub async fn create_note(state: State<'_, DataansState>, note: CreateNoteOwned) -> CommandResult<OwnedNote> {
     Ok(state.note_service.create_note(note).await?)
 }
 
 #[instrument(ret, skip(state))]
 #[tauri::command]
-pub async fn update_note(state: State<'_, DataansState>, note_data: UpdateNote<'_>) -> CommandResultEmpty {
+pub async fn update_note(state: State<'_, DataansState>, note_data: UpdateNote<'static>) -> CommandResult<OwnedNote> {
     Ok(state.note_service.update_note(note_data).await?)
 }
 
