@@ -48,7 +48,7 @@ pub async fn full_sync<R: Runtime>(_app: AppHandle<R>, state: State<'_, DataansS
         return Err(DataansError::UserNotSignedIn.into());
     };
 
-    let db = Arc::clone(&state.db);
+    let operation_logger = Arc::clone(&state.operation_logger);
 
     let UserProfile {
         user_id: _,
@@ -66,14 +66,13 @@ pub async fn full_sync<R: Runtime>(_app: AppHandle<R>, state: State<'_, DataansS
     ];
 
     async_runtime::spawn(async move {
-        let result = sync_future(
-            db,
+        let _result = sync_future(
+            operation_logger,
             Url::parse("http://127.0.0.1:8000/").unwrap(),
             auth_token,
             encryption_key.into(),
         )
         .await;
-        warn!(?result, "Sync has been finished!");
     });
 
     Ok(())

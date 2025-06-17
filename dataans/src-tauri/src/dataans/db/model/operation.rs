@@ -3,14 +3,13 @@ use std::ops::{Deref, DerefMut};
 
 use serde::{Deserialize, Serialize};
 use sqlx::pool::PoolConnection;
-use sqlx::sqlite::SqliteRow;
-use sqlx::{Error as SqlxError, FromRow, Row, Sqlite, SqlitePool, SqliteTransaction, Transaction};
+use sqlx::{FromRow, Sqlite, SqlitePool, SqliteTransaction, Transaction};
 use time::serde::rfc3339;
 use time::OffsetDateTime;
 use uuid::Uuid;
 
 use crate::dataans::db::sqlite::SqliteDb;
-use crate::dataans::db::{DbError, File, Note, Space};
+use crate::dataans::db::{DbError, File, Note, OperationDb, Space};
 use crate::dataans::sync::{Hash, Hasher};
 
 #[derive(Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -43,65 +42,62 @@ impl Operation<'_> {
         }
     }
 
-    pub fn data(&self) -> Result<String, DbError> {
-        Ok(match self {
-            Operation::CreateNote(note) => serde_json::to_string(note)?,
-            Operation::UpdateNote(note) => serde_json::to_string(note)?,
-            Operation::DeleteNote(id) => serde_json::to_string(id)?,
-            Operation::CreateFile(file) => serde_json::to_string(file)?,
-            Operation::DeleteFile(id) => serde_json::to_string(id)?,
-            Operation::CreateSpace(space) => serde_json::to_string(space)?,
-            Operation::UpdateSpace(space) => serde_json::to_string(space)?,
-            Operation::DeleteSpace(id) => serde_json::to_string(id)?,
-            Operation::SetNoteFiles(note_id, files) => serde_json::to_string(&(note_id, files.as_ref()))?,
-        })
-    }
-
     pub async fn apply(
         &self,
         operation_time: OffsetDateTime,
-        now: OffsetDateTime,
-        transaction: &mut Transaction<'_, sqlx::Sqlite>,
+        transaction: &mut Transaction<'_, Sqlite>,
     ) -> Result<(), DbError> {
         match self {
             Operation::CreateNote(note) => {
-                SqliteDb::add_note(note.as_ref(), now, transaction).await?;
+                SqliteDb::add_note(note.as_ref(), operation_time, transaction).await?;
             }
             Operation::UpdateNote(note) => {
                 let local_note = SqliteDb::note_by_id(note.id, transaction.as_mut()).await?;
 
                 if local_note.updated_at < operation_time {
-                    SqliteDb::update_note(note.as_ref(), now, transaction).await?;
+                    SqliteDb::update_note(note.as_ref(), operation_time, transaction).await?;
                 }
             }
             Operation::DeleteNote(id) => {
                 let local_note = SqliteDb::note_by_id(*id, transaction.as_mut()).await?;
 
                 if local_note.updated_at < operation_time {
-                    SqliteDb::remove_note_inner(*id, now, transaction).await?;
+                    SqliteDb::remove_note_inner(*id, operation_time, transaction).await?;
                 }
             }
             Operation::CreateFile(file) => {
-                SqliteDb::add_file(file.as_ref(), now, transaction).await?;
+                SqliteDb::add_file(file.as_ref(), operation_time, transaction).await?;
             }
             Operation::DeleteFile(id) => {
-                todo!()
+                let local_file = SqliteDb::file_by_id(*id, transaction.as_mut()).await?;
+
+                if local_file.updated_at < operation_time {
+                    SqliteDb::remove_file(*id, operation_time, transaction).await?;
+                }
             }
             Operation::CreateSpace(space) => {
-                SqliteDb::add_space(space.as_ref(), now, transaction).await?;
+                SqliteDb::add_space(space.as_ref(), operation_time, transaction).await?;
             }
             Operation::UpdateSpace(space) => {
                 let local_space = SqliteDb::space_by_id(space.id, transaction.as_mut()).await?;
 
                 if local_space.updated_at < operation_time {
-                    SqliteDb::update_space(space.as_ref(), now, transaction).await?;
+                    SqliteDb::update_space(space.as_ref(), operation_time, transaction).await?;
                 }
             }
             Operation::DeleteSpace(id) => {
-                todo!()
+                let local_space = SqliteDb::space_by_id(*id, transaction.as_mut()).await?;
+
+                if local_space.updated_at < operation_time {
+                    SqliteDb::remove_space(*id, operation_time, transaction).await?;
+                }
             }
             Operation::SetNoteFiles(note_id, files) => {
-                todo!()
+                let local_note = SqliteDb::note_by_id(*note_id, transaction.as_mut()).await?;
+
+                if local_note.updated_at < operation_time {
+                    SqliteDb::set_note_files(*note_id, files.as_ref(), operation_time, transaction).await?;
+                }
             }
         }
 
@@ -130,60 +126,6 @@ impl Hash for Operation<'_> {
     }
 }
 
-impl FromRow<'_, SqliteRow> for OperationOwned {
-    fn from_row(row: &SqliteRow) -> Result<Self, SqlxError> {
-        let name: String = row.try_get("name")?;
-        let data: String = row.try_get("operation")?;
-
-        let operation = match name.as_str() {
-            "CreateNote" => {
-                let note: Note = serde_json::from_str(&data).map_err(|err| SqlxError::Decode(Box::new(err)))?;
-                Operation::CreateNote(Cow::Owned(note))
-            }
-            "UpdateNote" => {
-                let note: Note = serde_json::from_str(&data).map_err(|err| SqlxError::Decode(Box::new(err)))?;
-                Operation::UpdateNote(Cow::Owned(note))
-            }
-            "DeleteNote" => {
-                let id: Uuid = serde_json::from_str(&data).map_err(|err| SqlxError::Decode(Box::new(err)))?;
-                Operation::DeleteNote(id)
-            }
-            "CreateFile" => {
-                let file: File = serde_json::from_str(&data).map_err(|err| SqlxError::Decode(Box::new(err)))?;
-                Operation::CreateFile(Cow::Owned(file))
-            }
-            "DeleteFile" => {
-                let id: Uuid = serde_json::from_str(&data).map_err(|err| SqlxError::Decode(Box::new(err)))?;
-                Operation::DeleteFile(id)
-            }
-            "CreateSpace" => {
-                let space: Space = serde_json::from_str(&data).map_err(|err| SqlxError::Decode(Box::new(err)))?;
-                Operation::CreateSpace(Cow::Owned(space))
-            }
-            "UpdateSpace" => {
-                let space: Space = serde_json::from_str(&data).map_err(|err| SqlxError::Decode(Box::new(err)))?;
-                Operation::UpdateSpace(Cow::Owned(space))
-            }
-            "DeleteSpace" => {
-                let id: Uuid = serde_json::from_str(&data).map_err(|err| SqlxError::Decode(Box::new(err)))?;
-                Operation::DeleteSpace(id)
-            }
-            "SetNoteFiles" => {
-                let (note_id, files): (Uuid, Vec<Uuid>) =
-                    serde_json::from_str(&data).map_err(|err| SqlxError::Decode(Box::new(err)))?;
-                Operation::SetNoteFiles(note_id, Cow::Owned(files))
-            }
-            _ => {
-                return Err(SqlxError::Decode(
-                    format!("operation is not supported: {}", name).into(),
-                ))
-            }
-        };
-
-        Ok(operation)
-    }
-}
-
 #[derive(Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct OperationRecord<'data> {
     pub id: Uuid,
@@ -200,6 +142,13 @@ impl Hash for OperationRecord<'_> {
         self.created_at.hash(state);
         self.operation.hash(state);
     }
+}
+
+#[derive(FromRow)]
+struct PlainOperationRecord {
+    pub id: Uuid,
+    pub created_at: OffsetDateTime,
+    pub operation: String,
 }
 
 pub struct OperationLogger {
@@ -221,6 +170,75 @@ impl OperationLogger {
             operation,
             transaction: self.pool.begin().await?,
         })
+    }
+
+    async fn log(operation: &PlainOperationRecord, transaction: &mut Transaction<'_, Sqlite>) -> Result<(), DbError> {
+        let PlainOperationRecord {
+            id,
+            created_at,
+            operation,
+        } = operation;
+
+        sqlx::query("INSERT INTO operations (id, created_at, operation) VALUES (?1, ?2, ?3)")
+            .bind(id)
+            .bind(created_at)
+            .bind(operation)
+            .execute(&mut **transaction)
+            .await?;
+
+        Ok(())
+    }
+}
+
+impl OperationDb for OperationLogger {
+    async fn operations(&self) -> Result<Vec<OperationRecordOwned>, DbError> {
+        let mut connection = self.pool.acquire().await?;
+
+        let operations: Vec<PlainOperationRecord> = sqlx::query_as("SELECT id, created_at, operation FROM operations")
+            .fetch_all(&mut *connection)
+            .await?;
+
+        let operations = operations
+            .into_iter()
+            .map(|op| {
+                let operation: OperationOwned = serde_json::from_str(&op.operation)?;
+
+                Result::<_, DbError>::Ok(OperationRecord {
+                    id: op.id,
+                    created_at: op.created_at,
+                    operation,
+                })
+            })
+            .collect::<Result<Vec<_>, _>>()?;
+
+        Ok(operations)
+    }
+
+    async fn apply_operations(&self, operations: &[&OperationRecord<'_>]) -> Result<(), DbError> {
+        let mut transaction = self.pool.begin().await?;
+
+        for operation in operations {
+            let OperationRecord {
+                id,
+                created_at,
+                operation,
+            } = operation;
+
+            operation.apply(*created_at, &mut transaction).await?;
+            OperationLogger::log(
+                &PlainOperationRecord {
+                    id: *id,
+                    created_at: *created_at,
+                    operation: serde_json::to_string(operation)?,
+                },
+                &mut transaction,
+            )
+            .await?;
+        }
+
+        transaction.commit().await?;
+
+        Ok(())
     }
 }
 
@@ -246,14 +264,15 @@ impl<'a> OperationLoggerGuard<'a> {
             mut transaction,
         } = self;
 
-        sqlx::query("INSERT INTO operations (id, created_at, name, operation) VALUES (?1, ?2, ?3, ?4)")
-            .bind(Uuid::new_v4())
-            .bind(now)
-            .bind(operation.name())
-            .bind(operation.data()?)
-            .execute(&mut *transaction)
-            .await?;
-
+        OperationLogger::log(
+            &PlainOperationRecord {
+                id: Uuid::new_v4(),
+                created_at: now,
+                operation: serde_json::to_string(&operation)?,
+            },
+            &mut transaction,
+        )
+        .await?;
         transaction.commit().await?;
 
         Ok(())

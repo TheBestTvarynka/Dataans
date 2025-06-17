@@ -37,6 +37,7 @@ impl Client {
         })
     }
 
+    #[instrument(ret, skip(self))]
     pub async fn blocks(&self, items_per_block: usize) -> Result<Vec<Vec<u8>>, SyncError> {
         let mut blocks_url = self.sync_server.join("data/block")?;
         blocks_url
@@ -50,6 +51,7 @@ impl Client {
         Ok(blocks)
     }
 
+    #[instrument(ret, skip(self))]
     pub async fn operations(&self, operations_to_skip: usize) -> Result<Vec<OperationRecordOwned>, SyncError> {
         let mut operations_url = self.sync_server.join("data/operation")?;
         operations_url
@@ -74,6 +76,7 @@ impl Client {
         Ok(operations)
     }
 
+    #[instrument(ret, skip(self, operations))]
     pub async fn upload_operations(&self, operations: &[&OperationRecord<'_>]) -> Result<(), SyncError> {
         let operations = operations
             .iter()

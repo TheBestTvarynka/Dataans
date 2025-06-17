@@ -54,7 +54,8 @@ pub enum SyncError {
     SyncFailed(&'static str),
 }
 
-pub async fn sync_future<D: Db + OperationDb>(
+#[instrument(ret, skip(db, auth_token, encryption_key))]
+pub async fn sync_future<D: OperationDb>(
     db: Arc<D>,
     sync_server: Url,
     auth_token: AuthToken,
@@ -70,7 +71,7 @@ struct Synchronizer<D> {
     client: Client,
 }
 
-impl<D: Db + OperationDb> Synchronizer<D> {
+impl<D: OperationDb> Synchronizer<D> {
     pub fn new(
         db: Arc<D>,
         sync_server: Url,
@@ -83,6 +84,7 @@ impl<D: Db + OperationDb> Synchronizer<D> {
         })
     }
 
+    #[instrument(ret, skip(self))]
     async fn synchronize(&self) -> Result<(), SyncError> {
         let (local_operations, remote_blocks) =
             futures::join!(self.db.operations(), self.client.blocks(OPERATIONS_PER_BLOCK),);
@@ -140,13 +142,16 @@ impl<D: Db + OperationDb> Synchronizer<D> {
             }
         }
 
-        while let Some(local_operation) = local_operations.next() {
+        for local_operation in local_operations {
             operations_to_upload.push(local_operation);
         }
 
-        while let Some(remote_operation) = remote_operations.next() {
+        for remote_operation in remote_operations {
             operations_to_apply.push(remote_operation);
         }
+
+        trace!(?operations_to_upload);
+        trace!(?operations_to_apply);
 
         let result = futures::join!(
             self.db.apply_operations(&operations_to_apply),

@@ -1,25 +1,24 @@
 use std::borrow::Cow;
+use std::sync::Arc;
 
-use sqlx::{Sqlite, SqliteConnection, SqlitePool, Transaction};
+use sqlx::{Sqlite, SqliteConnection, Transaction};
 use time::OffsetDateTime;
 use uuid::Uuid;
 
 use super::*;
 
-const NOTE_FILES: &str = "SELECT files.id, files.name, files.path, file.created_at, file.updated_at, files.is_deleted
+const NOTE_FILES: &str = "SELECT files.id, files.name, files.path, files.created_at, files.updated_at, files.is_deleted
     FROM files
         LEFT JOIN notes_files ON files.id = notes_files.file_id
     WHERE notes_files.note_id = ?1 AND files.is_deleted = FALSE";
 
 pub struct SqliteDb {
-    pool: OperationLogger,
+    pool: Arc<OperationLogger>,
 }
 
 impl SqliteDb {
-    pub fn new(pool: SqlitePool) -> Self {
-        Self {
-            pool: OperationLogger::new(pool),
-        }
+    pub fn new(pool: Arc<OperationLogger>) -> Self {
+        Self { pool }
     }
 }
 
@@ -127,6 +126,47 @@ impl SqliteDb {
         Ok(())
     }
 
+    pub async fn remove_space(
+        space_id: Uuid,
+        now: OffsetDateTime,
+        transaction: &mut Transaction<'_, Sqlite>,
+    ) -> Result<(), DbError> {
+        let notes: Vec<Note> =
+            sqlx::query_as("SELECT id, text, created_at, updated_at, space_id, is_deleted FROM notes WHERE space_id = ?1 AND is_deleted = FALSE")
+                .bind(space_id)
+                .fetch_all(&mut **transaction)
+                .await?;
+
+        // TODO: replace with `join_all`.
+        for note in notes {
+            SqliteDb::remove_note_inner(note.id, now, transaction).await?;
+        }
+
+        let space: Space =
+            sqlx::query_as("SELECT id, name, avatar_id, created_at, updated_at, is_deleted FROM spaces WHERE id = ?1 AND is_deleted = FALSE")
+                .bind(space_id)
+                .fetch_one(&mut **transaction)
+                .await?;
+
+        sqlx::query!(
+            "UPDATE spaces SET is_deleted = TRUE, updated_at = ?1 WHERE id = ?2",
+            now,
+            space_id
+        )
+        .execute(&mut **transaction)
+        .await?;
+
+        sqlx::query!(
+            "UPDATE files SET is_deleted = TRUE, updated_at = ?1 WHERE id = ?2",
+            now,
+            space.avatar_id
+        )
+        .execute(&mut **transaction)
+        .await?;
+
+        Ok(())
+    }
+
     pub async fn note_by_id(note_id: Uuid, connection: &mut SqliteConnection) -> Result<Note, DbError> {
         let note = sqlx::query_as("SELECT id, text, created_at, updated_at, space_id, is_deleted FROM notes WHERE id = ?1 AND is_deleted = FALSE")
             .bind(note_id)
@@ -191,6 +231,17 @@ impl SqliteDb {
         Ok(())
     }
 
+    pub async fn file_by_id(file_id: Uuid, connection: &mut SqliteConnection) -> Result<File, DbError> {
+        let file = sqlx::query_as(
+            "SELECT id, name, path, created_at, updated_at, is_deleted FROM files WHERE id = ?1 AND is_deleted = FALSE",
+        )
+        .bind(file_id)
+        .fetch_one(&mut *connection)
+        .await?;
+
+        Ok(file)
+    }
+
     pub async fn add_file(
         file: &File,
         now: OffsetDateTime,
@@ -218,6 +269,50 @@ impl SqliteDb {
 
         Ok(())
     }
+
+    pub async fn remove_file(
+        file_id: Uuid,
+        now: OffsetDateTime,
+        transaction: &mut Transaction<'_, Sqlite>,
+    ) -> Result<(), DbError> {
+        sqlx::query!(
+            "UPDATE files SET is_deleted = TRUE, updated_at = ?1 WHERE id = ?2",
+            now,
+            file_id
+        )
+        .execute(&mut **transaction)
+        .await?;
+
+        Ok(())
+    }
+
+    pub async fn set_note_files(
+        note_id: Uuid,
+        files: &[Uuid],
+        now: OffsetDateTime,
+        transaction: &mut Transaction<'_, Sqlite>,
+    ) -> Result<(), DbError> {
+        sqlx::query("UPDATE notes SET updated_at = ?1 WHERE id = ?2")
+            .bind(now)
+            .bind(note_id)
+            .execute(&mut **transaction)
+            .await?;
+
+        sqlx::query("DELETE FROM notes_files WHERE note_id = ?1")
+            .bind(note_id)
+            .execute(&mut **transaction)
+            .await?;
+
+        for file_id in files {
+            sqlx::query("INSERT INTO notes_files (note_id, file_id) VALUES (?1, ?2)")
+                .bind(note_id)
+                .bind(file_id)
+                .execute(&mut **transaction)
+                .await?;
+        }
+
+        Ok(())
+    }
 }
 
 impl Db for SqliteDb {
@@ -238,14 +333,7 @@ impl Db for SqliteDb {
     async fn file_by_id(&self, file_id: Uuid) -> Result<File, DbError> {
         let mut connection = self.pool.read_only_connection().await?;
 
-        let files = sqlx::query_as(
-            "SELECT id, name, path, created_at, updated_at, is_deleted FROM files WHERE id = ?1 AND is_deleted = FALSE",
-        )
-        .bind(file_id)
-        .fetch_one(&mut *connection)
-        .await?;
-
-        Ok(files)
+        SqliteDb::file_by_id(file_id, &mut connection).await
     }
 
     #[instrument(ret, skip(self))]
@@ -264,14 +352,7 @@ impl Db for SqliteDb {
         let mut transaction = self.pool.begin(Operation::DeleteFile(file_id)).await?;
         let now = transaction.now();
 
-        sqlx::query!(
-            "UPDATE files SET is_deleted = TRUE, updated_at = ?1 WHERE id = ?2",
-            now,
-            file_id
-        )
-        .execute(&mut *transaction)
-        .await?;
-
+        SqliteDb::remove_file(file_id, now, transaction.transaction()).await?;
         transaction.commit().await?;
 
         Ok(())
@@ -312,39 +393,7 @@ impl Db for SqliteDb {
         let mut transaction = self.pool.begin(Operation::DeleteSpace(space_id)).await?;
         let now = transaction.now();
 
-        let notes: Vec<Note> =
-            sqlx::query_as("SELECT id, text, created_at, updated_at, space_id, is_deleted FROM notes WHERE space_id = ?1 AND is_deleted = FALSE")
-                .bind(space_id)
-                .fetch_all(&mut *transaction)
-                .await?;
-
-        // TODO: replace with `join_all`.
-        for note in notes {
-            SqliteDb::remove_note_inner(note.id, now, transaction.transaction()).await?;
-        }
-
-        let space: Space =
-            sqlx::query_as("SELECT id, name, avatar_id, created_at, updated_at, is_deleted FROM spaces WHERE id = ?1 AND is_deleted = FALSE")
-                .bind(space_id)
-                .fetch_one(&mut *transaction)
-                .await?;
-
-        sqlx::query!(
-            "UPDATE spaces SET is_deleted = TRUE, updated_at = ?1 WHERE id = ?2",
-            now,
-            space_id
-        )
-        .execute(&mut *transaction)
-        .await?;
-
-        sqlx::query!(
-            "UPDATE files SET is_deleted = TRUE, updated_at = ?1 WHERE id = ?2",
-            now,
-            space.avatar_id
-        )
-        .execute(&mut *transaction)
-        .await?;
-
+        SqliteDb::remove_space(space_id, now, transaction.transaction()).await?;
         transaction.commit().await?;
 
         Ok(())
@@ -444,63 +493,10 @@ impl Db for SqliteDb {
             .pool
             .begin(Operation::SetNoteFiles(note_id, Cow::Borrowed(files)))
             .await?;
+        let now = transaction.now();
 
-        sqlx::query("DELETE FROM notes_files WHERE note_id = ?1")
-            .bind(note_id)
-            .execute(&mut *transaction)
-            .await?;
-
-        for file_id in files {
-            sqlx::query("INSERT INTO notes_files (note_id, file_id) VALUES (?1, ?2)")
-                .bind(note_id)
-                .bind(file_id)
-                .execute(&mut *transaction)
-                .await?;
-        }
-
+        SqliteDb::set_note_files(note_id, files, now, transaction.transaction()).await?;
         transaction.commit().await?;
-
-        Ok(())
-    }
-}
-
-impl OperationDb for SqliteDb {
-    async fn operations(&self) -> Result<Vec<OperationRecordOwned>, DbError> {
-        #[derive(sqlx::FromRow)]
-        struct PlainOperationRecord {
-            pub id: Uuid,
-            pub created_at: time::OffsetDateTime,
-            pub name: String,
-            pub operation: String,
-        }
-
-        let mut connection = self.pool.read_only_connection().await?;
-
-        let operations: Vec<PlainOperationRecord> =
-            sqlx::query_as("SELECT id, created_at, name, operation FROM operations")
-                .fetch_all(&mut *connection)
-                .await?;
-
-        let operations = operations
-            .into_iter()
-            .map(|op| {
-                let operation: OperationOwned = serde_json::from_str(&op.operation)?;
-
-                Result::<_, DbError>::Ok(OperationRecord {
-                    id: op.id,
-                    created_at: op.created_at,
-                    operation,
-                })
-            })
-            .collect::<Result<Vec<_>, _>>()?;
-
-        Ok(operations)
-    }
-
-    async fn apply_operations(&self, operations: &[&OperationRecord<'_>]) -> Result<(), DbError> {
-        for operation in operations {
-            //
-        }
 
         Ok(())
     }

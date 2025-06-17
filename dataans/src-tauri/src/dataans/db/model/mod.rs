@@ -1,6 +1,6 @@
 mod operation;
 
-pub use operation::{Operation, OperationLogger, OperationOwned, OperationRecord, OperationRecordOwned};
+pub use operation::{Operation, OperationLogger, OperationRecord, OperationRecordOwned};
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 use time::serde::rfc3339;
