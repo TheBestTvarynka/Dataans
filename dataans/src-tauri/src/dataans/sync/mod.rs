@@ -99,7 +99,7 @@ impl<D: OperationDb> Synchronizer<D> {
                 let mut hasher = Sha256::new();
 
                 for operation in operations {
-                    operation.hash(&mut hasher);
+                    hasher.update(operation.digest::<Sha256>());
                 }
 
                 hasher.finalize().to_vec()
@@ -132,22 +132,32 @@ impl<D: OperationDb> Synchronizer<D> {
         let mut operations_to_upload = Vec::new();
         let mut operations_to_apply = Vec::new();
 
-        while let (Some(local_operation), Some(remote_operation)) = (local_operations.next(), remote_operations.next())
-        {
-            if local_operation.id != remote_operation.id {
-                operations_to_upload.push(local_operation);
-                operations_to_apply.push(remote_operation);
+        loop {
+            match (local_operations.next(), remote_operations.next()) {
+                (Some(local_operation), Some(remote_operation)) => {
+                    if local_operation.id != remote_operation.id {
+                        operations_to_upload.push(local_operation);
+                        operations_to_apply.push(remote_operation);
 
-                break;
+                        for local_operation in local_operations {
+                            operations_to_upload.push(local_operation);
+                        }
+
+                        for remote_operation in remote_operations {
+                            operations_to_apply.push(remote_operation);
+                        }
+
+                        break;
+                    }
+                }
+                (Some(local_operation), None) => {
+                    operations_to_upload.push(local_operation);
+                }
+                (None, Some(remote_operation)) => {
+                    operations_to_apply.push(remote_operation);
+                }
+                (None, None) => break,
             }
-        }
-
-        for local_operation in local_operations {
-            operations_to_upload.push(local_operation);
-        }
-
-        for remote_operation in remote_operations {
-            operations_to_apply.push(remote_operation);
         }
 
         trace!(?operations_to_upload);
