@@ -1,4 +1,4 @@
-use derive_more::{AsRef, From};
+use derive_more::{AsRef, From, Into};
 use serde::{Deserialize, Serialize};
 use time::serde::rfc3339;
 use time::OffsetDateTime;
@@ -8,13 +8,13 @@ use web_api_types::{AuthToken, UserId, Username};
 /// Secret key.
 ///
 /// This key is used to encrypt the user's data.
-#[derive(Debug, Serialize, Deserialize, AsRef, From, Clone)]
+#[derive(Debug, Serialize, Deserialize, AsRef, From, Into, Clone)]
 pub struct SecretKey(Vec<u8>);
 
 /// Web server URL.
 ///
 /// The authentication and synchronization server URL.
-#[derive(Debug, Serialize, Deserialize, AsRef, From, Clone)]
+#[derive(Debug, Serialize, Deserialize, AsRef, From, Into, Clone)]
 pub struct WebServerUrl(Url);
 
 /// Synchronization mode.

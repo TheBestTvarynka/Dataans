@@ -3,9 +3,10 @@ use std::sync::Arc;
 use common::error::{CommandResult, CommandResultEmpty};
 use common::profile::{Sync, UserContext, UserProfile};
 use tauri::{async_runtime, AppHandle, Emitter, Runtime, State};
-use url::Url;
+use time::OffsetDateTime;
 
 use crate::dataans::command::web::emit_user_context;
+use crate::dataans::crypto::EncryptionKey;
 use crate::dataans::sync::sync_future;
 use crate::dataans::{DataansError, DataansState};
 
@@ -43,7 +44,11 @@ pub fn set_sync_options<R: Runtime>(
 #[tauri::command]
 pub async fn full_sync<R: Runtime>(_app: AppHandle<R>, state: State<'_, DataansState>) -> CommandResultEmpty {
     let user_profile = if let Some(user_profile) = state.web_service.user_profile() {
-        user_profile
+        if user_profile.auth_token_expiration_date > OffsetDateTime::now_utc() {
+            user_profile
+        } else {
+            return Err(DataansError::AuthTokenExpired.into());
+        }
     } else {
         return Err(DataansError::UserNotSignedIn.into());
     };
@@ -55,22 +60,16 @@ pub async fn full_sync<R: Runtime>(_app: AppHandle<R>, state: State<'_, DataansS
         username: _,
         auth_token,
         auth_token_expiration_date: _,
-        secret_key: _,
-        sync_config: _,
+        secret_key,
+        sync_config,
     } = user_profile;
-
-    // TODO: derive encryption key properly.
-    let encryption_key = [
-        19, 28, 59, 181, 9, 202, 41, 22, 25, 122, 144, 217, 9, 87, 170, 209, 72, 223, 145, 41, 12, 252, 9, 229, 45,
-        218, 206, 161, 199, 216, 243, 53,
-    ];
 
     async_runtime::spawn(async move {
         let _result = sync_future(
             operation_logger,
-            Url::parse("http://127.0.0.1:8000/").unwrap(),
+            sync_config.get_web_server_url().into(),
             auth_token,
-            encryption_key.into(),
+            *EncryptionKey::from_slice(secret_key.as_ref().as_slice()),
         )
         .await;
     });
