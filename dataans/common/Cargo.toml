@@ -14,5 +14,5 @@ serde = { workspace = true, features = ["derive"] }
 time = { workspace = true, default-features = false, features = ["serde", "formatting", "parsing"] }
 uuid = { workspace = true, features = ["serde"] }
 web-api-types.workspace = true
-url.workspace = true
+url = { workspace = true, features = ["serde"] }
 derive_more = { workspace = true, features = ["from", "as_ref", "into"] }

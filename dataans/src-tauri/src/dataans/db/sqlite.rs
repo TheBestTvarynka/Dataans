@@ -242,6 +242,15 @@ impl SqliteDb {
         Ok(file)
     }
 
+    pub async fn note_files(note_id: Uuid, connection: &mut SqliteConnection) -> Result<Vec<File>, DbError> {
+        let files = sqlx::query_as(NOTE_FILES)
+            .bind(note_id)
+            .fetch_all(&mut *connection)
+            .await?;
+
+        Ok(files)
+    }
+
     pub async fn add_file(
         file: &File,
         now: OffsetDateTime,
@@ -479,12 +488,7 @@ impl Db for SqliteDb {
     async fn note_files(&self, note_id: Uuid) -> Result<Vec<File>, DbError> {
         let mut connection = self.pool.read_only_connection().await?;
 
-        let files = sqlx::query_as(NOTE_FILES)
-            .bind(note_id)
-            .fetch_all(&mut *connection)
-            .await?;
-
-        Ok(files)
+        SqliteDb::note_files(note_id, &mut connection).await
     }
 
     #[instrument(ret, skip(self))]

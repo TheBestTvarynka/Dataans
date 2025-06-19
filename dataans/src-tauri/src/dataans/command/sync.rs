@@ -42,7 +42,7 @@ pub fn set_sync_options<R: Runtime>(
 }
 
 #[tauri::command]
-pub async fn full_sync<R: Runtime>(_app: AppHandle<R>, state: State<'_, DataansState>) -> CommandResultEmpty {
+pub async fn full_sync<R: Runtime>(app: AppHandle<R>, state: State<'_, DataansState>) -> CommandResultEmpty {
     let user_profile = if let Some(user_profile) = state.web_service.user_profile() {
         if user_profile.auth_token_expiration_date > OffsetDateTime::now_utc() {
             user_profile
@@ -70,6 +70,7 @@ pub async fn full_sync<R: Runtime>(_app: AppHandle<R>, state: State<'_, DataansS
             sync_config.get_web_server_url().into(),
             auth_token,
             *EncryptionKey::from_slice(secret_key.as_ref().as_slice()),
+            app,
         )
         .await;
     });
