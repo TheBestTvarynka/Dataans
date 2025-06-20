@@ -149,6 +149,7 @@ where
     let (tx, rx) = mpsc::unbounded::<Event<T>>();
 
     let closure = Closure::<dyn FnMut(JsValue)>::new(move |raw| {
+        info!("raw value: {:?}", raw);
         let _ = tx.unbounded_send(serde_wasm_bindgen::from_value(raw).unwrap());
     });
     let unlisten = inner::listen(

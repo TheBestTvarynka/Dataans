@@ -10,7 +10,7 @@ use leptos_router::{Route, Router, Routes};
 use crate::app_info::AppInfo;
 use crate::auth::AuthWindow;
 use crate::backend::auth::profile;
-use crate::backend::sync::on_user_context;
+use crate::backend::sync::{on_data, on_user_context};
 use crate::backend::{load_config, load_theme};
 use crate::notes::Notes;
 use crate::spaces::Spaces;
@@ -59,9 +59,15 @@ pub fn App() -> impl IntoView {
     spawn_local(async move {
         try_exec!(
             on_user_context(|data| user_context.set(data)).await,
-            "Failed to listen on user context",
+            "Failed to listen on user context events",
             t
         );
+    });
+
+    let app_data = expect_context::<RwSignal<GlobalState>>();
+    let t = toaster.clone();
+    spawn_local(async move {
+        try_exec!(on_data(app_data).await, "Failed to listen on data events", t);
     });
 
     let (theme_css, set_theme_css) = create_signal(String::default());
