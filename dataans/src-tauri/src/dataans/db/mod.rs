@@ -1,6 +1,7 @@
 pub mod model;
 pub mod sqlite;
 
+use common::event::DataEvent;
 use thiserror::Error;
 use uuid::Uuid;
 
@@ -41,5 +42,5 @@ pub trait Db: Send + Sync {
 
 pub trait OperationDb: Send + Sync {
     async fn operations(&self) -> Result<Vec<OperationRecordOwned>, DbError>;
-    async fn apply_operations(&self, operations: &[&OperationRecord<'_>]) -> Result<(), DbError>;
+    async fn apply_operation(&self, operations: &OperationRecord<'_>) -> Result<Option<DataEvent>, DbError>;
 }

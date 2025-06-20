@@ -1,6 +1,10 @@
 use std::borrow::Cow;
 use std::ops::{Deref, DerefMut};
 
+use common::event::DataEvent;
+use common::note::{File as EventFile, Id as NoteId, MdText, Note as EventNote};
+use common::space::{Avatar, Id as SpaceId, Name as SpaceName, Space as EventSpace};
+use common::{CreationDate, UpdateDate};
 use serde::{Deserialize, Serialize};
 use sqlx::pool::PoolConnection;
 use sqlx::{FromRow, Sqlite, SqlitePool, SqliteTransaction, Transaction};
@@ -46,16 +50,94 @@ impl Operation<'_> {
         &self,
         operation_time: OffsetDateTime,
         transaction: &mut Transaction<'_, Sqlite>,
-    ) -> Result<(), DbError> {
-        match self {
+    ) -> Result<Option<DataEvent>, DbError> {
+        let event = match self {
             Operation::CreateNote(note) => {
                 SqliteDb::add_note(note.as_ref(), operation_time, transaction).await?;
+
+                let Note {
+                    id,
+                    text,
+                    created_at,
+                    updated_at,
+                    space_id,
+                    is_deleted: _,
+                } = note.as_ref();
+
+                let files = SqliteDb::note_files(*id, transaction.as_mut())
+                    .await?
+                    .into_iter()
+                    .map(|file| {
+                        let File {
+                            id,
+                            name,
+                            path,
+                            created_at: _,
+                            updated_at: _,
+                            is_deleted: _,
+                        } = file;
+                        EventFile {
+                            id,
+                            name,
+                            path: path.into(),
+                        }
+                    })
+                    .collect();
+
+                Some(DataEvent::NoteAdded(EventNote {
+                    id: NoteId::from(*id),
+                    text: MdText::from(text.clone()),
+                    created_at: CreationDate::from(*created_at),
+                    updated_at: UpdateDate::from(*updated_at),
+                    space_id: SpaceId::from(*space_id),
+                    files,
+                }))
             }
             Operation::UpdateNote(note) => {
                 let local_note = SqliteDb::note_by_id(note.id, transaction.as_mut()).await?;
 
                 if local_note.updated_at < operation_time {
                     SqliteDb::update_note(note.as_ref(), operation_time, transaction).await?;
+
+                    let Note {
+                        id,
+                        text,
+                        created_at,
+                        updated_at,
+                        space_id,
+                        is_deleted: _,
+                    } = note.as_ref();
+
+                    let files = SqliteDb::note_files(*id, transaction.as_mut())
+                        .await?
+                        .into_iter()
+                        .map(|file| {
+                            let File {
+                                id,
+                                name,
+                                path,
+                                created_at: _,
+                                updated_at: _,
+                                is_deleted: _,
+                            } = file;
+                            EventFile {
+                                id,
+                                name,
+                                path: path.into(),
+                            }
+                        })
+                        .collect();
+
+                    Some(DataEvent::NoteUpdated(EventNote {
+                        id: NoteId::from(*id),
+                        text: MdText::from(text.clone()),
+                        created_at: CreationDate::from(*created_at),
+                        updated_at: UpdateDate::from(*updated_at),
+                        space_id: SpaceId::from(*space_id),
+                        files,
+                    }))
+                } else {
+                    None
                 }
             }
             Operation::DeleteNote(id) => {
@@ -63,10 +145,19 @@ impl Operation<'_> {
 
                 if local_note.updated_at < operation_time {
                     SqliteDb::remove_note_inner(*id, operation_time, transaction).await?;
+
+                    Some(DataEvent::NoteDeleted(
+                        SpaceId::from(local_note.space_id),
+                        NoteId::from(local_note.id),
+                    ))
+                } else {
+                    None
                 }
             }
             Operation::CreateFile(file) => {
                 SqliteDb::add_file(file.as_ref(), operation_time, transaction).await?;
+
+                None
             }
             Operation::DeleteFile(id) => {
                 let local_file = SqliteDb::file_by_id(*id, transaction.as_mut()).await?;
@@ -74,15 +165,57 @@ impl Operation<'_> {
                 if local_file.updated_at < operation_time {
                     SqliteDb::remove_file(*id, operation_time, transaction).await?;
                 }
+
+                None
             }
             Operation::CreateSpace(space) => {
                 SqliteDb::add_space(space.as_ref(), operation_time, transaction).await?;
+
+                let Space {
+                    id,
+                    name,
+                    avatar_id,
+                    created_at,
+                    updated_at,
+                    is_deleted: _,
+                } = space.as_ref();
+
+                let avatar = SqliteDb::file_by_id(*avatar_id, transaction.as_mut()).await?;
+
+                Some(DataEvent::SpaceAdded(EventSpace {
+                    id: SpaceId::from(*id),
+                    name: SpaceName::from(name.clone()),
+                    created_at: CreationDate::from(*created_at),
+                    updated_at: UpdateDate::from(*updated_at),
+                    avatar: Avatar::new(*avatar_id, avatar.path),
+                }))
             }
             Operation::UpdateSpace(space) => {
                 let local_space = SqliteDb::space_by_id(space.id, transaction.as_mut()).await?;
 
                 if local_space.updated_at < operation_time {
                     SqliteDb::update_space(space.as_ref(), operation_time, transaction).await?;
+
+                    let Space {
+                        id,
+                        name,
+                        avatar_id,
+                        created_at,
+                        updated_at,
+                        is_deleted: _,
+                    } = space.as_ref();
+
+                    let avatar = SqliteDb::file_by_id(*avatar_id, transaction.as_mut()).await?;
+
+                    Some(DataEvent::SpaceAdded(EventSpace {
+                        id: SpaceId::from(*id),
+                        name: SpaceName::from(name.clone()),
+                        created_at: CreationDate::from(*created_at),
+                        updated_at: UpdateDate::from(*updated_at),
+                        avatar: Avatar::new(*avatar_id, avatar.path),
+                    }))
+                } else {
+                    None
                 }
             }
             Operation::DeleteSpace(id) => {
@@ -90,6 +223,10 @@ impl Operation<'_> {
 
                 if local_space.updated_at < operation_time {
                     SqliteDb::remove_space(*id, operation_time, transaction).await?;
+
+                    Some(DataEvent::SpaceDeleted(SpaceId::from(local_space.id)))
+                } else {
+                    None
                 }
             }
             Operation::SetNoteFiles(note_id, files) => {
@@ -97,11 +234,51 @@ impl Operation<'_> {
 
                 if local_note.updated_at < operation_time {
                     SqliteDb::set_note_files(*note_id, files.as_ref(), operation_time, transaction).await?;
+
+                    let Note {
+                        id,
+                        text,
+                        created_at,
+                        updated_at,
+                        space_id,
+                        is_deleted: _,
+                    } = local_note;
+
+                    let files = SqliteDb::note_files(id, transaction.as_mut())
+                        .await?
+                        .into_iter()
+                        .map(|file| {
+                            let File {
+                                id,
+                                name,
+                                path,
+                                created_at: _,
+                                updated_at: _,
+                                is_deleted: _,
+                            } = file;
+                            EventFile {
+                                id,
+                                name,
+                                path: path.into(),
+                            }
+                        })
+                        .collect();
+
+                    Some(DataEvent::NoteUpdated(EventNote {
+                        id: NoteId::from(id),
+                        text: MdText::from(text),
+                        created_at: CreationDate::from(created_at),
+                        updated_at: UpdateDate::from(updated_at),
+                        space_id: SpaceId::from(space_id),
+                        files,
+                    }))
+                } else {
+                    None
                 }
             }
-        }
+        };
 
-        Ok(())
+        Ok(event)
     }
 }
 
@@ -214,31 +391,29 @@ impl OperationDb for OperationLogger {
         Ok(operations)
     }
 
-    async fn apply_operations(&self, operations: &[&OperationRecord<'_>]) -> Result<(), DbError> {
+    async fn apply_operation(&self, operation: &OperationRecord<'_>) -> Result<Option<DataEvent>, DbError> {
         let mut transaction = self.pool.begin().await?;
 
-        for operation in operations {
-            let OperationRecord {
-                id,
-                created_at,
-                operation,
-            } = operation;
+        let OperationRecord {
+            id,
+            created_at,
+            operation,
+        } = operation;
 
-            operation.apply(*created_at, &mut transaction).await?;
-            OperationLogger::log(
-                &PlainOperationRecord {
-                    id: *id,
-                    created_at: *created_at,
-                    operation: serde_json::to_string(operation)?,
-                },
-                &mut transaction,
-            )
-            .await?;
-        }
+        let event = operation.apply(*created_at, &mut transaction).await?;
+        OperationLogger::log(
+            &PlainOperationRecord {
+                id: *id,
+                created_at: *created_at,
+                operation: serde_json::to_string(operation)?,
+            },
+            &mut transaction,
+        )
+        .await?;
 
         transaction.commit().await?;
 
-        Ok(())
+        Ok(event)
     }
 }
 

@@ -20,7 +20,6 @@ fn main() {
             "handle_clipboard_image",
             "sign_up",
             "sign_in",
-            "sync",
             "profile",
             "set_sync_options",
             "full_sync",
