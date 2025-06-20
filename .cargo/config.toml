@@ -6,3 +6,6 @@ codegen-backend = true
 
 [profile.dev.package.dataans]
 codegen-backend = "cranelift"
+
+[profile.dev.package.web-server]
+codegen-backend = "cranelift"
