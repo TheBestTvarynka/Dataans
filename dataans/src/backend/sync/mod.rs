@@ -1,10 +1,13 @@
 mod event;
 
 use common::error::{CommandResult, CommandResultEmpty};
-use common::event::{DataEvent, UserContextEvent, DATA_EVENT, USER_CONTEXT_EVENT};
+use common::event::{
+    DataEvent, StatusUpdateEvent, UserContextEvent, DATA_EVENT, STATUS_UPDATE_EVENT, USER_CONTEXT_EVENT,
+};
 use common::profile::{Sync, UserContext};
 use common::APP_PLUGIN_NAME;
 use futures::StreamExt;
+use leptoaster::ToasterContext;
 use leptos::{RwSignal, SignalUpdate};
 use serde::Serialize;
 
@@ -26,6 +29,36 @@ pub async fn on_user_context(set_user_context: impl Fn(Option<UserContext>)) -> 
             }
             UserContextEvent::SignedOut => {
                 set_user_context(None);
+            }
+        }
+    }
+
+    Ok(())
+}
+
+pub async fn on_status_update(toaster: ToasterContext) -> CommandResultEmpty {
+    let mut events = event::listen::<StatusUpdateEvent>(STATUS_UPDATE_EVENT).await?;
+
+    while let Some(event) = events.next().await {
+        info!("Event received: {:?}", event);
+
+        match event.payload {
+            StatusUpdateEvent::SyncSuccessful => {
+                toaster.toast(
+                    leptoaster::ToastBuilder::new("Synchronization successful.")
+                        .with_level(leptoaster::ToastLevel::Success)
+                        .with_position(leptoaster::ToastPosition::BottomRight)
+                        .with_expiry(Some(3000)),
+                );
+            }
+            StatusUpdateEvent::SyncFailed(message) => {
+                error!("{:?}", message);
+                toaster.toast(
+                    leptoaster::ToastBuilder::new(&format!("Synchronization failed: {}", message))
+                        .with_level(leptoaster::ToastLevel::Error)
+                        .with_position(leptoaster::ToastPosition::BottomRight)
+                        .with_expiry(Some(5000)),
+                );
             }
         }
     }

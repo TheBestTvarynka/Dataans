@@ -3064,7 +3064,7 @@ checksum = "03087c2bad5e1034e8cace5926dec053fb3790248370865f5117a7d0213354c8"
 [[package]]
 name = "leptoaster"
 version = "0.1.8"
-source = "git+https://github.com/TheBestTvarynka/leptoaster.git?rev=8c06d3f#8c06d3f40b5f23369201f41e62f0c65fd597a4fa"
+source = "git+https://github.com/TheBestTvarynka/leptoaster.git?rev=983c98b#983c98be3bcccc8b08f05eedee3cc0fdb8d5b68e"
 dependencies = [
  "gloo-timers",
  "leptos",

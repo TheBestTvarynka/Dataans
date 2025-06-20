@@ -13,6 +13,9 @@ pub const USER_CONTEXT_EVENT: &str = "user-context";
 /// This event happens every time the local database is updated (e.g. during the sync process).
 pub const DATA_EVENT: &str = "data-event";
 
+/// An event name for any status-updates.
+pub const STATUS_UPDATE_EVENT: &str = "status-update-event";
+
 /// An event related to the user context.
 ///
 /// It includes sign in, sign out, and related events.
@@ -43,4 +46,13 @@ pub enum DataEvent {
     NoteUpdated(OwnedNote),
     /// The note has been deleted.
     NoteDeleted(SpaceId, NoteId),
+}
+
+/// Status update event.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub enum StatusUpdateEvent {
+    /// Synchronization finished successfully.
+    SyncSuccessful,
+    /// Synchronization failed.
+    SyncFailed(String),
 }

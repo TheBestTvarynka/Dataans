@@ -65,7 +65,7 @@ pub async fn sync_future<D: OperationDb, R: Runtime, E: Emitter<R>>(
     sync_server: Url,
     auth_token: AuthToken,
     encryption_key: EncryptionKey,
-    emitter: E,
+    emitter: &E,
 ) -> Result<(), SyncError> {
     let synchronizer = Synchronizer::new(db, sync_server, auth_token, encryption_key)?;
 
@@ -91,7 +91,7 @@ impl<D: OperationDb> Synchronizer<D> {
     }
 
     #[instrument(err, skip(self, emitter))]
-    async fn synchronize<R: Runtime, E: Emitter<R>>(&self, emitter: E) -> Result<(), SyncError> {
+    async fn synchronize<R: Runtime, E: Emitter<R>>(&self, emitter: &E) -> Result<(), SyncError> {
         let (local_operations, remote_blocks) =
             futures::join!(self.db.operations(), self.client.blocks(OPERATIONS_PER_BLOCK),);
 
