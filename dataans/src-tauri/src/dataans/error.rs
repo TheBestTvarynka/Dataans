@@ -66,6 +66,9 @@ pub enum DataansError {
 
     #[error("user is not signed in")]
     UserNotSignedIn,
+
+    #[error("auth token is expired")]
+    AuthTokenExpired,
 }
 
 impl From<DataansError> for CommandError {

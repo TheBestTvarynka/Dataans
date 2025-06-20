@@ -101,7 +101,6 @@ pub fn init_dataans_plugin<R: Runtime>() -> TauriPlugin<R> {
             command::web::sign_up,
             command::web::sign_in,
             command::web::profile,
-            command::sync::sync,
             command::sync::set_sync_options,
             command::sync::full_sync,
         ])

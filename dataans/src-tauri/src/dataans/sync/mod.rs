@@ -6,8 +6,10 @@ mod hash;
 
 use std::sync::Arc;
 
+use common::event::DATA_EVENT;
 pub use hash::{Hash, Hasher};
 use sha2::{Digest, Sha256};
+use tauri::{Emitter, Runtime};
 use thiserror::Error;
 use url::Url;
 use uuid::Uuid;
@@ -52,18 +54,22 @@ pub enum SyncError {
 
     #[error("sync failed: {0}")]
     SyncFailed(&'static str),
+
+    #[error("failed to send event: {0}")]
+    Event(&'static str),
 }
 
-#[instrument(ret, skip(db, auth_token, encryption_key))]
-pub async fn sync_future<D: OperationDb>(
+#[instrument(ret, skip(db, auth_token, encryption_key, emitter))]
+pub async fn sync_future<D: OperationDb, R: Runtime, E: Emitter<R>>(
     db: Arc<D>,
     sync_server: Url,
     auth_token: AuthToken,
     encryption_key: EncryptionKey,
+    emitter: &E,
 ) -> Result<(), SyncError> {
     let synchronizer = Synchronizer::new(db, sync_server, auth_token, encryption_key)?;
 
-    synchronizer.synchronize().await
+    synchronizer.synchronize(emitter).await
 }
 
 struct Synchronizer<D> {
@@ -84,8 +90,8 @@ impl<D: OperationDb> Synchronizer<D> {
         })
     }
 
-    #[instrument(ret, skip(self))]
-    async fn synchronize(&self) -> Result<(), SyncError> {
+    #[instrument(err, skip(self, emitter))]
+    async fn synchronize<R: Runtime, E: Emitter<R>>(&self, emitter: &E) -> Result<(), SyncError> {
         let (local_operations, remote_blocks) =
             futures::join!(self.db.operations(), self.client.blocks(OPERATIONS_PER_BLOCK),);
 
@@ -164,7 +170,18 @@ impl<D: OperationDb> Synchronizer<D> {
         trace!(?operations_to_apply);
 
         let result = futures::join!(
-            self.db.apply_operations(&operations_to_apply),
+            async {
+                for operation in operations_to_apply {
+                    if let Some(event) = self.db.apply_operation(operation).await? {
+                        emitter.emit(DATA_EVENT, event).map_err(|err| {
+                            error!(?err, "Failed to emit data event");
+                            SyncError::Event("failed to emit data event")
+                        })?;
+                    }
+                }
+
+                Result::<_, SyncError>::Ok(())
+            },
             self.client.upload_operations(&operations_to_upload)
         );
 
