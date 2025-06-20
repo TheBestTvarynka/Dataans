@@ -6,7 +6,7 @@ use serde::Serialize;
 use crate::backend::{invoke_command, EmptyArgs};
 
 pub async fn list_spaces() -> CommandResult<Vec<OwnedSpace>> {
-    invoke_command(&format!("plugin:{}|list_spaces", APP_PLUGIN_NAME), &EmptyArgs {}).await
+    invoke_command(&format!("plugin:{APP_PLUGIN_NAME}|list_spaces"), &EmptyArgs {}).await
 }
 
 #[derive(Serialize)]
@@ -17,7 +17,7 @@ struct CreateSpaceArgs<'name, 'avatar> {
 
 pub async fn create_space(space_data: CreateSpace<'_, '_>) -> CommandResult<OwnedSpace> {
     invoke_command(
-        &format!("plugin:{}|create_space", APP_PLUGIN_NAME),
+        &format!("plugin:{APP_PLUGIN_NAME}|create_space"),
         &CreateSpaceArgs { space_data },
     )
     .await
@@ -31,7 +31,7 @@ struct UpdateSpaceArgs<'name> {
 
 pub async fn update_space(space_data: UpdateSpace<'_>) -> CommandResult<OwnedSpace> {
     invoke_command(
-        &format!("plugin:{}|update_space", APP_PLUGIN_NAME),
+        &format!("plugin:{APP_PLUGIN_NAME}|update_space"),
         &UpdateSpaceArgs { space_data },
     )
     .await
@@ -45,7 +45,7 @@ struct DeleteSpaceArgs {
 
 pub async fn delete_space(space_data: DeleteSpace) -> CommandResultEmpty {
     invoke_command(
-        &format!("plugin:{}|delete_space", APP_PLUGIN_NAME),
+        &format!("plugin:{APP_PLUGIN_NAME}|delete_space"),
         &DeleteSpaceArgs { space_data },
     )
     .await

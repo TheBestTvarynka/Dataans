@@ -19,7 +19,7 @@ pub async fn open_auth_window(app: AppHandle, web_server_url: Url) -> CommandRes
         WebviewWindowBuilder::new(
             &app,
             AUTH_WINDOW_TITLE,
-            WebviewUrl::App(format!("auth/{}", web_server_url).into()),
+            WebviewUrl::App(format!("auth/{web_server_url}").into()),
         )
         .always_on_top(false)
         .decorations(true)

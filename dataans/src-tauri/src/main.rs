@@ -71,15 +71,15 @@ fn init_tracing(app_data: &Path) {
     // `dataans.log` layer
     if !app_data.exists() {
         match fs::create_dir(app_data) {
-            Ok(()) => println!("Successfully created app data directory: {:?}", app_data),
-            Err(err) => eprintln!("Filed to create app data directory: {:?}. Path: {:?}", err, app_data),
+            Ok(()) => println!("Successfully created app data directory: {app_data:?}"),
+            Err(err) => eprintln!("Filed to create app data directory: {err:?}. Path: {app_data:?}"),
         }
     }
     let logs_dir = app_data.join(LOGS_DIR);
     if !logs_dir.exists() {
         match fs::create_dir(&logs_dir) {
-            Ok(()) => println!("Successfully created logs directory: {:?}", logs_dir),
-            Err(err) => eprintln!("Filed to create logs directory: {:?}. Path: {:?}", err, logs_dir),
+            Ok(()) => println!("Successfully created logs directory: {logs_dir:?}"),
+            Err(err) => eprintln!("Filed to create logs directory: {err:?}. Path: {logs_dir:?}"),
         }
     }
 
@@ -90,7 +90,7 @@ fn init_tracing(app_data: &Path) {
             registry.with(log_file_layer).with(logging_filter).init();
         }
         Err(e) => {
-            eprintln!("Couldn't open log file: {e}. Path: {:?}.", log_file);
+            eprintln!("Couldn't open log file: {e}. Path: {log_file:?}.");
             registry.with(logging_filter).init();
         }
     }

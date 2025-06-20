@@ -53,7 +53,7 @@ impl Theme {
         self.0.iter().fold(String::new(), |mut css, (key, value)| {
             use std::fmt::Write;
 
-            let _ = write!(css, "--{}: {};", key, value);
+            let _ = write!(css, "--{key}: {value};");
             css
         })
     }
@@ -245,7 +245,7 @@ impl NotesExportOption {
             "OneFile" => NotesExportOption::OneFile,
             "FilePerSpace" => NotesExportOption::FilePerSpace,
             "FilePerNote" => NotesExportOption::FilePerNote,
-            _ => panic!("Invalid NotesExportOption value: {}", value),
+            _ => panic!("Invalid NotesExportOption value: {value}"),
         }
     }
 }
@@ -281,7 +281,7 @@ impl DataExportConfig {
         match value {
             "Md" => DataExportConfig::Md(Default::default()),
             "Json" => DataExportConfig::Json(Default::default()),
-            _ => panic!("Invalid DataExportConfig variant name: {}", value),
+            _ => panic!("Invalid DataExportConfig variant name: {value}"),
         }
     }
 

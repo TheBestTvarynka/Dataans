@@ -91,10 +91,10 @@ mod tests {
         };
 
         let json = serde_json::to_string(&data).unwrap();
-        println!("{}", json);
+        println!("{json}");
 
         let raw = "{\"invitationToken\":[1,2,3,4],\"username\":\"tbt\",\"password\":\"quest1!\"}";
         let data = serde_json::from_str::<SignUpRequest>(raw).unwrap();
-        println!("{:?}", data);
+        println!("{data:?}");
     }
 }

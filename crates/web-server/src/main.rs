@@ -59,7 +59,7 @@ impl Default for WebServerState {
 }
 
 #[rocket::main]
-async fn main() -> std::result::Result<(), rocket::Error> {
+async fn main() -> std::result::Result<(), Box<rocket::Error>> {
     logging::init_tracing();
 
     let _rocket = rocket::build()

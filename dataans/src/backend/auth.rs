@@ -24,7 +24,7 @@ pub async fn sign_up(
     web_server_url: Url,
 ) -> CommandResult<Uuid> {
     invoke_command(
-        &format!("plugin:{}|sign_up", APP_PLUGIN_NAME),
+        &format!("plugin:{APP_PLUGIN_NAME}|sign_up"),
         &SignUpArgs {
             invitation_token: invitation_token
                 .try_into()
@@ -57,7 +57,7 @@ pub async fn sign_in(
     web_server_url: Url,
 ) -> CommandResultEmpty {
     invoke_command(
-        &format!("plugin:{}|sign_in", APP_PLUGIN_NAME),
+        &format!("plugin:{APP_PLUGIN_NAME}|sign_in"),
         &SignInArgs {
             secret_key: secret_key.map(|key| key.into()),
             username: username
@@ -73,5 +73,5 @@ pub async fn sign_in(
 }
 
 pub async fn profile() -> CommandResult<Option<UserContext>> {
-    invoke_command(&format!("plugin:{}|profile", APP_PLUGIN_NAME), &EmptyArgs {}).await
+    invoke_command(&format!("plugin:{APP_PLUGIN_NAME}|profile"), &EmptyArgs {}).await
 }

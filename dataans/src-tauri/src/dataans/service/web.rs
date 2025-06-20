@@ -62,7 +62,7 @@ impl WebService {
         let secret_key = SecretKey::from(OsRng.gen::<[u8; 32]>().to_vec());
 
         fs::write(
-            self.user_data_dir.join(format!("secret-key-{}.json", user_id)),
+            self.user_data_dir.join(format!("secret-key-{user_id}.json")),
             hex::encode(secret_key.as_ref()),
         )?;
 

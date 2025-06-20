@@ -54,7 +54,7 @@ impl<D: Db> FileService<D> {
         data: &[u8],
         base_path: &Path,
     ) -> Result<File, DataansError> {
-        let file_name = format!("{}_{}", id, name);
+        let file_name = format!("{id}_{name}");
 
         let file_path = base_path.join(FILES_DIR).join(file_name);
 
@@ -95,7 +95,7 @@ impl<D: Db> FileService<D> {
         let avatar = avatar_generator::generate::avatar();
 
         let avatar_id = Uuid::new_v4();
-        let avatar_name = format!("{}.png", avatar_id);
+        let avatar_name = format!("{avatar_id}.png");
 
         let avatar_path = base_path.join(IMAGES_DIR).join(&avatar_name);
 

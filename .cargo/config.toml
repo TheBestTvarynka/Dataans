@@ -4,8 +4,5 @@ rustflags = ["--cfg=web_sys_unstable_apis", "-Z", "threads=8"]
 [unstable]
 codegen-backend = true
 
-[profile.dev.package.dataans]
-codegen-backend = "cranelift"
-
-[profile.dev.package.web-server]
+[profile.dev]
 codegen-backend = "cranelift"
