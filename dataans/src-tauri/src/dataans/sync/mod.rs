@@ -172,11 +172,12 @@ impl<D: OperationDb> Synchronizer<D> {
         let result = futures::join!(
             async {
                 for operation in operations_to_apply {
-                    let event = self.db.apply_operation(operation).await?;
-                    emitter.emit(DATA_EVENT, event).map_err(|err| {
-                        error!(?err, "Failed to emit data event");
-                        SyncError::Event("failed to emit data event")
-                    })?;
+                    if let Some(event) = self.db.apply_operation(operation).await? {
+                        emitter.emit(DATA_EVENT, event).map_err(|err| {
+                            error!(?err, "Failed to emit data event");
+                            SyncError::Event("failed to emit data event")
+                        })?;
+                    }
                 }
 
                 Result::<_, SyncError>::Ok(())
