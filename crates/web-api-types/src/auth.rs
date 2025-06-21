@@ -35,6 +35,8 @@ pub struct SignInResponse {
 
 #[cfg(feature = "server")]
 mod impl_responder {
+    use std::env;
+
     use rocket::http::{ContentType, Cookie, Status};
     use rocket::request::Request;
     use rocket::response::{self, Responder, Response};
@@ -57,7 +59,7 @@ mod impl_responder {
                 .header(ContentType::JSON)
                 .header(
                     Cookie::build((crate::AUTH_COOKIE_NAME, token.as_str()))
-                        .domain(env!("DATAANS_SERVER_DOMAIN"))
+                        .domain(env::var("DATAANS_SERVER_DOMAIN").map_err(|_err| Status::InternalServerError)?)
                         .path("/")
                         .secure(true)
                         .http_only(true)

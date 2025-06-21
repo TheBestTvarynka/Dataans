@@ -1,0 +1,25 @@
+# fly.toml app configuration file generated for dataans-web-server on 2025-06-21T22:10:16+03:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = 'dataans-web-server'
+primary_region = 'waw'
+
+[build]
+
+[env]
+  PORT = '8080'
+  ROCKET_ADDRESS = '0.0.0.0'
+  ROCKET_PORT = '8080'
+
+[http_service]
+  internal_port = 8000
+  force_https = true
+  auto_stop_machines = 'stop'
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ['app']
+
+[[vm]]
+  size = 'shared-cpu-1x'
