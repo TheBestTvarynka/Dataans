@@ -5,6 +5,7 @@ use common::space::{Avatar, CreateSpaceOwned, DeleteSpace, Id as SpaceId, OwnedS
 use futures::future::try_join_all;
 use thiserror::Error;
 use time::OffsetDateTime;
+use uuid::Uuid;
 
 use crate::dataans::db::model::{File as FileModel, Space as SpaceModel};
 use crate::dataans::db::{Db, DbError};
@@ -38,11 +39,31 @@ impl<D: Db> SpaceService<D> {
 
         let created_at = OffsetDateTime::now_utc();
 
+        let avatar_id = if avatar.id() == common::DEFAULT_SPACE_AVATAR_ID {
+            // If the user decided to use the default avatar, we should create a new avatar file with a default image path in the database.
+            let avatar_id = Uuid::new_v4();
+            let avatar_name = format!("{avatar_id}.png");
+
+            self.db
+                .add_file(&FileModel::new(
+                    avatar_id,
+                    avatar_name,
+                    avatar.path().to_owned(),
+                    created_at,
+                    created_at,
+                ))
+                .await?;
+
+            avatar_id
+        } else {
+            avatar.id()
+        };
+
         self.db
             .create_space(&SpaceModel::new(
                 id.inner(),
                 name.clone().into(),
-                avatar.id(),
+                avatar_id,
                 created_at,
                 created_at,
             ))

@@ -1,4 +1,6 @@
 fn main() {
+    println!("cargo:rerun-if-changed=migrations");
+
     tauri_build::try_build(tauri_build::Attributes::new().plugin(
         "dataans",
         tauri_build::InlinedPlugin::new().commands(&[

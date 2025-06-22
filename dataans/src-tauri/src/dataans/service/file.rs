@@ -9,7 +9,7 @@ use time::OffsetDateTime;
 use uuid::Uuid;
 
 use crate::dataans::db::model::File as FileModel;
-use crate::dataans::db::{Db, DbError};
+use crate::dataans::db::Db;
 use crate::dataans::DataansError;
 use crate::{FILES_DIR, IMAGES_DIR};
 
@@ -20,31 +20,6 @@ pub struct FileService<D> {
 impl<D: Db> FileService<D> {
     pub fn new(db: Arc<D>) -> Self {
         Self { db }
-    }
-
-    pub async fn check_default_space_avatar(&self) -> Result<(), DataansError> {
-        if let Err(DbError::SqlxError(err)) = self.db.file_by_id(common::DEFAULT_SPACE_AVATAR_ID).await {
-            if let sqlx::Error::RowNotFound = err {
-                warn!(?err);
-
-                let now = OffsetDateTime::now_utc();
-                self.db
-                    .add_file(&FileModel::new(
-                        common::DEFAULT_SPACE_AVATAR_ID,
-                        "default_space_avatar.png".into(),
-                        common::DEFAULT_SPACE_AVATAR_PATH.into(),
-                        now,
-                        now,
-                    ))
-                    .await?;
-
-                Ok(())
-            } else {
-                Err(DataansError::DbError(DbError::SqlxError(err)))
-            }
-        } else {
-            Ok(())
-        }
     }
 
     pub async fn upload_file(

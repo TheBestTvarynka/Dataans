@@ -13,7 +13,7 @@ tauri-build = { version = "2", features = [] }
 time = { workspace = true, features = ["macros", "formatting"] }
 uuid = { workspace = true, features = ["serde", "v4"] }
 serde = { workspace = true, features = ["derive"] }
-sqlx = { workspace = true, features = ["runtime-tokio", "sqlite", "uuid", "time"] }
+sqlx = { workspace = true, features = ["runtime-tokio", "sqlite", "uuid", "time", "migrate"] }
 tracing.workspace = true
 thiserror.workspace = true
 web-api-types.workspace = true
