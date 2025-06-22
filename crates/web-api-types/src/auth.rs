@@ -35,6 +35,8 @@ pub struct SignInResponse {
 
 #[cfg(feature = "server")]
 mod impl_responder {
+    use std::env;
+
     use rocket::http::{ContentType, Cookie, Status};
     use rocket::request::Request;
     use rocket::response::{self, Responder, Response};
@@ -57,7 +59,7 @@ mod impl_responder {
                 .header(ContentType::JSON)
                 .header(
                     Cookie::build((crate::AUTH_COOKIE_NAME, token.as_str()))
-                        .domain(env!("DATAANS_SERVER_DOMAIN"))
+                        .domain(env::var("DATAANS_SERVER_DOMAIN").map_err(|_err| Status::InternalServerError)?)
                         .path("/")
                         .secure(true)
                         .http_only(true)
@@ -91,10 +93,10 @@ mod tests {
         };
 
         let json = serde_json::to_string(&data).unwrap();
-        println!("{}", json);
+        println!("{json}");
 
-        let raw = "{\"invitation_token\":[1,2,3,4],\"username\":\"tbt\",\"password\":\"quest1!\"}";
+        let raw = "{\"invitationToken\":[1,2,3,4],\"username\":\"tbt\",\"password\":\"quest1!\"}";
         let data = serde_json::from_str::<SignUpRequest>(raw).unwrap();
-        println!("{:?}", data);
+        println!("{data:?}");
     }
 }

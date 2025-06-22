@@ -28,10 +28,10 @@ impl From<std::io::Error> for CommandError {
 impl fmt::Display for CommandError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            CommandError::Dataans(m) => write!(f, "Dataans: {}", m),
-            CommandError::JsValue(m) => write!(f, "JS value: {}", m),
-            CommandError::Tauri(m) => write!(f, "Tauri: {}", m),
-            CommandError::InvalidData(m) => write!(f, "invalid data: {}", m),
+            CommandError::Dataans(m) => write!(f, "Dataans: {m}"),
+            CommandError::JsValue(m) => write!(f, "JS value: {m}"),
+            CommandError::Tauri(m) => write!(f, "Tauri: {m}"),
+            CommandError::InvalidData(m) => write!(f, "invalid data: {m}"),
             CommandError::TauriEvent(_) => write!(f, "Tauri event error"),
         }
     }

@@ -62,9 +62,9 @@ pub fn render_md_node(node: &Node) -> HtmlElement<AnyElement> {
                     <h6>{inner}</h6>
                 }
                 .into_any(),
-                // Note: should never be reached but let it be here just in case.
+                // Should never be reached but let it be here just in case.
                 n => view! {
-                    <span>{format!("Heading with depth={} is not supported!", n)}</span>
+                    <span>{format!("Heading with depth={n} is not supported!")}</span>
                 }
                 .into_any(),
             }
@@ -219,6 +219,6 @@ pub fn render_md_node(node: &Node) -> HtmlElement<AnyElement> {
             }
             .into_any()
         }
-        v => view! { <span>{format!("{:?} is not supported", v)}</span> }.into_any(),
+        v => view! { <span>{format!("{v:?} is not supported")}</span> }.into_any(),
     }
 }

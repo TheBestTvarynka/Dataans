@@ -32,7 +32,7 @@ impl SchemaVersion {
     pub fn _from_str(value: &str) -> Self {
         match value {
             "V1" => SchemaVersion::V1,
-            _ => panic!("Invalid export schema version: {}", value),
+            _ => panic!("Invalid export schema version: {value}"),
         }
     }
 }

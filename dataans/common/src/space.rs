@@ -74,8 +74,6 @@ impl AsRef<str> for Name<'_> {
 }
 
 /// Represents space avatar file name.
-///
-/// Example: `461d7188-062a-4514-bece-3577624d0ee8.png`.
 #[derive(Serialize, Deserialize, Debug, Default, Clone, Eq, PartialEq)]
 pub struct Avatar<'avatar> {
     id: Uuid,
