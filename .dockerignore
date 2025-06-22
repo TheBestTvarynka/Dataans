@@ -1,0 +1,6 @@
+fly.toml
+.git/
+.github/
+doc/
+target/
+dist/

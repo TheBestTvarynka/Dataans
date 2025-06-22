@@ -27,11 +27,11 @@ pub fn convert_file_src(image_path: impl AsRef<str>) -> String {
 
     #[cfg(windows_is_host_os)]
     {
-        format!("http://asset.localhost/{}", image_path)
+        format!("http://asset.localhost/{image_path}")
     }
     #[cfg(not(windows_is_host_os))]
     {
-        format!("asset://localhost/{}", image_path)
+        format!("asset://localhost/{image_path}")
     }
 }
 

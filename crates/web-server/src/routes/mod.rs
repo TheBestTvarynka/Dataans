@@ -17,6 +17,7 @@ pub fn health() -> &'static str {
 
 #[derive(Debug)]
 pub struct UserContext {
+    #[allow(dead_code)]
     pub user_id: UserId,
 }
 

@@ -54,7 +54,7 @@ pub async fn on_status_update(toaster: ToasterContext) -> CommandResultEmpty {
             StatusUpdateEvent::SyncFailed(message) => {
                 error!("{:?}", message);
                 toaster.toast(
-                    leptoaster::ToastBuilder::new(&format!("Synchronization failed: {}", message))
+                    leptoaster::ToastBuilder::new(&format!("Synchronization failed: {message}"))
                         .with_level(leptoaster::ToastLevel::Error)
                         .with_position(leptoaster::ToastPosition::BottomRight)
                         .with_expiry(Some(5000)),
@@ -136,12 +136,12 @@ pub struct SyncConfigArgs<'a> {
 
 pub async fn set_sync_options(sync_config: &Sync) -> CommandResult<UserContext> {
     invoke_command(
-        &format!("plugin:{}|set_sync_options", APP_PLUGIN_NAME),
+        &format!("plugin:{APP_PLUGIN_NAME}|set_sync_options"),
         &SyncConfigArgs { sync_config },
     )
     .await
 }
 
 pub async fn trigger_full_sync() -> CommandResultEmpty {
-    invoke_command(&format!("plugin:{}|full_sync", APP_PLUGIN_NAME), &EmptyArgs {}).await
+    invoke_command(&format!("plugin:{APP_PLUGIN_NAME}|full_sync"), &EmptyArgs {}).await
 }

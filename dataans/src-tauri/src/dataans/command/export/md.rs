@@ -66,9 +66,9 @@ async fn write_space_notes_per_file<D: Db>(
                 for note_file in files {
                     let NoteFile { id, name, path } = note_file;
 
-                    writeln!(file, "### {}\n", name)?;
-                    writeln!(file, "Id: {}", id)?;
-                    writeln!(file, "Path: {:?}\n", path)?;
+                    writeln!(file, "### {name}\n")?;
+                    writeln!(file, "Id: {id}")?;
+                    writeln!(file, "Path: {path:?}\n")?;
                 }
 
                 Result::<(), DataansError>::Ok(())
@@ -100,9 +100,9 @@ fn write_space_notes(notes: &[OwnedNote], file: &mut File) -> Result<(), Dataans
         for note_file in files {
             let NoteFile { id, name, path } = note_file;
 
-            writeln!(file, "##### {}\n", name)?;
-            writeln!(file, "Id: {}", id)?;
-            writeln!(file, "Path: {:?}\n", path)?;
+            writeln!(file, "##### {name}\n")?;
+            writeln!(file, "Id: {id}")?;
+            writeln!(file, "Path: {path:?}\n")?;
         }
 
         writeln!(file, "---\n")?;

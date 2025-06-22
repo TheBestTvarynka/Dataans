@@ -84,7 +84,7 @@ pub async fn emit<T: Serialize>(event: &str, payload: &T) -> CommandResult<()> {
     .await
     .map_err(|err| {
         error!("{:?}", err);
-        CommandError::TauriEvent(format!("{:?}", err))
+        CommandError::TauriEvent(format!("{err:?}"))
     })?;
 
     Ok(())
@@ -118,7 +118,7 @@ pub async fn emit_to<T: Serialize>(target: &EventTarget, event: &str, payload: &
     .await
     .map_err(|err| {
         error!("{:?}", err);
-        CommandError::TauriEvent(format!("{:?}", err))
+        CommandError::TauriEvent(format!("{err:?}"))
     })?;
 
     Ok(())
@@ -149,7 +149,6 @@ where
     let (tx, rx) = mpsc::unbounded::<Event<T>>();
 
     let closure = Closure::<dyn FnMut(JsValue)>::new(move |raw| {
-        info!("raw value: {:?}", raw);
         let _ = tx.unbounded_send(serde_wasm_bindgen::from_value(raw).unwrap());
     });
     let unlisten = inner::listen(
@@ -163,7 +162,7 @@ where
     .await
     .map_err(|err| {
         error!("{:?}", err);
-        CommandError::TauriEvent(format!("{:?}", err))
+        CommandError::TauriEvent(format!("{err:?}"))
     })?;
     closure.forget();
 
@@ -209,7 +208,7 @@ where
     .await
     .map_err(|err| {
         error!("{:?}", err);
-        CommandError::TauriEvent(format!("{:?}", err))
+        CommandError::TauriEvent(format!("{err:?}"))
     })?;
     closure.forget();
 
@@ -288,7 +287,7 @@ where
     .await
     .map_err(|err| {
         error!("{:?}", err);
-        CommandError::TauriEvent(format!("{:?}", err))
+        CommandError::TauriEvent(format!("{err:?}"))
     })?;
     closure.forget();
 
@@ -343,7 +342,7 @@ where
     .await
     .map_err(|err| {
         error!("{:?}", err);
-        CommandError::TauriEvent(format!("{:?}", err))
+        CommandError::TauriEvent(format!("{err:?}"))
     })?;
     closure.forget();
 

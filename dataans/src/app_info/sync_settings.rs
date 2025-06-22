@@ -97,10 +97,10 @@ pub fn SyncSettings(context: UserContext) -> impl IntoView {
                             </label>
                         </div>
                         <div class="horizontal">
-                            <input type="radio" id="push" name="sync-move" value="push" on:change=move |ev| on_change.call(ev) checked=mode == SyncMode::Push />
+                            <input type="radio" id="push" name="sync-move" value="push" on:change=move |ev| on_change.call(ev) checked=mode == SyncMode::Push disabled=true />
                             <label for="push" class="app-info-sync-mode">
                                 <b>"Push."</b>
-                                <span>"The app maintains the connection with a server and syncs data automatically."</span>
+                                <span>"The app maintains the connection with a server and syncs data automatically. (not implemented yet)"</span>
                             </label>
                         </div>
                     </form>

@@ -58,6 +58,8 @@ impl DataansState {
             ))
             .expect("can not connect to sqlite db");
 
+        sqlx::migrate!().run(&pool).await.expect("Failed to run migrations");
+
         let operation_logger = Arc::new(OperationLogger::new(pool));
         let sqlite = Arc::new(SqliteDb::new(Arc::clone(&operation_logger)));
 
@@ -195,9 +197,6 @@ pub fn init_dataans_plugin<R: Runtime>() -> TauriPlugin<R> {
             }
 
             let dataans_state = block_on(DataansState::init(db_dir, app_data));
-            if let Err(err) = block_on(dataans_state.file_service.check_default_space_avatar()) {
-                error!(?err);
-            }
             app_handle.manage(dataans_state);
 
             Ok(())
