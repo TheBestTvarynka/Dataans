@@ -28,13 +28,15 @@ pub struct State<D> {
 pub type WebServerState = State<PostgresDb>;
 
 impl WebServerState {
-    pub fn new() -> WebServerState {
+    pub async fn new() -> WebServerState {
         let pool = PgPoolOptions::new()
             .max_connections(16)
             .min_connections(1)
             .acquire_timeout(std::time::Duration::from_secs(3))
             .connect_lazy(&std::env::var(DATABASE_URL).expect("database url env var should be set"))
             .expect("can not connect to postgresql db");
+
+        sqlx::migrate!().run(&pool).await.expect("Failed to run migrations");
 
         let db = Arc::new(PostgresDb::new(pool));
 
@@ -52,18 +54,14 @@ impl WebServerState {
     }
 }
 
-impl Default for WebServerState {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
 #[rocket::main]
 async fn main() -> std::result::Result<(), Box<rocket::Error>> {
     logging::init_tracing();
 
+    let state = WebServerState::new().await;
+
     let _rocket = rocket::build()
-        .manage(WebServerState::new())
+        .manage(state)
         .mount("/auth", routes![routes::sign_up, routes::sign_in])
         .mount(
             "/data",
