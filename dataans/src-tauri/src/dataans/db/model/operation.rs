@@ -75,6 +75,7 @@ impl Operation<'_> {
                             created_at: _,
                             updated_at: _,
                             is_deleted: _,
+                            is_uploaded: _,
                         } = file;
                         EventFile {
                             id,
@@ -119,6 +120,7 @@ impl Operation<'_> {
                                 created_at: _,
                                 updated_at: _,
                                 is_deleted: _,
+                                is_uploaded: _,
                             } = file;
                             EventFile {
                                 id,
@@ -255,6 +257,7 @@ impl Operation<'_> {
                                 created_at: _,
                                 updated_at: _,
                                 is_deleted: _,
+                                is_uploaded: _,
                             } = file;
                             EventFile {
                                 id,

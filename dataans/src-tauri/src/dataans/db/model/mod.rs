@@ -97,6 +97,8 @@ pub struct File {
     #[serde(with = "rfc3339")]
     pub updated_at: OffsetDateTime,
     pub is_deleted: bool,
+    #[serde(skip)]
+    pub is_uploaded: bool,
 }
 
 impl Hash for File {
@@ -119,6 +121,7 @@ impl File {
             created_at,
             updated_at,
             is_deleted: false,
+            is_uploaded: false,
         }
     }
 }

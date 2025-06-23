@@ -138,6 +138,7 @@ impl<D: Db> SpaceService<D> {
             created_at: _,
             updated_at: _,
             is_deleted: _,
+            is_uploaded: _,
         } = db.file_by_id(avatar_id).await?;
 
         Ok(OwnedSpace {
