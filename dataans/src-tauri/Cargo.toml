@@ -49,6 +49,9 @@ serde_json = "1"
 reqwest = { version = "0.12", features = ["json", "rustls-tls", "http2"] }
 rand = { version = "0.8", features = ["getrandom"] }
 
+[dev-dependencies]
+tokio = { version = "1.45.1", features = ["full"] }
+
 [features]
 # This feature is used for production builds or when a dev server is not specified, DO NOT REMOVE!!
 custom-protocol = ["tauri/custom-protocol"]
