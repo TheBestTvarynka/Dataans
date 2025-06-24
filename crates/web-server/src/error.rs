@@ -36,6 +36,9 @@ pub enum Error {
 
     #[error("internal error: {0}")]
     Internal(&'static str),
+
+    #[error("io error: {0}")]
+    Io(#[from] std::io::Error),
 }
 
 impl From<DbError> for Error {
@@ -80,6 +83,7 @@ impl From<Error> for web_api_types::Error {
             Error::AccessDenied => Self::AccessDenied("access denied".into()),
             Error::InvalidData(_) => Self::InvalidData(error.to_string()),
             Error::DecryptionFailed(reason) => Self::Internal(reason.into()),
+            Error::Io(err) => Self::Internal(format!("{err:?}")),
             Error::Session(_) => Self::Unauthorized(error.to_string()),
         }
     }

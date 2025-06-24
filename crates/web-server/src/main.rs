@@ -1,3 +1,5 @@
+#![allow(async_fn_in_trait)]
+
 #[macro_use]
 extern crate tracing;
 
@@ -8,6 +10,7 @@ mod logging;
 mod routes;
 pub mod services;
 
+use std::path::PathBuf;
 use std::sync::Arc;
 
 pub use error::{Error, Result};
@@ -15,17 +18,18 @@ use rocket::routes;
 use sqlx::postgres::PgPoolOptions;
 
 use crate::db::PostgresDb;
-use crate::services::{Auth as AuthService, Data as DataService};
+use crate::services::{Auth as AuthService, Data as DataService, Fs};
 
 const DATABASE_URL: &str = "DATAANS_WEB_SERVER_DATABASE_URL";
 const DATAANS_SERVER_ENCRYPTION_KEY: &str = "DATAANS_SERVER_ENCRYPTION_KEY";
 
-pub struct State<D> {
+pub struct State<D, S> {
     pub auth_service: AuthService<D>,
     pub data_service: DataService<D>,
+    pub file_saver: S,
 }
 
-pub type WebServerState = State<PostgresDb>;
+pub type WebServerState = State<PostgresDb, Fs>;
 
 impl WebServerState {
     pub async fn new() -> WebServerState {
@@ -50,6 +54,7 @@ impl WebServerState {
         Self {
             auth_service: AuthService::new(Arc::clone(&db), server_encryption_key),
             data_service: DataService::new(Arc::clone(&db)),
+            file_saver: Fs::new(PathBuf::from(String::from("dist"))),
         }
     }
 }
@@ -67,6 +72,7 @@ async fn main() -> std::result::Result<(), Box<rocket::Error>> {
             "/data",
             routes![routes::blocks, routes::operations, routes::add_operations,],
         )
+        .mount("/file", routes![routes::upload, routes::download])
         .mount("/health", routes![routes::health])
         .launch()
         .await?;
