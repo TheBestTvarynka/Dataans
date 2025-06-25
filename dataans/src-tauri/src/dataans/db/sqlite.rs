@@ -264,16 +264,17 @@ impl SqliteDb {
             created_at: _,
             updated_at: _,
             is_deleted: _,
-            is_uploaded: _,
+            is_uploaded,
         } = file;
 
         sqlx::query!(
-            "INSERT INTO files (id, name, path, created_at, updated_at) VALUES (?1, ?2, ?3, ?4, ?5)",
+            "INSERT INTO files (id, name, path, created_at, updated_at, is_uploaded) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
             id,
             name,
             path,
             now,
             now,
+            is_uploaded,
         )
         .execute(&mut **transaction)
         .await?;
@@ -324,6 +325,16 @@ impl SqliteDb {
 
         Ok(())
     }
+
+    pub async fn files(connection: &mut SqliteConnection) -> Result<Vec<File>, DbError> {
+        let files = sqlx::query_as(
+            "SELECT id, name, path, created_at, updated_at, is_deleted, is_uploaded FROM files WHERE is_deleted = FALSE",
+        )
+        .fetch_all(&mut *connection)
+        .await?;
+
+        Ok(files)
+    }
 }
 
 impl Db for SqliteDb {
@@ -331,11 +342,7 @@ impl Db for SqliteDb {
     async fn files(&self) -> Result<Vec<File>, DbError> {
         let mut connection = self.pool.read_only_connection().await?;
 
-        let files = sqlx::query_as(
-            "SELECT id, name, path, created_at, updated_at, is_deleted, is_uploaded FROM files WHERE is_deleted = FALSE",
-        )
-        .fetch_all(&mut *connection)
-        .await?;
+        let files = SqliteDb::files(&mut connection).await?;
 
         Ok(files)
     }

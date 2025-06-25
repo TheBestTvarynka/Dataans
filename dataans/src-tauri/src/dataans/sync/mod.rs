@@ -9,6 +9,7 @@ use std::sync::Arc;
 use common::event::DATA_EVENT;
 pub use hash::{Hash, Hasher};
 use sha2::{Digest, Sha256};
+use tauri::async_runtime::{channel, Receiver, Sender};
 use tauri::{Emitter, Runtime};
 use thiserror::Error;
 use url::Url;
@@ -17,7 +18,8 @@ use web_api_types::{AuthToken, UserId, AUTH_HEADER_NAME};
 
 use crate::dataans::crypto::{decrypt, encrypt, CryptoError, EncryptionKey};
 use crate::dataans::db::{
-    Db, DbError, Note as NoteModel, Operation, OperationDb, OperationRecord, OperationRecordOwned, Space as SpaceModel,
+    Db, DbError, File as FileModel, Note as NoteModel, Operation, OperationDb, OperationRecord, OperationRecordOwned,
+    Space as SpaceModel,
 };
 use crate::dataans::service::note::NoteServiceError;
 use crate::dataans::service::space::SpaceServiceError;
@@ -25,6 +27,7 @@ use crate::dataans::sync::client::Client;
 use crate::dataans::{NoteService, SpaceService};
 
 const OPERATIONS_PER_BLOCK: usize = 16;
+const CHANNEL_BUFFER_SIZE: usize = 64;
 
 #[derive(Debug, Error)]
 pub enum SyncError {
@@ -69,7 +72,14 @@ pub async fn sync_future<D: OperationDb, R: Runtime, E: Emitter<R>>(
 ) -> Result<(), SyncError> {
     let synchronizer = Synchronizer::new(db, sync_server, auth_token, encryption_key)?;
 
-    synchronizer.synchronize(emitter).await
+    let (sender, receiver) = channel::<FileModel>(CHANNEL_BUFFER_SIZE);
+
+    let main_sync_fut = synchronizer.synchronize(emitter, sender);
+    let file_sync_fut = synchronizer.synchronize_files(emitter, receiver);
+
+    let (main_result, file_result) = futures::join!(main_sync_fut, file_sync_fut);
+
+    todo!()
 }
 
 struct Synchronizer<D> {
@@ -90,8 +100,25 @@ impl<D: OperationDb> Synchronizer<D> {
         })
     }
 
+    async fn synchronize_files<R: Runtime, E: Emitter<R>>(
+        &self,
+        emitter: &E,
+        receiver: Receiver<FileModel>,
+    ) -> Result<(), SyncError> {
+        let files = self.db.files().await?;
+
+        for file in files {
+            //
+        }
+        Ok(())
+    }
+
     #[instrument(err, skip(self, emitter))]
-    async fn synchronize<R: Runtime, E: Emitter<R>>(&self, emitter: &E) -> Result<(), SyncError> {
+    async fn synchronize<R: Runtime, E: Emitter<R>>(
+        &self,
+        emitter: &E,
+        sender: Sender<FileModel>,
+    ) -> Result<(), SyncError> {
         let (local_operations, remote_blocks) =
             futures::join!(self.db.operations(), self.client.blocks(OPERATIONS_PER_BLOCK),);
 

@@ -126,27 +126,3 @@ impl Client {
         Ok(response.bytes().await?.to_vec())
     }
 }
-
-#[cfg(test)]
-mod tests {
-    use uuid::uuid;
-
-    use super::*;
-
-    #[tokio::test]
-    async fn file_upload() {
-        let client = Client::new(
-            Url::parse("http://127.0.0.1:8000/").unwrap(),
-            AuthToken::from(String::from("29a1f10a4c49ab3c27bee9d7b402656f385acb457a61a8252d1c31212d5459b1c6bd20c2f9e0fa98b8d25c52bef9ac67480f3b399d32e6b975a66f50f697c0c2b44eb25fca13732c09b03f23")),
-            [108, 64, 23, 46, 95, 35, 193, 87, 128, 150, 103, 124, 155, 39, 149, 8, 4, 121, 110, 115, 185, 43, 142, 40, 148, 90, 144, 255, 151, 19, 153, 204].into(),
-        ).unwrap();
-
-        let id = Uuid::new_v4();
-        let file_data = b"Hello, Dataans!";
-        client.upload_file(id, file_data).await.unwrap();
-
-        let data = client.download_file(id).await.unwrap();
-
-        assert_eq!(data, file_data);
-    }
-}

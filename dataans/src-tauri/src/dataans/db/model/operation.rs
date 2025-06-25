@@ -157,7 +157,10 @@ impl Operation<'_> {
                 }
             }
             Operation::CreateFile(file) => {
-                SqliteDb::add_file(file.as_ref(), operation_time, transaction).await?;
+                let mut file = file.clone().into_owned();
+                file.is_uploaded = true;
+
+                SqliteDb::add_file(&file, operation_time, transaction).await?;
 
                 None
             }
@@ -417,6 +420,14 @@ impl OperationDb for OperationLogger {
         transaction.commit().await?;
 
         Ok(event)
+    }
+
+    async fn files(&self) -> Result<Vec<File>, DbError> {
+        let mut connection = self.pool.acquire().await?;
+
+        let files = SqliteDb::files(&mut connection).await?;
+
+        Ok(files)
     }
 }
 

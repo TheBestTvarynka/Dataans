@@ -43,4 +43,5 @@ pub trait Db: Send + Sync {
 pub trait OperationDb: Send + Sync {
     async fn operations(&self) -> Result<Vec<OperationRecordOwned>, DbError>;
     async fn apply_operation(&self, operations: &OperationRecord<'_>) -> Result<Option<DataEvent>, DbError>;
+    async fn files(&self) -> Result<Vec<File>, DbError>;
 }

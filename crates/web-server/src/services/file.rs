@@ -12,7 +12,7 @@ pub trait FileSaver: Send + Sync {
     async fn open_file(&self, id: Uuid) -> Result<(Option<usize>, impl AsyncRead + Send)>;
 }
 
-#[derive(Default)]
+#[derive(Default, Debug)]
 pub struct Fs {
     dest: PathBuf,
 }
@@ -24,6 +24,7 @@ impl Fs {
 }
 
 impl FileSaver for Fs {
+    #[instrument(ret, skip(reader))]
     async fn save_file(&self, id: Uuid, mut reader: impl AsyncRead + Unpin) -> Result<()> {
         let mut file = File::create(self.dest.join(id.to_string())).await?;
 
@@ -32,7 +33,9 @@ impl FileSaver for Fs {
         Ok(())
     }
 
+    #[instrument(err)]
     async fn open_file(&self, id: Uuid) -> Result<(Option<usize>, impl AsyncRead + Send)> {
+        // TODO: use buf reader.
         let data = File::open(self.dest.join(id.to_string())).await?;
         let size = data
             .metadata()
