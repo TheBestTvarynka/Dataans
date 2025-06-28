@@ -5,7 +5,7 @@ use reqwest::ClientBuilder;
 use sha2::Sha256;
 use url::Url;
 use uuid::Uuid;
-use web_api_types::{AuthToken, Blocks, Operation, UserId, AUTH_HEADER_NAME};
+use web_api_types::{AuthToken, Blocks, Operation, AUTH_HEADER_NAME};
 
 use super::SyncError;
 use crate::dataans::crypto::{decrypt, encrypt, EncryptionKey};

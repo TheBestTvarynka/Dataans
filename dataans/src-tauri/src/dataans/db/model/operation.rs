@@ -429,6 +429,14 @@ impl OperationDb for OperationLogger {
 
         Ok(files)
     }
+
+    async fn file_by_id(&self, file_id: Uuid) -> Result<File, DbError> {
+        let mut connection = self.pool.acquire().await?;
+
+        let file = SqliteDb::file_by_id(file_id, &mut connection).await?;
+
+        Ok(file)
+    }
 }
 
 pub struct OperationLoggerGuard<'a> {
