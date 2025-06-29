@@ -138,12 +138,13 @@ impl<D: Db> SpaceService<D> {
             created_at: _,
             updated_at: _,
             is_deleted: _,
+            is_uploaded: _,
         } = db.file_by_id(avatar_id).await?;
 
         Ok(OwnedSpace {
             id: id.into(),
             name: name.into(),
-            avatar: Avatar::new(avatar_id, avatar_path),
+            avatar: Avatar::new(avatar_id.into(), avatar_path),
             created_at: created_at.into(),
             updated_at: updated_at.into(),
         })

@@ -1,30 +1,29 @@
-#![allow(dead_code)]
-#![allow(unused_imports)]
-
 mod client;
 mod hash;
 
+use std::path::Path;
 use std::sync::Arc;
 
-use common::event::DATA_EVENT;
+use common::event::{DataEvent, DATA_EVENT};
+use common::note::{FileId, FileStatus};
+use futures::stream::FuturesUnordered;
+use futures::StreamExt;
 pub use hash::{Hash, Hasher};
 use sha2::{Digest, Sha256};
+use tauri::async_runtime::{channel, Receiver, Sender};
 use tauri::{Emitter, Runtime};
 use thiserror::Error;
+use tokio_stream::wrappers::ReceiverStream;
 use url::Url;
 use uuid::Uuid;
-use web_api_types::{AuthToken, UserId, AUTH_HEADER_NAME};
+use web_api_types::AuthToken;
 
-use crate::dataans::crypto::{decrypt, encrypt, CryptoError, EncryptionKey};
-use crate::dataans::db::{
-    Db, DbError, Note as NoteModel, Operation, OperationDb, OperationRecord, OperationRecordOwned, Space as SpaceModel,
-};
-use crate::dataans::service::note::NoteServiceError;
-use crate::dataans::service::space::SpaceServiceError;
+use crate::dataans::crypto::{CryptoError, EncryptionKey};
+use crate::dataans::db::{DbError, OperationDb};
 use crate::dataans::sync::client::Client;
-use crate::dataans::{NoteService, SpaceService};
 
 const OPERATIONS_PER_BLOCK: usize = 16;
+const CHANNEL_BUFFER_SIZE: usize = 64;
 
 #[derive(Debug, Error)]
 pub enum SyncError {
@@ -43,20 +42,14 @@ pub enum SyncError {
     #[error(transparent)]
     Crypto(#[from] CryptoError),
 
-    #[error("invalid note ({0}): block id is missing: trying to sync not-uploaded note")]
-    InvalidNoteBlockId(Uuid),
-
-    #[error(transparent)]
-    NoteService(#[from] NoteServiceError),
-
-    #[error(transparent)]
-    SpaceService(#[from] SpaceServiceError),
-
     #[error("sync failed: {0}")]
     SyncFailed(&'static str),
 
     #[error("failed to send event: {0}")]
     Event(&'static str),
+
+    #[error("io error: {0}")]
+    Io(#[from] std::io::Error),
 }
 
 #[instrument(ret, skip(db, auth_token, encryption_key, emitter))]
@@ -69,7 +62,35 @@ pub async fn sync_future<D: OperationDb, R: Runtime, E: Emitter<R>>(
 ) -> Result<(), SyncError> {
     let synchronizer = Synchronizer::new(db, sync_server, auth_token, encryption_key)?;
 
-    synchronizer.synchronize(emitter).await
+    let (sender, receiver) = channel::<FileId>(CHANNEL_BUFFER_SIZE);
+
+    let main_sync_fut = synchronizer.synchronize(emitter, sender);
+    let file_sync_fut = synchronizer.synchronize_files(emitter, receiver);
+
+    let (main_result, file_result) = futures::join!(main_sync_fut, file_sync_fut);
+
+    match (main_result, file_result) {
+        (Ok(_), Ok(_)) => {
+            info!("Synchronization successful.");
+
+            Ok(())
+        }
+        (Err(main_err), Err(file_err)) => {
+            error!(?main_err, ?file_err, "Failed to sync DB data and files data");
+
+            Err(SyncError::SyncFailed("failed to sync DB data and files data"))
+        }
+        (Err(err), _) => {
+            error!(?err, "Failed to sync DB data");
+
+            Err(SyncError::SyncFailed("failed to sync DB data"))
+        }
+        (_, Err(err)) => {
+            error!(?err, "Failed to sync files data");
+
+            Err(SyncError::SyncFailed("failed to sync files data"))
+        }
+    }
 }
 
 struct Synchronizer<D> {
@@ -90,8 +111,102 @@ impl<D: OperationDb> Synchronizer<D> {
         })
     }
 
+    async fn handle_file<R: Runtime, E: Emitter<R>>(&self, file_id: Uuid, emitter: &E) -> Result<(), SyncError> {
+        let file = self.db.file_by_id(*file_id.as_ref()).await?;
+        let file_path = Path::new(&file.path);
+
+        if file.is_uploaded {
+            if !file_path.exists() {
+                debug!(?file.id, ?file.path, "File does not exist locally, but is uploaded. Downloading...");
+
+                self.client.download_file(file.id, file_path).await?;
+                emitter
+                    .emit(
+                        DATA_EVENT,
+                        DataEvent::FileStatusUpdated(file.id.into(), FileStatus::ExistAndUploaded),
+                    )
+                    .map_err(|err| {
+                        error!(?err, "Failed to emit data event");
+                        SyncError::Event("failed to emit data event")
+                    })?;
+            } else {
+                debug!(?file.id, ?file.path, "File exists locally and is uploaded. Nothing to do.");
+            }
+        } else if file_path.exists() {
+            debug!(?file.id, ?file.path, "File exists locally, but is not uploaded. Uploading...");
+
+            self.client.upload_file(file.id, file_path).await?;
+            self.db.mark_file_as_uploaded(file.id).await?;
+            emitter
+                .emit(
+                    DATA_EVENT,
+                    DataEvent::FileStatusUpdated(file.id.into(), FileStatus::ExistAndUploaded),
+                )
+                .map_err(|err| {
+                    error!(?err, "Failed to emit data event");
+                    SyncError::Event("failed to emit data event")
+                })?;
+        } else {
+            warn!(?file.id, ?file.path, "File does not exist locally and is not uploaded. Something weird happens here...");
+            emitter
+                .emit(
+                    DATA_EVENT,
+                    DataEvent::FileStatusUpdated(file.id.into(), FileStatus::NotExistAndNotUploaded),
+                )
+                .map_err(|err| {
+                    error!(?err, "Failed to emit data event");
+                    SyncError::Event("failed to emit data event")
+                })?;
+        }
+
+        Ok(())
+    }
+
+    async fn synchronize_files<R: Runtime, E: Emitter<R>>(
+        &self,
+        emitter: &E,
+        receiver: Receiver<FileId>,
+    ) -> Result<(), SyncError> {
+        let mut tasks = self
+            .db
+            .files()
+            .await?
+            .into_iter()
+            .map(|file| self.handle_file(file.id, emitter))
+            .collect::<FuturesUnordered<_>>();
+
+        let receiver_stream = ReceiverStream::new(receiver);
+        let mut receiver_stream = receiver_stream.fuse();
+
+        loop {
+            futures::select! {
+                file_id = receiver_stream.next() => {
+                    if let Some(file_id) = file_id {
+                        let fut = self.handle_file(file_id.into(), emitter);
+                        tasks.push(fut);
+                    } else {
+                        break;
+                    }
+                }
+                task_result = tasks.next() => {
+                    debug!(?task_result, "File synchronization task finished");
+                }
+            }
+        }
+
+        while let Some(task_result) = tasks.next().await {
+            debug!(?task_result, "File synchronization task finished");
+        }
+
+        Ok(())
+    }
+
     #[instrument(err, skip(self, emitter))]
-    async fn synchronize<R: Runtime, E: Emitter<R>>(&self, emitter: &E) -> Result<(), SyncError> {
+    async fn synchronize<R: Runtime, E: Emitter<R>>(
+        &self,
+        emitter: &E,
+        sender: Sender<FileId>,
+    ) -> Result<(), SyncError> {
         let (local_operations, remote_blocks) =
             futures::join!(self.db.operations(), self.client.blocks(OPERATIONS_PER_BLOCK),);
 
@@ -175,6 +290,12 @@ impl<D: OperationDb> Synchronizer<D> {
                     if let Some(event) = self.db.apply_operation(operation).await.inspect_err(|err| {
                         error!(?err, ?operation, "Failed to apply operation");
                     })? {
+                        if let DataEvent::FileAdded(file) = &event {
+                            sender.send(file.id).await.map_err(|err| {
+                                error!(?err, "Failed to send file id into the channel");
+                                SyncError::Event("failed to send file id into the channel")
+                            })?;
+                        }
                         emitter.emit(DATA_EVENT, event).map_err(|err| {
                             error!(?err, "Failed to emit data event");
                             SyncError::Event("failed to emit data event")

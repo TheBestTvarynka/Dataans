@@ -1,8 +1,9 @@
 use std::borrow::Cow;
 use std::ops::{Deref, DerefMut};
+use std::path::PathBuf;
 
 use common::event::DataEvent;
-use common::note::{File as EventFile, Id as NoteId, MdText, Note as EventNote};
+use common::note::{File as EventFile, FileStatus, Id as NoteId, MdText, Note as EventNote};
 use common::space::{Avatar, Id as SpaceId, Name as SpaceName, Space as EventSpace};
 use common::{CreationDate, UpdateDate};
 use serde::{Deserialize, Serialize};
@@ -75,11 +76,17 @@ impl Operation<'_> {
                             created_at: _,
                             updated_at: _,
                             is_deleted: _,
+                            is_uploaded,
                         } = file;
+
+                        let path = PathBuf::from(path);
+                        let status = FileStatus::status_for_file(&path, is_uploaded);
+
                         EventFile {
-                            id,
+                            id: id.into(),
                             name,
-                            path: path.into(),
+                            path,
+                            status,
                         }
                     })
                     .collect();
@@ -119,11 +126,17 @@ impl Operation<'_> {
                                 created_at: _,
                                 updated_at: _,
                                 is_deleted: _,
+                                is_uploaded,
                             } = file;
+
+                            let path = PathBuf::from(path);
+                            let status = FileStatus::status_for_file(&path, is_uploaded);
+
                             EventFile {
-                                id,
+                                id: id.into(),
                                 name,
-                                path: path.into(),
+                                path,
+                                status,
                             }
                         })
                         .collect();
@@ -155,9 +168,30 @@ impl Operation<'_> {
                 }
             }
             Operation::CreateFile(file) => {
-                SqliteDb::add_file(file.as_ref(), operation_time, transaction).await?;
+                let mut file = file.clone().into_owned();
+                file.is_uploaded = true;
 
-                None
+                SqliteDb::add_file(&file, operation_time, transaction).await?;
+
+                let File {
+                    id,
+                    name,
+                    path,
+                    created_at: _,
+                    updated_at: _,
+                    is_deleted: _,
+                    is_uploaded,
+                } = file;
+
+                let path = PathBuf::from(path);
+                let status = FileStatus::status_for_file(&path, is_uploaded);
+
+                Some(DataEvent::FileAdded(EventFile {
+                    id: id.into(),
+                    name,
+                    path,
+                    status,
+                }))
             }
             Operation::DeleteFile(id) => {
                 let local_file = SqliteDb::file_by_id(*id, transaction.as_mut()).await?;
@@ -187,7 +221,7 @@ impl Operation<'_> {
                     name: SpaceName::from(name.clone()),
                     created_at: CreationDate::from(*created_at),
                     updated_at: UpdateDate::from(*updated_at),
-                    avatar: Avatar::new(*avatar_id, avatar.path),
+                    avatar: Avatar::new((*avatar_id).into(), avatar.path),
                 }))
             }
             Operation::UpdateSpace(space) => {
@@ -212,7 +246,7 @@ impl Operation<'_> {
                         name: SpaceName::from(name.clone()),
                         created_at: CreationDate::from(*created_at),
                         updated_at: UpdateDate::from(*updated_at),
-                        avatar: Avatar::new(*avatar_id, avatar.path),
+                        avatar: Avatar::new((*avatar_id).into(), avatar.path),
                     }))
                 } else {
                     None
@@ -255,11 +289,17 @@ impl Operation<'_> {
                                 created_at: _,
                                 updated_at: _,
                                 is_deleted: _,
+                                is_uploaded,
                             } = file;
+
+                            let path = PathBuf::from(path);
+                            let status = FileStatus::status_for_file(&path, is_uploaded);
+
                             EventFile {
-                                id,
+                                id: id.into(),
                                 name,
-                                path: path.into(),
+                                path,
+                                status,
                             }
                         })
                         .collect();
@@ -414,6 +454,32 @@ impl OperationDb for OperationLogger {
         transaction.commit().await?;
 
         Ok(event)
+    }
+
+    async fn files(&self) -> Result<Vec<File>, DbError> {
+        let mut connection = self.pool.acquire().await?;
+
+        let files = SqliteDb::files(&mut connection).await?;
+
+        Ok(files)
+    }
+
+    async fn file_by_id(&self, file_id: Uuid) -> Result<File, DbError> {
+        let mut connection = self.pool.acquire().await?;
+
+        let file = SqliteDb::file_by_id(file_id, &mut connection).await?;
+
+        Ok(file)
+    }
+
+    async fn mark_file_as_uploaded(&self, file_id: Uuid) -> Result<(), DbError> {
+        let mut transaction = self.pool.begin().await?;
+
+        SqliteDb::mark_file_as_uploaded(file_id, &mut transaction).await?;
+
+        transaction.commit().await?;
+
+        Ok(())
     }
 }
 

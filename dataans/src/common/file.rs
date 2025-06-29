@@ -1,4 +1,4 @@
-use common::note::File;
+use common::note::{File, FileStatus};
 use leptos::*;
 
 use crate::backend::file::{open, reveal};
@@ -15,12 +15,19 @@ pub fn File(file: File, edit_mode: bool, #[prop(into)] remove_file: Callback<Fil
         });
     };
 
+    let icon = match file.status {
+        FileStatus::ExistAndUploaded => "/public/icons/file.png",
+        FileStatus::ExistAndNotUploaded => "/public/icons/file-upload.png",
+        FileStatus::NotExistAndUploaded => "/public/icons/file-download.png",
+        FileStatus::NotExistAndNotUploaded => "/public/icons/file-broken.png",
+    };
+
     view! {
         <div class="files-file">
             {if edit_mode {
                 view! {
                     <img alt="" title="remove file" src="/public/icons/cancel-dark.png" class="files-file-cancel" on:click=move |_| remove_file.call(file_data.clone()) />
-                    <img src="/public/icons/file.png" alt="" class="files-file-icon" />
+                    <img src=icon alt="" class="files-file-icon" />
                 }
             } else {
                 let file_path = file.path;
@@ -33,7 +40,7 @@ pub fn File(file: File, edit_mode: bool, #[prop(into)] remove_file: Callback<Fil
 
                 view! {
                     <img alt="" title="open file location" src="/public/icons/folder-dark.png" class="files-file-cancel" on:click=reveal_file />
-                    <img src="/public/icons/file.png" alt="" class="files-file-icon" />
+                    <img src=icon alt="" class="files-file-icon" />
                 }
             }}
             <span title="click to open the file" on:click=open_file>{file.name.clone()}</span>

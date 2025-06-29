@@ -1,7 +1,8 @@
 use std::borrow::Cow;
 use std::fmt::Display;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
+use derive_more::derive::{AsRef, From, Into};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -74,15 +75,55 @@ impl AsRef<str> for MdText<'_> {
     }
 }
 
+/// File status.
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, Eq, PartialEq)]
+pub enum FileStatus {
+    /// File exists and has been uploaded.
+    ExistAndUploaded,
+    /// File exists but has not been uploaded.
+    ExistAndNotUploaded,
+    /// File does not exist but has been uploaded.
+    ///
+    /// The user needs to synchronize the data.
+    NotExistAndUploaded,
+    /// File does not exist and has not been uploaded.
+    ///
+    /// Something went wrong. Maybe someone deleted the file manually.
+    NotExistAndNotUploaded,
+}
+
+impl FileStatus {
+    /// Determines the file status based on the file path and whether it has been uploaded.
+    pub fn status_for_file(path: &Path, is_uploaded: bool) -> Self {
+        if path.exists() {
+            if is_uploaded {
+                FileStatus::ExistAndUploaded
+            } else {
+                FileStatus::ExistAndNotUploaded
+            }
+        } else if is_uploaded {
+            FileStatus::NotExistAndUploaded
+        } else {
+            FileStatus::NotExistAndNotUploaded
+        }
+    }
+}
+
+/// File ID.
+#[derive(Serialize, Deserialize, Default, Debug, Clone, Copy, Eq, PartialEq, From, Into, AsRef)]
+pub struct FileId(Uuid);
+
 /// Represents an uploaded file.
 #[derive(Serialize, Deserialize, Debug, Clone, Eq, PartialEq)]
 pub struct File {
     /// The unique file id.
-    pub id: Uuid,
+    pub id: FileId,
     /// The original file name.
     pub name: String,
     /// Full path to the file in the local file system.
     pub path: PathBuf,
+    /// File status.
+    pub status: FileStatus,
 }
 
 /// Represent one note.

@@ -31,6 +31,8 @@ tauri-plugin-fs = "2"
 tauri-plugin-shell = "2"
 tauri-plugin-autostart = "2"
 tauri-plugin-dialog = "2"
+tokio = { version = "1.45", features = ["fs"] }
+tokio-stream = "0.1"
 
 # logging
 tracing-subscriber = { version = "0.3", features = ["std", "fmt", "ansi", "env-filter"] }

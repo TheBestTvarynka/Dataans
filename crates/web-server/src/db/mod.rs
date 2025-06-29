@@ -1,5 +1,3 @@
-#![allow(async_fn_in_trait)]
-
 mod model;
 mod postgres;
 
