@@ -52,7 +52,7 @@ impl<D: Db> FileService<D> {
         let status = FileStatus::status_for_file(&file_path, false);
 
         Ok(File {
-            id,
+            id: id.into(),
             name,
             path: file_path,
             status,
@@ -99,7 +99,7 @@ impl<D: Db> FileService<D> {
         let status = FileStatus::status_for_file(&avatar_path, false);
 
         Ok(File {
-            id: avatar_id,
+            id: avatar_id.into(),
             name: avatar_name,
             path: avatar_path,
             status,
@@ -140,7 +140,7 @@ impl<D: Db> FileService<D> {
         let status = FileStatus::status_for_file(&image_path, false);
 
         Ok(File {
-            id,
+            id: id.into(),
             name,
             path: image_path,
             status,

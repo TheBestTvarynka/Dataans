@@ -65,7 +65,12 @@ impl<D: Db> NoteService<D> {
                 let path = PathBuf::from(path);
                 let status = FileStatus::status_for_file(&path, is_uploaded);
 
-                File { id, name, path, status }
+                File {
+                    id: id.into(),
+                    name,
+                    path,
+                    status,
+                }
             })
             .collect();
 
@@ -126,7 +131,10 @@ impl<D: Db> NoteService<D> {
             .await?;
 
         self.db
-            .set_note_files(id.inner(), &files.iter().map(|file| file.id).collect::<Vec<_>>())
+            .set_note_files(
+                id.inner(),
+                &files.iter().map(|file| *file.id.as_ref()).collect::<Vec<_>>(),
+            )
             .await?;
 
         Ok(Note {
@@ -168,7 +176,7 @@ impl<D: Db> NoteService<D> {
             .await?;
 
         self.db
-            .set_note_files(id, &files.iter().map(|file| file.id).collect::<Vec<_>>())
+            .set_note_files(id, &files.iter().map(|file| *file.id.as_ref()).collect::<Vec<_>>())
             .await?;
 
         Ok(Note {

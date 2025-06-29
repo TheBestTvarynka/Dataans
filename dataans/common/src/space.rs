@@ -4,7 +4,7 @@ use std::fmt::{Display, Formatter};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use crate::note::File;
+use crate::note::{File, FileId};
 use crate::{CreationDate, UpdateDate};
 
 /// Represent a space ID.
@@ -76,19 +76,19 @@ impl AsRef<str> for Name<'_> {
 /// Represents space avatar file name.
 #[derive(Serialize, Deserialize, Debug, Default, Clone, Eq, PartialEq)]
 pub struct Avatar<'avatar> {
-    id: Uuid,
+    id: FileId,
     path: Cow<'avatar, str>,
 }
 
 impl<'avatar> Avatar<'avatar> {
     /// Creates a new [Avatar] based on `id` and `path`.
-    pub fn new(id: Uuid, path: impl Into<Cow<'avatar, str>>) -> Self {
+    pub fn new(id: FileId, path: impl Into<Cow<'avatar, str>>) -> Self {
         Self { id, path: path.into() }
     }
 
     /// Returns avatar [Uuid].
     pub fn id(&self) -> Uuid {
-        self.id
+        *self.id.as_ref()
     }
 
     /// Returns path to the avatar file.

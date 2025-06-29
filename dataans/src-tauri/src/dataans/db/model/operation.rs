@@ -82,7 +82,12 @@ impl Operation<'_> {
                         let path = PathBuf::from(path);
                         let status = FileStatus::status_for_file(&path, is_uploaded);
 
-                        EventFile { id, name, path, status }
+                        EventFile {
+                            id: id.into(),
+                            name,
+                            path,
+                            status,
+                        }
                     })
                     .collect();
 
@@ -127,7 +132,12 @@ impl Operation<'_> {
                             let path = PathBuf::from(path);
                             let status = FileStatus::status_for_file(&path, is_uploaded);
 
-                            EventFile { id, name, path, status }
+                            EventFile {
+                                id: id.into(),
+                                name,
+                                path,
+                                status,
+                            }
                         })
                         .collect();
 
@@ -176,7 +186,12 @@ impl Operation<'_> {
                 let path = PathBuf::from(path);
                 let status = FileStatus::status_for_file(&path, is_uploaded);
 
-                Some(DataEvent::FileAdded(EventFile { id, name, path, status }))
+                Some(DataEvent::FileAdded(EventFile {
+                    id: id.into(),
+                    name,
+                    path,
+                    status,
+                }))
             }
             Operation::DeleteFile(id) => {
                 let local_file = SqliteDb::file_by_id(*id, transaction.as_mut()).await?;
@@ -206,7 +221,7 @@ impl Operation<'_> {
                     name: SpaceName::from(name.clone()),
                     created_at: CreationDate::from(*created_at),
                     updated_at: UpdateDate::from(*updated_at),
-                    avatar: Avatar::new(*avatar_id, avatar.path),
+                    avatar: Avatar::new((*avatar_id).into(), avatar.path),
                 }))
             }
             Operation::UpdateSpace(space) => {
@@ -231,7 +246,7 @@ impl Operation<'_> {
                         name: SpaceName::from(name.clone()),
                         created_at: CreationDate::from(*created_at),
                         updated_at: UpdateDate::from(*updated_at),
-                        avatar: Avatar::new(*avatar_id, avatar.path),
+                        avatar: Avatar::new((*avatar_id).into(), avatar.path),
                     }))
                 } else {
                     None
@@ -280,7 +295,12 @@ impl Operation<'_> {
                             let path = PathBuf::from(path);
                             let status = FileStatus::status_for_file(&path, is_uploaded);
 
-                            EventFile { id, name, path, status }
+                            EventFile {
+                                id: id.into(),
+                                name,
+                                path,
+                                status,
+                            }
                         })
                         .collect();
 

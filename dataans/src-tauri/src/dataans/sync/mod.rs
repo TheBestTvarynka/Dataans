@@ -5,6 +5,7 @@ use std::path::Path;
 use std::sync::Arc;
 
 use common::event::{DataEvent, DATA_EVENT};
+use common::note::{FileId, FileStatus};
 use futures::stream::FuturesUnordered;
 use futures::StreamExt;
 pub use hash::{Hash, Hasher};
@@ -61,7 +62,7 @@ pub async fn sync_future<D: OperationDb, R: Runtime, E: Emitter<R>>(
 ) -> Result<(), SyncError> {
     let synchronizer = Synchronizer::new(db, sync_server, auth_token, encryption_key)?;
 
-    let (sender, receiver) = channel::<Uuid>(CHANNEL_BUFFER_SIZE);
+    let (sender, receiver) = channel::<FileId>(CHANNEL_BUFFER_SIZE);
 
     let main_sync_fut = synchronizer.synchronize(emitter, sender);
     let file_sync_fut = synchronizer.synchronize_files(emitter, receiver);
@@ -111,7 +112,7 @@ impl<D: OperationDb> Synchronizer<D> {
     }
 
     async fn handle_file<R: Runtime, E: Emitter<R>>(&self, file_id: Uuid, _emitter: &E) -> Result<(), SyncError> {
-        let file = self.db.file_by_id(file_id).await?;
+        let file = self.db.file_by_id(*file_id.as_ref()).await?;
         let file_path = Path::new(&file.path);
 
         if file.is_uploaded {
@@ -139,7 +140,7 @@ impl<D: OperationDb> Synchronizer<D> {
     async fn synchronize_files<R: Runtime, E: Emitter<R>>(
         &self,
         emitter: &E,
-        receiver: Receiver<Uuid>,
+        receiver: Receiver<FileId>,
     ) -> Result<(), SyncError> {
         let mut tasks = self
             .db
@@ -156,7 +157,7 @@ impl<D: OperationDb> Synchronizer<D> {
             futures::select! {
                 file_id = receiver_stream.next() => {
                     if let Some(file_id) = file_id {
-                        let fut = self.handle_file(file_id, emitter);
+                        let fut = self.handle_file(file_id.into(), emitter);
                         tasks.push(fut);
                     } else {
                         break;
@@ -176,7 +177,11 @@ impl<D: OperationDb> Synchronizer<D> {
     }
 
     #[instrument(err, skip(self, emitter))]
-    async fn synchronize<R: Runtime, E: Emitter<R>>(&self, emitter: &E, sender: Sender<Uuid>) -> Result<(), SyncError> {
+    async fn synchronize<R: Runtime, E: Emitter<R>>(
+        &self,
+        emitter: &E,
+        sender: Sender<FileId>,
+    ) -> Result<(), SyncError> {
         let (local_operations, remote_blocks) =
             futures::join!(self.db.operations(), self.client.blocks(OPERATIONS_PER_BLOCK),);
 

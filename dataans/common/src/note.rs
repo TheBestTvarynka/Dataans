@@ -2,6 +2,7 @@ use std::borrow::Cow;
 use std::fmt::Display;
 use std::path::{Path, PathBuf};
 
+use derive_more::derive::{AsRef, From, Into};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -110,11 +111,15 @@ impl FileStatus {
     }
 }
 
+/// File ID.
+#[derive(Serialize, Deserialize, Default, Debug, Clone, Copy, Eq, PartialEq, From, Into, AsRef)]
+pub struct FileId(Uuid);
+
 /// Represents an uploaded file.
 #[derive(Serialize, Deserialize, Debug, Clone, Eq, PartialEq)]
 pub struct File {
     /// The unique file id.
-    pub id: Uuid,
+    pub id: FileId,
     /// The original file name.
     pub name: String,
     /// Full path to the file in the local file system.

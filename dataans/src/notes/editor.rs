@@ -60,18 +60,25 @@ pub fn Editor(space_id: SpaceId, #[prop(into)] create_note: Callback<Note<'stati
     };
 
     let toaster = toaster.clone();
-    let remove_file = Callback::new(move |File { id, name: _, path: _ }| {
-        let toaster = toaster.clone();
+    let remove_file = Callback::new(
+        move |File {
+                  id,
+                  name: _,
+                  path: _,
+                  status: _,
+              }| {
+            let toaster = toaster.clone();
 
-        let DraftNote { text, mut files } = draft_note.get();
+            let DraftNote { text, mut files } = draft_note.get();
 
-        spawn_local(async move {
-            try_exec!(remove_file(id).await, "File removing failed", toaster);
+            spawn_local(async move {
+                try_exec!(remove_file(*id.as_ref()).await, "File removing failed", toaster);
 
-            files.retain(|file| file.id != id);
-            set_draft_note(DraftNote { text, files });
-        });
-    });
+                files.retain(|file| file.id != id);
+                set_draft_note(DraftNote { text, files });
+            });
+        },
+    );
 
     let handle_files = move |files| {
         if let Some(DraftNote { text, files: _ }) = draft_note.try_get_untracked() {
