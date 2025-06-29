@@ -101,12 +101,10 @@ impl FileStatus {
             } else {
                 FileStatus::ExistAndNotUploaded
             }
+        } else if is_uploaded {
+            FileStatus::NotExistAndUploaded
         } else {
-            if is_uploaded {
-                FileStatus::NotExistAndUploaded
-            } else {
-                FileStatus::NotExistAndNotUploaded
-            }
+            FileStatus::NotExistAndNotUploaded
         }
     }
 }
