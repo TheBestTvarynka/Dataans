@@ -73,6 +73,10 @@ pub async fn on_data(data: RwSignal<GlobalState>) -> CommandResultEmpty {
         info!("Event received: {:?}", event);
 
         match event.payload {
+            DataEvent::FileAdded(file) => {
+                debug!("File added: {:?}", file);
+                // Nothing to do here.
+            }
             DataEvent::SpaceAdded(space) => {
                 data.update(|state| {
                     state.spaces.push(space);

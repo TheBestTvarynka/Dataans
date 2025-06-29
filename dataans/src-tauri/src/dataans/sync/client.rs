@@ -1,3 +1,4 @@
+use std::path::Path;
 use std::time::Duration;
 
 use reqwest::header::{HeaderMap, HeaderValue};
@@ -8,7 +9,7 @@ use uuid::Uuid;
 use web_api_types::{AuthToken, Blocks, Operation, AUTH_HEADER_NAME};
 
 use super::SyncError;
-use crate::dataans::crypto::{decrypt, encrypt, EncryptionKey};
+use crate::dataans::crypto::{decrypt, decrypt_data, encrypt, EncryptionKey};
 use crate::dataans::db::{OperationRecord, OperationRecordOwned};
 use crate::dataans::sync::hash::Hash;
 
@@ -102,11 +103,15 @@ impl Client {
         Ok(())
     }
 
-    #[instrument(ret, skip(self, data))]
-    pub async fn upload_file(&self, id: Uuid, data: &[u8]) -> Result<(), SyncError> {
+    #[instrument(ret, skip(self))]
+    pub async fn upload_file(&self, id: Uuid, path: &Path) -> Result<(), SyncError> {
+        let file_data = tokio::fs::read(path).await?;
+
+        let data = encrypt(&file_data, &self.encryption_key)?;
+
         self.client
             .post(self.sync_server.join("file/")?.join(&id.to_string())?)
-            .body(data.to_vec())
+            .body(data)
             .send()
             .await?
             .error_for_status()?;
@@ -115,7 +120,7 @@ impl Client {
     }
 
     #[instrument(err, skip(self))]
-    pub async fn download_file(&self, id: Uuid) -> Result<Vec<u8>, SyncError> {
+    pub async fn download_file(&self, id: Uuid, path: &Path) -> Result<(), SyncError> {
         let response = self
             .client
             .get(self.sync_server.join("file/")?.join(&id.to_string())?)
@@ -123,6 +128,11 @@ impl Client {
             .await?
             .error_for_status()?;
 
-        Ok(response.bytes().await?.to_vec())
+        let data = response.bytes().await?.to_vec();
+        let file_data = decrypt_data(&data, &self.encryption_key)?;
+
+        tokio::fs::write(path, &file_data).await?;
+
+        Ok(())
     }
 }

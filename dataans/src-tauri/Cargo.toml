@@ -30,6 +30,7 @@ tauri = { version = "2", features = [
 tauri-plugin-fs = "2"
 tauri-plugin-shell = "2"
 tauri-plugin-autostart = "2"
+tokio = { version = "1.45.1", features = ["fs"] }
 tokio-stream = "0.1"
 
 # logging

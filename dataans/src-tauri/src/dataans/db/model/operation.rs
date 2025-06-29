@@ -162,7 +162,21 @@ impl Operation<'_> {
 
                 SqliteDb::add_file(&file, operation_time, transaction).await?;
 
-                None
+                let File {
+                    id,
+                    name,
+                    path,
+                    created_at: _,
+                    updated_at: _,
+                    is_deleted: _,
+                    is_uploaded: _,
+                } = file;
+
+                Some(DataEvent::FileAdded(EventFile {
+                    id,
+                    name,
+                    path: path.into(),
+                }))
             }
             Operation::DeleteFile(id) => {
                 let local_file = SqliteDb::file_by_id(*id, transaction.as_mut()).await?;
@@ -436,6 +450,16 @@ impl OperationDb for OperationLogger {
         let file = SqliteDb::file_by_id(file_id, &mut connection).await?;
 
         Ok(file)
+    }
+
+    async fn mark_file_as_uploaded(&self, file_id: Uuid) -> Result<(), DbError> {
+        let mut transaction = self.pool.begin().await?;
+
+        SqliteDb::mark_file_as_uploaded(file_id, &mut transaction).await?;
+
+        transaction.commit().await?;
+
+        Ok(())
     }
 }
 

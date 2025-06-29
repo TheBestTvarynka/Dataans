@@ -1,9 +1,10 @@
 mod client;
 mod hash;
 
+use std::path::Path;
 use std::sync::Arc;
 
-use common::event::DATA_EVENT;
+use common::event::{DataEvent, DATA_EVENT};
 use futures::stream::FuturesUnordered;
 use futures::StreamExt;
 pub use hash::{Hash, Hasher};
@@ -45,6 +46,9 @@ pub enum SyncError {
 
     #[error("failed to send event: {0}")]
     Event(&'static str),
+
+    #[error("io error: {0}")]
+    Io(#[from] std::io::Error),
 }
 
 #[instrument(ret, skip(db, auth_token, encryption_key, emitter))]
@@ -64,7 +68,28 @@ pub async fn sync_future<D: OperationDb, R: Runtime, E: Emitter<R>>(
 
     let (main_result, file_result) = futures::join!(main_sync_fut, file_sync_fut);
 
-    todo!()
+    match (main_result, file_result) {
+        (Ok(_), Ok(_)) => {
+            info!("Synchronization successful.");
+
+            Ok(())
+        }
+        (Err(main_err), Err(file_err)) => {
+            error!(?main_err, ?file_err, "Failed to sync DB data and files data");
+
+            Err(SyncError::SyncFailed("failed to sync DB data and files data"))
+        }
+        (Err(err), _) => {
+            error!(?err, "Failed to sync DB data");
+
+            Err(SyncError::SyncFailed("failed to sync DB data"))
+        }
+        (_, Err(err)) => {
+            error!(?err, "Failed to sync files data");
+
+            Err(SyncError::SyncFailed("failed to sync files data"))
+        }
+    }
 }
 
 struct Synchronizer<D> {
@@ -86,7 +111,27 @@ impl<D: OperationDb> Synchronizer<D> {
     }
 
     async fn handle_file<R: Runtime, E: Emitter<R>>(&self, file_id: Uuid, _emitter: &E) -> Result<(), SyncError> {
-        let _file = self.db.file_by_id(file_id).await?;
+        let file = self.db.file_by_id(file_id).await?;
+        let file_path = Path::new(&file.path);
+
+        if file.is_uploaded {
+            if !file_path.exists() {
+                debug!(?file.id, ?file.path, "File does not exist locally, but is uploaded. Downloading...");
+
+                self.client.download_file(file.id, file_path).await?;
+            } else {
+                debug!(?file.id, ?file.path, "File exists locally and is uploaded. Nothing to do.");
+            }
+        } else {
+            if file_path.exists() {
+                debug!(?file.id, ?file.path, "File exists locally, but is not uploaded. Uploading...");
+
+                self.client.upload_file(file.id, file_path).await?;
+                self.db.mark_file_as_uploaded(file.id).await?;
+            } else {
+                warn!(?file.id, ?file.path, "File does not exist locally and is not uploaded. Something weird happens here...");
+            }
+        }
 
         Ok(())
     }
@@ -215,6 +260,12 @@ impl<D: OperationDb> Synchronizer<D> {
                     if let Some(event) = self.db.apply_operation(operation).await.inspect_err(|err| {
                         error!(?err, ?operation, "Failed to apply operation");
                     })? {
+                        if let DataEvent::FileAdded(file) = &event {
+                            sender.send(file.id).await.map_err(|err| {
+                                error!(?err, "Failed to send file id into the channel");
+                                SyncError::Event("failed to send file id into the channel")
+                            })?;
+                        }
                         emitter.emit(DATA_EVENT, event).map_err(|err| {
                             error!(?err, "Failed to emit data event");
                             SyncError::Event("failed to emit data event")

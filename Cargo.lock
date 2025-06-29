@@ -1136,6 +1136,7 @@ dependencies = [
  "tauri-plugin-shell",
  "thiserror 2.0.11",
  "time",
+ "tokio",
  "tokio-stream",
  "toml 0.8.19",
  "tracing",

@@ -243,6 +243,17 @@ impl SqliteDb {
         Ok(file)
     }
 
+    pub async fn mark_file_as_uploaded(
+        file_id: Uuid,
+        transaction: &mut Transaction<'_, Sqlite>,
+    ) -> Result<(), DbError> {
+        sqlx::query!("UPDATE files SET is_uploaded = TRUE WHERE id = ?1", file_id)
+            .execute(&mut **transaction)
+            .await?;
+
+        Ok(())
+    }
+
     pub async fn note_files(note_id: Uuid, connection: &mut SqliteConnection) -> Result<Vec<File>, DbError> {
         let files = sqlx::query_as(NOTE_FILES)
             .bind(note_id)
