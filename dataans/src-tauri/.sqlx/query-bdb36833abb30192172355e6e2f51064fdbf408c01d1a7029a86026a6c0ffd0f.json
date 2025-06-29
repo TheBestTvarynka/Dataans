@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE files SET is_uploaded = TRUE WHERE id = ?1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": []
+  },
+  "hash": "bdb36833abb30192172355e6e2f51064fdbf408c01d1a7029a86026a6c0ffd0f"
+}

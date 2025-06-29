@@ -132,33 +132,31 @@ impl<D: OperationDb> Synchronizer<D> {
             } else {
                 debug!(?file.id, ?file.path, "File exists locally and is uploaded. Nothing to do.");
             }
-        } else {
-            if file_path.exists() {
-                debug!(?file.id, ?file.path, "File exists locally, but is not uploaded. Uploading...");
+        } else if file_path.exists() {
+            debug!(?file.id, ?file.path, "File exists locally, but is not uploaded. Uploading...");
 
-                self.client.upload_file(file.id, file_path).await?;
-                self.db.mark_file_as_uploaded(file.id).await?;
-                emitter
-                    .emit(
-                        DATA_EVENT,
-                        DataEvent::FileStatusUpdated(file.id.into(), FileStatus::ExistAndUploaded),
-                    )
-                    .map_err(|err| {
-                        error!(?err, "Failed to emit data event");
-                        SyncError::Event("failed to emit data event")
-                    })?;
-            } else {
-                warn!(?file.id, ?file.path, "File does not exist locally and is not uploaded. Something weird happens here...");
-                emitter
-                    .emit(
-                        DATA_EVENT,
-                        DataEvent::FileStatusUpdated(file.id.into(), FileStatus::NotExistAndNotUploaded),
-                    )
-                    .map_err(|err| {
-                        error!(?err, "Failed to emit data event");
-                        SyncError::Event("failed to emit data event")
-                    })?;
-            }
+            self.client.upload_file(file.id, file_path).await?;
+            self.db.mark_file_as_uploaded(file.id).await?;
+            emitter
+                .emit(
+                    DATA_EVENT,
+                    DataEvent::FileStatusUpdated(file.id.into(), FileStatus::ExistAndUploaded),
+                )
+                .map_err(|err| {
+                    error!(?err, "Failed to emit data event");
+                    SyncError::Event("failed to emit data event")
+                })?;
+        } else {
+            warn!(?file.id, ?file.path, "File does not exist locally and is not uploaded. Something weird happens here...");
+            emitter
+                .emit(
+                    DATA_EVENT,
+                    DataEvent::FileStatusUpdated(file.id.into(), FileStatus::NotExistAndNotUploaded),
+                )
+                .map_err(|err| {
+                    error!(?err, "Failed to emit data event");
+                    SyncError::Event("failed to emit data event")
+                })?;
         }
 
         Ok(())
