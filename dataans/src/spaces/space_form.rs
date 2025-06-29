@@ -26,7 +26,12 @@ pub fn SpaceForm(
             .as_ref()
             .map(|s| s.avatar.clone())
             // The default space avatar is always exists in DB. It is checked during the app start up.
-            .unwrap_or_else(|| Avatar::new(common::DEFAULT_SPACE_AVATAR_ID, common::DEFAULT_SPACE_AVATAR_PATH)),
+            .unwrap_or_else(|| {
+                Avatar::new(
+                    common::DEFAULT_SPACE_AVATAR_ID.into(),
+                    common::DEFAULT_SPACE_AVATAR_PATH,
+                )
+            }),
     );
     let ref_input = create_node_ref::<html::Input>();
 

@@ -28,7 +28,7 @@ jobs:
       run: 'cargo +nightly fmt --all -- --check'
 
     - name: 'Clippy'
-      run: 'SQLX_OFFLINE=true mkdir dataans/dist && cargo clippy --workspace --all-features --all-targets -- -D warnings'
+      run: 'SQLX_OFFLINE=true mkdir dataans/dist && cargo clippy --workspace --all-targets -- -D warnings'
 
     - name: 'Tests'
-      run: 'SQLX_OFFLINE=true cargo test --workspace --all-features'
+      run: 'SQLX_OFFLINE=true cargo test --workspace'

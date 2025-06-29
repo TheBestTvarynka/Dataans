@@ -1,8 +1,10 @@
 mod auth;
 mod data;
+mod file;
 
 pub use auth::*;
 pub use data::*;
+pub use file::*;
 use rocket::get;
 use rocket::http::Status;
 use rocket::request::{FromRequest, Outcome, Request};
