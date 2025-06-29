@@ -1,7 +1,8 @@
+use std::path::PathBuf;
 use std::sync::Arc;
 
 use common::error::CommandError;
-use common::note::{CreateNoteOwned, File, Id as NoteId, Note, NoteFullOwned, OwnedNote, UpdateNote};
+use common::note::{CreateNoteOwned, File, FileStatus, Id as NoteId, Note, NoteFullOwned, OwnedNote, UpdateNote};
 use common::space::Id as SpaceId;
 use futures::future::try_join_all;
 use thiserror::Error;
@@ -58,13 +59,13 @@ impl<D: Db> NoteService<D> {
                     created_at: _,
                     updated_at: _,
                     is_deleted: _,
-                    is_uploaded: _,
+                    is_uploaded,
                 } = file;
-                File {
-                    id,
-                    name,
-                    path: path.into(),
-                }
+
+                let path = PathBuf::from(path);
+                let status = FileStatus::status_for_file(&path, is_uploaded);
+
+                File { id, name, path, status }
             })
             .collect();
 

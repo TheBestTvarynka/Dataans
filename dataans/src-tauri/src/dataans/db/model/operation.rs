@@ -1,8 +1,9 @@
 use std::borrow::Cow;
 use std::ops::{Deref, DerefMut};
+use std::path::PathBuf;
 
 use common::event::DataEvent;
-use common::note::{File as EventFile, Id as NoteId, MdText, Note as EventNote};
+use common::note::{File as EventFile, FileStatus, Id as NoteId, MdText, Note as EventNote};
 use common::space::{Avatar, Id as SpaceId, Name as SpaceName, Space as EventSpace};
 use common::{CreationDate, UpdateDate};
 use serde::{Deserialize, Serialize};
@@ -75,13 +76,13 @@ impl Operation<'_> {
                             created_at: _,
                             updated_at: _,
                             is_deleted: _,
-                            is_uploaded: _,
+                            is_uploaded,
                         } = file;
-                        EventFile {
-                            id,
-                            name,
-                            path: path.into(),
-                        }
+
+                        let path = PathBuf::from(path);
+                        let status = FileStatus::status_for_file(&path, is_uploaded);
+
+                        EventFile { id, name, path, status }
                     })
                     .collect();
 
@@ -120,13 +121,13 @@ impl Operation<'_> {
                                 created_at: _,
                                 updated_at: _,
                                 is_deleted: _,
-                                is_uploaded: _,
+                                is_uploaded,
                             } = file;
-                            EventFile {
-                                id,
-                                name,
-                                path: path.into(),
-                            }
+
+                            let path = PathBuf::from(path);
+                            let status = FileStatus::status_for_file(&path, is_uploaded);
+
+                            EventFile { id, name, path, status }
                         })
                         .collect();
 
@@ -169,14 +170,13 @@ impl Operation<'_> {
                     created_at: _,
                     updated_at: _,
                     is_deleted: _,
-                    is_uploaded: _,
+                    is_uploaded,
                 } = file;
 
-                Some(DataEvent::FileAdded(EventFile {
-                    id,
-                    name,
-                    path: path.into(),
-                }))
+                let path = PathBuf::from(path);
+                let status = FileStatus::status_for_file(&path, is_uploaded);
+
+                Some(DataEvent::FileAdded(EventFile { id, name, path, status }))
             }
             Operation::DeleteFile(id) => {
                 let local_file = SqliteDb::file_by_id(*id, transaction.as_mut()).await?;
@@ -274,13 +274,13 @@ impl Operation<'_> {
                                 created_at: _,
                                 updated_at: _,
                                 is_deleted: _,
-                                is_uploaded: _,
+                                is_uploaded,
                             } = file;
-                            EventFile {
-                                id,
-                                name,
-                                path: path.into(),
-                            }
+
+                            let path = PathBuf::from(path);
+                            let status = FileStatus::status_for_file(&path, is_uploaded);
+
+                            EventFile { id, name, path, status }
                         })
                         .collect();
 

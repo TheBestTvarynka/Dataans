@@ -3,7 +3,7 @@ use std::path::Path;
 use std::sync::Arc;
 
 use arboard::Clipboard;
-use common::note::File;
+use common::note::{File, FileStatus};
 use image::{ImageBuffer, Rgba};
 use time::OffsetDateTime;
 use uuid::Uuid;
@@ -49,10 +49,13 @@ impl<D: Db> FileService<D> {
             ))
             .await?;
 
+        let status = FileStatus::status_for_file(&file_path, false);
+
         Ok(File {
             id,
             name,
             path: file_path,
+            status,
         })
     }
 
@@ -93,10 +96,13 @@ impl<D: Db> FileService<D> {
             ))
             .await?;
 
+        let status = FileStatus::status_for_file(&avatar_path, false);
+
         Ok(File {
             id: avatar_id,
             name: avatar_name,
             path: avatar_path,
+            status,
         })
     }
 
@@ -131,10 +137,13 @@ impl<D: Db> FileService<D> {
             ))
             .await?;
 
+        let status = FileStatus::status_for_file(&image_path, false);
+
         Ok(File {
             id,
             name,
             path: image_path,
+            status,
         })
     }
 }

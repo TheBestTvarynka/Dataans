@@ -99,7 +99,13 @@ impl<'avatar> Avatar<'avatar> {
 
 impl From<File> for Avatar<'_> {
     fn from(file: File) -> Self {
-        let File { id, name: _, path } = file;
+        let File {
+            id,
+            name: _,
+            path,
+            status: _,
+        } = file;
+
         Self {
             id,
             path: path.to_str().expect("UTF8-path").to_owned().into(),
