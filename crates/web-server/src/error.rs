@@ -39,6 +39,9 @@ pub enum Error {
 
     #[error("io error: {0}")]
     Io(#[from] std::io::Error),
+
+    #[error("file saver error: {0}")]
+    FileSaver(String),
 }
 
 impl From<DbError> for Error {
@@ -83,8 +86,9 @@ impl From<Error> for web_api_types::Error {
             Error::AccessDenied => Self::AccessDenied("access denied".into()),
             Error::InvalidData(_) => Self::InvalidData(error.to_string()),
             Error::DecryptionFailed(reason) => Self::Internal(reason.into()),
-            Error::Io(err) => Self::Internal(format!("{err:?}")),
+            Error::Io(_) => Self::Internal("internal IO error".into()),
             Error::Session(_) => Self::Unauthorized(error.to_string()),
+            Error::FileSaver(_) => Self::Internal("internal file saver error".into()),
         }
     }
 }

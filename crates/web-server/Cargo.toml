@@ -8,6 +8,11 @@ homepage.workspace = true
 repository.workspace = true
 authors.workspace = true
 
+[features]
+default = ["tigris"]
+tigris = ["dep:aws-sdk-s3", "dep:aws-config"]
+fs = []
+
 [dependencies]
 web-api-types = { workspace = true, features = ["server"] }
 serde = { workspace = true, features = ["derive"] }
@@ -29,5 +34,9 @@ tracing-subscriber = { version = "0.3", features = ["std", "fmt", "ansi", "env-f
 # crypto
 argon2 = { version = "0.5", features = ["std"] }
 
+# Tigris storage
+aws-sdk-s3 = { version = "1.91", optional = true }
+aws-config = { version = "1.8", optional = true }
+
 [dev-dependencies]
-tokio = { version = "1.43", features = ["full"] }
+tokio = { version = "1.45", features = ["full"] }

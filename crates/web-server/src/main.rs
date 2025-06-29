@@ -11,7 +11,6 @@ mod routes;
 pub mod services;
 
 use std::env;
-use std::path::PathBuf;
 use std::sync::Arc;
 
 pub use error::{Error, Result};
@@ -19,11 +18,10 @@ use rocket::routes;
 use sqlx::postgres::PgPoolOptions;
 
 use crate::db::PostgresDb;
-use crate::services::{Auth as AuthService, Data as DataService, Fs};
+use crate::services::{Auth as AuthService, Data as DataService};
 
 const DATABASE_URL: &str = "DATAANS_WEB_SERVER_DATABASE_URL";
 const SERVER_ENCRYPTION_KEY: &str = "DATAANS_SERVER_ENCRYPTION_KEY";
-const FILES_DIR: &str = "DATAANS_WEB_SERVER_FILES_DIR";
 
 pub struct State<D, S> {
     pub auth_service: AuthService<D>,
@@ -31,7 +29,41 @@ pub struct State<D, S> {
     pub file_saver: S,
 }
 
-pub type WebServerState = State<PostgresDb, Fs>;
+#[cfg(feature = "fs")]
+pub type WebServerState = State<PostgresDb, crate::services::Fs>;
+
+#[cfg(feature = "fs")]
+async fn prepare_file_loader() -> crate::services::Fs {
+    use std::path::PathBuf;
+
+    const FILES_DIR: &str = "DATAANS_WEB_SERVER_FILES_DIR";
+
+    let files_dir = PathBuf::from(env::var(FILES_DIR).unwrap_or_else(|_| String::from("dist")));
+    if !files_dir.exists() {
+        std::fs::create_dir_all(&files_dir)
+            .inspect_err(|err| {
+                error!(?err, ?files_dir, "Failed to create files directory");
+            })
+            .expect("Failed to create files directory");
+    }
+
+    crate::services::Fs::new(files_dir)
+}
+
+#[cfg(feature = "tigris")]
+async fn prepare_file_loader() -> crate::services::Tigris {
+    use aws_config::{load_defaults, BehaviorVersion};
+
+    const BUCKET_NAME: &str = "DATAANS_WEB_SERVER_S3_BUCKET";
+
+    crate::services::Tigris::new(
+        load_defaults(BehaviorVersion::latest()).await,
+        env::var(BUCKET_NAME).expect("S3 bucket name env var should be set"),
+    )
+}
+
+#[cfg(feature = "tigris")]
+pub type WebServerState = State<PostgresDb, crate::services::Tigris>;
 
 impl WebServerState {
     pub async fn new() -> WebServerState {
@@ -52,19 +84,10 @@ impl WebServerState {
                 .try_into()
                 .expect("invalid server encryption key length");
 
-        let files_dir = PathBuf::from(env::var(FILES_DIR).unwrap_or_else(|_| String::from("dist")));
-        if !files_dir.exists() {
-            std::fs::create_dir_all(&files_dir)
-                .inspect_err(|err| {
-                    error!(?err, ?files_dir, "Failed to create files directory");
-                })
-                .expect("Failed to create files directory");
-        }
-
         Self {
             auth_service: AuthService::new(Arc::clone(&db), server_encryption_key),
             data_service: DataService::new(Arc::clone(&db)),
-            file_saver: Fs::new(files_dir),
+            file_saver: prepare_file_loader().await,
         }
     }
 }
