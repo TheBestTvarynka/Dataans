@@ -44,7 +44,7 @@
 }
 
 .files-file .files-file-icon {
-    height: 1.2em;
+    height: 1.5em;
 }
 
 .files-file:hover .files-file-cancel {
@@ -52,7 +52,7 @@
 }
 
 .files-file .files-file-cancel {
-    height: 1.2em;
+    height: 1.5em;
     display: none;
 }
 

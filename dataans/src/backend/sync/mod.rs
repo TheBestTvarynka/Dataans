@@ -73,6 +73,15 @@ pub async fn on_data(data: RwSignal<GlobalState>) -> CommandResultEmpty {
         info!("Event received: {:?}", event);
 
         match event.payload {
+            DataEvent::FileStatusUpdated(file_id, file_status) => {
+                data.update(|state| {
+                    state.notes.iter_mut().for_each(|note| {
+                        if let Some(file) = note.files.iter_mut().find(|f| f.id == file_id) {
+                            file.status = file_status;
+                        }
+                    });
+                });
+            }
             DataEvent::FileAdded(file) => {
                 debug!("File added: {:?}", file);
                 // Nothing to do here.

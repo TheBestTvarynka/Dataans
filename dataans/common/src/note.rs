@@ -76,7 +76,7 @@ impl AsRef<str> for MdText<'_> {
 }
 
 /// File status.
-#[derive(Serialize, Deserialize, Debug, Clone, Eq, PartialEq)]
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, Eq, PartialEq)]
 pub enum FileStatus {
     /// File exists and has been uploaded.
     ExistAndUploaded,
