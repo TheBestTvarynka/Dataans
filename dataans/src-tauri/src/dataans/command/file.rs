@@ -17,7 +17,7 @@ pub async fn upload_file(state: State<'_, DataansState>, id: Uuid, name: String,
 #[instrument(ret, skip(state))]
 #[tauri::command]
 pub async fn delete_file(state: State<'_, DataansState>, id: Uuid) -> CommandResultEmpty {
-    Ok(state.file_service.delete_file(id).await?)
+    Ok(state.file_service.delete_file(id, &state.app_data_dir).await?)
 }
 
 #[instrument(ret, skip(state))]

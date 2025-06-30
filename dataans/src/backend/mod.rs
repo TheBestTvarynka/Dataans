@@ -17,8 +17,9 @@ use wasm_bindgen::prelude::wasm_bindgen;
 use wasm_bindgen::JsValue;
 
 /// Accepts image fs path and returns its Tauri asset url.
-pub fn convert_file_src(image_path: impl AsRef<str>) -> String {
+pub fn convert_file_src(image_path: impl AsRef<str>, base_path: impl AsRef<str>) -> String {
     let image_path = image_path.as_ref();
+    let base_path = base_path.as_ref();
 
     if image_path == common::DEFAULT_SPACE_AVATAR_PATH {
         return image_path.to_owned();
@@ -26,11 +27,11 @@ pub fn convert_file_src(image_path: impl AsRef<str>) -> String {
 
     #[cfg(windows_is_host_os)]
     {
-        format!("http://asset.localhost/{image_path}")
+        format!("http://asset.localhost/{base_path}/files/{image_path}")
     }
     #[cfg(not(windows_is_host_os))]
     {
-        format!("asset://localhost/{image_path}")
+        format!("asset://localhost/{base_path}/files/{image_path}")
     }
 }
 

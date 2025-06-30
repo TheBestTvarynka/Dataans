@@ -27,7 +27,6 @@ const WINDOW_VISIBILITY_TITLE: &str = "Toggle";
 const WINDOW_QUIT_TITLE: &str = "Quit";
 
 const PROFILE_DIR: &str = "profile";
-const IMAGES_DIR: &str = "images";
 const FILES_DIR: &str = "files";
 const CONFIGS_DIR: &str = "configs";
 const CONFIG_FILE_NAME: &str = "config.toml";

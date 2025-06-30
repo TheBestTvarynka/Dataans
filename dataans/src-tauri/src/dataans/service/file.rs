@@ -1,5 +1,5 @@
 use std::fs;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::sync::Arc;
 
 use arboard::Clipboard;
@@ -11,7 +11,7 @@ use uuid::Uuid;
 use crate::dataans::db::model::File as FileModel;
 use crate::dataans::db::Db;
 use crate::dataans::DataansError;
-use crate::{FILES_DIR, IMAGES_DIR};
+use crate::FILES_DIR;
 
 pub struct FileService<D> {
     db: Arc<D>,
@@ -31,22 +31,13 @@ impl<D: Db> FileService<D> {
     ) -> Result<File, DataansError> {
         let file_name = format!("{id}_{name}");
 
-        let file_path = base_path.join(FILES_DIR).join(file_name);
+        let file_path = base_path.join(FILES_DIR).join(&file_name);
 
         fs::write(&file_path, data)?;
 
         let now = OffsetDateTime::now_utc();
         self.db
-            .add_file(&FileModel::new(
-                id,
-                name.clone(),
-                file_path
-                    .to_str()
-                    .ok_or_else(|| DataansError::PathIsNotUtf8(file_path.clone()))?
-                    .to_owned(),
-                now,
-                now,
-            ))
+            .add_file(&FileModel::new(id, name.clone(), file_name.clone(), now, now))
             .await?;
 
         let status = FileStatus::status_for_file(&file_path, false);
@@ -54,15 +45,17 @@ impl<D: Db> FileService<D> {
         Ok(File {
             id: id.into(),
             name,
-            path: file_path,
+            path: PathBuf::from(file_name),
             status,
         })
     }
 
-    pub async fn delete_file(&self, file_id: Uuid) -> Result<(), DataansError> {
+    pub async fn delete_file(&self, file_id: Uuid, base_path: &Path) -> Result<(), DataansError> {
         let file = self.db.file_by_id(file_id).await?;
 
-        fs::remove_file(file.path)?;
+        let file_path = base_path.join(FILES_DIR).join(&file.path);
+
+        fs::remove_file(file_path)?;
 
         self.db.remove_file(file_id).await?;
 
@@ -75,7 +68,7 @@ impl<D: Db> FileService<D> {
         let avatar_id = Uuid::new_v4();
         let avatar_name = format!("{avatar_id}.png");
 
-        let avatar_path = base_path.join(IMAGES_DIR).join(&avatar_name);
+        let avatar_path = base_path.join(FILES_DIR).join(&avatar_name);
 
         avatar
             .save(&avatar_path)
@@ -87,10 +80,7 @@ impl<D: Db> FileService<D> {
             .add_file(&FileModel::new(
                 avatar_id,
                 avatar_name.clone(),
-                avatar_path
-                    .to_str()
-                    .ok_or_else(|| DataansError::PathIsNotUtf8(avatar_path.clone()))?
-                    .to_owned(),
+                avatar_name.clone(),
                 now,
                 now,
             ))
@@ -100,8 +90,8 @@ impl<D: Db> FileService<D> {
 
         Ok(File {
             id: avatar_id.into(),
-            name: avatar_name,
-            path: avatar_path,
+            name: avatar_name.clone(),
+            path: avatar_name.into(),
             status,
         })
     }
@@ -113,7 +103,7 @@ impl<D: Db> FileService<D> {
         let id = Uuid::new_v4();
         let name = format!("{}.png", Uuid::new_v4());
 
-        let image_path = base_path.join(IMAGES_DIR).join(&name);
+        let image_path = base_path.join(FILES_DIR).join(&name);
 
         let img: ImageBuffer<Rgba<u8>, _> = ImageBuffer::from_raw(
             image_data.width.try_into().unwrap(),
@@ -125,24 +115,15 @@ impl<D: Db> FileService<D> {
 
         let now = OffsetDateTime::now_utc();
         self.db
-            .add_file(&FileModel::new(
-                id,
-                name.clone(),
-                image_path
-                    .to_str()
-                    .ok_or_else(|| DataansError::PathIsNotUtf8(image_path.clone()))?
-                    .to_owned(),
-                now,
-                now,
-            ))
+            .add_file(&FileModel::new(id, name.clone(), name.clone(), now, now))
             .await?;
 
         let status = FileStatus::status_for_file(&image_path, false);
 
         Ok(File {
             id: id.into(),
-            name,
-            path: image_path,
+            name: name.clone(),
+            path: name.into(),
             status,
         })
     }

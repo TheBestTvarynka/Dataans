@@ -89,12 +89,14 @@ pub fn Spaces(
 
     let user_context = expect_context::<RwSignal<Option<UserContext>>>();
 
+    info!("Spaces config: {:?}", config);
+
     view! {
         <div class="spaces-container">
             <Tools set_spaces spaces_minimized set_spaces_minimized set_find_node_mode set_query=set_query.into() set_selected_space config=config.clone() />
             {move || match find_note_mode.get() {
                 FindNoteMode::None => view!{
-                    <SpacesList config=config.clone() selected_space spaces spaces_minimized set_selected_space />
+                    <SpacesList selected_space spaces spaces_minimized set_selected_space />
                 },
                 FindNoteMode::FindNote { space } => {
                     use_hotkeys!(("Escape") => move |_| set_find_node_mode.set(FindNoteMode::None));

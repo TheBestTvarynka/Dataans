@@ -4,9 +4,9 @@ use std::path::{Path, PathBuf};
 
 use common::error::CommandResult;
 use common::{Config, Theme};
-use tauri::{AppHandle, Manager};
+use tauri::{AppHandle, Manager, Runtime};
 
-use super::{CONFIGS_DIR, CONFIG_FILE_NAME};
+use super::{CONFIGS_DIR, CONFIG_FILE_NAME, FILES_DIR};
 
 pub fn read_config(path: impl AsRef<Path>) -> Result<Config, IoError> {
     let config_file_path = path.as_ref();
@@ -15,18 +15,30 @@ pub fn read_config(path: impl AsRef<Path>) -> Result<Config, IoError> {
     toml::from_str(&config_data).map_err(|err| IoError::new(IoErrorKind::InvalidInput, err))
 }
 
-pub fn load_config_inner(app_handle: &AppHandle) -> Result<Config, IoError> {
+pub fn load_config_inner<R: Runtime>(app_handle: &AppHandle<R>) -> Result<Config, IoError> {
     let configs_dir = app_handle.path().app_data_dir().unwrap_or_default().join(CONFIGS_DIR);
 
     let config_file_path = configs_dir.join(CONFIG_FILE_NAME);
     info!(?config_file_path, "Config file path");
 
-    read_config(config_file_path)
+    let mut config = read_config(config_file_path)?;
+
+    if config.app.base_path.is_empty() {
+        config.app.base_path = app_handle
+            .path()
+            .app_data_dir()
+            .unwrap_or_default()
+            .to_str()
+            .expect("Bro, wtf, use UTF-8 paths")
+            .to_owned();
+    }
+
+    Ok(config)
 }
 
 #[instrument(ret, skip(app_handle))]
 #[tauri::command]
-pub fn config(app_handle: AppHandle) -> CommandResult<Config> {
+pub fn config<R: Runtime>(app_handle: AppHandle<R>) -> CommandResult<Config> {
     Ok(load_config_inner(&app_handle)?)
 }
 
@@ -75,14 +87,22 @@ pub fn open_config_file_folder(app_handle: AppHandle) {
 
 #[instrument]
 #[tauri::command]
-pub fn reveal(path: PathBuf) {
-    let reveal_note_file_result = opener::reveal(&path);
+pub fn reveal(app_handle: AppHandle, path: PathBuf) {
+    let path_resolver = app_handle.path();
+    let files_dir = path_resolver.app_data_dir().unwrap_or_default().join(FILES_DIR);
+    let file = files_dir.join(path);
+
+    let reveal_note_file_result = opener::reveal(&file);
     info!(?reveal_note_file_result);
 }
 
 #[instrument]
 #[tauri::command]
-pub fn open(path: PathBuf) {
-    let open_note_file_result = opener::open(&path);
+pub fn open(app_handle: AppHandle, path: PathBuf) {
+    let path_resolver = app_handle.path();
+    let files_dir = path_resolver.app_data_dir().unwrap_or_default().join(FILES_DIR);
+    let file = files_dir.join(path);
+
+    let open_note_file_result = opener::open(&file);
     info!(?open_note_file_result);
 }

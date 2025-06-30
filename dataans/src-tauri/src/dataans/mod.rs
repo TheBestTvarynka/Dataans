@@ -10,7 +10,7 @@ use tauri::{Manager, Runtime};
 
 use crate::dataans::db::sqlite::SqliteDb;
 use crate::dataans::db::OperationLogger;
-use crate::{CONFIGS_DIR, CONFIG_FILE_NAME, FILES_DIR, IMAGES_DIR, PROFILE_DIR};
+use crate::{CONFIGS_DIR, CONFIG_FILE_NAME, FILES_DIR, PROFILE_DIR};
 
 mod command;
 mod crypto;
@@ -110,7 +110,9 @@ pub fn init_dataans_plugin<R: Runtime>() -> TauriPlugin<R> {
             info!("Starting app setup...");
 
             let path_resolver = app_handle.path();
-            let app_data = path_resolver.app_data_dir().unwrap_or_default();
+            let config = crate::config::load_config_inner(app_handle).expect("config reading should not fail");
+            let app_data = PathBuf::from(config.app.base_path);
+
             debug!(?app_data);
             if !app_data.exists() {
                 match fs::create_dir(&app_data) {
@@ -121,7 +123,6 @@ pub fn init_dataans_plugin<R: Runtime>() -> TauriPlugin<R> {
 
             let db_dir = app_data.join("db");
             let files_dir = app_data.join(FILES_DIR);
-            let images_dir = app_data.join(IMAGES_DIR);
             let configs_dir = app_data.join(CONFIGS_DIR);
             let profile_dir = app_data.join(PROFILE_DIR);
 
@@ -136,13 +137,6 @@ pub fn init_dataans_plugin<R: Runtime>() -> TauriPlugin<R> {
                 match fs::create_dir(&files_dir) {
                     Ok(()) => info!(?files_dir, "Successfully created files directory"),
                     Err(err) => error!(?err, ?files_dir, "Filed to create files directory"),
-                }
-            }
-
-            if !images_dir.exists() {
-                match fs::create_dir(&images_dir) {
-                    Ok(()) => info!(?images_dir, "Successfully created images directory"),
-                    Err(err) => error!(?err, ?images_dir, "Filed to create images directory"),
                 }
             }
 

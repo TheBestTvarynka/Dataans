@@ -1,4 +1,5 @@
 use common::note::{File, Id as NoteId, Note as NoteData, OwnedNote, UpdateNote};
+use common::Config;
 use leptos::web_sys::KeyboardEvent;
 use leptos::*;
 use markdown::mdast::{Node, Text};
@@ -14,6 +15,8 @@ pub fn Note(
     delete_note: SignalSetter<NoteId>,
     update_note: SignalSetter<OwnedNote>,
 ) -> impl IntoView {
+    let config = expect_context::<RwSignal<Config>>();
+
     let (show_modal, set_show_modal) = create_signal(false);
     let (edit_mode, set_edit_mode) = create_signal(false);
     let (updated_note_text, set_updated_note_text) = create_signal(note.text.to_string());
@@ -95,59 +98,62 @@ pub fn Note(
                     </button>
                 </div>
             </div>
-            {move || if edit_mode.get() {
-                let note_files = note.files.clone();
-                let key_down = move |key: KeyboardEvent| {
-                    if key.key() == "Enter" && !key.shift_key() {
-                        update_note_fn();
-                    } else if key.key() == "Escape" {
+            {move || {
+                let config = config.get();
+                if edit_mode.get() {
+                    let note_files = note.files.clone();
+                    let key_down = move |key: KeyboardEvent| {
+                        if key.key() == "Enter" && !key.shift_key() {
+                            update_note_fn();
+                        } else if key.key() == "Escape" {
+                            set_updated_files.set(note_files.clone());
+                            set_edit_mode.set(false);
+                        }
+                    };
+
+                    let note_files = note.files.clone();
+                    let cancel = move |_| {
                         set_updated_files.set(note_files.clone());
                         set_edit_mode.set(false);
-                    }
-                };
+                    };
 
-                let note_files = note.files.clone();
-                let cancel = move |_| {
-                    set_updated_files.set(note_files.clone());
-                    set_edit_mode.set(false);
-                };
-
-                view! {
-                    <div class="vertical">
-                        <TextArea
-                            id=format!("edit_input_{}", note.id)
-                            text=updated_note_text.into()
-                            set_text=move |t| set_updated_note_text.set(t)
-                            key_down
-                        />
-                        <div class="horizontal">
-                            <button
-                                class="tool"
-                                title="Discard changed"
-                                on:click=cancel
-                            >
-                                <img alt="discard" src="/public/icons/cancel.png" />
-                            </button>
-                            <button
-                                class="tool"
-                                title="Save changes"
-                                on:click=move |_| update_note_fn()
-                            >
-                                <img alt="save" src="/public/icons/accept.png" />
-                            </button>
-                            <Attachment id=note_id.to_string() files=updated_files.into() set_files=move |files| set_updated_files.set(files) />
+                    view! {
+                        <div class="vertical">
+                            <TextArea
+                                id=format!("edit_input_{}", note.id)
+                                text=updated_note_text.into()
+                                set_text=move |t| set_updated_note_text.set(t)
+                                key_down
+                            />
+                            <div class="horizontal">
+                                <button
+                                    class="tool"
+                                    title="Discard changed"
+                                    on:click=cancel
+                                >
+                                    <img alt="discard" src="/public/icons/cancel.png" />
+                                </button>
+                                <button
+                                    class="tool"
+                                    title="Save changes"
+                                    on:click=move |_| update_note_fn()
+                                >
+                                    <img alt="save" src="/public/icons/accept.png" />
+                                </button>
+                                <Attachment id=note_id.to_string() files=updated_files.into() set_files=move |files| set_updated_files.set(files) />
+                            </div>
+                            {move || view! { <Files files=updated_files.get() remove_file=remove_file_locally edit_mode=true /> }}
                         </div>
-                        {move || view! { <Files files=updated_files.get() remove_file=remove_file_locally edit_mode=true /> }}
-                    </div>
-                }.into_any()
-            } else {
-                view !{
-                    <div class="vertical">
-                        {render_md_node(&md)}
-                        {move || view! { <Files files=updated_files.get() remove_file=|_| {} edit_mode=false /> }}
-                    </div>
-                }.into_any()
-            }}
+                    }.into_any()
+                } else {
+                    view !{
+                        <div class="vertical">
+                            {render_md_node(&md, &config.app.base_path)}
+                            {move || view! { <Files files=updated_files.get() remove_file=|_| {} edit_mode=false /> }}
+                        </div>
+                    }.into_any()
+                }}
+            }
             <Show when=move || show_modal.get()>
                 <Confirm
                     message="Confirm note deletion.".to_owned()
