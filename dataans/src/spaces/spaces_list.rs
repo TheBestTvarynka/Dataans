@@ -7,6 +7,7 @@ use crate::spaces::Space;
 
 #[component]
 pub fn SpacesList(
+    config: Config,
     selected_space: Signal<Option<OwnedSpace>>,
     spaces: Signal<Vec<OwnedSpace>>,
     spaces_minimized: Signal<bool>,
@@ -51,10 +52,10 @@ pub fn SpacesList(
         }
     };
 
-    // let key_bindings = config.key_bindings.clone();
+    let key_bindings = config.key_bindings.clone();
 
-    // use_hotkeys!((key_bindings.select_prev_list_item) => move |_| select_prev_space());
-    // use_hotkeys!((key_bindings.select_next_list_item) => move |_| select_next_space());
+    use_hotkeys!((key_bindings.select_prev_list_item) => move |_| select_prev_space());
+    use_hotkeys!((key_bindings.select_next_list_item) => move |_| select_next_space());
 
     let global_config = expect_context::<RwSignal<Config>>();
 

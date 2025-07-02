@@ -33,6 +33,11 @@ pub fn Tools(
 
     let key_bindings = &config.key_bindings;
 
+    let toggle_spaces_bar = key_bindings.toggle_spaces_bar.clone();
+    use_hotkeys!((toggle_spaces_bar) => move |_| {
+        set_spaces_minimized.set(!spaces_minimized.get());
+    });
+
     use_hotkeys!((key_bindings.create_space.clone()) => move |_| {
         set_show_modal.set(true);
     });
