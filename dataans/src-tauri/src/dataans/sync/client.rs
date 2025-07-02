@@ -9,7 +9,7 @@ use uuid::Uuid;
 use web_api_types::{AuthToken, Blocks, Operation, AUTH_HEADER_NAME};
 
 use super::SyncError;
-use crate::dataans::crypto::{decrypt, decrypt_data, encrypt, EncryptionKey};
+use crate::dataans::crypto::{decrypt, decrypt_data, encrypt, encrypt_data, EncryptionKey};
 use crate::dataans::db::{OperationRecord, OperationRecordOwned};
 use crate::dataans::sync::hash::Hash;
 
@@ -107,7 +107,7 @@ impl Client {
     pub async fn upload_file(&self, id: Uuid, path: &Path) -> Result<(), SyncError> {
         let file_data = tokio::fs::read(path).await?;
 
-        let data = encrypt(&file_data, &self.encryption_key)?;
+        let data = encrypt_data(&file_data, &self.encryption_key)?;
 
         self.client
             .post(self.sync_server.join("file/")?.join(&id.to_string())?)

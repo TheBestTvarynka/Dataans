@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use std::path::Path;
 use std::sync::Arc;
 
 use common::error::CommandError;
@@ -30,14 +30,19 @@ type NoteServiceResult<T> = Result<T, NoteServiceError>;
 pub struct NoteService<D> {
     db: Arc<D>,
     space_service: Arc<SpaceService<D>>,
+    files_path: Arc<Path>,
 }
 
 impl<D: Db> NoteService<D> {
-    pub fn new(db: Arc<D>, space_service: Arc<SpaceService<D>>) -> Self {
-        Self { db, space_service }
+    pub fn new(db: Arc<D>, space_service: Arc<SpaceService<D>>, files_path: Arc<Path>) -> Self {
+        Self {
+            db,
+            space_service,
+            files_path,
+        }
     }
 
-    pub async fn map_note_model_to_note(note: NoteModel, db: &D) -> NoteServiceResult<OwnedNote> {
+    pub async fn map_note_model_to_note(note: NoteModel, db: &D, files_path: &Path) -> NoteServiceResult<OwnedNote> {
         let NoteModel {
             id,
             text,
@@ -62,7 +67,7 @@ impl<D: Db> NoteService<D> {
                     is_uploaded,
                 } = file;
 
-                let path = PathBuf::from(path);
+                let path = files_path.join(path);
                 let status = FileStatus::status_for_file(&path, is_uploaded);
 
                 File {
@@ -90,7 +95,7 @@ impl<D: Db> NoteService<D> {
                 .space_notes(space_id.inner())
                 .await?
                 .into_iter()
-                .map(|note| Self::map_note_model_to_note(note, &self.db)),
+                .map(|note| Self::map_note_model_to_note(note, &self.db, &self.files_path)),
         )
         .await?;
 
@@ -103,7 +108,7 @@ impl<D: Db> NoteService<D> {
                 .notes()
                 .await?
                 .into_iter()
-                .map(|note| Self::map_note_model_to_note(note, &self.db)),
+                .map(|note| Self::map_note_model_to_note(note, &self.db, &self.files_path)),
         )
         .await?;
 

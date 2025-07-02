@@ -1,5 +1,5 @@
 use std::fs;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::sync::Arc;
 
 use common::APP_PLUGIN_NAME;
@@ -26,7 +26,9 @@ use crate::dataans::service::space::SpaceService;
 use crate::dataans::service::web::WebService;
 
 pub struct State<D> {
-    app_data_dir: PathBuf,
+    base_path: Arc<Path>,
+    files_path: Arc<Path>,
+
     space_service: Arc<SpaceService<D>>,
     note_service: Arc<NoteService<D>>,
     file_service: Arc<FileService<D>>,
@@ -37,7 +39,7 @@ pub struct State<D> {
 pub type DataansState = State<SqliteDb>;
 
 impl DataansState {
-    pub async fn init(db_dir: PathBuf, app_data_dir: PathBuf) -> Self {
+    pub async fn init(db_dir: PathBuf, base_path: Arc<Path>) -> Self {
         // It's okay to panic in this function because the app is useless without a working db.
 
         let db_file = db_dir.join("dataans.sqlite");
@@ -62,15 +64,21 @@ impl DataansState {
 
         let operation_logger = Arc::new(OperationLogger::new(pool));
         let sqlite = Arc::new(SqliteDb::new(Arc::clone(&operation_logger)));
+        let files_path = base_path.join(FILES_DIR).into();
 
         let space_service = Arc::new(SpaceService::new(Arc::clone(&sqlite)));
-        let note_service = Arc::new(NoteService::new(Arc::clone(&sqlite), Arc::clone(&space_service)));
-        let file_service = Arc::new(FileService::new(Arc::clone(&sqlite)));
-        let web_service =
-            Arc::new(WebService::new(app_data_dir.join(PROFILE_DIR)).expect("can not initiate web service"));
+        let note_service = Arc::new(NoteService::new(
+            Arc::clone(&sqlite),
+            Arc::clone(&space_service),
+            Arc::clone(&files_path),
+        ));
+        let file_service = Arc::new(FileService::new(Arc::clone(&sqlite), Arc::clone(&files_path)));
+        let web_service = Arc::new(WebService::new(base_path.join(PROFILE_DIR)).expect("can not initiate web service"));
 
         Self {
-            app_data_dir,
+            base_path,
+            files_path,
+
             space_service,
             note_service,
             file_service,
@@ -189,7 +197,7 @@ pub fn init_dataans_plugin<R: Runtime>() -> TauriPlugin<R> {
                 }
             }
 
-            let dataans_state = block_on(DataansState::init(db_dir, app_data));
+            let dataans_state = block_on(DataansState::init(db_dir, app_data.into()));
             app_handle.manage(dataans_state);
 
             Ok(())
