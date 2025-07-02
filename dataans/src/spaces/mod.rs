@@ -9,7 +9,7 @@ use common::profile::{Sync, SyncMode, UserContext};
 use common::space::OwnedSpace;
 use common::Config;
 use leptos::*;
-use leptos_hotkeys::{use_hotkeys, use_hotkeys_scoped};
+use leptos_hotkeys::use_hotkeys;
 
 use self::found_notes_list::FoundNotesList;
 use self::space::Space;
@@ -23,11 +23,7 @@ use crate::utils::focus_element;
 use crate::FindNoteMode;
 
 #[component]
-pub fn Spaces(
-    config: Config,
-    spaces: Signal<Vec<OwnedSpace>>,
-    set_spaces: SignalSetter<Vec<OwnedSpace>>,
-) -> impl IntoView {
+pub fn Spaces(spaces: Signal<Vec<OwnedSpace>>, set_spaces: SignalSetter<Vec<OwnedSpace>>) -> impl IntoView {
     let global_state = expect_context::<RwSignal<GlobalState>>();
 
     spawn_local(async move {
@@ -66,11 +62,6 @@ pub fn Spaces(
         |state, minimized| state.minimize_spaces = minimized,
     );
 
-    let toggle_spaces_bar = config.key_bindings.toggle_spaces_bar.clone();
-    use_hotkeys!((toggle_spaces_bar) => move |_| {
-        set_spaces_minimized.set(!spaces_minimized.get());
-    });
-
     let (query, set_query) = create_signal(String::new());
 
     let toaster = leptoaster::expect_toaster();
@@ -89,19 +80,24 @@ pub fn Spaces(
 
     let user_context = expect_context::<RwSignal<Option<UserContext>>>();
 
+    let global_config = expect_context::<RwSignal<Config>>();
+
     view! {
         <div class="spaces-container">
-            <Tools set_spaces spaces_minimized set_spaces_minimized set_find_node_mode set_query=set_query.into() set_selected_space config=config.clone() />
-            {move || match find_note_mode.get() {
-                FindNoteMode::None => view!{
-                    <SpacesList config=config.clone() selected_space spaces spaces_minimized set_selected_space />
-                },
-                FindNoteMode::FindNote { space } => {
-                    use_hotkeys!(("Escape") => move |_| set_find_node_mode.set(FindNoteMode::None));
-                    view! {
-                        <FoundNotesList config=config.clone() query search_in_space=space spaces_minimized focus_note />
-                    }
-                },
+            {move || view! { <Tools set_spaces spaces_minimized set_spaces_minimized set_find_node_mode set_query=set_query.into() set_selected_space config=global_config.get() /> }}
+            {move || {
+                let config = global_config.get();
+                match find_note_mode.get() {
+                    FindNoteMode::None => view!{
+                        <SpacesList config selected_space spaces spaces_minimized set_selected_space />
+                    },
+                    FindNoteMode::FindNote { space } => {
+                        use_hotkeys!(("Escape") => move |_| set_find_node_mode.set(FindNoteMode::None));
+                        view! {
+                            <FoundNotesList config query search_in_space=space spaces_minimized focus_note />
+                        }
+                    },
+                }
             }}
             <div style="flex-grow: 1; align-content: end; display: flex; flex-direction: column; align-items: center; justify-content: flex-end;">
                 {move || if let Some(UserContext { sync_config: Sync::Enabled { mode: SyncMode::Manual, .. }, .. }) = user_context.get() {

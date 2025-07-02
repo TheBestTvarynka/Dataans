@@ -37,6 +37,7 @@ pub async fn full_sync<R: Runtime>(app: AppHandle<R>, state: State<'_, DataansSt
     };
 
     let operation_logger = Arc::clone(&state.operation_logger);
+    let files_path = Arc::clone(&state.files_path);
 
     let UserProfile {
         user_id: _,
@@ -54,6 +55,7 @@ pub async fn full_sync<R: Runtime>(app: AppHandle<R>, state: State<'_, DataansSt
             auth_token,
             *EncryptionKey::from_slice(secret_key.as_ref().as_slice()),
             &app,
+            files_path,
         )
         .await
         .map(|_| StatusUpdateEvent::SyncSuccessful)

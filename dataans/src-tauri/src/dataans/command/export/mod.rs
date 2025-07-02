@@ -35,7 +35,7 @@ fn prepare_backups_dir(base_path: &Path) -> Result<PathBuf, DataansError> {
 }
 
 async fn export_data(state: State<'_, DataansState>, export_config: DataExportConfig) -> Result<PathBuf, DataansError> {
-    let backups_dir = prepare_backups_dir(&state.app_data_dir)?;
+    let backups_dir = prepare_backups_dir(&state.base_path)?;
     let spaces = state.space_service.spaces().await?;
 
     match export_config {

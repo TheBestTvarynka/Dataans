@@ -159,6 +159,9 @@ pub struct App {
     /// Hide app icon on taskbar.
     #[serde(default = "hide_taskbar_icon")]
     pub hide_taskbar_icon: bool,
+    /// Base path for the all app data: config file, user files, DB, etc.
+    #[serde(default)]
+    pub base_path: String,
 }
 
 fn hide_taskbar_icon() -> bool {

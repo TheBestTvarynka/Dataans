@@ -14,13 +14,13 @@ use self::list_item::ListItem;
 use crate::backend::convert_file_src;
 use crate::backend::file::open;
 
-pub fn render_md_node(node: &Node) -> HtmlElement<AnyElement> {
+pub fn render_md_node(node: &Node, base_path: &str) -> HtmlElement<AnyElement> {
     match node {
         Node::Root(root) => view! {
             <div class="note">
                 {root.children
                     .iter()
-                    .map(render_md_node)
+                    .map(|n| render_md_node(n, base_path))
                     .collect::<Vec<_>>()}
             </div>
         }
@@ -29,14 +29,14 @@ pub fn render_md_node(node: &Node) -> HtmlElement<AnyElement> {
             <span class="paragraph">
                 {paragraph.children
                     .iter()
-                    .map(render_md_node)
+                    .map(|n| render_md_node(n,  base_path))
                     .collect::<Vec<_>>()}
             </span>
         }
         .into_any(),
         Node::ThematicBreak(_) => view! { <br class="br" /> }.into_any(),
         Node::Heading(heading) => {
-            let inner = heading.children.iter().map(render_md_node).collect::<Vec<_>>();
+            let inner = heading.children.iter().map(|n| render_md_node(n, base_path)).collect::<Vec<_>>();
             match heading.depth {
                 1 => view! {
                     <h1>{inner}</h1>
@@ -80,7 +80,7 @@ pub fn render_md_node(node: &Node) -> HtmlElement<AnyElement> {
             <s>
                 {delete.children
                     .iter()
-                    .map(render_md_node)
+                    .map(|n| render_md_node(n,  base_path))
                     .collect::<Vec<_>>()}
             </s>
         }
@@ -89,7 +89,7 @@ pub fn render_md_node(node: &Node) -> HtmlElement<AnyElement> {
             <em>
                 {emphasis.children
                     .iter()
-                    .map(render_md_node)
+                    .map(|n| render_md_node(n,  base_path))
                     .collect::<Vec<_>>()}
             </em>
         }
@@ -98,7 +98,7 @@ pub fn render_md_node(node: &Node) -> HtmlElement<AnyElement> {
             <b>
                 {strong.children
                     .iter()
-                    .map(render_md_node)
+                    .map(|n| render_md_node(n,  base_path))
                     .collect::<Vec<_>>()}
             </b>
         }
@@ -107,7 +107,7 @@ pub fn render_md_node(node: &Node) -> HtmlElement<AnyElement> {
             <div class="quote">
                 {quote.children
                     .iter()
-                    .map(render_md_node)
+                    .map(|n| render_md_node(n,  base_path))
                     .collect::<Vec<_>>()}
             </div>
         }
@@ -116,7 +116,7 @@ pub fn render_md_node(node: &Node) -> HtmlElement<AnyElement> {
             <a class="link" href=&link.url target="_blank">
                 {link.children
                     .iter()
-                    .map(render_md_node)
+                    .map(|n| render_md_node(n,  base_path))
                     .collect::<Vec<_>>()}
             </a>
         }
@@ -127,7 +127,7 @@ pub fn render_md_node(node: &Node) -> HtmlElement<AnyElement> {
                     <ol class="list" start=list.start.unwrap_or(1)>
                         {list.children
                             .iter()
-                            .map(render_md_node)
+                            .map(|n| render_md_node(n,  base_path))
                             .collect::<Vec<_>>()}
                     </ol>
                 }
@@ -137,7 +137,7 @@ pub fn render_md_node(node: &Node) -> HtmlElement<AnyElement> {
                     <ul class="list">
                         {list.children
                             .iter()
-                            .map(render_md_node)
+                            .map(|n| render_md_node(n,  base_path))
                             .collect::<Vec<_>>()}
                     </ul>
                 }
@@ -146,7 +146,7 @@ pub fn render_md_node(node: &Node) -> HtmlElement<AnyElement> {
         }
         Node::ListItem(list_item) => view! {
             <div>
-                <ListItem list_item=list_item.clone() />
+                <ListItem list_item=list_item.clone() base_path />
             </div>
         }
         .into_any(),
@@ -159,7 +159,7 @@ pub fn render_md_node(node: &Node) -> HtmlElement<AnyElement> {
                 })
             };
             view! {
-                <img src=convert_file_src(&image.url) alt=image.alt.clone() class="note-image" on:click=open_image />
+                <img src=convert_file_src(&image.url, base_path) alt=image.alt.clone() class="note-image" on:click=open_image />
             }
         }
         .into_any(),
@@ -171,7 +171,7 @@ pub fn render_md_node(node: &Node) -> HtmlElement<AnyElement> {
                             <tr class="table-header">
                                 {header_row.children
                                     .iter()
-                                    .map(render_md_node)
+                                    .map(|n| render_md_node(n,  base_path))
                                     .collect_view()}
                             </tr>
                         }
@@ -186,7 +186,7 @@ pub fn render_md_node(node: &Node) -> HtmlElement<AnyElement> {
                 {
                     table.children[1..]
                         .iter()
-                        .map(render_md_node)
+                        .map(|n| render_md_node(n,  base_path))
                         .collect_view()
                 }
             </table>
@@ -196,7 +196,7 @@ pub fn render_md_node(node: &Node) -> HtmlElement<AnyElement> {
             <tr class="table-row">
                 {row.children
                     .iter()
-                    .map(render_md_node)
+                    .map(|n| render_md_node(n,  base_path))
                     .collect_view()}
             </tr>
         }
@@ -205,7 +205,7 @@ pub fn render_md_node(node: &Node) -> HtmlElement<AnyElement> {
             <td class="table-cell">
                 {cell.children
                     .iter()
-                    .map(render_md_node)
+                    .map(|n| render_md_node(n,  base_path))
                     .collect_view()}
             </td>
         }
