@@ -76,7 +76,7 @@ pub fn AppInfo() -> impl IntoView {
 
                 let KeyBindings { toggle_spaces_bar, create_space, edit_current_space, delete_current_space, select_next_list_item, select_prev_list_item, find_note, find_note_in_selected_space, regenerate_space_avatar } = key_bindings;
                 let Appearance { theme } = appearance;
-                let App { app_toggle, always_on_top, hide_window_decorations, hide_taskbar_icon } = app;
+                let App { app_toggle, always_on_top, hide_window_decorations, hide_taskbar_icon, base_path } = app;
 
                 view!{
                     <table class="app-window-config-table">
@@ -88,6 +88,12 @@ pub fn AppInfo() -> impl IntoView {
                             <td>"App window toggle"</td>
                             <td>
                                 <InlineCode code=app_toggle />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>"App data folder"</td>
+                            <td>
+                                <InlineCode code=base_path />
                             </td>
                         </tr>
                         <tr>

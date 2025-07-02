@@ -59,8 +59,9 @@ pub async fn sync_future<D: OperationDb, R: Runtime, E: Emitter<R>>(
     auth_token: AuthToken,
     encryption_key: EncryptionKey,
     emitter: &E,
+    files_path: Arc<Path>,
 ) -> Result<(), SyncError> {
-    let synchronizer = Synchronizer::new(db, sync_server, auth_token, encryption_key)?;
+    let synchronizer = Synchronizer::new(db, sync_server, auth_token, encryption_key, files_path)?;
 
     let (sender, receiver) = channel::<FileId>(CHANNEL_BUFFER_SIZE);
 
@@ -96,6 +97,7 @@ pub async fn sync_future<D: OperationDb, R: Runtime, E: Emitter<R>>(
 struct Synchronizer<D> {
     db: Arc<D>,
     client: Client,
+    files_path: Arc<Path>,
 }
 
 impl<D: OperationDb> Synchronizer<D> {
@@ -104,22 +106,24 @@ impl<D: OperationDb> Synchronizer<D> {
         sync_server: Url,
         auth_token: AuthToken,
         encryption_key: EncryptionKey,
+        files_path: Arc<Path>,
     ) -> Result<Self, SyncError> {
         Ok(Self {
             db,
             client: Client::new(sync_server, auth_token, encryption_key)?,
+            files_path,
         })
     }
 
     async fn handle_file<R: Runtime, E: Emitter<R>>(&self, file_id: Uuid, emitter: &E) -> Result<(), SyncError> {
         let file = self.db.file_by_id(*file_id.as_ref()).await?;
-        let file_path = Path::new(&file.path);
+        let file_path = self.files_path.join(&file.path);
 
         if file.is_uploaded {
             if !file_path.exists() {
                 debug!(?file.id, ?file.path, "File does not exist locally, but is uploaded. Downloading...");
 
-                self.client.download_file(file.id, file_path).await?;
+                self.client.download_file(file.id, &file_path).await?;
                 emitter
                     .emit(
                         DATA_EVENT,
@@ -135,7 +139,7 @@ impl<D: OperationDb> Synchronizer<D> {
         } else if file_path.exists() {
             debug!(?file.id, ?file.path, "File exists locally, but is not uploaded. Uploading...");
 
-            self.client.upload_file(file.id, file_path).await?;
+            self.client.upload_file(file.id, &file_path).await?;
             self.db.mark_file_as_uploaded(file.id).await?;
             emitter
                 .emit(
@@ -194,11 +198,16 @@ impl<D: OperationDb> Synchronizer<D> {
             }
         }
 
+        let mut result = Ok(());
+
         while let Some(task_result) = tasks.next().await {
             debug!(?task_result, "File synchronization task finished");
+            if let Err(err) = task_result {
+                result = Err(err);
+            }
         }
 
-        Ok(())
+        result
     }
 
     #[instrument(err, skip(self, emitter))]

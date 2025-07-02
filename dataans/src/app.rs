@@ -81,7 +81,6 @@ pub fn App() -> impl IntoView {
     });
 
     let (theme_css, set_theme_css) = create_signal(String::default());
-    let (config, set_config) = create_signal(Config::default());
 
     let main_ref = create_node_ref::<html::Main>();
     let HotkeysContext { .. } = provide_hotkeys_context(main_ref, false, scopes!());
@@ -89,10 +88,10 @@ pub fn App() -> impl IntoView {
     let global_config = expect_context::<RwSignal<Config>>();
     spawn_local(async move {
         let config = try_exec!(load_config().await, "Failed to load config", toaster);
+        info!("Loaded config: {:?}", config);
         let theme = config.appearance.theme.clone();
 
         global_config.set(config.clone());
-        set_config.set(config);
 
         set_theme_css.set(try_exec!(load_theme(&theme).await, "Failed to load theme", toaster).to_css());
 
@@ -115,7 +114,7 @@ pub fn App() -> impl IntoView {
             <main class="app" style=move || theme_css.get() _ref=main_ref>
                 <Routes>
                     <Route path="/" view=move || view! {
-                        <Spaces config=config.get() spaces set_spaces />
+                        <Spaces spaces set_spaces />
                         <Notes />
                     } />
                     <Route path="/auth/:url" view=AuthWindow />

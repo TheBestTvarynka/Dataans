@@ -2,14 +2,16 @@ use leptos::*;
 
 use super::render_md_node;
 
+// The `ListItem` component will not compile without an explicit lifetime.
+#[allow(clippy::needless_lifetimes)]
 #[component]
-pub fn ListItem(list_item: markdown::mdast::ListItem) -> impl IntoView {
+pub fn ListItem<'a>(list_item: markdown::mdast::ListItem, base_path: &'a str) -> impl IntoView {
     match list_item.checked {
         None => view! {
             <li>
                 {list_item.children
                     .iter()
-                    .map(render_md_node)
+                    .map(|n| render_md_node(n,  base_path))
                     .collect_view()}
             </li>
         }
@@ -23,7 +25,7 @@ pub fn ListItem(list_item: markdown::mdast::ListItem) -> impl IntoView {
                     <label for=id>
                         {list_item.children
                             .iter()
-                            .map(render_md_node)
+                            .map(|n| render_md_node(n,  base_path))
                             .collect_view()}
                     </label>
                 </li>
@@ -39,7 +41,7 @@ pub fn ListItem(list_item: markdown::mdast::ListItem) -> impl IntoView {
                     <label for=id>
                         {list_item.children
                             .iter()
-                            .map(render_md_node)
+                            .map(|n| render_md_node(n,  base_path))
                             .collect_view()}
                     </label>
                 </li>
