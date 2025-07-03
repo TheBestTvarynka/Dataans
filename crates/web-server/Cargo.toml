@@ -16,7 +16,7 @@ fs = []
 [dependencies]
 web-api-types = { workspace = true, features = ["server"] }
 serde = { workspace = true, features = ["derive"] }
-sqlx = { workspace = true, features = ["runtime-tokio", "time", "uuid", "postgres", "migrate"] }
+sqlx = { workspace = true, features = ["runtime-tokio", "time", "uuid", "postgres", "migrate", "tls-rustls"] }
 thiserror.workspace = true
 uuid = { workspace = true, features = ["serde", "v4"] }
 tracing.workspace = true
