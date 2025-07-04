@@ -1,42 +1,15 @@
-mod auth;
 mod data;
 mod error;
 
-pub use auth::*;
 pub use data::*;
 use derive_more::{AsRef, From, Into};
 pub use error::*;
-use nutype::nutype;
 use serde::{Deserialize, Serialize};
 use time::serde::rfc3339;
 use time::OffsetDateTime;
 
-#[nutype(
-    validate(not_empty),
-    derive(Debug, Serialize, Deserialize, AsRef, Deref, TryFrom, Clone)
-)]
-pub struct Username(String);
-
-#[nutype(
-    validate(not_empty),
-    derive(Debug, Serialize, Deserialize, AsRef, Deref, TryFrom, Clone)
-)]
-pub struct Password(String);
-
-#[nutype(
-    validate(predicate = |token| !token.is_empty()),
-    derive(Debug, Serialize, Deserialize, AsRef, Deref, TryFrom),
-)]
-pub struct InvitationToken(Vec<u8>);
-
-#[derive(Debug, Serialize, Deserialize, AsRef, From, Copy, Clone, Into, PartialEq, Eq, Hash)]
-pub struct UserId(uuid::Uuid);
-
 #[derive(Debug, Serialize, Deserialize, AsRef, From, Copy, Clone, Into, PartialEq, Eq, Hash)]
 pub struct OperationId(uuid::Uuid);
-
-#[derive(Debug, Serialize, Deserialize, AsRef, From, Copy, Clone, Into, PartialEq, Eq, Hash)]
-pub struct SessionId(uuid::Uuid);
 
 #[cfg(feature = "server")]
 mod impl_from_param {
@@ -56,8 +29,6 @@ mod impl_from_param {
     }
 
     impl_from_param!(id: crate::OperationId);
-    impl_from_param!(id: crate::UserId);
-    impl_from_param!(id: crate::SessionId);
 }
 
 #[derive(Debug, Serialize, Deserialize, AsRef, From, Into)]
