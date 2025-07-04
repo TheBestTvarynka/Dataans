@@ -21,6 +21,11 @@ pub fn health() -> &'static str {
     "ok"
 }
 
+#[get("/auth")]
+pub fn health_auth(_u: UserContext) -> &'static str {
+    "auth_ok"
+}
+
 #[derive(Debug)]
 pub struct UserContext;
 
@@ -107,10 +112,11 @@ async fn verify_auth_token(team_name: &str, aud: &str, token: &str) -> Result<()
         .json::<CloudflareCerts>()
         .await?;
 
-    let key =
-        certs.keys.iter().find(|k| k.kid == k_id).ok_or_else(|| {
-            Error::Unauthorized("authentication token key id does not match any Cloudflare key")
-        })?;
+    let key = certs
+        .keys
+        .iter()
+        .find(|k| k.kid == k_id)
+        .ok_or_else(|| Error::Unauthorized("authentication token key id does not match any Cloudflare key"))?;
     let decoding_key = DecodingKey::from_rsa_components(&key.n, &key.e)?;
     let mut validation = Validation::new(
         Algorithm::from_str(&key.alg)

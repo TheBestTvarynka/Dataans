@@ -104,7 +104,7 @@ async fn main() -> std::result::Result<(), Box<rocket::Error>> {
             routes![routes::blocks, routes::operations, routes::add_operations,],
         )
         .mount("/file", routes![routes::upload, routes::download])
-        .mount("/health", routes![routes::health])
+        .mount("/health", routes![routes::health, routes::health_auth])
         .launch()
         .await?;
 
