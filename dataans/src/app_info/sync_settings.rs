@@ -3,17 +3,11 @@ use leptos::*;
 use wasm_bindgen::JsCast;
 use web_sys::HtmlInputElement;
 
-use crate::notes::md_node::InlineCode;
-
 #[component]
 pub fn SyncSettings(context: UserContext) -> impl IntoView {
     let toaster = leptoaster::expect_toaster();
 
-    let UserContext {
-        user_id,
-        username,
-        sync_config,
-    } = context;
+    let UserContext { sync_config } = context;
 
     let url = sync_config.get_web_server_url();
     let t = toaster.clone();
@@ -39,13 +33,6 @@ pub fn SyncSettings(context: UserContext) -> impl IntoView {
     view! {
         <div class="app-info-sync-config">
             <div class="horizontal">
-                <span>
-                    "Signed in as "
-                    <InlineCode code={username.as_ref().to_string()} />
-                    " (id: "
-                    <InlineCode code={user_id.as_ref().to_string()} />
-                    "). "
-                </span>
                 {if sync_config.is_enabled() { view! {
                     <button
                         class="button_ok"

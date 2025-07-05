@@ -6,7 +6,7 @@ use reqwest::ClientBuilder;
 use sha2::Sha256;
 use url::Url;
 use uuid::Uuid;
-use web_api_types::{AuthToken, Blocks, Operation, AUTH_HEADER_NAME};
+use web_api_types::{Blocks, Operation};
 
 use super::SyncError;
 use crate::dataans::crypto::{decrypt, decrypt_data, encrypt, encrypt_data, EncryptionKey};
@@ -20,11 +20,11 @@ pub struct Client {
 }
 
 impl Client {
-    pub fn new(sync_server: Url, auth_token: AuthToken, encryption_key: EncryptionKey) -> Result<Self, SyncError> {
+    pub fn new(sync_server: Url, encryption_key: EncryptionKey) -> Result<Self, SyncError> {
         let client = ClientBuilder::new()
             .default_headers({
                 let mut headers = HeaderMap::new();
-                headers.insert(AUTH_HEADER_NAME, HeaderValue::from_str(auth_token.as_ref())?);
+                // headers.insert(AUTH_HEADER_NAME, HeaderValue::from_str(auth_token.as_ref())?);
                 headers
             })
             .http2_keep_alive_interval(Some(Duration::from_secs(30)))

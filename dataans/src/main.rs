@@ -8,7 +8,6 @@ pub mod macros;
 
 mod app;
 mod app_info;
-mod auth;
 mod backend;
 mod common;
 mod notes;

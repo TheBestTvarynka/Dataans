@@ -108,8 +108,6 @@ pub fn init_dataans_plugin<R: Runtime>() -> TauriPlugin<R> {
             command::file::gen_random_avatar,
             command::file::handle_clipboard_image,
             command::export::export_app_data,
-            command::web::sign_up,
-            command::web::sign_in,
             command::web::profile,
             command::sync::set_sync_options,
             command::sync::full_sync,

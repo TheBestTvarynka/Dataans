@@ -8,7 +8,6 @@ use leptos_hotkeys::{provide_hotkeys_context, scopes, HotkeysContext};
 use leptos_router::{Route, Router, Routes};
 
 use crate::app_info::AppInfo;
-use crate::auth::AuthWindow;
 use crate::backend::auth::profile;
 use crate::backend::sync::{on_data, on_status_update, on_user_context};
 use crate::backend::{load_config, load_theme};
@@ -117,7 +116,6 @@ pub fn App() -> impl IntoView {
                         <Spaces spaces set_spaces />
                         <Notes />
                     } />
-                    <Route path="/auth/:url" view=AuthWindow />
                     <Route path="/app-info" view=AppInfo />
                 </Routes>
             </main>

@@ -16,7 +16,6 @@ use thiserror::Error;
 use tokio_stream::wrappers::ReceiverStream;
 use url::Url;
 use uuid::Uuid;
-use web_api_types::AuthToken;
 
 use crate::dataans::crypto::{CryptoError, EncryptionKey};
 use crate::dataans::db::{DbError, OperationDb};
@@ -52,16 +51,15 @@ pub enum SyncError {
     Io(#[from] std::io::Error),
 }
 
-#[instrument(ret, skip(db, auth_token, encryption_key, emitter))]
+#[instrument(ret, skip(db, encryption_key, emitter))]
 pub async fn sync_future<D: OperationDb, R: Runtime, E: Emitter<R>>(
     db: Arc<D>,
     sync_server: Url,
-    auth_token: AuthToken,
     encryption_key: EncryptionKey,
     emitter: &E,
     files_path: Arc<Path>,
 ) -> Result<(), SyncError> {
-    let synchronizer = Synchronizer::new(db, sync_server, auth_token, encryption_key, files_path)?;
+    let synchronizer = Synchronizer::new(db, sync_server, encryption_key, files_path)?;
 
     let (sender, receiver) = channel::<FileId>(CHANNEL_BUFFER_SIZE);
 
@@ -104,13 +102,12 @@ impl<D: OperationDb> Synchronizer<D> {
     pub fn new(
         db: Arc<D>,
         sync_server: Url,
-        auth_token: AuthToken,
         encryption_key: EncryptionKey,
         files_path: Arc<Path>,
     ) -> Result<Self, SyncError> {
         Ok(Self {
             db,
-            client: Client::new(sync_server, auth_token, encryption_key)?,
+            client: Client::new(sync_server, encryption_key)?,
             files_path,
         })
     }

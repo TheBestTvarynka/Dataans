@@ -3,7 +3,6 @@ use serde::{Deserialize, Serialize};
 use time::serde::rfc3339;
 use time::OffsetDateTime;
 use url::Url;
-use web_api_types::{AuthToken, UserId, Username};
 
 /// Secret key.
 ///
@@ -77,12 +76,6 @@ impl Sync {
 /// Represents the user's profile.
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct UserProfile {
-    /// User ID.
-    pub user_id: UserId,
-    /// Username.
-    pub username: Username,
-    /// Auth token.
-    pub auth_token: AuthToken,
     /// Auth token expiration date.
     #[serde(with = "rfc3339")]
     pub auth_token_expiration_date: OffsetDateTime,
@@ -97,10 +90,6 @@ pub struct UserProfile {
 /// The user context is returned by the backend and used only on frontend.
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct UserContext {
-    /// User ID.
-    pub user_id: UserId,
-    /// Username.
-    pub username: Username,
     /// Synchronization configuration.
     pub sync_config: Sync,
 }

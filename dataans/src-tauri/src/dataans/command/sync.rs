@@ -40,9 +40,6 @@ pub async fn full_sync<R: Runtime>(app: AppHandle<R>, state: State<'_, DataansSt
     let files_path = Arc::clone(&state.files_path);
 
     let UserProfile {
-        user_id: _,
-        username: _,
-        auth_token,
         auth_token_expiration_date: _,
         secret_key,
         sync_config,
@@ -52,7 +49,6 @@ pub async fn full_sync<R: Runtime>(app: AppHandle<R>, state: State<'_, DataansSt
         let status_update_event = sync_future(
             operation_logger,
             sync_config.get_web_server_url().into(),
-            auth_token,
             *EncryptionKey::from_slice(secret_key.as_ref().as_slice()),
             &app,
             files_path,
