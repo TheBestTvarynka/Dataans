@@ -6,9 +6,11 @@ use std::str::FromStr;
 pub use data::*;
 pub use file::*;
 use jsonwebtoken::{decode, decode_header, Algorithm, DecodingKey, Validation};
+use rocket::fs::{relative, NamedFile};
 use rocket::get;
-use rocket::http::Status;
+use rocket::http::{ContentType, Status};
 use rocket::request::{FromRequest, Outcome, Request};
+use rocket::response::{self, Responder, Response};
 use serde::Deserialize;
 use uuid::Uuid;
 
@@ -24,6 +26,23 @@ pub fn health() -> &'static str {
 #[get("/auth")]
 pub fn health_auth(_u: UserContext) -> &'static str {
     "auth_ok"
+}
+
+pub struct AuthorizationPage(&'static str);
+
+impl<'r, 'o: 'r> Responder<'r, 'o> for AuthorizationPage {
+    fn respond_to(self, _req: &'r Request<'_>) -> response::Result<'o> {
+        Response::build()
+            .status(Status::Ok)
+            .header(ContentType::HTML)
+            .sized_body(self.0.len(), std::io::Cursor::new(self.0))
+            .ok()
+    }
+}
+
+#[get("/authorize.html")]
+pub async fn cf_token(_u: UserContext) -> AuthorizationPage {
+    AuthorizationPage(include_str!("../../authorize.html"))
 }
 
 #[derive(Debug)]

@@ -198,8 +198,9 @@ fn main() {
             config::open_config_file_folder,
             config::open_theme_file,
             code_block::parse_code,
-            window::open_auth_window,
             window::open_app_info_window,
+            window::cf_auth,
+            window::cf_token,
         ])
         .build(
             {

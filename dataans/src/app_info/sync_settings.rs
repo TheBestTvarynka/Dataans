@@ -106,11 +106,11 @@ pub fn SetUpSync() -> impl IntoView {
     let web_server_url_ref: NodeRef<html::Input> = NodeRef::new();
     let show_auth_window = Callback::new(move |_: ()| {
         let t = toaster.clone();
-        let url = web_server_url_ref.get().expect("<input> should be mounted").value();
-        let url = try_exec!(url.parse(), "Failed to parse the web server URL", t);
+        // let url = web_server_url_ref.get().expect("<input> should be mounted").value();
+        // let url = try_exec!(url.parse(), "Failed to parse the web server URL", t);
         spawn_local(async move {
             try_exec!(
-                crate::backend::window::show_auth_window(url).await,
+                crate::backend::window::show_cf_auth_window().await,
                 "Failed to create auth window",
                 t
             );
@@ -132,14 +132,14 @@ pub fn SyncState() -> impl IntoView {
     let user_context = expect_context::<RwSignal<Option<UserContext>>>();
 
     move || {
-        if let Some(user_context) = user_context.get() {
-            view! {
-                <SyncSettings context=user_context />
-            }
-        } else {
-            view! {
-                <SetUpSync />
-            }
+        // if let Some(user_context) = user_context.get() {
+        //     view! {
+        //         <SyncSettings context=user_context />
+        //     }
+        // } else {
+        view! {
+            <SetUpSync />
         }
+        // }
     }
 }
