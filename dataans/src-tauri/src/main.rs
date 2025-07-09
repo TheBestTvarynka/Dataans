@@ -200,7 +200,6 @@ fn main() {
             code_block::parse_code,
             window::open_app_info_window,
             window::cf_auth,
-            window::cf_token,
         ])
         .build(
             {

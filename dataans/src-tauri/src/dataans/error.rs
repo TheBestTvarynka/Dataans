@@ -52,12 +52,6 @@ pub enum DataansError {
     #[error("failed to send a request: {0:?}")]
     Reqwest(#[from] reqwest::Error),
 
-    #[error("failed to sign in: {0}")]
-    SignInFailed(String),
-
-    #[error("failed to read secret-key file: path {0}, error: {1:?}")]
-    SecretKeyFile(PathBuf, IoError),
-
     #[error("failed to parse secret key: {0:?}")]
     ParseSecretKey(hex::FromHexError),
 
@@ -67,8 +61,14 @@ pub enum DataansError {
     #[error("user is not signed in")]
     UserNotSignedIn,
 
-    #[error("auth token is expired")]
-    AuthTokenExpired,
+    #[error(transparent)]
+    Crypto(#[from] crate::dataans::crypto::CryptoError),
+
+    #[error("invalid credentials: {0}")]
+    InvalidCredentials(&'static str),
+
+    #[error(transparent)]
+    Sync(#[from] crate::dataans::sync::SyncError),
 }
 
 impl From<DataansError> for CommandError {

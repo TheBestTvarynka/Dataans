@@ -1,9 +1,11 @@
 use aes_gcm::aead::Aead;
-use aes_gcm::{AeadCore, Aes256Gcm, Key, KeyInit, Nonce};
+use aes_gcm::{AeadCore, Aes256Gcm, Key, KeyInit, KeySizeUser, Nonce};
+use pbkdf2::pbkdf2_hmac;
 use rand::rngs::OsRng;
 use serde::de::DeserializeOwned;
 use serde::Serialize;
-use sha2::Sha256;
+use sha2::digest::typenum::Unsigned;
+use sha2::{Digest, Sha256};
 use thiserror::Error;
 
 const NONCE_LENGTH: usize = 12;
@@ -109,10 +111,19 @@ pub fn decrypt<T: DeserializeOwned>(data: &[u8], key: &EncryptionKey) -> CryptoR
     Ok(serde_json::from_slice(&data)?)
 }
 
+pub fn derive_encryption_key(password: &[u8], salt: &[u8]) -> CryptoResult<EncryptionKey> {
+    let password = Sha256::digest(password).to_vec();
+    let salt = Sha256::digest(salt).to_vec();
+
+    let mut key = [0_u8; <Aes256Gcm as KeySizeUser>::KeySize::USIZE];
+    pbkdf2_hmac::<Sha256>(&password, &salt, 1_200_000, &mut key);
+
+    Ok(key.into())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
-
     #[test]
     fn data_encryption() {
         let key = b"oeifvncpfiejnvdjpvnwifvj12345678";

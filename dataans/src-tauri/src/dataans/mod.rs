@@ -73,7 +73,11 @@ impl DataansState {
             Arc::clone(&files_path),
         ));
         let file_service = Arc::new(FileService::new(Arc::clone(&sqlite), Arc::clone(&files_path)));
-        let web_service = Arc::new(WebService::new(base_path.join(PROFILE_DIR)).expect("can not initiate web service"));
+        let web_service = Arc::new(
+            WebService::new(base_path.join(PROFILE_DIR))
+                .await
+                .expect("can not initiate web service"),
+        );
 
         Self {
             base_path,
@@ -109,6 +113,7 @@ pub fn init_dataans_plugin<R: Runtime>() -> TauriPlugin<R> {
             command::file::handle_clipboard_image,
             command::export::export_app_data,
             command::web::profile,
+            command::web::sign_in,
             command::sync::set_sync_options,
             command::sync::full_sync,
         ])

@@ -1,4 +1,4 @@
-mod client;
+pub mod client;
 mod hash;
 
 use std::path::Path;
@@ -6,6 +6,7 @@ use std::sync::Arc;
 
 use common::event::{DataEvent, DATA_EVENT};
 use common::note::{FileId, FileStatus};
+use common::profile::AuthorizationToken;
 use futures::stream::FuturesUnordered;
 use futures::StreamExt;
 pub use hash::{Hash, Hasher};
@@ -49,6 +50,9 @@ pub enum SyncError {
 
     #[error("io error: {0}")]
     Io(#[from] std::io::Error),
+
+    #[error("health check failed: {0:?}")]
+    HealthCheckFailed(reqwest::StatusCode),
 }
 
 #[instrument(ret, skip(db, encryption_key, emitter))]
@@ -58,8 +62,9 @@ pub async fn sync_future<D: OperationDb, R: Runtime, E: Emitter<R>>(
     encryption_key: EncryptionKey,
     emitter: &E,
     files_path: Arc<Path>,
+    auth_token: &AuthorizationToken,
 ) -> Result<(), SyncError> {
-    let synchronizer = Synchronizer::new(db, sync_server, encryption_key, files_path)?;
+    let synchronizer = Synchronizer::new(db, sync_server, encryption_key, files_path, auth_token)?;
 
     let (sender, receiver) = channel::<FileId>(CHANNEL_BUFFER_SIZE);
 
@@ -104,10 +109,11 @@ impl<D: OperationDb> Synchronizer<D> {
         sync_server: Url,
         encryption_key: EncryptionKey,
         files_path: Arc<Path>,
+        auth_token: &AuthorizationToken,
     ) -> Result<Self, SyncError> {
         Ok(Self {
             db,
-            client: Client::new(sync_server, encryption_key)?,
+            client: Client::new(sync_server, encryption_key, auth_token)?,
             files_path,
         })
     }

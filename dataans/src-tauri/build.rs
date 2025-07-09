@@ -22,6 +22,7 @@ fn main() {
             "profile",
             "set_sync_options",
             "full_sync",
+            "sign_in",
         ]),
     ))
     .expect("Tauri app build should not fail")

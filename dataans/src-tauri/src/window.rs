@@ -28,17 +28,9 @@ pub async fn open_app_info_window(app: AppHandle) -> CommandResultEmpty {
     Ok(())
 }
 
-#[instrument(level = "trace", ret)]
-#[tauri::command]
-pub async fn cf_token(token: String) -> CommandResultEmpty {
-    info!("Setting CF token: {}", token);
-
-    Ok(())
-}
-
 #[instrument(level = "trace", ret, skip(app))]
 #[tauri::command]
-pub async fn cf_auth(app: AppHandle) -> CommandResultEmpty {
+pub async fn cf_auth(app: AppHandle, url: Url) -> CommandResultEmpty {
     if let Some(window) = app.webview_windows().get(CF_WINDOW_TITLE) {
         info!("CF-Auth window already opened");
 
@@ -48,9 +40,7 @@ pub async fn cf_auth(app: AppHandle) -> CommandResultEmpty {
         WebviewWindowBuilder::new(
             &app,
             CF_WINDOW_TITLE,
-            WebviewUrl::External(
-                Url::parse("https://backup.dataans.com/health/authorize.html").expect("Invalid URL for CF-Auth"),
-            ),
+            WebviewUrl::External(url.join("health/authorize.html").expect("Invalid URL for CF-Auth")),
         )
         .always_on_top(false)
         .decorations(true)
