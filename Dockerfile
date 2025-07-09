@@ -15,6 +15,13 @@ RUN cargo build -p web-server --release --bin web-server
 
 # We do not need the Rust toolchain to run the binary!
 FROM debian:bookworm-slim AS runtime
+
+# Install CA certificates
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends ca-certificates && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
 COPY --from=builder /app/target/release/web-server /usr/local/bin
 ENTRYPOINT ["/usr/local/bin/web-server"]

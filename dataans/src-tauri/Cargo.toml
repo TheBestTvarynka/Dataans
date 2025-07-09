@@ -23,6 +23,7 @@ url.workspace = true
 aes-gcm.workspace = true
 hmac.workspace = true
 sha2.workspace = true
+reqwest = { workspace = true, features = ["json", "rustls-tls", "http2"] }
 
 tauri = { version = "2", features = [
     "protocol-asset", "tray-icon",
@@ -49,8 +50,9 @@ syntect = { version = "5.2", default-features = false, features = [
     "metadata",
 ] }
 serde_json = "1"
-reqwest = { version = "0.12", features = ["json", "rustls-tls", "http2"] }
 rand = { version = "0.8", features = ["getrandom"] }
+pbkdf2 = "0.12.2"
+phraze = "0.3.22"
 
 [features]
 # This feature is used for production builds or when a dev server is not specified, DO NOT REMOVE!!
@@ -58,3 +60,6 @@ custom-protocol = ["tauri/custom-protocol"]
 
 [target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
 tauri-plugin-global-shortcut = "2"
+
+[dev-dependencies]
+tokio = { version = "1.45", features = ["rt", "macros", "fs"] }

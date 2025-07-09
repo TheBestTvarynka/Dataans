@@ -10,27 +10,6 @@ pub enum Error {
     #[error("the requested resource not found")]
     NotFound,
 
-    #[error("cannot hash password: {0}")]
-    Argon2Hash(#[from] argon2::password_hash::Error),
-
-    #[error("cannot parse password hash")]
-    PasswordHashParsingError,
-
-    #[error("encryption error: {0}")]
-    Encryption(#[from] aes_gcm::Error),
-
-    #[error("invalid encryption key or IV length")]
-    InvalidKeyLength,
-
-    #[error("failed to decrypt the data: {0}")]
-    DecryptionFailed(&'static str),
-
-    #[error("session error: {0}")]
-    Session(&'static str),
-
-    #[error("access denied")]
-    AccessDenied,
-
     #[error("invalid {0}")]
     InvalidData(&'static str),
 
@@ -42,6 +21,15 @@ pub enum Error {
 
     #[error("file saver error: {0}")]
     FileSaver(String),
+
+    #[error("unauthorized: {0}")]
+    Unauthorized(&'static str),
+
+    #[error("reqwest error: {0}")]
+    Reqwest(#[from] reqwest::Error),
+
+    #[error("json web token error: {0}")]
+    JsonWebToken(#[from] jsonwebtoken::errors::Error),
 }
 
 impl From<DbError> for Error {
@@ -64,31 +52,22 @@ impl From<Error> for web_api_types::Error {
                 Self::DbError("interaction with the database failed".into())
             }
             Error::NotFound => Self::NotFound("the requested resource not found".into()),
-            Error::Argon2Hash(err) => {
-                error!(?err);
-
-                if let argon2::password_hash::Error::Password = err {
-                    Self::InvalidCredentials("invalid credentials".into())
-                } else {
-                    Self::PasswordHashingError("failed to hash password".into())
-                }
-            }
-            Error::Encryption(err) => {
-                error!(?err);
-                Self::Internal("internal error".into())
-            }
             Error::Internal(err) => {
                 error!(err);
                 Self::Internal("internal error".into())
             }
-            Error::InvalidKeyLength => Self::Internal("internal error".into()),
-            Error::PasswordHashParsingError => Self::PasswordHashingError("unable to verify credentials".into()),
-            Error::AccessDenied => Self::AccessDenied("access denied".into()),
             Error::InvalidData(_) => Self::InvalidData(error.to_string()),
-            Error::DecryptionFailed(reason) => Self::Internal(reason.into()),
             Error::Io(_) => Self::Internal("internal IO error".into()),
-            Error::Session(_) => Self::Unauthorized(error.to_string()),
             Error::FileSaver(_) => Self::Internal("internal file saver error".into()),
+            Error::Unauthorized(err) => Self::Unauthorized(err.into()),
+            Error::Reqwest(err) => {
+                error!(?err);
+                Self::Internal("failed to fetch".into())
+            }
+            Error::JsonWebToken(err) => {
+                error!(?err);
+                Self::Internal("failed to validate JWT".into())
+            }
         }
     }
 }

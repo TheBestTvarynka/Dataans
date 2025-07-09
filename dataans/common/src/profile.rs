@@ -1,9 +1,18 @@
 use derive_more::{AsRef, From, Into};
 use serde::{Deserialize, Serialize};
-use time::serde::rfc3339;
-use time::OffsetDateTime;
 use url::Url;
-use web_api_types::{AuthToken, UserId, Username};
+
+/// Authorization token.
+///
+/// This token is used to authenticate the user with the backend server.
+#[derive(Debug, Serialize, Deserialize, AsRef, From, Into, Clone)]
+pub struct AuthorizationToken(String);
+
+/// Key derivation salt (nonce).
+///
+/// The salt is used to derive the encryption key from the user's password.
+#[derive(Debug, Serialize, Deserialize, AsRef, From, Into, Clone)]
+pub struct Salt(String);
 
 /// Secret key.
 ///
@@ -24,52 +33,17 @@ pub struct WebServerUrl(Url);
 pub enum SyncMode {
     /// The user manually synchronizes the data by pressing the sync button.
     Manual,
-    /// The app maintains the websocket connection with the server and automatically synchronize the data.
-    Push,
+    // /// The app maintains the websocket connection with the server and automatically synchronize the data.
+    // Push,
 }
 
 /// Synchronization configuration.
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub enum Sync {
-    /// No synchronization enabled.
-    ///
-    /// The user needs to sign up/in to enable synchronization.
-    Disabled {
-        /// The synchronization server URL.
-        url: WebServerUrl,
-    },
-    /// The user is authorized but synchronization is not enabled.
-    /// The synchronization is enabled.
-    Enabled {
-        /// The synchronization server URL.
-        url: WebServerUrl,
-        /// The synchronization mode. It represents how the user wants to synchronize the data.
-        mode: SyncMode,
-    },
-}
-
-impl Sync {
-    /// Returns web server url.
-    pub fn get_web_server_url(&self) -> WebServerUrl {
-        match self {
-            Sync::Disabled { url } => url.clone(),
-            Sync::Enabled { url, mode: _ } => url.clone(),
-        }
-    }
-
-    /// Checks synchronization is enabled.
-    pub fn is_enabled(&self) -> bool {
-        !matches!(self, Sync::Disabled { .. })
-    }
-
-    /// Returns [SyncMode] if the sync is enabled.
-    pub fn mode(&self) -> Option<SyncMode> {
-        if let Sync::Enabled { url: _, mode } = self {
-            Some(*mode)
-        } else {
-            None
-        }
-    }
+pub struct Sync {
+    /// The synchronization server URL.
+    pub url: WebServerUrl,
+    /// The synchronization mode. It represents how the user wants to synchronize the data.
+    pub mode: SyncMode,
 }
 
 /// User profile.
@@ -77,17 +51,15 @@ impl Sync {
 /// Represents the user's profile.
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct UserProfile {
-    /// User ID.
-    pub user_id: UserId,
-    /// Username.
-    pub username: Username,
-    /// Auth token.
-    pub auth_token: AuthToken,
-    /// Auth token expiration date.
-    #[serde(with = "rfc3339")]
-    pub auth_token_expiration_date: OffsetDateTime,
+    /// Authorization token.
+    pub auth_token: AuthorizationToken,
     /// Secret key.
     pub secret_key: SecretKey,
+    /// Key derivation salt (nonce).
+    ///
+    /// The app does not need this value. It is stored only for the user to be able read it
+    /// and login on another device.
+    pub salt: Salt,
     /// Synchronization configuration.
     pub sync_config: Sync,
 }
@@ -97,10 +69,6 @@ pub struct UserProfile {
 /// The user context is returned by the backend and used only on frontend.
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct UserContext {
-    /// User ID.
-    pub user_id: UserId,
-    /// Username.
-    pub username: Username,
     /// Synchronization configuration.
     pub sync_config: Sync,
 }

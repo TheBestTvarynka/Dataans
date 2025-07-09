@@ -20,11 +20,10 @@ fn main() {
             "delete_file",
             "gen_random_avatar",
             "handle_clipboard_image",
-            "sign_up",
-            "sign_in",
             "profile",
             "set_sync_options",
             "full_sync",
+            "sign_in",
         ]),
     ))
     .expect("Tauri app build should not fail")

@@ -1,4 +1,4 @@
-mod client;
+pub mod client;
 mod hash;
 
 use std::path::Path;
@@ -6,6 +6,7 @@ use std::sync::Arc;
 
 use common::event::{DataEvent, DATA_EVENT};
 use common::note::{FileId, FileStatus};
+use common::profile::AuthorizationToken;
 use futures::stream::FuturesUnordered;
 use futures::StreamExt;
 pub use hash::{Hash, Hasher};
@@ -16,7 +17,6 @@ use thiserror::Error;
 use tokio_stream::wrappers::ReceiverStream;
 use url::Url;
 use uuid::Uuid;
-use web_api_types::AuthToken;
 
 use crate::dataans::crypto::{CryptoError, EncryptionKey};
 use crate::dataans::db::{DbError, OperationDb};
@@ -50,18 +50,21 @@ pub enum SyncError {
 
     #[error("io error: {0}")]
     Io(#[from] std::io::Error),
+
+    #[error("health check failed: {0:?}")]
+    HealthCheckFailed(reqwest::StatusCode),
 }
 
-#[instrument(ret, skip(db, auth_token, encryption_key, emitter))]
+#[instrument(ret, skip(db, encryption_key, emitter))]
 pub async fn sync_future<D: OperationDb, R: Runtime, E: Emitter<R>>(
     db: Arc<D>,
     sync_server: Url,
-    auth_token: AuthToken,
     encryption_key: EncryptionKey,
     emitter: &E,
     files_path: Arc<Path>,
+    auth_token: &AuthorizationToken,
 ) -> Result<(), SyncError> {
-    let synchronizer = Synchronizer::new(db, sync_server, auth_token, encryption_key, files_path)?;
+    let synchronizer = Synchronizer::new(db, sync_server, encryption_key, files_path, auth_token)?;
 
     let (sender, receiver) = channel::<FileId>(CHANNEL_BUFFER_SIZE);
 
@@ -104,13 +107,13 @@ impl<D: OperationDb> Synchronizer<D> {
     pub fn new(
         db: Arc<D>,
         sync_server: Url,
-        auth_token: AuthToken,
         encryption_key: EncryptionKey,
         files_path: Arc<Path>,
+        auth_token: &AuthorizationToken,
     ) -> Result<Self, SyncError> {
         Ok(Self {
             db,
-            client: Client::new(sync_server, auth_token, encryption_key)?,
+            client: Client::new(sync_server, encryption_key, auth_token)?,
             files_path,
         })
     }

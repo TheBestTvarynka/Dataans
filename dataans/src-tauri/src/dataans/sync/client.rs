@@ -1,12 +1,13 @@
 use std::path::Path;
 use std::time::Duration;
 
+use common::profile::AuthorizationToken;
 use reqwest::header::{HeaderMap, HeaderValue};
 use reqwest::ClientBuilder;
 use sha2::Sha256;
 use url::Url;
 use uuid::Uuid;
-use web_api_types::{AuthToken, Blocks, Operation, AUTH_HEADER_NAME};
+use web_api_types::{Blocks, Operation};
 
 use super::SyncError;
 use crate::dataans::crypto::{decrypt, decrypt_data, encrypt, encrypt_data, EncryptionKey};
@@ -20,11 +21,20 @@ pub struct Client {
 }
 
 impl Client {
-    pub fn new(sync_server: Url, auth_token: AuthToken, encryption_key: EncryptionKey) -> Result<Self, SyncError> {
+    pub fn new(
+        sync_server: Url,
+        encryption_key: EncryptionKey,
+        auth_token: &AuthorizationToken,
+    ) -> Result<Self, SyncError> {
         let client = ClientBuilder::new()
             .default_headers({
                 let mut headers = HeaderMap::new();
-                headers.insert(AUTH_HEADER_NAME, HeaderValue::from_str(auth_token.as_ref())?);
+
+                headers.insert(
+                    "Cookie",
+                    HeaderValue::from_str(&format!("CF_Authorization={}", auth_token.as_ref()))?,
+                );
+
                 headers
             })
             .http2_keep_alive_interval(Some(Duration::from_secs(30)))
@@ -37,6 +47,19 @@ impl Client {
             sync_server,
             encryption_key,
         })
+    }
+
+    pub async fn auth_health(&self) -> Result<(), SyncError> {
+        let health_url = self.sync_server.join("health/auth")?;
+        trace!(?health_url, "Auth health check URL");
+
+        let response = self.client.get(health_url).send().await?;
+
+        if response.status().is_success() {
+            Ok(())
+        } else {
+            Err(SyncError::HealthCheckFailed(response.status()))
+        }
     }
 
     #[instrument(ret, skip(self))]

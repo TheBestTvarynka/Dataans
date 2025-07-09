@@ -100,7 +100,7 @@ pub fn Spaces(spaces: Signal<Vec<OwnedSpace>>, set_spaces: SignalSetter<Vec<Owne
                 }
             }}
             <div style="flex-grow: 1; align-content: end; display: flex; flex-direction: column; align-items: center; justify-content: flex-end;">
-                {move || if let Some(UserContext { sync_config: Sync::Enabled { mode: SyncMode::Manual, .. }, .. }) = user_context.get() {
+                {move || if let Some(UserContext { sync_config: Sync { mode: SyncMode::Manual, .. } }) = user_context.get() {
                     let sync_toaster = toaster.clone();
                     let start_full_sync = move |_| {
                         let t = sync_toaster.clone();

@@ -6,12 +6,12 @@ use crate::backend::{invoke_command, EmptyArgs};
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
-struct ShowAppWindowArgs {
-    pub web_server_url: Url,
+struct ShowAuthWindowArgs<'a> {
+    pub url: &'a Url,
 }
 
-pub async fn show_auth_window(web_server_url: Url) -> CommandResultEmpty {
-    invoke_command("open_auth_window", &ShowAppWindowArgs { web_server_url }).await
+pub async fn show_cf_auth_window(url: &Url) -> CommandResultEmpty {
+    invoke_command("cf_auth", &ShowAuthWindowArgs { url }).await
 }
 
 pub async fn show_app_info_window() -> CommandResultEmpty {

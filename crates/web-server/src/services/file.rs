@@ -62,6 +62,8 @@ pub use fs::Fs;
 
 #[cfg(feature = "tigris")]
 mod tigris {
+    use std::fmt;
+
     use aws_config::SdkConfig;
     use aws_sdk_s3::Client;
     use rocket::tokio::io::{AsyncRead, AsyncReadExt};
@@ -70,10 +72,18 @@ mod tigris {
     use crate::services::FileSaver;
     use crate::{Error, Result};
 
-    #[derive(Debug)]
     pub struct Tigris {
         client: Client,
         bucket: String,
+    }
+
+    impl fmt::Debug for Tigris {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            f.debug_struct("Tigris")
+                .field("client", &"<...>")
+                .field("bucket", &self.bucket)
+                .finish()
+        }
     }
 
     impl Tigris {

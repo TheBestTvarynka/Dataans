@@ -3,7 +3,6 @@
 #[macro_use]
 extern crate tracing;
 
-mod crypto;
 pub mod db;
 mod error;
 mod logging;
@@ -18,13 +17,15 @@ use rocket::routes;
 use sqlx::postgres::PgPoolOptions;
 
 use crate::db::PostgresDb;
-use crate::services::{Auth as AuthService, Data as DataService};
+use crate::services::Data as DataService;
 
+const CF_TEAM_NAME: &str = "DATAANS_WEB_SERVER_CF_TEAM_NAME";
+const CF_AUD: &str = "DATAANS_WEB_CF_AUD";
 const DATABASE_URL: &str = "DATAANS_WEB_SERVER_DATABASE_URL";
-const SERVER_ENCRYPTION_KEY: &str = "DATAANS_SERVER_ENCRYPTION_KEY";
 
 pub struct State<D, S> {
-    pub auth_service: AuthService<D>,
+    pub cf_team_name: String,
+    pub cf_aud: String,
     pub data_service: DataService<D>,
     pub file_saver: S,
 }
@@ -67,6 +68,9 @@ pub type WebServerState = State<PostgresDb, crate::services::Tigris>;
 
 impl WebServerState {
     pub async fn new() -> WebServerState {
+        let cf_team_name = env::var(CF_TEAM_NAME).expect("Cloudflare team name env var should be set");
+        let cf_aud = env::var(CF_AUD).expect("Cloudflare AUD env var should be set");
+
         let pool = PgPoolOptions::new()
             .max_connections(16)
             .min_connections(1)
@@ -78,14 +82,9 @@ impl WebServerState {
 
         let db = Arc::new(PostgresDb::new(pool));
 
-        let server_encryption_key =
-            hex::decode(env::var(SERVER_ENCRYPTION_KEY).expect("server encryption key env var should be set"))
-                .expect("server encryption key should be a valid hex string")
-                .try_into()
-                .expect("invalid server encryption key length");
-
         Self {
-            auth_service: AuthService::new(Arc::clone(&db), server_encryption_key),
+            cf_team_name,
+            cf_aud,
             data_service: DataService::new(Arc::clone(&db)),
             file_saver: prepare_file_loader().await,
         }
@@ -100,13 +99,15 @@ async fn main() -> std::result::Result<(), Box<rocket::Error>> {
 
     let _rocket = rocket::build()
         .manage(state)
-        .mount("/auth", routes![routes::sign_up, routes::sign_in])
         .mount(
             "/data",
             routes![routes::blocks, routes::operations, routes::add_operations,],
         )
         .mount("/file", routes![routes::upload, routes::download])
-        .mount("/health", routes![routes::health])
+        .mount(
+            "/health",
+            routes![routes::health, routes::health_auth, routes::cf_token],
+        )
         .launch()
         .await?;
 
