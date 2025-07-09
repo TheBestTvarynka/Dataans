@@ -5,7 +5,7 @@ use common::event::{StatusUpdateEvent, STATUS_UPDATE_EVENT};
 use common::profile::{Sync, UserContext, UserProfile};
 use tauri::{async_runtime, AppHandle, Emitter, Runtime, State};
 
-use crate::dataans::command::web::emit_user_context;
+use crate::dataans::command::auth::emit_user_context;
 use crate::dataans::crypto::EncryptionKey;
 use crate::dataans::sync::sync_future;
 use crate::dataans::{DataansError, DataansState};
