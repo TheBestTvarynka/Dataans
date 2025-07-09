@@ -147,6 +147,7 @@ pub struct SyncConfigArgs<'a> {
     pub sync_config: &'a Sync,
 }
 
+#[allow(dead_code)]
 pub async fn set_sync_options(sync_config: &Sync) -> CommandResult<UserContext> {
     invoke_command(
         &format!("plugin:{APP_PLUGIN_NAME}|set_sync_options"),

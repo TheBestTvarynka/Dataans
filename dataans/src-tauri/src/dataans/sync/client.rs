@@ -50,7 +50,7 @@ impl Client {
     }
 
     pub async fn auth_health(&self) -> Result<(), SyncError> {
-        let health_url = self.sync_server.join("health")?.join("auth")?;
+        let health_url = self.sync_server.join("health/auth")?;
         trace!(?health_url, "Auth health check URL");
 
         let response = self.client.get(health_url).send().await?;

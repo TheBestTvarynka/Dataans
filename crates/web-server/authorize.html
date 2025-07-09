@@ -10,25 +10,68 @@
         .find(row => row.startsWith('CF_Authorization='));
       
       if (!cookie) {
-        console.log("CF_Authorization cookie not found.");
+        console.error("CF_Authorization cookie not found.");
         return;
       }
 
       const token = cookie.split('=')[1];
-
       console.log("Extracted token:", token);
 
+      const password = document.getElementById("password").value;
+      const salt = document.getElementById("salt").value;
+
+      let args = { token, url: window.location.origin };
+      if (password && password.length > 0) {
+        args.password = password;
+      }
+      if (salt && salt.length > 0) {
+        args.salt = salt;
+      }
+
+      console.log(args);
+
       try {
-        await window.__TAURI__.core.invoke("cf_token", { token });
+        await window.__TAURI__.core.invoke("plugin:dataans|sign_in", args);
         console.log("Token sent successfully:", token);
       } catch (e) {
         console.error("Failed to send token:", e);
       }
     }
   </script>
+  <style>
+    body {
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.8em;
+      height: calc(100vh - 1.6em);
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: flex-start;
+      gap: 0.3em;
+    }
+  </style>
 </head>
 <body>
-  <h2>Cloudflare Authorization</h2>
-  <button onclick="extractAndSendToken()">Send Token to App</button>
+  <h2>Authorization</h2>
+
+  <div class="field">
+    <label for="password">Password:</label>
+    <input type="password" id="password" placeholder="Enter password" />
+  </div>
+
+  <div class="field">
+    <label for="salt">Unique Passphrase:</label>
+    <input type="text" id="salt" placeholder="Enter passphrase" />
+  </div>
+
+  <button onclick="extractAndSendToken()">Let me in!</button>
 </body>
 </html>

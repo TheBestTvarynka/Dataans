@@ -1,0 +1,20 @@
+{
+  "identifier": "cf-auth-capability",
+  "platforms": [
+    "macOS",
+    "windows",
+    "linux"
+  ],
+  "windows": [
+    "CF-Auth"
+  ],
+  "remote": {
+    "urls": [
+      "https://backup.dataans.com"
+    ]
+  },
+  "permissions": [
+    "dataans:allow-sign-in",
+    "core:event:allow-listen"
+  ]
+}
