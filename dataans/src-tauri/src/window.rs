@@ -3,7 +3,7 @@ use tauri::{AppHandle, Manager, WebviewUrl, WebviewWindowBuilder};
 use url::Url;
 
 const APP_INFO_WINDOW_TITLE: &str = "App-Info";
-const CF_WINDOW_TITLE: &str = "CF-Auth";
+pub const CF_WINDOW_TITLE: &str = "CF-Auth";
 
 #[instrument(level = "trace", ret, skip(app))]
 #[tauri::command]

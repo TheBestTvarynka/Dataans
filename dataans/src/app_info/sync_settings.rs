@@ -3,6 +3,15 @@ use leptos::*;
 
 #[component]
 pub fn SyncSettings(context: UserContext) -> impl IntoView {
+    let toaster = leptoaster::expect_toaster();
+
+    let sign_out = Callback::new(move |_: ()| {
+        let t = toaster.clone();
+        spawn_local(async move {
+            try_exec!(crate::backend::auth::sign_out().await, "Failed to sign out", t);
+        })
+    });
+
     let UserContext {
         sync_config: Sync { url, mode },
     } = context;
@@ -12,6 +21,9 @@ pub fn SyncSettings(context: UserContext) -> impl IntoView {
         <div class="app-info-sync-config">
             <div class="horizontal">
                 <input type="text" class="input" value=url style="flex-grow: 1;" disabled=true />
+                <button title="Sign out" class="tool" on:click=move |_| sign_out.call(())>
+                    <img alt="cloud-icon" src="/public/icons/sign-out.png" />
+                </button>
             </div>
             {match mode {
                 SyncMode::Manual => view! {
