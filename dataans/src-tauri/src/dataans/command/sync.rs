@@ -18,7 +18,7 @@ pub async fn set_sync_options<R: Runtime>(
 ) -> CommandResult<UserContext> {
     let user_context = state.web_service.set_sync_options(sync_config).await?;
 
-    emit_user_context(app, user_context.clone())?;
+    emit_user_context(&app, user_context.clone())?;
 
     Ok(user_context)
 }

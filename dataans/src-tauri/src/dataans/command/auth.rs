@@ -3,14 +3,14 @@ use common::event::{UserContextEvent, USER_CONTEXT_EVENT};
 use common::profile::{Sync, SyncMode, UserContext, UserProfile};
 use phraze::cli::ListChoice;
 use phraze::generate_a_passphrase;
-use tauri::{AppHandle, Emitter, Runtime, State};
+use tauri::{AppHandle, Emitter, Manager, Runtime, State};
 use url::Url;
 
 use crate::dataans::crypto::{derive_encryption_key, EncryptionKey};
 use crate::dataans::sync::client::Client;
 use crate::dataans::{DataansError, DataansState};
 
-pub fn emit_user_context<R: Runtime>(app: AppHandle<R>, user_context: UserContext) -> Result<(), DataansError> {
+pub fn emit_user_context<R: Runtime>(app: &AppHandle<R>, user_context: UserContext) -> Result<(), DataansError> {
     app.emit(USER_CONTEXT_EVENT, UserContextEvent::SignedIn(user_context))?;
 
     Ok(())
@@ -19,6 +19,16 @@ pub fn emit_user_context<R: Runtime>(app: AppHandle<R>, user_context: UserContex
 #[tauri::command]
 pub async fn profile(state: State<'_, DataansState>) -> CommandResult<Option<UserContext>> {
     Ok(state.web_service.user_context().await?)
+}
+
+#[tauri::command]
+pub async fn sign_out<R: Runtime>(app: AppHandle<R>, state: State<'_, DataansState>) -> CommandResultEmpty {
+    state.web_service.sign_out().await?;
+
+    app.emit(USER_CONTEXT_EVENT, UserContextEvent::SignedOut)
+        .map_err(DataansError::from)?;
+
+    Ok(())
 }
 
 #[tauri::command]
@@ -112,7 +122,13 @@ pub async fn sign_in<R: Runtime>(
 
     state.web_service.authorize(profile).await?;
 
-    emit_user_context(app, UserContext { sync_config })?;
+    emit_user_context(&app, UserContext { sync_config })?;
+
+    if let Some(window) = app.webview_windows().get(crate::window::CF_WINDOW_TITLE) {
+        window.close().map_err(DataansError::from)?;
+    } else {
+        warn!("CF-Auth windows not found.");
+    }
 
     Ok(())
 }
