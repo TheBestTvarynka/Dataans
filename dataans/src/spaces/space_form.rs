@@ -39,7 +39,7 @@ pub fn SpaceForm(
         if let Some(ref_input) = ref_input.get() {
             let _ = ref_input.on_mount(|input| {
                 if let Err(err) = input.focus() {
-                    warn!("Can not focus TextArea: {:?}", err);
+                    warn!("Can not focus TextArea: {err:?}");
                 }
             });
         }

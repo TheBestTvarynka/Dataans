@@ -1,9 +1,9 @@
-use std::fs;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
+use std::{fs, io};
 
 use arboard::Clipboard;
-use common::note::{File, FileStatus};
+use common::note::{File, FileId, FileStatus};
 use image::{ImageBuffer, Rgba};
 use time::OffsetDateTime;
 use uuid::Uuid;
@@ -11,6 +11,8 @@ use uuid::Uuid;
 use crate::dataans::db::model::File as FileModel;
 use crate::dataans::db::Db;
 use crate::dataans::DataansError;
+
+// TODO: Introduce `FileServiceError`.
 
 pub struct FileService<D> {
     db: Arc<D>,
@@ -20,6 +22,59 @@ pub struct FileService<D> {
 impl<D: Db> FileService<D> {
     pub fn new(db: Arc<D>, files_path: Arc<Path>) -> Self {
         Self { db, files_path }
+    }
+
+    pub async fn register_file(&self, file: File) -> Result<(), DataansError> {
+        let File {
+            id,
+            name,
+            path,
+            status: _,
+        } = file;
+        let now = OffsetDateTime::now_utc();
+
+        self.db
+            .add_file(&FileModel::new(
+                id.into(),
+                name,
+                path.file_name()
+                    .ok_or_else(|| {
+                        DataansError::IoError(io::Error::new(
+                            io::ErrorKind::IsADirectory,
+                            format!("invalid file path: {path:?}"),
+                        ))
+                    })?
+                    .to_str()
+                    .ok_or_else(|| DataansError::PathIsNotUtf8(path.clone()))?
+                    .to_owned(),
+                now,
+                now,
+            ))
+            .await?;
+
+        Ok(())
+    }
+
+    pub async fn file_by_id(&self, file_id: FileId) -> Result<File, DataansError> {
+        let FileModel {
+            id,
+            name,
+            path,
+            created_at: _,
+            updated_at: _,
+            is_deleted: _,
+            is_uploaded,
+        } = self.db.file_by_id(*file_id.as_ref()).await?;
+
+        let path = self.files_path.join(path);
+        let status = FileStatus::status_for_file(&path, is_uploaded);
+
+        Ok(File {
+            id: id.into(),
+            name,
+            path,
+            status,
+        })
     }
 
     pub async fn upload_file(&self, id: Uuid, name: String, data: &[u8]) -> Result<File, DataansError> {

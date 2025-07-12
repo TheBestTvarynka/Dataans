@@ -16,7 +16,20 @@ use crate::dataans::DataansError;
 #[derive(Debug, Error)]
 pub enum NoteServiceError {
     #[error(transparent)]
-    DbError(#[from] DbError),
+    DbError(DbError),
+
+    #[error("not found")]
+    NotFound,
+}
+
+impl From<DbError> for NoteServiceError {
+    fn from(err: DbError) -> Self {
+        if let DbError::SqlxError(sqlx::Error::RowNotFound) = err {
+            Self::NotFound
+        } else {
+            Self::DbError(err)
+        }
+    }
 }
 
 impl From<NoteServiceError> for CommandError {
@@ -115,10 +128,11 @@ impl<D: Db> NoteService<D> {
         Ok(notes)
     }
 
-    // pub async fn note_by_id(&self, id: NoteId) -> NoteServiceResult<OwnedNote> {
-    //     let note_model = self.db.note_by_id(id.inner()).await?;
-    //     Self::map_note_model_to_note(note_model, &self.db).await
-    // }
+    pub async fn note_by_id(&self, id: NoteId) -> NoteServiceResult<OwnedNote> {
+        let note_model = self.db.note_by_id(id.inner()).await?;
+
+        Self::map_note_model_to_note(note_model, &self.db, &self.files_path).await
+    }
 
     pub async fn create_note(&self, note: CreateNoteOwned) -> NoteServiceResult<OwnedNote> {
         let CreateNoteOwned {

@@ -14,7 +14,20 @@ use crate::dataans::DataansError;
 #[derive(Debug, Error)]
 pub enum SpaceServiceError {
     #[error(transparent)]
-    DbError(#[from] DbError),
+    DbError(DbError),
+
+    #[error("not found")]
+    NotFound,
+}
+
+impl From<DbError> for SpaceServiceError {
+    fn from(err: DbError) -> Self {
+        if let DbError::SqlxError(sqlx::Error::RowNotFound) = err {
+            Self::NotFound
+        } else {
+            Self::DbError(err)
+        }
+    }
 }
 
 impl From<SpaceServiceError> for CommandError {

@@ -17,7 +17,7 @@ pub async fn select_file() -> CommandResult<Option<String>> {
 
 pub async fn import_app_data(path: String) -> CommandResult<()> {
     invoke_command(
-        &format!("plugin:{}|import_app_data", APP_PLUGIN_NAME),
+        &format!("plugin:{APP_PLUGIN_NAME}|import_app_data"),
         &ImportConfig { path },
     )
     .await
