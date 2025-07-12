@@ -3,10 +3,14 @@
 
 /// Contains general error and result types for Tauri commands.
 pub mod error;
+/// Events names and types.
+pub mod event;
 /// Contains schema definitions for data export.
 pub mod export;
 /// Contains all note-related structures.
 pub mod note;
+/// User's profile.
+pub mod profile;
 /// Contains all space-related structures.
 pub mod space;
 
@@ -14,9 +18,11 @@ use std::collections::HashMap;
 use std::fmt;
 use std::path::PathBuf;
 
+use derive_more::{AsRef, From, Into};
 use serde::{Deserialize, Serialize};
 use time::OffsetDateTime;
 use uuid::{uuid, Uuid};
+pub use web_api_types as common_api_types;
 
 use crate::export::SchemaVersion;
 
@@ -47,7 +53,7 @@ impl Theme {
         self.0.iter().fold(String::new(), |mut css, (key, value)| {
             use std::fmt::Write;
 
-            let _ = write!(css, "--{}: {};", key, value);
+            let _ = write!(css, "--{key}: {value};");
             css
         })
     }
@@ -153,6 +159,9 @@ pub struct App {
     /// Hide app icon on taskbar.
     #[serde(default = "hide_taskbar_icon")]
     pub hide_taskbar_icon: bool,
+    /// Base path for the all app data: config file, user files, DB, etc.
+    #[serde(default)]
+    pub base_path: String,
 }
 
 fn hide_taskbar_icon() -> bool {
@@ -183,27 +192,13 @@ pub struct Config {
     pub app: App,
 }
 
-/// Date and time when note was created.
-#[derive(Serialize, Deserialize, Debug, Clone, Eq, PartialEq)]
+/// Date and time when the item was created.
+#[derive(Serialize, Deserialize, Debug, Clone, Eq, PartialEq, From, Into, AsRef, PartialOrd, Ord)]
 pub struct CreationDate(OffsetDateTime);
 
-impl From<OffsetDateTime> for CreationDate {
-    fn from(value: OffsetDateTime) -> Self {
-        Self(value)
-    }
-}
-
-impl From<CreationDate> for OffsetDateTime {
-    fn from(value: CreationDate) -> Self {
-        value.0
-    }
-}
-
-impl AsRef<OffsetDateTime> for CreationDate {
-    fn as_ref(&self) -> &OffsetDateTime {
-        &self.0
-    }
-}
+/// Date and time when the item was updated.
+#[derive(Serialize, Deserialize, Debug, Clone, Eq, PartialEq, From, Into, AsRef, PartialOrd, Ord)]
+pub struct UpdateDate(OffsetDateTime);
 
 /// Option that describes how to export notes.
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone, Default)]
@@ -253,7 +248,7 @@ impl NotesExportOption {
             "OneFile" => NotesExportOption::OneFile,
             "FilePerSpace" => NotesExportOption::FilePerSpace,
             "FilePerNote" => NotesExportOption::FilePerNote,
-            _ => panic!("Invalid NotesExportOption value: {}", value),
+            _ => panic!("Invalid NotesExportOption value: {value}"),
         }
     }
 }
@@ -289,7 +284,7 @@ impl DataExportConfig {
         match value {
             "Md" => DataExportConfig::Md(Default::default()),
             "Json" => DataExportConfig::Json(Default::default()),
-            _ => panic!("Invalid DataExportConfig variant name: {}", value),
+            _ => panic!("Invalid DataExportConfig variant name: {value}"),
         }
     }
 

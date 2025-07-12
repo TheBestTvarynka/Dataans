@@ -1,4 +1,6 @@
 name: Build & Deploy
+env:
+  DATAANS_SERVER_DOMAIN: dataans.com
 on:
   push:
     branches:
@@ -22,13 +24,13 @@ jobs:
       run: 'rustup component add rustfmt --toolchain nightly-x86_64-unknown-linux-gnu'
 
     - name: 'Fmt'
-      run: 'cd dataans && cargo +nightly fmt --all -- --check'
+      run: 'cargo +nightly fmt --all -- --check'
 
     - name: 'Clippy'
-      run: 'cd dataans && cargo clippy --all-targets --workspace -- -D warnings'
+      run: 'SQLX_OFFLINE=true mkdir dataans/dist && cargo clippy --workspace --all-targets -- -D warnings'
 
     - name: 'Tests'
-      run: 'cd dataans && cargo test --workspace'
+      run: 'SQLX_OFFLINE=true cargo test --workspace'
 
 # Some day I'll set up cross platform (matrix) app build with proper artifacts.
 # But currently I don't need it :)

@@ -15,13 +15,13 @@ pub fn Import() -> impl IntoView {
             match select_file().await {
                 Ok(Some(path)) => match import_app_data(path).await {
                     Ok(_) => toaster_clone.success("Import successful!"),
-                    Err(e) => toaster_clone.error(&format!("Import failed: {}", e)),
+                    Err(e) => toaster_clone.error(&format!("Import failed: {e}")),
                 },
                 Ok(None) => {
                     // User canceled the dialog, do nothing
                 }
                 Err(e) => {
-                    toaster_clone.error(&format!("Cannot select a file: {}", e));
+                    toaster_clone.error(&format!("Cannot select a file: {e}"));
                 }
             }
             set_is_importing.set(false);

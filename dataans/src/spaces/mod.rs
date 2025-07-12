@@ -5,28 +5,25 @@ mod spaces_list;
 pub mod tools;
 
 use common::note::Id as NoteId;
+use common::profile::{Sync, SyncMode, UserContext};
 use common::space::OwnedSpace;
 use common::Config;
 use leptos::*;
-use leptos_hotkeys::{use_hotkeys, use_hotkeys_scoped};
+use leptos_hotkeys::use_hotkeys;
 
 use self::found_notes_list::FoundNotesList;
 use self::space::Space;
 use self::spaces_list::SpacesList;
 use self::tools::Tools;
 use crate::app::GlobalState;
-use crate::app_info::AppInfo;
 use crate::backend::notes::list_notes;
 use crate::backend::spaces::list_spaces;
+use crate::backend::sync::trigger_full_sync;
 use crate::utils::focus_element;
 use crate::FindNoteMode;
 
 #[component]
-pub fn Spaces(
-    config: Config,
-    spaces: Signal<Vec<OwnedSpace>>,
-    set_spaces: SignalSetter<Vec<OwnedSpace>>,
-) -> impl IntoView {
+pub fn Spaces(spaces: Signal<Vec<OwnedSpace>>, set_spaces: SignalSetter<Vec<OwnedSpace>>) -> impl IntoView {
     let global_state = expect_context::<RwSignal<GlobalState>>();
 
     spawn_local(async move {
@@ -65,44 +62,70 @@ pub fn Spaces(
         |state, minimized| state.minimize_spaces = minimized,
     );
 
-    let toggle_spaces_bar = config.key_bindings.toggle_spaces_bar.clone();
-    use_hotkeys!((toggle_spaces_bar) => move |_| {
-        set_spaces_minimized.set(!spaces_minimized.get());
-    });
-
     let (query, set_query) = create_signal(String::new());
+
+    let toaster = leptoaster::expect_toaster();
+
+    let app_info_window_toaster = toaster.clone();
+    let show_app_info_window = move |_| {
+        let t = app_info_window_toaster.clone();
+        spawn_local(async move {
+            try_exec!(
+                crate::backend::window::show_app_info_window().await,
+                "Failed to create auth window",
+                t
+            );
+        });
+    };
+
+    let user_context = expect_context::<RwSignal<Option<UserContext>>>();
+
+    let global_config = expect_context::<RwSignal<Config>>();
 
     view! {
         <div class="spaces-container">
-            <Tools set_spaces spaces_minimized set_spaces_minimized set_find_node_mode set_query=set_query.into() set_selected_space config=config.clone() />
-            {move || match find_note_mode.get() {
-                FindNoteMode::None => view!{
-                    <SpacesList config=config.clone() selected_space spaces spaces_minimized set_selected_space />
-                },
-                FindNoteMode::FindNote { space } => {
-                    use_hotkeys!(("Escape") => move |_| set_find_node_mode.set(FindNoteMode::None));
-                    view! {
-                        <FoundNotesList config=config.clone() query search_in_space=space spaces_minimized focus_note />
-                    }
-                },
+            {move || view! { <Tools set_spaces spaces_minimized set_spaces_minimized set_find_node_mode set_query=set_query.into() set_selected_space config=global_config.get() /> }}
+            {move || {
+                let config = global_config.get();
+                match find_note_mode.get() {
+                    FindNoteMode::None => view!{
+                        <SpacesList config selected_space spaces spaces_minimized set_selected_space />
+                    },
+                    FindNoteMode::FindNote { space } => {
+                        use_hotkeys!(("Escape") => move |_| set_find_node_mode.set(FindNoteMode::None));
+                        view! {
+                            <FoundNotesList config query search_in_space=space spaces_minimized focus_note />
+                        }
+                    },
+                }
             }}
-            <div style="flex-grow: 1; align-content: end;">
-                {move || if spaces_minimized.get() {
-                    view! {
-                        <a class="icons-by-icons8" href="https://icons8.com" target="_blank">
-                            <svg width="18" height="18" viewBox="0 0 18 18">
-                                <path d="M9 0H0V18H9V0Z" fill="#1FB141"></path>
-                                <path d="M13.5 9C15.9853 9 18 6.98528 18 4.5C18 2.01472 15.9853 0 13.5 0C11.0147 0 9 2.01472 9 4.5C9 6.98528 11.0147 9 13.5 9Z" fill="#1FB141"></path>
-                                <path d="M13.5 18C15.9853 18 18 15.9853 18 13.5C18 11.0147 15.9853 9 13.5 9C11.0147 9 9 11.0147 9 13.5C9 15.9853 11.0147 18 13.5 18Z" fill="#1FB141"></path>
-                            </svg>
-                        </a>
+            <div style="flex-grow: 1; align-content: end; display: flex; flex-direction: column; align-items: center; justify-content: flex-end;">
+                {move || if let Some(UserContext { sync_config: Sync { mode: SyncMode::Manual, .. } }) = user_context.get() {
+                    let sync_toaster = toaster.clone();
+                    let start_full_sync = move |_| {
+                        let t = sync_toaster.clone();
+                        spawn_local(async move {
+                            try_exec!(
+                                trigger_full_sync().await,
+                                "Failed to start syncing...",
+                                t
+                            );
+                        });
+                    };
+
+                    view!{
+                        <button title="Sync data" class="tool">
+                            <img alt="sync-icon" src="/public/icons/synchronize-light.png" on:click=start_full_sync />
+                        </button>
                     }.into_any()
                 } else {
-                    view! {
-                        <span class="icons-by-icons8">"Icons by: "<a href="https://icons8.com" target="_blank">"icons8.com"</a></span>
-                    }.into_any()
+                    view! { <span /> }.into()
                 }}
-                <AppInfo />
+                <div style="display: inline-flex; width: 100%; justify-content: center; margin-bottom: 0.2em;">
+                    <button class="button_cancel" on:click=show_app_info_window>
+                        {format!("{}.{}", env!("CARGO_PKG_VERSION_MAJOR"), env!("CARGO_PKG_VERSION_MINOR"))}
+                    </button>
+                </div>
             </div>
         </div>
     }

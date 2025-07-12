@@ -8,6 +8,7 @@ mod code_block;
 mod config;
 mod dataans;
 mod dialog;
+mod window;
 
 use std::path::Path;
 use std::str::FromStr;
@@ -17,7 +18,7 @@ use tauri::{AppHandle, Manager, Result, RunEvent};
 use tauri_plugin_global_shortcut::{GlobalShortcutExt, Shortcut, ShortcutState};
 
 const LOGGING_ENV_VAR_NAME: &str = "DATAANS_LOG";
-const DEFAULT_LOG_LEVEL: &str = "dataans=warn";
+const DEFAULT_LOG_LEVEL: &str = "dataans=trace";
 
 const MAIN_WINDOW_NAME: &str = "main";
 
@@ -26,7 +27,7 @@ const WINDOW_QUIT_MENU_ITEM_ID: &str = "quit";
 const WINDOW_VISIBILITY_TITLE: &str = "Toggle";
 const WINDOW_QUIT_TITLE: &str = "Quit";
 
-const IMAGES_DIR: &str = "images";
+const PROFILE_DIR: &str = "profile";
 const FILES_DIR: &str = "files";
 const CONFIGS_DIR: &str = "configs";
 const CONFIG_FILE_NAME: &str = "config.toml";
@@ -70,15 +71,15 @@ fn init_tracing(app_data: &Path) {
     // `dataans.log` layer
     if !app_data.exists() {
         match fs::create_dir(app_data) {
-            Ok(()) => println!("Successfully created app data directory: {:?}", app_data),
-            Err(err) => eprintln!("Filed to create app data directory: {:?}. Path: {:?}", err, app_data),
+            Ok(()) => println!("Successfully created app data directory: {app_data:?}"),
+            Err(err) => eprintln!("Filed to create app data directory: {err:?}. Path: {app_data:?}"),
         }
     }
     let logs_dir = app_data.join(LOGS_DIR);
     if !logs_dir.exists() {
         match fs::create_dir(&logs_dir) {
-            Ok(()) => println!("Successfully created logs directory: {:?}", logs_dir),
-            Err(err) => eprintln!("Filed to create logs directory: {:?}. Path: {:?}", err, logs_dir),
+            Ok(()) => println!("Successfully created logs directory: {logs_dir:?}"),
+            Err(err) => eprintln!("Filed to create logs directory: {err:?}. Path: {logs_dir:?}"),
         }
     }
 
@@ -89,7 +90,7 @@ fn init_tracing(app_data: &Path) {
             registry.with(log_file_layer).with(logging_filter).init();
         }
         Err(e) => {
-            eprintln!("Couldn't open log file: {e}. Path: {:?}.", log_file);
+            eprintln!("Couldn't open log file: {e}. Path: {log_file:?}.");
             registry.with(logging_filter).init();
         }
     }
@@ -200,6 +201,8 @@ fn main() {
             config::open_theme_file,
             code_block::parse_code,
             dialog::select_file,
+            window::open_app_info_window,
+            window::cf_auth,
         ])
         .build(
             {

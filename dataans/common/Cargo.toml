@@ -1,12 +1,18 @@
 [package]
 name = "common"
 version = "0.2.1"
-authors = ["Pavlo Myroniuk <the.best.tvarynka@gmail.com>"]
-edition = "2021"
-repository = "https://github.com/TheBestTvarynka/dataans"
+description = "Common code between Tauri backend and frontend"
+readme = "README.md"
+edition.workspace = true
+license.workspace = true
+homepage.workspace = true
+repository.workspace = true
+authors.workspace = true
 
 [dependencies]
 serde = { workspace = true, features = ["derive"] }
-time = { workspace = true, default-features = false, features = ["serde"] }
+time = { workspace = true, default-features = false, features = ["serde", "formatting", "parsing"] }
 uuid = { workspace = true, features = ["serde"] }
-bson = "2.10"
+web-api-types.workspace = true
+url = { workspace = true, features = ["serde"] }
+derive_more = { workspace = true, features = ["from", "as_ref", "into"] }

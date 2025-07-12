@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE notes SET is_deleted = TRUE, updated_at = ?1 WHERE id = ?2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": []
+  },
+  "hash": "7cc62e4c38b2a18f190cf5fdf28a0ae4dddbaa01ad5c46b33402457e40d8b4bf"
+}

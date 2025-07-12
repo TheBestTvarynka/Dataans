@@ -83,21 +83,25 @@ pub fn FoundNotesList(
     use_hotkeys!((key_bindings.select_prev_list_item) => move |_| select_prev_note());
     use_hotkeys!((key_bindings.select_next_list_item) => move |_| select_next_note());
 
+    let global_config = expect_context::<RwSignal<Config>>();
+
     view! {
         <div class="spaces-scroll-area">
             {move || if let Some(space) = search_in_space.clone() {
+                let base_path = global_config.get().app.base_path.clone();
+
                 if spaces_minimized.get() {
                     view! {
                         <div class="note-search-options">
                             <span class="note-search-label">"in:"</span>
-                            <Space space set_selected_space=|_| {} selected=true minimized=spaces_minimized />
+                            <Space space base_path set_selected_space=|_| {} selected=true minimized=spaces_minimized />
                         </div>
                     }.into_view()
                 } else {
                     view! {
                         <div class="note-search-options">
                             <span class="note-search-label">"Search notes in:"</span>
-                            <Space space set_selected_space=|_| {} selected=true minimized=spaces_minimized />
+                            <Space space base_path set_selected_space=|_| {} selected=true minimized=spaces_minimized />
                         </div>
                     }.into_view()
                 }
@@ -122,11 +126,13 @@ pub fn FoundNotesList(
                         let is_selected = selected_note.get().map(|id| id == note.id).unwrap_or_default();
                         let note_id = note.id;
                         let space = note.space.clone();
+                        let base_path = global_config.get().app.base_path.clone();
                         view! {
                             <NotePreview
                                 note
                                 minimized=spaces_minimized
                                 selected=is_selected
+                                base_path
                                 set_selected_note=move |id| {
                                     set_selected_note.set(Some(id));
                                     focus_note.call((note_id, space.clone()));

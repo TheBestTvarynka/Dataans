@@ -20,7 +20,7 @@ pub fn TextArea(
         if let Some(ref_input) = ref_input.get() {
             let _ = ref_input.on_mount(|input| {
                 if let Err(err) = input.focus() {
-                    warn!("Can not focus TextArea: {:?}", err);
+                    warn!("Can not focus TextArea: {err:?}");
                 }
             });
         }
@@ -119,10 +119,10 @@ pub fn TextArea(
                 set_text.call(text);
                 if let Some((selection_start, selection_end)) = selection {
                     if let Err(err) = text_area.set_selection_start(Some(selection_start)) {
-                        error!("{:?}", err);
+                        error!("{err:?}");
                     }
                     if let Err(err) = text_area.set_selection_end(Some(selection_end)) {
-                        error!("{:?}", err);
+                        error!("{err:?}");
                     }
                 }
             }
@@ -174,7 +174,7 @@ fn get_text_format_fn(event: KeyboardEvent) -> Option<TextFormatFn> {
         Some(&move |pre_text, selected_text, after_text, start| {
             let selection_start = start + selected_text.len() as u32 + 3 /* "[](" */;
             (
-                format!("{}[{}](url){}", pre_text, selected_text, after_text),
+                format!("{pre_text}[{selected_text}](url){after_text}"),
                 Some((selection_start, selection_start + 3 /* "url" */)),
             )
         })
@@ -182,7 +182,7 @@ fn get_text_format_fn(event: KeyboardEvent) -> Option<TextFormatFn> {
         Some(&move |pre_text, selected_text, after_text, start| {
             let selection = start + 2 /* "**" */ + selected_text.len() as u32 + 2 /* "**" */;
             (
-                format!("{}**{}**{}", pre_text, selected_text, after_text),
+                format!("{pre_text}**{selected_text}**{after_text}"),
                 Some((selection, selection)),
             )
         })
@@ -190,7 +190,7 @@ fn get_text_format_fn(event: KeyboardEvent) -> Option<TextFormatFn> {
         Some(&move |pre_text, selected_text, after_text, start| {
             let selection = start + 1 /* "*" */ + selected_text.len() as u32 + 1 /* "*" */;
             (
-                format!("{}*{}*{}", pre_text, selected_text, after_text),
+                format!("{pre_text}*{selected_text}*{after_text}"),
                 Some((selection, selection)),
             )
         })
@@ -198,7 +198,7 @@ fn get_text_format_fn(event: KeyboardEvent) -> Option<TextFormatFn> {
         Some(&move |pre_text, selected_text, after_text, start| {
             let selection = start + 1 /* "`" */ + selected_text.len() as u32 + 1 /* "`" */;
             (
-                format!("{}`{}`{}", pre_text, selected_text, after_text),
+                format!("{pre_text}`{selected_text}`{after_text}"),
                 Some((selection, selection)),
             )
         })

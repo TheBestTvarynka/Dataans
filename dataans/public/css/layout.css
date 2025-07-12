@@ -91,11 +91,8 @@ h4 {
 
 .icons-by-icons8 {
     width: 100%;
-    text-align: center;
+    text-align: left;
     display: block;
-    color: var(--space-text-color);
-    border-top: 2px solid var(--notes-border-color);
-    padding-top: 0.4em;
 }
 
 .icons-by-icons8 a {
@@ -110,4 +107,57 @@ h4 {
     background-color: #50437f;
     color: #dbcfbf;
     cursor: pointer;
+}
+
+/* switch */
+
+.switch-span {
+    display: inline-flex;
+    width: fit-content;
+    justify-content: center;
+    align-items: center;
+}
+
+.switch-input[type=checkbox]{
+	height: 0;
+	width: 0;
+    padding: 0;
+    margin: 0;
+	visibility: hidden;
+}
+
+.switch-label {
+	cursor: pointer;
+	text-indent: -9999px;
+	width: 2em;
+	height: 1em;
+	background: #a562e3;
+	display: block;
+	border-radius: 1em;
+	position: relative;
+}
+
+.switch-label:after {
+	content: '';
+	position: absolute;
+	top: 0.15em;
+	left: 0.15em;
+	width: 0.7em;
+	height: 0.7em;
+	background: #ebdcd8;
+	border-radius: 0.7em;
+	transition: 0.3s;
+}
+
+.switch-input:checked + .switch-label {
+	background: mediumvioletred;
+}
+
+.switch-input:checked + .switch-label:after {
+	left: calc(100% - 0.15em);
+	transform: translateX(-100%);
+}
+
+.switch-label:active:after {
+	width: 1.3em;
 }

@@ -1,8 +1,7 @@
-use common::space::{Avatar, OwnedSpace, Space, UpdateSpace};
+use common::space::{Avatar, CreateSpace, OwnedSpace, UpdateSpace};
 use common::Config;
 use leptos::*;
 use leptos_hotkeys::{use_hotkeys, use_hotkeys_scoped};
-use time::OffsetDateTime;
 use uuid::Uuid;
 
 use crate::backend::convert_file_src;
@@ -27,7 +26,12 @@ pub fn SpaceForm(
             .as_ref()
             .map(|s| s.avatar.clone())
             // The default space avatar is always exists in DB. It is checked during the app start up.
-            .unwrap_or_else(|| Avatar::new(common::DEFAULT_SPACE_AVATAR_ID, common::DEFAULT_SPACE_AVATAR_PATH)),
+            .unwrap_or_else(|| {
+                Avatar::new(
+                    common::DEFAULT_SPACE_AVATAR_ID.into(),
+                    common::DEFAULT_SPACE_AVATAR_PATH,
+                )
+            }),
     );
     let ref_input = create_node_ref::<html::Input>();
 
@@ -35,7 +39,7 @@ pub fn SpaceForm(
         if let Some(ref_input) = ref_input.get() {
             let _ = ref_input.on_mount(|input| {
                 if let Err(err) = input.focus() {
-                    warn!("Can not focus TextArea: {:?}", err);
+                    warn!("Can not focus TextArea: {err:?}");
                 }
             });
         }
@@ -67,10 +71,9 @@ pub fn SpaceForm(
                 None
             } else {
                 let new_space_id = Uuid::new_v4();
-                create_space(Space {
+                create_space(CreateSpace {
                     id: new_space_id.into(),
                     name: name.into(),
-                    created_at: OffsetDateTime::now_utc().into(),
                     avatar,
                 })
                 .await
@@ -98,6 +101,8 @@ pub fn SpaceForm(
     let regenerate_space_avatar = config.key_bindings.regenerate_space_avatar.clone();
     use_hotkeys!((regenerate_space_avatar) => move |_| generate_avatar.call(()));
 
+    let global_config = expect_context::<RwSignal<Config>>();
+
     view! {
         <div class="create-space-window" on:load=move |_| info!("on_load")>
             {if space.is_some() {
@@ -106,7 +111,7 @@ pub fn SpaceForm(
                 view! { <span class="create-space-title">"Create space"</span> }
             }}
             <div class="create-space-avatar">
-                <img class="create-space-avatar-img" src=move || convert_file_src(avatar.get().path()) />
+                <img class="create-space-avatar-img" src=move || convert_file_src(avatar.get().path(), &global_config.get().app.base_path) />
                 <div style="align-self: center">
                     <button class="tool" title="Regenerate avatar" on:click=move |_| generate_avatar.call(())>
                         <img alt="regenerate-avatar" src="/public/icons/refresh.svg" />

@@ -1,0 +1,39 @@
+[package]
+name = "web-server"
+version = "0.1.0"
+description = "Web-server for data synchronization and backup"
+edition.workspace = true
+license.workspace = true
+homepage.workspace = true
+repository.workspace = true
+authors.workspace = true
+
+[features]
+default = ["tigris"]
+tigris = ["dep:aws-sdk-s3", "dep:aws-config"]
+fs = []
+
+[dependencies]
+web-api-types = { workspace = true, features = ["server"] }
+serde = { workspace = true, features = ["derive"] }
+sqlx = { workspace = true, features = ["runtime-tokio", "time", "uuid", "postgres", "migrate", "tls-rustls"] }
+thiserror.workspace = true
+uuid = { workspace = true, features = ["serde", "v4"] }
+tracing.workspace = true
+time = { workspace = true }
+rocket = { workspace = true, features = ["json"] }
+hex.workspace = true
+futures.workspace = true
+sha2.workspace = true
+reqwest = { workspace = true, features = ["json", "rustls-tls", "http2"] }
+
+# logging
+tracing-subscriber = { version = "0.3", features = ["std", "fmt", "ansi", "env-filter"] }
+
+# Tigris storage
+aws-sdk-s3 = { version = "1.91", optional = true }
+aws-config = { version = "1.8", optional = true }
+jsonwebtoken = "9.3.1"
+
+[dev-dependencies]
+tokio = { version = "1.45", features = ["full"] }

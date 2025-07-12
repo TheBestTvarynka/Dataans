@@ -1,4 +1,6 @@
 fn main() {
+    println!("cargo:rerun-if-changed=migrations");
+
     tauri_build::try_build(tauri_build::Attributes::new().plugin(
         "dataans",
         tauri_build::InlinedPlugin::new().commands(&[
@@ -18,6 +20,11 @@ fn main() {
             "delete_file",
             "gen_random_avatar",
             "handle_clipboard_image",
+            "profile",
+            "set_sync_options",
+            "full_sync",
+            "sign_in",
+            "sign_out",
         ]),
     ))
     .expect("Tauri app build should not fail")

@@ -4,7 +4,6 @@ use common::error::{CommandError, CommandResult};
 use futures::channel::oneshot;
 use tauri::{command, AppHandle};
 use tauri_plugin_dialog::{DialogExt, FilePath};
-use tracing::error;
 
 #[command]
 pub async fn select_file(app: AppHandle) -> CommandResult<Option<PathBuf>> {
@@ -19,7 +18,7 @@ pub async fn select_file(app: AppHandle) -> CommandResult<Option<PathBuf>> {
                     Some(FilePath::Path(p)) => Ok(Some(p)),
                     Some(_) => {
                         let err = CommandError::Dataans("Unsupported file type selected".to_string());
-                        error!("Failed to select file: {:?}", err);
+                        error!(?err, "Failed to select file");
                         Err(err)
                     }
                     None => Ok(None),
@@ -31,8 +30,8 @@ pub async fn select_file(app: AppHandle) -> CommandResult<Option<PathBuf>> {
     match rx.await {
         Ok(result) => result,
         Err(e) => {
-            let err = CommandError::Dataans(format!("Failed to receive file path: {}", e));
-            error!("Failed to select file: {:?}", err);
+            let err = CommandError::Dataans(format!("Failed to receive file path: {e}"));
+            error!(?err, "Failed to select file");
             Err(err)
         }
     }

@@ -4,8 +4,8 @@ use std::fmt::{Display, Formatter};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use crate::note::File;
-use crate::CreationDate;
+use crate::note::{File, FileId};
+use crate::{CreationDate, UpdateDate};
 
 /// Represent a space ID.
 #[derive(Serialize, Deserialize, Debug, Default, Copy, Clone, Eq, PartialEq, Hash)]
@@ -27,6 +27,12 @@ impl AsRef<Uuid> for Id {
 impl From<Uuid> for Id {
     fn from(value: Uuid) -> Self {
         Self(value)
+    }
+}
+
+impl From<Id> for Uuid {
+    fn from(value: Id) -> Self {
+        value.0
     }
 }
 
@@ -68,23 +74,21 @@ impl AsRef<str> for Name<'_> {
 }
 
 /// Represents space avatar file name.
-///
-/// Example: `461d7188-062a-4514-bece-3577624d0ee8.png`.
 #[derive(Serialize, Deserialize, Debug, Default, Clone, Eq, PartialEq)]
 pub struct Avatar<'avatar> {
-    id: Uuid,
+    id: FileId,
     path: Cow<'avatar, str>,
 }
 
 impl<'avatar> Avatar<'avatar> {
     /// Creates a new [Avatar] based on `id` and `path`.
-    pub fn new(id: Uuid, path: impl Into<Cow<'avatar, str>>) -> Self {
+    pub fn new(id: FileId, path: impl Into<Cow<'avatar, str>>) -> Self {
         Self { id, path: path.into() }
     }
 
     /// Returns avatar [Uuid].
     pub fn id(&self) -> Uuid {
-        self.id
+        *self.id.as_ref()
     }
 
     /// Returns path to the avatar file.
@@ -95,7 +99,13 @@ impl<'avatar> Avatar<'avatar> {
 
 impl From<File> for Avatar<'_> {
     fn from(file: File) -> Self {
-        let File { id, name: _, path } = file;
+        let File {
+            id,
+            name: _,
+            path,
+            status: _,
+        } = file;
+
         Self {
             id,
             path: path.to_str().expect("UTF8-path").to_owned().into(),
@@ -114,12 +124,28 @@ pub struct Space<'name, 'avatar> {
     pub name: Name<'name>,
     /// Creation date.
     pub created_at: CreationDate,
+    /// Update date.
+    pub updated_at: UpdateDate,
     /// Avatar image name.
     pub avatar: Avatar<'avatar>,
 }
 
 /// Owned version of [Space].
 pub type OwnedSpace = Space<'static, 'static>;
+
+/// Data that the app need to create the space.
+#[derive(Serialize, Deserialize, Debug, Clone, Eq, PartialEq)]
+pub struct CreateSpace<'name, 'avatar> {
+    /// Space ID.
+    pub id: Id,
+    /// Space name.
+    pub name: Name<'name>,
+    /// Avatar image name.
+    pub avatar: Avatar<'avatar>,
+}
+
+/// Owned version of [CreateSpace];
+pub type CreateSpaceOwned = CreateSpace<'static, 'static>;
 
 /// Data that the app need to update the space.
 #[derive(Serialize, Deserialize, Debug, Clone)]

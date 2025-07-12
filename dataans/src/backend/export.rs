@@ -14,7 +14,7 @@ struct ExportConfig {
 
 pub async fn export_data(export_config: DataExportConfig) -> CommandResult<PathBuf> {
     invoke_command(
-        &format!("plugin:{}|export_app_data", APP_PLUGIN_NAME),
+        &format!("plugin:{APP_PLUGIN_NAME}|export_app_data"),
         &ExportConfig { export_config },
     )
     .await

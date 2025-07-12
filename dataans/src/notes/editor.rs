@@ -1,8 +1,7 @@
-use common::note::{DraftNote, File, Note};
+use common::note::{CreateNote, DraftNote, File, Note};
 use common::space::Id as SpaceId;
 use gloo_storage::{LocalStorage, Storage};
 use leptos::*;
-use time::OffsetDateTime;
 use uuid::Uuid;
 use web_sys::KeyboardEvent;
 
@@ -22,10 +21,7 @@ pub fn Editor(space_id: SpaceId, #[prop(into)] create_note: Callback<Note<'stati
 
     let set_draft_note = move |draft_note| {
         if let Err(err) = LocalStorage::set(space_id.inner().to_string(), &draft_note) {
-            error!(
-                "Cannot save note in local storage. err={:?}, draft_note={:?}",
-                err, draft_note
-            );
+            error!("Cannot save note in local storage. err={err:?}, draft_note={draft_note:?}");
         }
         set_draft_note.set(draft_note);
     };
@@ -40,14 +36,13 @@ pub fn Editor(space_id: SpaceId, #[prop(into)] create_note: Callback<Note<'stati
         set_draft_note(DraftNote::default());
 
         spawn_local(async move {
-            let new_note = Note {
+            let new_note = CreateNote {
                 id: Uuid::new_v4().into(),
                 text: note_text.as_ref().trim().to_string().into(),
-                created_at: OffsetDateTime::now_utc().into(),
                 space_id,
                 files,
             };
-            crate::backend::notes::create_note(new_note.clone())
+            let new_note = crate::backend::notes::create_note(new_note.clone())
                 .await
                 .expect("Note creating should not fail.");
             create_note.call(new_note);
@@ -62,18 +57,25 @@ pub fn Editor(space_id: SpaceId, #[prop(into)] create_note: Callback<Note<'stati
     };
 
     let toaster = toaster.clone();
-    let remove_file = Callback::new(move |File { id, name: _, path: _ }| {
-        let toaster = toaster.clone();
+    let remove_file = Callback::new(
+        move |File {
+                  id,
+                  name: _,
+                  path: _,
+                  status: _,
+              }| {
+            let toaster = toaster.clone();
 
-        let DraftNote { text, mut files } = draft_note.get();
+            let DraftNote { text, mut files } = draft_note.get();
 
-        spawn_local(async move {
-            try_exec!(remove_file(id).await, "File removing failed", toaster);
+            spawn_local(async move {
+                try_exec!(remove_file(*id.as_ref()).await, "File removing failed", toaster);
 
-            files.retain(|file| file.id != id);
-            set_draft_note(DraftNote { text, files });
-        });
-    });
+                files.retain(|file| file.id != id);
+                set_draft_note(DraftNote { text, files });
+            });
+        },
+    );
 
     let handle_files = move |files| {
         if let Some(DraftNote { text, files: _ }) = draft_note.try_get_untracked() {

@@ -1,11 +1,11 @@
 .app-into-window {
+    width: 100%;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
     align-items: start;
     gap: 0.2em;
     padding: 0.5em;
-    border-radius: 0.5em;
     color: var(--note-text-color);
     background-color: var(--note-background-color);
     position: relative;
@@ -31,15 +31,7 @@
     font-size: 1.3em;
 }
 
-.app-window-close-button {
-    top: 0.2em;
-    right: 0.2em;
-    position: absolute;
-}
-
-.app-into-window table,
-th,
-td {
+.app-into-window table, th, td {
     border: 1px solid #dbcfbf;
     border-collapse: collapse;
 }
@@ -54,9 +46,31 @@ th {
     padding: 0.2em;
 }
 
-.app-into-window-data-actions {
+.app-info-sync-config {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 90%;
+    flex-direction: column;
+    gap: 0.2em;
+    align-items: flex-start;
+}
+
+.app-info-sync-mode {
+    display: flex;
+    flex-direction: row;
+    gap: 0.2em;
+}
+
+.small-input {
+    border-radius: 3px;
+    margin: 0;
+    padding: 0.2em;
+    transition: all 0.2s;
+    border: 3px solid transparent;
+    background: var(--input-background-color);
+    width: 3em;
+    color: var(--input-text-color);
+}
+
+.small-input:focus {
+    border-color: var(--input-border-color);
+    outline: none;
 }

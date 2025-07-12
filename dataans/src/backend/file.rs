@@ -18,7 +18,7 @@ struct FileData<'name, 'data> {
 
 pub async fn upload_file(id: Uuid, name: &str, data: &[u8]) -> CommandResult<File> {
     invoke_command(
-        &format!("plugin:{}|upload_file", APP_PLUGIN_NAME),
+        &format!("plugin:{APP_PLUGIN_NAME}|upload_file"),
         &FileData { id, name, data },
     )
     .await
@@ -31,16 +31,16 @@ struct FileId {
 }
 
 pub async fn remove_file(id: Uuid) -> CommandResultEmpty {
-    invoke_command(&format!("plugin:{}|delete_file", APP_PLUGIN_NAME), &FileId { id }).await
+    invoke_command(&format!("plugin:{APP_PLUGIN_NAME}|delete_file"), &FileId { id }).await
 }
 
 pub async fn gen_avatar() -> CommandResult<File> {
-    invoke_command(&format!("plugin:{}|gen_random_avatar", APP_PLUGIN_NAME), &EmptyArgs {}).await
+    invoke_command(&format!("plugin:{APP_PLUGIN_NAME}|gen_random_avatar"), &EmptyArgs {}).await
 }
 
 pub async fn load_clipboard_image() -> CommandResult<File> {
     invoke_command(
-        &format!("plugin:{}|handle_clipboard_image", APP_PLUGIN_NAME),
+        &format!("plugin:{APP_PLUGIN_NAME}|handle_clipboard_image"),
         &EmptyArgs {},
     )
     .await
