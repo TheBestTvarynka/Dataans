@@ -4,6 +4,9 @@ This document aimed to describe the server backup, synchronization functionality
 > It is an initial version of the document and the implementation hasn't started yet. The content may be changed in the future.
 > All comments, feedback, questions, and proposals are highly welcome.
 
+> [!CAUTION]
+> This document is outdated. Wait an update in the near future.
+
 # Motivation
 
 Currently (23.11.2024), all notes, spaces, files, and all other data are saved only on the user's computer without any synchronization between devices or even between client-server.
