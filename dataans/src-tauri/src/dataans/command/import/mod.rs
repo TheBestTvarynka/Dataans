@@ -14,7 +14,7 @@ pub async fn import_app_data(state: State<'_, DataansState>, path: PathBuf) -> C
 
     if extension == "json" {
         info!(?path, "Processing JSON import...");
-        json::import(&path, &state.space_service, &state.note_service).await?;
+        json::import(&path, &state.file_service, &state.space_service, &state.note_service).await?;
 
         Ok(())
     } else {

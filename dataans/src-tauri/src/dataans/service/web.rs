@@ -6,6 +6,8 @@ use tokio::fs;
 
 use crate::dataans::DataansError;
 
+// TODO: Introduce `WebServiceError`.
+
 const PROFILE_FILE_NAME: &str = "profile.json";
 
 pub struct WebService {

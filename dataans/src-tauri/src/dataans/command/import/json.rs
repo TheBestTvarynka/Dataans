@@ -10,10 +10,11 @@ use serde_json;
 use crate::dataans::db::Db;
 use crate::dataans::service::note::{NoteService, NoteServiceError};
 use crate::dataans::service::space::{SpaceService, SpaceServiceError};
-use crate::dataans::DataansError;
+use crate::dataans::{DataansError, FileService};
 
 pub async fn import_v1<D: Db>(
     schema_v1: SchemaV1,
+    file_service: &FileService<D>,
     space_service: &SpaceService<D>,
     note_service: &NoteService<D>,
 ) -> Result<(), DataansError> {
@@ -58,6 +59,16 @@ pub async fn import_v1<D: Db>(
                 files,
             };
 
+            let files_futures = note_data.files.clone().into_iter().map(|file| async move {
+                if file_service.file_by_id(file.id).await.is_err() {
+                    file_service.register_file(file).await?;
+                }
+
+                Ok::<(), DataansError>(())
+            });
+
+            try_join_all(files_futures).await?;
+
             match note_service.note_by_id(note.id).await {
                 Err(NoteServiceError::NotFound) => {
                     note_service.create_note(note_data).await?;
@@ -86,6 +97,7 @@ pub async fn import_v1<D: Db>(
 
 pub async fn import<D: Db>(
     file_path: &Path,
+    file_service: &FileService<D>,
     space_service: &SpaceService<D>,
     note_service: &NoteService<D>,
 ) -> Result<(), DataansError> {
@@ -93,6 +105,6 @@ pub async fn import<D: Db>(
     let schema: Schema = serde_json::from_reader(file)?;
 
     match schema {
-        Schema::V1(schema_v1) => import_v1(schema_v1, space_service, note_service).await,
+        Schema::V1(schema_v1) => import_v1(schema_v1, file_service, space_service, note_service).await,
     }
 }
