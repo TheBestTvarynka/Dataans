@@ -1,19 +1,28 @@
 use std::fs::File;
 use std::path::Path;
 
+use common::event::{DataEvent, DATA_EVENT};
 use common::export::{Schema, SchemaV1};
-use common::note::{CreateNoteOwned, Note};
-use common::space::{CreateSpaceOwned, Space};
+use common::note::{CreateNoteOwned, Note, UpdateNote};
+use common::space::{CreateSpaceOwned, Space, UpdateSpace};
 use futures::future::try_join_all;
 use serde_json;
+use tauri::{Emitter, Runtime};
 
 use crate::dataans::db::Db;
 use crate::dataans::service::note::{NoteService, NoteServiceError};
 use crate::dataans::service::space::{SpaceService, SpaceServiceError};
 use crate::dataans::{DataansError, FileService};
 
-pub async fn import_v1<D: Db>(
+fn emit_data_event<R: Runtime, E: Emitter<R>>(emitter: &E, event: DataEvent) -> Result<(), DataansError> {
+    emitter.emit(DATA_EVENT, event)?;
+
+    Ok(())
+}
+
+pub async fn import_v1<D: Db, R: Runtime, E: Emitter<R>>(
     schema_v1: SchemaV1,
+    emitter: &E,
     file_service: &FileService<D>,
     space_service: &SpaceService<D>,
     note_service: &NoteService<D>,
@@ -29,15 +38,26 @@ pub async fn import_v1<D: Db>(
             updated_at,
             avatar,
         } = space;
-        let space_data = CreateSpaceOwned { id, name, avatar };
 
         match space_service.space_by_id(space.id).await {
             Err(SpaceServiceError::NotFound) => {
-                space_service.create_space(space_data).await?;
+                space_service
+                    .create_space(CreateSpaceOwned { id, name, avatar })
+                    .await?;
+
+                emit_data_event(
+                    emitter,
+                    DataEvent::SpaceAdded(space_service.space_by_id(space.id).await?),
+                )?;
             }
             Ok(space) => {
                 if space.updated_at < updated_at {
-                    space_service.create_space(space_data).await?;
+                    space_service.update_space(UpdateSpace { id, name, avatar }).await?;
+
+                    emit_data_event(
+                        emitter,
+                        DataEvent::SpaceAdded(space_service.space_by_id(space.id).await?),
+                    )?;
                 }
             }
             Err(err) => return Err(DataansError::from(err)),
@@ -52,16 +72,13 @@ pub async fn import_v1<D: Db>(
                 files,
                 space_id,
             } = note;
-            let note_data = CreateNoteOwned {
-                id,
-                text,
-                space_id,
-                files,
-            };
 
-            let files_futures = note_data.files.clone().into_iter().map(|file| async move {
+            let files_futures = files.clone().into_iter().map(|file| async move {
                 if file_service.file_by_id(file.id).await.is_err() {
+                    let file_id = file.id;
                     file_service.register_file(file).await?;
+
+                    emit_data_event(emitter, DataEvent::FileAdded(file_service.file_by_id(file_id).await?))?;
                 }
 
                 Ok::<(), DataansError>(())
@@ -71,11 +88,22 @@ pub async fn import_v1<D: Db>(
 
             match note_service.note_by_id(note.id).await {
                 Err(NoteServiceError::NotFound) => {
-                    note_service.create_note(note_data).await?;
+                    note_service
+                        .create_note(CreateNoteOwned {
+                            id,
+                            text,
+                            space_id,
+                            files,
+                        })
+                        .await?;
+
+                    emit_data_event(emitter, DataEvent::NoteAdded(note_service.note_by_id(note.id).await?))?;
                 }
                 Ok(note) => {
                     if note.updated_at < updated_at {
-                        note_service.create_note(note_data).await?;
+                        note_service.update_note(UpdateNote { id, text, files }).await?;
+
+                        emit_data_event(emitter, DataEvent::NoteUpdated(note_service.note_by_id(note.id).await?))?;
                     }
                 }
                 Err(err) => return Err(DataansError::from(err)),
@@ -89,13 +117,13 @@ pub async fn import_v1<D: Db>(
         Ok::<(), DataansError>(())
     });
 
-    // Wait for all spaces to complete
     try_join_all(space_futures).await?;
 
     Ok(())
 }
 
-pub async fn import<D: Db>(
+pub async fn import<D: Db, R: Runtime, E: Emitter<R>>(
+    emitter: &E,
     file_path: &Path,
     file_service: &FileService<D>,
     space_service: &SpaceService<D>,
@@ -105,6 +133,6 @@ pub async fn import<D: Db>(
     let schema: Schema = serde_json::from_reader(file)?;
 
     match schema {
-        Schema::V1(schema_v1) => import_v1(schema_v1, file_service, space_service, note_service).await,
+        Schema::V1(schema_v1) => import_v1(schema_v1, emitter, file_service, space_service, note_service).await,
     }
 }
