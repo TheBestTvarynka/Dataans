@@ -87,7 +87,7 @@ pub fn App() -> impl IntoView {
     let global_config = expect_context::<RwSignal<Config>>();
     spawn_local(async move {
         let config = try_exec!(load_config().await, "Failed to load config", toaster);
-        info!("Loaded config: {:?}", config);
+        info!("Loaded config: {config:?}");
         let theme = config.appearance.theme.clone();
 
         global_config.set(config.clone());

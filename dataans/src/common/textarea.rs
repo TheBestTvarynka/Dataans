@@ -20,7 +20,7 @@ pub fn TextArea(
         if let Some(ref_input) = ref_input.get() {
             let _ = ref_input.on_mount(|input| {
                 if let Err(err) = input.focus() {
-                    warn!("Can not focus TextArea: {:?}", err);
+                    warn!("Can not focus TextArea: {err:?}");
                 }
             });
         }
@@ -119,10 +119,10 @@ pub fn TextArea(
                 set_text.call(text);
                 if let Some((selection_start, selection_end)) = selection {
                     if let Err(err) = text_area.set_selection_start(Some(selection_start)) {
-                        error!("{:?}", err);
+                        error!("{err:?}");
                     }
                     if let Err(err) = text_area.set_selection_end(Some(selection_end)) {
-                        error!("{:?}", err);
+                        error!("{err:?}");
                     }
                 }
             }

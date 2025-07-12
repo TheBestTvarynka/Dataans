@@ -21,10 +21,7 @@ pub fn Editor(space_id: SpaceId, #[prop(into)] create_note: Callback<Note<'stati
 
     let set_draft_note = move |draft_note| {
         if let Err(err) = LocalStorage::set(space_id.inner().to_string(), &draft_note) {
-            error!(
-                "Cannot save note in local storage. err={:?}, draft_note={:?}",
-                err, draft_note
-            );
+            error!("Cannot save note in local storage. err={err:?}, draft_note={draft_note:?}");
         }
         set_draft_note.set(draft_note);
     };

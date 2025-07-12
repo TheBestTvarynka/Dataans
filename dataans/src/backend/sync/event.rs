@@ -83,7 +83,7 @@ pub async fn emit<T: Serialize>(event: &str, payload: &T) -> CommandResult<()> {
     )
     .await
     .map_err(|err| {
-        error!("{:?}", err);
+        error!("{err:?}");
         CommandError::TauriEvent(format!("{err:?}"))
     })?;
 
@@ -117,7 +117,7 @@ pub async fn emit_to<T: Serialize>(target: &EventTarget, event: &str, payload: &
     )
     .await
     .map_err(|err| {
-        error!("{:?}", err);
+        error!("{err:?}");
         CommandError::TauriEvent(format!("{err:?}"))
     })?;
 
@@ -161,7 +161,7 @@ where
     )
     .await
     .map_err(|err| {
-        error!("{:?}", err);
+        error!("{err:?}");
         CommandError::TauriEvent(format!("{err:?}"))
     })?;
     closure.forget();
@@ -207,7 +207,7 @@ where
     )
     .await
     .map_err(|err| {
-        error!("{:?}", err);
+        error!("{err:?}");
         CommandError::TauriEvent(format!("{err:?}"))
     })?;
     closure.forget();
@@ -286,7 +286,7 @@ where
     )
     .await
     .map_err(|err| {
-        error!("{:?}", err);
+        error!("{err:?}");
         CommandError::TauriEvent(format!("{err:?}"))
     })?;
     closure.forget();
@@ -341,7 +341,7 @@ where
     )
     .await
     .map_err(|err| {
-        error!("{:?}", err);
+        error!("{err:?}");
         CommandError::TauriEvent(format!("{err:?}"))
     })?;
     closure.forget();
