@@ -1,3 +1,3 @@
 # Common
 
-Common code and structures for app frontend and backend.
+Common code and types for the desktop app frontend and backend.

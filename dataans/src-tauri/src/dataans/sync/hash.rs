@@ -1,9 +1,16 @@
+//! Hashing primitives.
+//!
+//! Data objects like notes and spaces need to be hashed during the sync process.
+//! Object hash calculation can be easily customized in the [Hash] trait implementation.
+//! For example, some fields are skipped and do not count in hash calculation.
+
 use sha2::digest::generic_array::GenericArray;
 use sha2::Digest;
 pub use sha2::Sha256;
 use time::OffsetDateTime;
 use uuid::Uuid;
 
+/// Custom [Digest] trait extension.
 pub trait Hasher: Digest {
     fn hash_str(&mut self, data: impl AsRef<str>) {
         self.update(data.as_ref().as_bytes());
@@ -12,9 +19,14 @@ pub trait Hasher: Digest {
 
 impl Hasher for Sha256 {}
 
+/// Hashable type.
+///
+/// Any type that implement the [Hash] trait can be hashed.
 pub trait Hash {
+    /// Hashed the `self`.
     fn hash<H: Hasher>(&self, hasher: &mut H);
 
+    /// Returns the calculated hash over the `self`.
     fn digest<H: Hasher>(&self) -> GenericArray<u8, H::OutputSize> {
         let mut hasher = H::new();
 

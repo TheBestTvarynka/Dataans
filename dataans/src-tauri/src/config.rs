@@ -8,6 +8,9 @@ use tauri::{AppHandle, Manager, Runtime};
 
 use super::{CONFIGS_DIR, CONFIG_FILE_NAME, FILES_DIR};
 
+/// Reads the config file.
+///
+/// The provided path must be the absolute path in the file system.
 pub fn read_config(path: impl AsRef<Path>) -> Result<Config, IoError> {
     let config_file_path = path.as_ref();
     let config_data = read_to_string(config_file_path)?;
@@ -15,6 +18,9 @@ pub fn read_config(path: impl AsRef<Path>) -> Result<Config, IoError> {
     toml::from_str(&config_data).map_err(|err| IoError::new(IoErrorKind::InvalidInput, err))
 }
 
+/// Loads the config.
+///
+/// The [AppHandle] is needed to determine the config file location.
 pub fn load_config_inner<R: Runtime>(app_handle: &AppHandle<R>) -> Result<Config, IoError> {
     let configs_dir = app_handle.path().app_data_dir().unwrap_or_default().join(CONFIGS_DIR);
 
@@ -42,6 +48,9 @@ pub fn config<R: Runtime>(app_handle: AppHandle<R>) -> CommandResult<Config> {
     Ok(load_config_inner(&app_handle)?)
 }
 
+/// Loads the [Theme] object from the corresponding theme file.
+///
+/// The path to the theme file is taken from the user's config.
 #[instrument(level = "trace", ret, skip(app_handle))]
 #[tauri::command]
 pub fn theme(app_handle: AppHandle, file_path: PathBuf) -> CommandResult<Theme> {

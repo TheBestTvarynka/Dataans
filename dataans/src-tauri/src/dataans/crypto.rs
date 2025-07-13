@@ -1,3 +1,30 @@
+//! Crypto-related primitives for the app.
+//!
+//! This module contains all needed code for the data hashing, encryption,
+//! decryption, HMAC, etc.
+//!
+//! # Encryption
+//!
+//! The user's data is encrypted before sending to the sync server. The encryption algorithm is [AES GCM](https://en.wikipedia.org/wiki/Galois/Counter_Mode).
+//! AES GCM needs a nonce. The nonce is randomly generated and prepended to the resulting vector.
+//! Additionally, the HMAC-SHA256 is computed over the unencrypted data and appended to the resulting
+//! byte vector.
+//!
+//! # Encryption key derivation
+//!
+//! To derive the encryption key, the app needs the user's password and the special passphrase (salt).
+//! The passphrase (salt) is randomly generated during the first sign in. The user must use the same passphrase
+//! on all subsequential sign ins. This salt is stored in the `profile.json` file in the user's folder.
+//!
+//! The user is responsible for storing their password. The app never stores the user's password anywhere.
+//!
+//! The key derivation algorithm is [PBKDF2](https://en.wikipedia.org/wiki/PBKDF2). Iteration count is hardcoded
+//! and is equal to 1_200_000.
+//!
+//! The password and the salt can be very long, so they are hashed using the SHA256 before passing into PBKDF2.
+//! ```
+//! let key = pbkdf2(sha256(password), sha256(salt), 1_200_000);
+//! ```
 use aes_gcm::aead::Aead;
 use aes_gcm::{AeadCore, Aes256Gcm, Key, KeyInit, KeySizeUser, Nonce};
 use pbkdf2::pbkdf2_hmac;
@@ -8,7 +35,8 @@ use sha2::digest::typenum::Unsigned;
 use sha2::{Digest, Sha256};
 use thiserror::Error;
 
-const NONCE_LENGTH: usize = 12;
+/// AES-GCM 96-bit (12-byte) nonce.
+const NONCE_LENGTH: usize = <Aes256Gcm as AeadCore>::NonceSize::USIZE;
 const HMAC_SHA256_CHECKSUM_LENGTH: usize = 32;
 
 pub type EncryptionKey = Key<Aes256Gcm>;
@@ -30,6 +58,7 @@ pub enum CryptoError {
 
 type CryptoResult<T> = Result<T, CryptoError>;
 
+/// Encrypts the data using the provided encryption key.
 pub fn encrypt_data(data: &[u8], key: &EncryptionKey) -> CryptoResult<Vec<u8>> {
     // Encryption
     let nonce = Aes256Gcm::generate_nonce(&mut OsRng);
@@ -60,6 +89,7 @@ pub fn encrypt_data(data: &[u8], key: &EncryptionKey) -> CryptoResult<Vec<u8>> {
     Ok(result)
 }
 
+/// Decrypts the data using the provided encryption key.
 pub fn decrypt_data(data: &[u8], key: &EncryptionKey) -> CryptoResult<Vec<u8>> {
     // data = nonce + cipher_text + checksum
 
@@ -99,23 +129,30 @@ pub fn decrypt_data(data: &[u8], key: &EncryptionKey) -> CryptoResult<Vec<u8>> {
     Ok(decrypted)
 }
 
+/// The same as [encrypt_data], but accepts the serializable object instead of byte slice.
+///
+/// This is a helper function, so the user does not have to serialize the object manually every time.
 pub fn encrypt<T: Serialize>(data: &T, key: &EncryptionKey) -> CryptoResult<Vec<u8>> {
     let data = serde_json::to_vec(data)?;
 
     encrypt_data(&data, key)
 }
 
+/// The same as [decrypt_data], but returns the deserialized object instead of byte vector.
+///
+/// This is a helper function, so the user does not have to deserialize the object manually every time.
 pub fn decrypt<T: DeserializeOwned>(data: &[u8], key: &EncryptionKey) -> CryptoResult<T> {
     let data = decrypt_data(data, key)?;
 
     Ok(serde_json::from_slice(&data)?)
 }
 
+/// Derives the encryption key for encrypting the user's data.
 pub fn derive_encryption_key(password: &[u8], salt: &[u8]) -> CryptoResult<EncryptionKey> {
     let password = Sha256::digest(password).to_vec();
     let salt = Sha256::digest(salt).to_vec();
 
-    let mut key = [0_u8; <Aes256Gcm as KeySizeUser>::KeySize::USIZE];
+    let mut key = [0; <Aes256Gcm as KeySizeUser>::KeySize::USIZE];
     pbkdf2_hmac::<Sha256>(&password, &salt, 1_200_000, &mut key);
 
     Ok(key.into())

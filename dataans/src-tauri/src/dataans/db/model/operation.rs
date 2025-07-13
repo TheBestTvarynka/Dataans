@@ -1,3 +1,11 @@
+//! User's operations logging and applying.
+//!
+//! Alongside user's data, the app also tracks all user operations like note creation,
+//! updating, space deletion, etc. During the sync process all these operations are
+//! synchronized.
+//!
+//! This module provides operations reading, writing, and applying.
+
 use std::borrow::Cow;
 use std::ops::{Deref, DerefMut};
 use std::path::PathBuf;
@@ -17,6 +25,9 @@ use crate::dataans::db::sqlite::SqliteDb;
 use crate::dataans::db::{DbError, File, Note, OperationDb, Space};
 use crate::dataans::sync::{Hash, Hasher};
 
+/// The user's operation type (and its data).
+///
+/// This enumeration lists all possible user operation types.
 #[derive(Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub enum Operation<'data> {
     CreateNote(Cow<'data, Note>),
@@ -33,6 +44,7 @@ pub enum Operation<'data> {
 pub type OperationOwned = Operation<'static>;
 
 impl Operation<'_> {
+    /// Returns operation name.
     pub fn name(&self) -> &str {
         match self {
             Operation::CreateNote(_) => "CreateNote",
@@ -47,6 +59,13 @@ impl Operation<'_> {
         }
     }
 
+    /// Applies the operation on the local database.
+    ///
+    /// Returns the [DataEvent] that can be optionally sent, for example, to the frontend
+    /// to inform about new changes.
+    ///
+    /// There can be conflicts during the operation applying. The current strategy is
+    /// last write wins.
     pub async fn apply(
         &self,
         operation_time: OffsetDateTime,
@@ -361,26 +380,56 @@ impl Hash for OperationRecord<'_> {
     }
 }
 
+/// Operation record used to store [OperationRecord] in the local DB.
 #[derive(FromRow)]
 struct PlainOperationRecord {
     pub id: Uuid,
     pub created_at: OffsetDateTime,
+    /// JSON string: serialized [OperationRecord].
     pub operation: String,
 }
 
+/// This is a spacial database pool wrapper used to write user's operations
+/// automatically.
+///
+/// As already said, the app tracks all user operations. It needs to record
+/// all database changes. If the developer did it manually, then it would be
+/// super easy to forget to insert a new operation when making changes in the
+/// local DB. We do not want it.
+///
+/// It is impossible to forget to do it because of the help of this wrapper.
+/// The only way to change the local database is to request a transaction using
+/// the [OperationLogger::begin] method. It returns the OperationLoggerGuard,
+/// which encapsulates the sqlx transaction and will automatically insert a new
+/// operation during transaction committing.
+///
+/// Unfortunately, it is possible to overcome this and use the [OperationLogger::read_only_connection]
+/// method to modify the local database directly. It is the developer's responsibility
+/// to use the connection returned from the [OperationLogger::read_only_connection] method
+/// only for read-only purposes.
 pub struct OperationLogger {
     pool: SqlitePool,
 }
 
 impl OperationLogger {
+    /// Creates a new [OperationLogger] instance.
     pub fn new(pool: SqlitePool) -> Self {
         Self { pool }
     }
 
+    /// Returns the direct connection to the database.
+    ///
+    /// # Correctness
+    ///
+    /// It is the developer's responsibility to use the returned connection only for read-only purposes.
+    /// Performing writes may result in broken data synchronization feature.
     pub async fn read_only_connection(&self) -> Result<PoolConnection<Sqlite>, DbError> {
         Ok(self.pool.acquire().await?)
     }
 
+    /// Begins a new transaction.
+    ///
+    /// The returned guard automatically inserts a new operation during transaction committing.
     pub async fn begin<'a>(&self, operation: Operation<'a>) -> Result<OperationLoggerGuard<'a>, DbError> {
         Ok(OperationLoggerGuard {
             now: OffsetDateTime::now_utc(),
@@ -389,6 +438,9 @@ impl OperationLogger {
         })
     }
 
+    /// Writes a new operation into a local database.
+    ///
+    /// This function should never be exported and should never be used outside of this module.
     async fn log(operation: &PlainOperationRecord, transaction: &mut Transaction<'_, Sqlite>) -> Result<(), DbError> {
         let PlainOperationRecord {
             id,
@@ -483,6 +535,9 @@ impl OperationDb for OperationLogger {
     }
 }
 
+/// sqlx transaction wrapper for automatic user operation logging.
+///
+/// This guard automatically inserts a new operation during transaction committing.
 pub struct OperationLoggerGuard<'a> {
     now: OffsetDateTime,
     operation: Operation<'a>,
@@ -490,14 +545,21 @@ pub struct OperationLoggerGuard<'a> {
 }
 
 impl<'a> OperationLoggerGuard<'a> {
+    /// Returns the inner sqlx transaction.
     pub fn transaction(&mut self) -> &mut SqliteTransaction<'a> {
         &mut self.transaction
     }
 
+    /// Returns the [OffsetDateTime] of the current operation.
+    ///
+    /// Operation datetime is the [OperationLoggerGuard] creation datetime.
     pub fn now(&self) -> OffsetDateTime {
         self.now
     }
 
+    /// Commits the transaction.
+    ///
+    /// A new operation will be automatically inserted in the local database.
     pub async fn commit(self) -> Result<(), DbError> {
         let OperationLoggerGuard {
             now,
