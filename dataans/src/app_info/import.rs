@@ -1,6 +1,6 @@
 use leptos::*;
 
-use crate::backend::import::{import_app_data, select_file};
+use crate::backend::import::{import_app_data, select_import_file};
 
 #[component]
 pub fn Import() -> impl IntoView {
@@ -12,7 +12,7 @@ pub fn Import() -> impl IntoView {
         set_is_importing.set(true);
 
         spawn_local(async move {
-            match select_file().await {
+            match select_import_file().await {
                 Ok(Some(path)) => match import_app_data(path).await {
                     Ok(_) => toaster_clone.success("Import successful!"),
                     Err(e) => toaster_clone.error(&format!("Import failed: {e}")),

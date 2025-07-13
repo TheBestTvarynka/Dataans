@@ -1,10 +1,17 @@
-use common::error::{CommandError, CommandResultEmpty};
+use std::path::PathBuf;
+
+use common::error::{CommandError, CommandResult, CommandResultEmpty};
+use futures::channel::oneshot;
 use tauri::{AppHandle, Manager, WebviewUrl, WebviewWindowBuilder};
+use tauri_plugin_dialog::{DialogExt, FilePath};
 use url::Url;
 
 const APP_INFO_WINDOW_TITLE: &str = "App-Info";
 pub const CF_WINDOW_TITLE: &str = "CF-Auth";
 
+/// Opens the App-Info window.
+///
+/// This window contains basic app information and lists current settings.
 #[instrument(level = "trace", ret, skip(app))]
 #[tauri::command]
 pub async fn open_app_info_window(app: AppHandle) -> CommandResultEmpty {
@@ -28,6 +35,9 @@ pub async fn open_app_info_window(app: AppHandle) -> CommandResultEmpty {
     Ok(())
 }
 
+/// Opens the CF-Auth window.
+///
+/// It is used for authenticating to Cloudflare Zero Trust Access.
 #[instrument(level = "trace", ret, skip(app))]
 #[tauri::command]
 pub async fn cf_auth(app: AppHandle, url: Url) -> CommandResultEmpty {
@@ -53,4 +63,39 @@ pub async fn cf_auth(app: AppHandle, url: Url) -> CommandResultEmpty {
     }
 
     Ok(())
+}
+
+/// Selects the data file for importing into the app.
+///
+/// Currently, only the json import is supported.
+#[tauri::command]
+pub async fn select_import_file(app: AppHandle) -> CommandResult<Option<PathBuf>> {
+    let (tx, rx) = oneshot::channel();
+
+    tauri::async_runtime::spawn(async move {
+        app.dialog()
+            .file()
+            .add_filter("Notes", &["json"])
+            .pick_file(move |file_path| {
+                let result = match file_path {
+                    Some(FilePath::Path(p)) => Ok(Some(p)),
+                    Some(_) => {
+                        let err = CommandError::Dataans("unsupported file type selected".to_string());
+                        error!(?err, "Failed to select file");
+                        Err(err)
+                    }
+                    None => Ok(None),
+                };
+                let _ = tx.send(result);
+            });
+    });
+
+    match rx.await {
+        Ok(result) => result,
+        Err(e) => {
+            let err = CommandError::Dataans(format!("failed to receive file path: {e}"));
+            error!(?err, "failed to select file");
+            Err(err)
+        }
+    }
 }
