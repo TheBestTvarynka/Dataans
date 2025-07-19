@@ -16,6 +16,7 @@ Thus, everything starting from the back end and up to the front end is written i
 1. Tauri Prerequisites: https://v2.tauri.app/start/prerequisites/.
 2. Install needed cli tools:
    ```bash
+   rustup target add wasm32-unknown-unknown
    # https://v2.tauri.app/reference/cli/
    cargo install tauri-cli --version "^2.0.0" --locked
    # https://trunkrs.dev/#install
