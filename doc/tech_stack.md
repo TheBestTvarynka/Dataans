@@ -1,7 +1,7 @@
 
 # Technical decisions explained
 
-This documents is aimed to list technologies used in this project and explain why they were chosen.
+This documents aims to list technologies used in this project and explain why they were chosen.
 
 ## Why [`Tauri`](https://tauri.app/)?
 
@@ -15,8 +15,6 @@ In short, [`Tauri`](https://tauri.app/) was chosen based on the following criter
 * Secure.
 
 But it is not a comprehensive answer. There are a lot of ways how you can write desktop apps. And all of them suck.
-
-**Native desktop app?** Then we'll need to write the UI components separately for all supported platforms. Moreover, writing native UI on Linux and Windows is a pain. We don't want and don't have time for that.
 
 **[`Qt`](https://www.qt.io/)?** No, we don't want to deal with C++. **`Qt` bindings?** Usually, they are pretty limited and, eventually, you will be forced to return to the original `Qt` to implement more advanced features. Another `Qt` disadvantage, in this case, is complexity and time-consuming. 
 
@@ -38,7 +36,7 @@ So, yes, we still have some overhead and not the best performance ever, but it's
 
 If you want to know real word numbers (such as build times, bundle sizes, memory usage, etc), then follow this link: [github.com/Elanis/web-to-desktop-framework-comparison](https://github.com/Elanis/web-to-desktop-framework-comparison).
 
-The desktop app is divided into two main parts: backend and frontend.
+The desktop app is divided into two main parts: backend and frontend. And there is also sync server for user's data back up and sync.
 
 ## Desktop app backend
 
@@ -68,3 +66,14 @@ All of them are popular, fast, and interesting: [`Yew` vs `Dioxus` vs `Leptos` v
 > * Very, very good performance.
 
 It doesn't mean that the `Leptos` is the best. We just like it more and it's enough for us :stuck_out_tongue_closed_eyes:.
+
+## Sync server
+
+* Main programming language: [`Rust`](https://www.rust-lang.org/).
+* Web framework: [`Rocket`](https://rocket.rs/).
+* Storage:
+    * [`Postgres`](https://www.postgresql.org/).
+    * [`Tigris`](https://www.tigrisdata.com/).
+* Auth: [Cloudflare Zero Trust Access](https://www.cloudflare.com/zero-trust/products/access/).
+* Deployment infrastructure: [fly.io](https://fly.io/).
+* Logging: [`tracing`](https://docs.rs/tracing/) and [`tracing-subscriber`](https://docs.rs/tracing-subscriber/).

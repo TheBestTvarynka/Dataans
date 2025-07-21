@@ -1,6 +1,12 @@
 
 # Sync/back up server
 
+# What? Why?
+
+
+
+# Intro
+
 The Dataans app supports user's data back up to the remote server. The same server is used for the data synchronization between devices.
 Let me answer your next question. Nope, the P2P sync between devices is not implemented (at least yet).
 
@@ -43,7 +49,47 @@ let iteration_count = 1_200_000;
 let key = pbkdf2(password, salt, iteration_count);
 ```
 
-## Auth
+Before uploading, all data is encrypted using the following encryption scheme:
+
+```rust
+// Pseudocode
+let nonce = random();
+
+let cipher_text = aes_gcm.encrypt(key, nonce, plaintext);
+let checksum = hmac_sha256(key, nonce + plaintext);
+
+let result = nonce + plaintext + checksum;
+```
+
+The same for decryption, but in reverse:
+
+```rust
+// Pseudocode
+let (nonce, cipher) = result.split_at(NONCE_LEN);
+let (cipher_text, checksum) = cipher.split_at(cipher.len() - HMAC_LEN);
+
+let plaintext = aes_gcm.decrypt(key, nonce, cipher_text);
+let calculated_checksum = hmac_sha256(key, nonce + plaintext);
+
+if checksum != calculated_checksum {
+   return Err("data is altered");
+}
+
+Ok(plaintext)
+```
+
+## Sync
+
+Optionally (if configured), the user can configure data synchronization.
+
+If it configured, then the app can synchronize all user's data (spaces, notes, files, etc.) with the remote server. Also, the user can sign in on multiple devices using the same credentials and sync the data. Multi-device data synchronization can be achieved this way.
+
+In order to start the sync process, the user needs two do two things:
+
+1. Deploy the web-server (the sync-server).
+2. Sign in using the app setting page.
+
+### Auth
 
 The best way to implement auth is not to implement it. So, [Cloudflare Zero Trust Access](https://www.cloudflare.com/zero-trust/products/access/) has been chosen as the auth provider for the server.
 It works very convenient and simple:
@@ -54,5 +100,24 @@ It works very convenient and simple:
 
 If you want to support any other authorization method, you need to implement it :upside_down_face:.
 
-## Sync
+### Sync algorithm
 
+The app has some local state: spaces, notes, images, files, etc. All files (including images) are stored directly on the disk in the `files` directory.
+All other data is stored in the SQLite database.
+
+Additionally, the app also stores in a separate table all user's actions that alters the local state in any way: space creation, note editing, adding a new file, etc. Instead of synching the app full state, the app syncs the operations list (files are handled separately).
+
+The naive approach would be to request all operations the server has, and then compare them to local ones, and find the difference. But there can be a lot of operations. So, there is a small optimization: _synchronization blocks_ (or _sync blocks_, or just _blocks_).
+
+We do now want to request all operations and compare them to local ones. We would like to discard the common operations. Let's sort app operations by timestamp and slipt into blocks. Let's say into blocks of 256 notes. Then, we calculate block hash:
+
+```rust
+// Pseudocode
+let block_hash = hash(hash(notes[0]) | ... | hash(notes[255]));
+```
+
+As the result, we will have a list of block hashes. We do this procedure on the server-side (the sync server) and on the client-side (the app). 
+Then the server's blocks hashes list is transferred to the local app. The app compared these two lists. The same operations wil result in the same block hashes.
+So, we can discard operations that belong to blocks with the same hashes. If either side has some operation that the other side does not have, then all consecutive blocks will have different notes, and, in turn, different hash values.
+
+After that, the app requests server's notes starting from the end of the last discarded block. 
