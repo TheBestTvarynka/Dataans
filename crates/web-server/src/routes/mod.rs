@@ -52,6 +52,15 @@ impl<'r> FromRequest<'r> for UserContext {
     type Error = Error;
 
     async fn from_request(req: &'r Request<'_>) -> Outcome<Self, Self::Error> {
+        #![cfg_attr(feature = "dev", allow(unreachable_code))]
+        #![cfg_attr(feature = "dev", allow(unused_variables))]
+
+        // Only for local development!
+        #[cfg(feature = "dev")]
+        {
+            return Outcome::Success(UserContext);
+        }
+
         let Some(token) = req.headers().get_one(AUTH_HEADER_NAME) else {
             return Outcome::Error((
                 Status::Unauthorized,

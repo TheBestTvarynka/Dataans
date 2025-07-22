@@ -1,3 +1,67 @@
+//! The data synchronization algorithm implementation.
+//!
+//! # How it works
+//!
+//! ## General principle
+//!
+//! The user has some local database state. Alongside user's data, the app also
+//! tracks all user operations like note creation, updating, space deletion, etc.
+//! During the sync process all these operations are synchronized.
+//!
+//! After some time, the remote and local states may be outdated. The server may have
+//! operations made by the user on other devices, and the local database may have
+//! some operations that have not been uploaded to the remote server. When these two sets
+//! are determined, then the app applies the needed remote operations on the local database
+//! and uploads the needed operations to the server.
+//!
+//! ## Conflict resolution strategy
+//!
+//! Every object (like a note, a space, or a file) has a corresponding timestamp. During
+//! the operation applying, the object with the latest timestamp wins (i.e. last write wins).
+//!
+//! ## Sync algorithm
+//!
+//! ### Blocks
+//!
+//! The naive approach would be to request all operations the server has, and then compare them
+//! to local ones, and find the difference. But there can be a lot of operations. So, there is
+//! a small optimization: _synchronization blocks_ (or just _blocks_).
+//!
+//! Synchronization blocks is a hash of the N continuous operations hashes (e.g.
+//! `let block = hash(hash(operations[0]) | ... | hash(operations[N - 1]));`).
+//!
+//! If the server and client have some block with the same hash, then there is no need to sync
+//! operations that belong to this block. They are also equal.
+//!
+//! ### Algorithm
+//!
+//! **Step 1.** The app requests server's blocks and calculates local blocks.
+//!
+//! **Step 2.** The app determines the same blocks in two lists. It compares them one by one until
+//! the first pair of blocks with different hashes.
+//!
+//! **Step 3.** Now the app knows the amount of the common blocks and can skip operations that belong
+//! to these blocks. The app skips them and requests all other operations that the server has.
+//!
+//! **Step 4.** The app has two sets of operations: local one and remote one. It finds the difference
+//! between them. The first set will contain operations to upload and the second one will contain
+//! operations to apply.
+//!
+//! **Step 5.** The app uploads and applies operations from the corresponding sets.
+//!
+//! Basically, that's all.
+//!
+//! ### Files
+//!
+//! When the sync process starts, the synchronizer iterates over all files registered in the local
+//! database and determines which ones need to be uploaded/downloaded.
+//!
+//! The main sync and files sync tasks communicate over the channel. If any remote operation
+//! introduces a new file, then the main sync task will inform the file sync task about it. In turn,
+//! the file sync task will download this file.
+//!
+//! The synchronization process finishes only when both main and file sync futures are completed.
+
 pub mod client;
 mod hash;
 
@@ -97,6 +161,7 @@ pub async fn sync_future<D: OperationDb, R: Runtime, E: Emitter<R>>(
     }
 }
 
+/// Does all the synchronization work.
 struct Synchronizer<D> {
     db: Arc<D>,
     client: Client,
@@ -104,6 +169,7 @@ struct Synchronizer<D> {
 }
 
 impl<D: OperationDb> Synchronizer<D> {
+    /// Created a new [Synchronizer] instance.
     pub fn new(
         db: Arc<D>,
         sync_server: Url,
@@ -118,6 +184,12 @@ impl<D: OperationDb> Synchronizer<D> {
         })
     }
 
+    /// This function takes the `file_id` and determines what we need to do to this file.
+    ///
+    /// If the file needs to be uploaded, then it will upload it.
+    /// If the file needs to be downloaded, then it will download it.
+    ///
+    /// This function automatically sends update event to the frontend using the provided `emitter`.
     async fn handle_file<R: Runtime, E: Emitter<R>>(&self, file_id: Uuid, emitter: &E) -> Result<(), SyncError> {
         let file = self.db.file_by_id(*file_id.as_ref()).await?;
         let file_path = self.files_path.join(&file.path);
@@ -169,6 +241,10 @@ impl<D: OperationDb> Synchronizer<D> {
         Ok(())
     }
 
+    /// Synchronizes the files between local user's machine and the remote server.
+    ///
+    /// It iterates over all user files and downloads/uploads them if needed. Moreover,
+    /// If there are new files discovered during the data synchronization, it will download them.
     async fn synchronize_files<R: Runtime, E: Emitter<R>>(
         &self,
         emitter: &E,
@@ -213,12 +289,14 @@ impl<D: OperationDb> Synchronizer<D> {
         result
     }
 
+    /// Does local and remote databases synchronization.
     #[instrument(err, skip(self, emitter))]
     async fn synchronize<R: Runtime, E: Emitter<R>>(
         &self,
         emitter: &E,
         sender: Sender<FileId>,
     ) -> Result<(), SyncError> {
+        // Step 1: calculate local blocks and request server blocks.
         let (local_operations, remote_blocks) =
             futures::join!(self.db.operations(), self.client.blocks(OPERATIONS_PER_BLOCK),);
 
@@ -241,6 +319,7 @@ impl<D: OperationDb> Synchronizer<D> {
 
         trace!(?local_blocks, ?remote_blocks, "Syncing blocks");
 
+        // Step 2: Determine shared blocks.
         let mut blocks_to_skip = 0;
 
         while let (Some(local_hash), Some(remote_hash)) =
@@ -259,9 +338,11 @@ impl<D: OperationDb> Synchronizer<D> {
         }
 
         let mut local_operations = local_operations[blocks_to_skip * OPERATIONS_PER_BLOCK..].iter();
+        // Step 3: Request operations from the server.
         let remote_operations = self.client.operations(blocks_to_skip * OPERATIONS_PER_BLOCK).await?;
         let mut remote_operations = remote_operations.iter();
 
+        // Step 4: Find the difference between local and remote operations.
         let mut operations_to_upload = Vec::new();
         let mut operations_to_apply = Vec::new();
 
@@ -296,6 +377,8 @@ impl<D: OperationDb> Synchronizer<D> {
         trace!(?operations_to_upload);
         trace!(?operations_to_apply);
 
+        // Step 5: Upload local operations that the server does not have and apply remote operations
+        // on the local database that the current user does not have.
         let result = futures::join!(
             async {
                 for operation in operations_to_apply {

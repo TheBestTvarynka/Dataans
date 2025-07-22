@@ -14,6 +14,9 @@ use crate::dataans::crypto::{decrypt, decrypt_data, encrypt, encrypt_data, Encry
 use crate::dataans::db::{OperationRecord, OperationRecordOwned};
 use crate::dataans::sync::hash::Hash;
 
+/// Sync/Back up server API client.
+///
+/// This client is used for communication with the sync (back up) server.
 pub struct Client {
     client: reqwest::Client,
     sync_server: Url,
@@ -21,6 +24,7 @@ pub struct Client {
 }
 
 impl Client {
+    /// Creates a new client.
     pub fn new(
         sync_server: Url,
         encryption_key: EncryptionKey,
@@ -49,6 +53,9 @@ impl Client {
         })
     }
 
+    /// Sends a request to the protected endpoint.
+    ///
+    /// This method is used for checking whether the auth token is correct.
     pub async fn auth_health(&self) -> Result<(), SyncError> {
         let health_url = self.sync_server.join("health/auth")?;
         trace!(?health_url, "Auth health check URL");
@@ -62,6 +69,7 @@ impl Client {
         }
     }
 
+    /// Requests server's blocks hashes.
     #[instrument(ret, skip(self))]
     pub async fn blocks(&self, items_per_block: usize) -> Result<Vec<Vec<u8>>, SyncError> {
         let mut blocks_url = self.sync_server.join("data/block")?;
@@ -76,6 +84,10 @@ impl Client {
         Ok(blocks)
     }
 
+    /// Requests operation stored on the server.
+    ///
+    /// The server will skip the first `operations_to_skip` operations and will return the rest of them.
+    /// This method automatically decrypt the received operation.
     #[instrument(ret, skip(self))]
     pub async fn operations(&self, operations_to_skip: usize) -> Result<Vec<OperationRecordOwned>, SyncError> {
         let mut operations_url = self.sync_server.join("data/operation")?;
@@ -101,6 +113,9 @@ impl Client {
         Ok(operations)
     }
 
+    /// Sends the provided operations to the server.
+    ///
+    /// This method automatically encrypts provided operations.
     #[instrument(ret, skip(self, operations))]
     pub async fn upload_operations(&self, operations: &[&OperationRecord<'_>]) -> Result<(), SyncError> {
         let operations = operations
@@ -126,6 +141,9 @@ impl Client {
         Ok(())
     }
 
+    /// Uploads the file to the server.
+    ///
+    /// The provided path must be absolute in the file system.
     #[instrument(ret, skip(self))]
     pub async fn upload_file(&self, id: Uuid, path: &Path) -> Result<(), SyncError> {
         let file_data = tokio::fs::read(path).await?;
@@ -142,6 +160,9 @@ impl Client {
         Ok(())
     }
 
+    /// Downloads the file from the server.
+    ///
+    /// The provided path must be absolute in the file system.
     #[instrument(err, skip(self))]
     pub async fn download_file(&self, id: Uuid, path: &Path) -> Result<(), SyncError> {
         let response = self

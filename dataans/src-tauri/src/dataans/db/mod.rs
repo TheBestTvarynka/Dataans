@@ -40,10 +40,30 @@ pub trait Db: Send + Sync {
     async fn set_note_files(&self, note_id: Uuid, files: &[Uuid]) -> Result<(), DbError>;
 }
 
+/// DB-layer abstraction for working with user operations.
+///
+/// The user operation is any local database change. Every such change is used for data synchronization
+/// and should be recorded.
 pub trait OperationDb: Send + Sync {
+    /// Returns all user operations.
     async fn operations(&self) -> Result<Vec<OperationRecordOwned>, DbError>;
+
+    /// Applies the operation to the local database.
+    ///
+    /// May return the [DataEvent] object that can be sent, for example, to the frontend
+    /// to inform about new local changes. The event object is optional because when the operation loses
+    /// (local one has the latest update timestamp) to the local changes, then it is discarded, and no data
+    /// event is returned.
     async fn apply_operation(&self, operations: &OperationRecord<'_>) -> Result<Option<DataEvent>, DbError>;
+
+    /// Returns all registered files in the local database.
+    ///
+    /// Simply talking, returns all files recorded in the local database.
     async fn files(&self) -> Result<Vec<File>, DbError>;
+
+    /// Returns file by its id.
     async fn file_by_id(&self, file_id: Uuid) -> Result<File, DbError>;
+
+    /// Marks the file as uploaded in the local database.
     async fn mark_file_as_uploaded(&self, file_id: Uuid) -> Result<(), DbError>;
 }

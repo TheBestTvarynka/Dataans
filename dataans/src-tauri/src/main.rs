@@ -7,7 +7,6 @@ extern crate tracing;
 mod code_block;
 mod config;
 mod dataans;
-mod dialog;
 mod window;
 
 use std::path::Path;
@@ -200,7 +199,7 @@ fn main() {
             config::open_config_file_folder,
             config::open_theme_file,
             code_block::parse_code,
-            dialog::select_file,
+            window::select_import_file,
             window::open_app_info_window,
             window::cf_auth,
         ])

@@ -3,6 +3,11 @@
 #[macro_use]
 extern crate tracing;
 
+#[cfg(all(feature = "dev", not(debug_assertions)))]
+compile_error!(
+    "The dev feature is enabled, which is not intended for production use. Please disable it before deploying."
+);
+
 pub mod db;
 mod error;
 mod logging;
