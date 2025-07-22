@@ -12,6 +12,9 @@ authors.workspace = true
 default = ["tigris"]
 tigris = ["dep:aws-sdk-s3", "dep:aws-config"]
 fs = []
+# The `dev` feature disables authentication checks and allows access to the server without a token.
+# This is intended for local development only.
+dev = []
 
 [dependencies]
 web-api-types = { workspace = true, features = ["server"] }

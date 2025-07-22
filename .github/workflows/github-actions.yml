@@ -1,6 +1,4 @@
 name: Build & Deploy
-env:
-  DATAANS_SERVER_DOMAIN: dataans.com
 on:
   push:
     branches:

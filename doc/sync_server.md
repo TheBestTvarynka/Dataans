@@ -120,4 +120,29 @@ As the result, we will have a list of block hashes. We do this procedure on the 
 Then the server's blocks hashes list is transferred to the local app. The app compared these two lists. The same operations wil result in the same block hashes.
 So, we can discard operations that belong to blocks with the same hashes. If either side has some operation that the other side does not have, then all consecutive blocks will have different notes, and, in turn, different hash values.
 
-After that, the app requests server's notes starting from the end of the last discarded block. 
+After that, the app requests server's notes starting from the end of the last discarded block. The same for local operations: the app selects local operation starting from the last discarded block.
+
+As the result, the app has two operations list: local one and remote one. Both lists are sorted by timestamp. The app will compare them one by one and discard operations with the same id.
+This process stops when the app finds the two operations with different ids. Starting from this point, the rest of local operations will be uploaded on the remote server, and the rest of remote operations will be applied on the local database.
+Starting from this point, the app does not need to check other operations in lists, because it is guaranteed that their ids will be different.
+The app can safely stop comparing on the first operations pair with different ids.
+
+### Conflicts resolution
+
+Every object (like a note, a space, or a file) has creation and updating timestamps. During the operation applying, the object with the latest timestamp wins (i.e. last write wins).
+
+During operations uploading, the sync server accepts operations and inserts them into the operations table. Nothing more.
+
+### Files sync
+
+Files are not stored in the SQLite database but directly on the disk.
+When the sync process starts, the app iterates over all files registered in the local database and determines which ones need to be uploaded/downloaded.
+There are possible the following cases:
+
+1. If the `is_uploaded` attribute is `true` and file present locally, then the app will do nothing.
+2. If the `is_uploaded` attribute is `true` and file does not present locally, then the app will try to download the file from the sync server.
+1. If the `is_uploaded` attribute is `false` and file present locally, then the app will try to upload it on the sync server.
+1. If the `is_uploaded` attribute is `false` and file does not present locally, then the app will log an error.
+   Ideally, such situation should never exist. In general case, it means that this is a bug or someone/something (not the app) edited the local app database.
+
+The app may discover new files during remote operation applying process. You should not worry about it. The app automatically will try to download them immediately.

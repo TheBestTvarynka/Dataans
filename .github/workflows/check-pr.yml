@@ -1,6 +1,4 @@
 name: Check
-env:
-  DATAANS_SERVER_DOMAIN: dataans.com
 on:
   pull_request:
     branches:
