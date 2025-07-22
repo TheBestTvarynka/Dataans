@@ -1,7 +1,7 @@
 
 # Technical decisions explained
 
-This documents aims to list technologies used in this project and explain why they were chosen.
+This document aims to list technologies used in this project and explain why they were chosen.
 
 ## Why [`Tauri`](https://tauri.app/)?
 
@@ -28,15 +28,15 @@ But it is not a comprehensive answer. There are a lot of ways how you can write 
 
 > `Tauri` is built with security in mind and aims to be more secure than `Electron` by using a `Rust`-based native layer instead of a `JavaScript`-based layer.
 
-> `Tauri` apps have smaller binary sizes than `Electron` apps because it’s using rust instead of `JavaScript` and other web technologies.
+> `Tauri` apps have smaller binary sizes than `Electron` apps because they use Rust instead of `JavaScript` and other web technologies.
 
 src: [`Electron` vs `Tauri`](https://www.coditation.com/blog/electron-vs-tauri).
 
-So, yes, we still have some overhead and not the best performance ever, but it's easy to develop and maintain the app, we have modern tooling from the `Rust` ecosystem, advanced type system, and memory safety. It's the best option we currently have for writing desktop apps.
+So, yes, we still have some overhead and not the best performance ever, but it's easy to develop and maintain the app; we have modern tooling from the `Rust` ecosystem, an advanced type system, and memory safety. It's the best option we currently have for writing desktop apps.
 
 If you want to know real word numbers (such as build times, bundle sizes, memory usage, etc), then follow this link: [github.com/Elanis/web-to-desktop-framework-comparison](https://github.com/Elanis/web-to-desktop-framework-comparison).
 
-The desktop app is divided into two main parts: backend and frontend. And there is also sync server for user's data back up and sync.
+The desktop app is divided into two main parts: backend and frontend. And there is also a sync server for user's data backup and sync.
 
 ## Desktop app backend
 
@@ -65,7 +65,7 @@ All of them are popular, fast, and interesting: [`Yew` vs `Dioxus` vs `Leptos` v
 > * Entirely safe Rust.
 > * Very, very good performance.
 
-It doesn't mean that the `Leptos` is the best. We just like it more and it's enough for us :stuck_out_tongue_closed_eyes:.
+It doesn't mean that `Leptos` is the best. We just like it more and it's enough for us :stuck_out_tongue_closed_eyes:.
 
 ## Sync server
 
