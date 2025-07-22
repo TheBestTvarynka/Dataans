@@ -3,15 +3,19 @@
 
 # What? Why?
 
+The Dataans app has followed a _local first_ approach since the very beginning of its existence. After some time, I started to use the app on many devices and inside my Windows/Linux VMs.
+I caught myself on a thought that it would be good to be able to transfer the data from one device to another.
+After some considerations, I understood that I want the multi-device synchronization feature.
 
+Decentralized Internet, P2P networks, etc, are good. But the data synchronization feature relies on the central sync (backup) server.
+The data synchronization using the P2P communication may be implemented in the future. It depends on my needs.
 
 # Intro
 
 The Dataans app supports user's data back up to the remote server. The same server is used for the data synchronization between devices.
-Let me answer your next question. Nope, the P2P sync between devices is not implemented (at least yet).
 
 In the app terminology, the back up and sync servers are the same thing.
-If you use Dataans only on one device (or many devices but different purposes), then the remote server is the back up server.
+If you use Dataans only on one device (or many devices that do not share the data between each other), then the remote server is the back up server.
 If you use Dataans on many devices and want them to share the same state, then the remote server is the sync server.
 In any case, sync and back up servers are the same server instance. It is just a small clarification, so you do not get confused.
 
