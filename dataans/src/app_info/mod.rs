@@ -9,6 +9,7 @@ use leptos::*;
 
 use self::sync_settings::SyncState;
 use crate::app_info::export::Export;
+use crate::app_info::import::Import;
 use crate::backend::{open_config_file, open_config_file_folder, open_theme_file};
 use crate::notes::md_node::InlineCode;
 
@@ -125,10 +126,10 @@ pub fn AppInfo() -> impl IntoView {
                                 <InlineCode code=theme.display().to_string() />
                                 <button
                                     class="tool"
-                                    title="Open theme file location"
+                                    title="Edit theme file"
                                     on:click=move |_| open_theme_file(theme.clone())
                                 >
-                                    <img alt="edit note" src="/public/icons/folder-light.png" />
+                                    <img alt="edit note" src="/public/icons/edit-space.svg" />
                                 </button>
                             </td>
                         </tr>
@@ -195,7 +196,10 @@ pub fn AppInfo() -> impl IntoView {
                 }
             }}
             <hr style="width: 100%" />
-            <Export />
+            <div class="app-info-window-data-actions">
+                <Export />
+                <Import />
+            </div>
         </div>
     }
 }

@@ -29,10 +29,8 @@ pub fn Import() -> impl IntoView {
     };
 
     view! {
-        <div>
-            <button on:click=import_data disabled=is_importing.get()>
-                {move || if is_importing.get() { "Importing..." } else { "Import" }}
-            </button>
-        </div>
+        <button on:click=import_data disabled=is_importing.get() style="cursor: pointer;">
+            {move || if is_importing.get() { "Importing..." } else { "Import" }}
+        </button>
     }
 }
