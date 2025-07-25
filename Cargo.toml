@@ -18,13 +18,13 @@ hmac = "0.12"
 sqlx = "0.8"
 thiserror = "2.0"
 time = { version = "0.3" , default-features = false }
-uuid = { version = "1.11", default-features = false }
+uuid = { version = "1.17", default-features = false }
 tracing = "0.1"
 serde = "1"
 rocket = "0.5"
-nutype = "0.5"
-hex = "0.4"
 futures = "0.3"
 url = "2.5"
 derive_more = "1.0"
 reqwest = "0.12"
+
+tokio = "1.46"
