@@ -2,7 +2,8 @@ use std::path::PathBuf;
 
 use common::export::SchemaVersion;
 use common::{DataExportConfig, NotesExportOption};
-use leptos::*;
+use leptos::prelude::*;
+use leptos::task::spawn_local;
 use wasm_bindgen::JsCast;
 use web_sys::HtmlSelectElement;
 

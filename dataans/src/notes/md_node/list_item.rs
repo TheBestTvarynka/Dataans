@@ -1,4 +1,4 @@
-use leptos::*;
+use leptos::prelude::*;
 
 use super::render_md_node;
 

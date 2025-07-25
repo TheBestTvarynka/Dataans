@@ -3125,18 +3125,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "gloo-timers"
-version = "0.3.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bbb143cf96099802033e0d4f4963b19fd2e0b728bcf076cd9cf7f6634f092994"
-dependencies = [
- "futures-channel",
- "futures-core",
- "js-sys",
- "wasm-bindgen",
-]
-
-[[package]]
 name = "gloo-utils"
 version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4151,11 +4139,11 @@ checksum = "03087c2bad5e1034e8cace5926dec053fb3790248370865f5117a7d0213354c8"
 
 [[package]]
 name = "leptoaster"
-version = "0.1.8"
-source = "git+https://github.com/TheBestTvarynka/leptoaster.git?rev=983c98b#983c98be3bcccc8b08f05eedee3cc0fdb8d5b68e"
+version = "0.2.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "196a315ed9bad42e876ec8a2f613964dc144c7f4260603d108a95b4fe34803bc"
 dependencies = [
- "gloo-timers",
- "leptos 0.6.15",
+ "leptos 0.8.5",
 ]
 
 [[package]]
@@ -4174,7 +4162,6 @@ dependencies = [
  "tracing",
  "typed-builder 0.18.2",
  "typed-builder-macro 0.18.2",
- "wasm-bindgen",
  "web-sys",
 ]
 
@@ -4392,7 +4379,6 @@ dependencies = [
  "cfg-if",
  "futures",
  "indexmap 2.10.0",
- "js-sys",
  "oco_ref 0.1.1",
  "paste",
  "pin-project",
@@ -4404,9 +4390,7 @@ dependencies = [
  "slotmap",
  "thiserror 1.0.69",
  "tracing",
- "wasm-bindgen",
  "wasm-bindgen-futures",
- "web-sys",
 ]
 
 [[package]]

@@ -1,4 +1,5 @@
-use leptos::*;
+use leptos::callback::Callback;
+use leptos::prelude::*;
 use leptos_hotkeys::use_hotkeys;
 
 #[component]

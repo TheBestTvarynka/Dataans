@@ -1,5 +1,5 @@
 use common::space::OwnedSpace;
-use leptos::*;
+use leptos::prelude::*;
 
 use crate::backend::convert_file_src;
 

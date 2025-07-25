@@ -1,5 +1,6 @@
 use common::note::{File, FileStatus};
-use leptos::*;
+use leptos::prelude::*;
+use leptos::task::spawn_local;
 
 use crate::backend::file::{open, reveal};
 

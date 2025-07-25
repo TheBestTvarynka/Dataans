@@ -21,7 +21,7 @@ leptos_router = { version = "0.8" }
 # TODO: The main branch contains an important fix which is not released yet.
 # Replace `git` link with proper version when a new release will be published:
 leptos_hotkeys = { git = "https://github.com/TheBestTvarynka/leptos-hotkeys.git", rev = "1a3cebb" }
-leptoaster = { git = "https://github.com/TheBestTvarynka/leptoaster.git", rev = "983c98b" }
+leptoaster = { version = "0.2", features = ["csr"] }
 
 gloo-storage = "0.3"
 wasm-bindgen = "0.2"

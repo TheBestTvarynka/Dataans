@@ -1,5 +1,7 @@
+use leptos::html;
+use leptos::prelude::*;
+use leptos::task::spawn_local;
 use leptos::web_sys::KeyboardEvent;
-use leptos::*;
 use wasm_bindgen::JsCast;
 
 use crate::backend::file::load_clipboard_image;
@@ -147,7 +149,7 @@ pub fn TextArea(
         <div class="resizable-textarea">
             <textarea
                 id=id.clone()
-                _ref=ref_input
+                node_ref=ref_input
                 type="text"
                 placeholder="Type a note..."
                 class="resizable-textarea-textarea"

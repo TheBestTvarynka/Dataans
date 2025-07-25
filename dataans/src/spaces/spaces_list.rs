@@ -1,6 +1,7 @@
 use common::space::OwnedSpace;
 use common::Config;
-use leptos::*;
+use leptos::callback::Callback;
+use leptos::prelude::*;
 use leptos_hotkeys::{use_hotkeys, use_hotkeys_scoped};
 
 use crate::spaces::Space;

@@ -1,7 +1,8 @@
 use common::note::{CreateNote, DraftNote, File, Note};
 use common::space::Id as SpaceId;
 use gloo_storage::{LocalStorage, Storage};
-use leptos::*;
+use leptos::prelude::*;
+use leptos::task::spawn_local;
 use uuid::Uuid;
 use web_sys::KeyboardEvent;
 

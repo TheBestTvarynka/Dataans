@@ -8,7 +8,9 @@ use common::note::Id as NoteId;
 use common::profile::{Sync, SyncMode, UserContext};
 use common::space::OwnedSpace;
 use common::Config;
-use leptos::*;
+use leptos::callback::Callback;
+use leptos::prelude::*;
+use leptos::task::spawn_local;
 use leptos_hotkeys::use_hotkeys;
 
 use self::found_notes_list::FoundNotesList;

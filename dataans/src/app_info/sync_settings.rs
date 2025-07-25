@@ -1,5 +1,7 @@
 use common::profile::{Sync, SyncMode, UserContext};
-use leptos::*;
+use leptos::html;
+use leptos::prelude::*;
+use leptos::task::spawn_local;
 
 #[component]
 pub fn SyncSettings(context: UserContext) -> impl IntoView {

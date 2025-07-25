@@ -1,6 +1,9 @@
 use common::space::{Avatar, CreateSpace, OwnedSpace, UpdateSpace};
 use common::Config;
-use leptos::*;
+use leptos::callback::Callback;
+use leptos::html;
+use leptos::prelude::*;
+use leptos::task::spawn_local;
 use leptos_hotkeys::{use_hotkeys, use_hotkeys_scoped};
 use uuid::Uuid;
 
@@ -120,7 +123,7 @@ pub fn SpaceForm(
             </div>
             <input
                 id=INPUT_ELEM_ID
-                _ref=ref_input
+                node_ref=ref_input
                 type="text"
                 placeholder="Space name"
                 class="input"

@@ -15,7 +15,7 @@ mod spaces;
 mod utils;
 
 use app::*;
-use leptos::*;
+use leptos::prelude::*;
 
 fn main() {
     console_error_panic_hook::set_once();

@@ -1,7 +1,10 @@
 use common::note::File;
 use futures::future::try_join_all;
 use js_sys::{ArrayBuffer, Uint8Array};
-use leptos::{component, spawn_local, view, Callable, Callback, IntoView, Signal, SignalGet};
+use leptos::callback::{Callable, Callback};
+use leptos::prelude::*;
+use leptos::task::spawn_local;
+use leptos::{component, view, IntoView};
 use uuid::Uuid;
 use wasm_bindgen::JsCast;
 use web_sys::{Blob, HtmlInputElement};

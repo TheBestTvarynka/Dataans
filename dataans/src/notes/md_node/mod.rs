@@ -5,8 +5,9 @@ mod list_item;
 use std::path::Path;
 
 pub use inline_code::InlineCode;
-use leptos::html::AnyElement;
-use leptos::*;
+use leptos::html::HtmlElement;
+use leptos::prelude::*;
+use leptos::task::spawn_local;
 use markdown::mdast::Node;
 
 use self::code_block::CodeBlock;
@@ -14,7 +15,7 @@ use self::list_item::ListItem;
 use crate::backend::convert_file_src;
 use crate::backend::file::open;
 
-pub fn render_md_node(node: &Node, base_path: &str) -> HtmlElement<AnyElement> {
+pub fn render_md_node(node: &Node, base_path: &str) -> HtmlElement<AnyView> {
     match node {
         Node::Root(root) => view! {
             <div class="note">

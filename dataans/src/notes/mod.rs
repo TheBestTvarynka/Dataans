@@ -7,7 +7,8 @@ pub mod note_preview;
 use common::note::OwnedNote;
 use common::space::{OwnedSpace, Space as SpaceData};
 use common::Config;
-use leptos::*;
+use leptos::prelude::*;
+use leptos::task::spawn_local;
 use wasm_bindgen::JsCast;
 
 use self::editor::Editor;

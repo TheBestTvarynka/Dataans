@@ -3,9 +3,12 @@ use common::profile::UserContext;
 use common::space::OwnedSpace;
 use common::Config;
 use leptoaster::*;
-use leptos::*;
+use leptos::context::provide_context;
+use leptos::html;
+use leptos::prelude::*;
+use leptos::task::spawn_local;
 use leptos_hotkeys::{provide_hotkeys_context, scopes, HotkeysContext};
-use leptos_router::{Route, Router, Routes};
+use leptos_router::components::*;
 
 use crate::app_info::AppInfo;
 use crate::backend::auth::profile;
@@ -110,7 +113,7 @@ pub fn App() -> impl IntoView {
     view! {
         <Router>
             <Toaster stacked=true />
-            <main class="app" style=move || theme_css.get() _ref=main_ref>
+            <main class="app" style=move || theme_css.get() node_ref=main_ref>
                 <Routes>
                     <Route path="/" view=move || view! {
                         <Spaces spaces set_spaces />

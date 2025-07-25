@@ -1,7 +1,8 @@
 use common::note::{File, Id as NoteId, Note as NoteData, OwnedNote, UpdateNote};
 use common::Config;
+use leptos::prelude::*;
+use leptos::task::spawn_local;
 use leptos::web_sys::KeyboardEvent;
-use leptos::*;
 use markdown::mdast::{Node, Text};
 use markdown::ParseOptions;
 use time::OffsetDateTime;

@@ -1,4 +1,4 @@
-use leptos::*;
+use leptos::prelude::*;
 
 #[component]
 pub fn Switch(id: String, state: bool, setter: Callback<bool>) -> impl IntoView {

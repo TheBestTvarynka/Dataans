@@ -5,7 +5,8 @@ mod sync_settings;
 use std::path::PathBuf;
 
 use common::{App, Appearance, Config, KeyBindings};
-use leptos::*;
+use leptos::prelude::*;
+use leptos::task::spawn_local;
 
 use self::sync_settings::SyncState;
 use crate::app_info::export::Export;

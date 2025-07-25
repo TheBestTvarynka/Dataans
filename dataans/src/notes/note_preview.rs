@@ -1,5 +1,5 @@
 use common::note::{Id as NoteId, NoteFullOwned};
-use leptos::*;
+use leptos::prelude::*;
 
 use crate::backend::convert_file_src;
 
