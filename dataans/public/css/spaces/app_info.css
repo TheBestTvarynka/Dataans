@@ -74,3 +74,10 @@ th {
     border-color: var(--input-border-color);
     outline: none;
 }
+
+.app-info-window-data-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
