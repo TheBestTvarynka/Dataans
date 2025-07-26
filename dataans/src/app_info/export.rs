@@ -14,8 +14,8 @@ use crate::backend::file::open;
 pub fn Export() -> impl IntoView {
     let toaster = leptoaster::expect_toaster();
 
-    let (export_config, set_export_config) = create_signal(DataExportConfig::default());
-    let (backup_dir, set_backup_dir) = create_signal(None);
+    let (export_config, set_export_config) = signal(DataExportConfig::default());
+    let (backup_dir, set_backup_dir) = signal(None);
 
     let export_data_action = Action::new(move |export_config: &DataExportConfig| {
         let toaster = toaster.clone();
@@ -77,7 +77,7 @@ pub fn Export() -> impl IntoView {
                             </option>
                         }).collect_view()}
                     </select>
-                },
+                }.into_any(),
                 DataExportConfig::Json(schema_version) => view! {
                     <select
                         class="input"
@@ -95,9 +95,9 @@ pub fn Export() -> impl IntoView {
                             </option>
                         }).collect_view()}
                     </select>
-                },
+                }.into_any(),
             }}
-            <button class="button_cancel" on:click=move |_| export_data_action.dispatch(export_config.get())>"Export"</button>
+            <button class="button_cancel" on:click=move |_| { export_data_action.dispatch(export_config.get()); }>"Export"</button>
             <Show when=move || backup_dir.get().is_some()>
                 {move || {
                     let backup_dir = backup_dir.get().unwrap();

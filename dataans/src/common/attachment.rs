@@ -35,7 +35,7 @@ pub fn Attachment(
             spawn_local(async move {
                 let files = try_exec!(files.await, "Failed to upload files", toaster);
                 attached_files.extend_from_slice(&files);
-                set_files.call(attached_files);
+                set_files.run(attached_files);
             });
         };
     };

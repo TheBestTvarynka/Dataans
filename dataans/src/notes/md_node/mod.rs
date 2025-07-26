@@ -15,7 +15,7 @@ use self::list_item::ListItem;
 use crate::backend::convert_file_src;
 use crate::backend::file::open;
 
-pub fn render_md_node(node: &Node, base_path: &str) -> HtmlElement<AnyView> {
+pub fn render_md_node(node: &Node, base_path: &str) -> AnyView {
     match node {
         Node::Root(root) => view! {
             <div class="note">
@@ -76,7 +76,7 @@ pub fn render_md_node(node: &Node, base_path: &str) -> HtmlElement<AnyView> {
             </span>
         }
         .into_any(),
-        Node::Text(text) => view! { <span class="text">{&text.value}</span> }.into_any(),
+        Node::Text(text) => view! { <span class="text">{text.value.as_str()}</span> }.into_any(),
         Node::Delete(delete) => view! {
             <s>
                 {delete.children

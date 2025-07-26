@@ -2,7 +2,7 @@ use common::space::OwnedSpace;
 use common::Config;
 use leptos::callback::Callback;
 use leptos::prelude::*;
-use leptos_hotkeys::{use_hotkeys, use_hotkeys_scoped};
+// use leptos_hotkeys::{use_hotkeys, use_hotkeys_scoped};
 use web_sys::KeyboardEvent;
 
 use crate::common::Modal;
@@ -22,7 +22,7 @@ pub fn Tools(
     #[prop(into)] set_selected_space: Callback<OwnedSpace, ()>,
     config: Config,
 ) -> impl IntoView {
-    let (show_modal, set_show_modal) = create_signal(false);
+    let (show_modal, set_show_modal) = signal(false);
 
     let class = move || {
         if spaces_minimized.get() {
@@ -32,24 +32,24 @@ pub fn Tools(
         }
     };
 
-    let key_bindings = &config.key_bindings;
+    // let key_bindings = &config.key_bindings;
 
-    let toggle_spaces_bar = key_bindings.toggle_spaces_bar.clone();
-    use_hotkeys!((toggle_spaces_bar) => move |_| {
-        set_spaces_minimized.set(!spaces_minimized.get());
-    });
+    // let toggle_spaces_bar = key_bindings.toggle_spaces_bar.clone();
+    // use_hotkeys!((toggle_spaces_bar) => move |_| {
+    //     set_spaces_minimized.set(!spaces_minimized.get());
+    // });
 
-    use_hotkeys!((key_bindings.create_space.clone()) => move |_| {
-        set_show_modal.set(true);
-    });
+    // use_hotkeys!((key_bindings.create_space.clone()) => move |_| {
+    //     set_show_modal.set(true);
+    // });
 
-    use_hotkeys!((key_bindings.find_note.clone()) => move |_| {
-        if spaces_minimized.get() {
-            set_spaces_minimized.set(false);
-        }
-        set_find_node_mode.set(FindNoteMode::FindNote { space: None });
-        focus_element(SEARCH_NOTE_INPUT_ID);
-    });
+    // use_hotkeys!((key_bindings.find_note.clone()) => move |_| {
+    //     if spaces_minimized.get() {
+    //         set_spaces_minimized.set(false);
+    //     }
+    //     set_find_node_mode.set(FindNoteMode::FindNote { space: None });
+    //     focus_element(SEARCH_NOTE_INPUT_ID);
+    // });
 
     let key_down = move |key: KeyboardEvent| {
         if key.key() == "Enter" {
@@ -97,7 +97,7 @@ pub fn Tools(
                         <Modal>
                             <SpaceForm
                                 space=None
-                                on_cancel=move |_| set_show_modal.set(false)
+                                on_cancel=move || set_show_modal.set(false)
                                 set_spaces
                                 set_selected_space
                                 config

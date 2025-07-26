@@ -3,8 +3,8 @@ use common::space::OwnedSpace;
 use common::Config;
 use leptos::callback::Callback;
 use leptos::prelude::*;
-use leptos_hotkeys::{use_hotkeys, use_hotkeys_scoped};
 
+// use leptos_hotkeys::{use_hotkeys, use_hotkeys_scoped};
 use crate::backend::notes::{search_notes, search_notes_in_space};
 use crate::notes::note_preview::NotePreview;
 use crate::spaces::Space;
@@ -17,7 +17,7 @@ pub fn FoundNotesList(
     spaces_minimized: Signal<bool>,
     #[prop(into)] focus_note: Callback<(NoteId, OwnedSpace), ()>,
 ) -> impl IntoView {
-    let (selected_note, set_selected_note) = create_signal(None);
+    let (selected_note, set_selected_note) = signal(None);
 
     let space = search_in_space.clone();
     let found_notes = create_resource(
@@ -79,10 +79,10 @@ pub fn FoundNotesList(
         }
     };
 
-    let key_bindings = config.key_bindings.clone();
+    // let key_bindings = config.key_bindings.clone();
 
-    use_hotkeys!((key_bindings.select_prev_list_item) => move |_| select_prev_note());
-    use_hotkeys!((key_bindings.select_next_list_item) => move |_| select_next_note());
+    // use_hotkeys!((key_bindings.select_prev_list_item) => move |_| select_prev_note());
+    // use_hotkeys!((key_bindings.select_next_list_item) => move |_| select_next_note());
 
     let global_config = expect_context::<RwSignal<Config>>();
 
@@ -136,7 +136,7 @@ pub fn FoundNotesList(
                                 base_path
                                 set_selected_note=move |id| {
                                     set_selected_note.set(Some(id));
-                                    focus_note.call((note_id, space.clone()));
+                                    focus_note.run((note_id, space.clone()));
                                 }/>
                         }
                     }).collect_view())

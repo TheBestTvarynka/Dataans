@@ -11,8 +11,8 @@ use common::Config;
 use leptos::callback::Callback;
 use leptos::prelude::*;
 use leptos::task::spawn_local;
-use leptos_hotkeys::use_hotkeys;
 
+// use leptos_hotkeys::use_hotkeys;
 use self::found_notes_list::FoundNotesList;
 use self::space::Space;
 use self::spaces_list::SpacesList;
@@ -64,7 +64,7 @@ pub fn Spaces(spaces: Signal<Vec<OwnedSpace>>, set_spaces: SignalSetter<Vec<Owne
         |state, minimized| state.minimize_spaces = minimized,
     );
 
-    let (query, set_query) = create_signal(String::new());
+    let (query, set_query) = signal(String::new());
 
     let toaster = leptoaster::expect_toaster();
 
@@ -92,13 +92,13 @@ pub fn Spaces(spaces: Signal<Vec<OwnedSpace>>, set_spaces: SignalSetter<Vec<Owne
                 match find_note_mode.get() {
                     FindNoteMode::None => view!{
                         <SpacesList config selected_space spaces spaces_minimized set_selected_space />
-                    },
+                    }.into_any(),
                     FindNoteMode::FindNote { space } => {
-                        use_hotkeys!(("Escape") => move |_| set_find_node_mode.set(FindNoteMode::None));
+                        // use_hotkeys!(("Escape") => move |_| set_find_node_mode.set(FindNoteMode::None));
                         view! {
                             <FoundNotesList config query search_in_space=space spaces_minimized focus_note />
                         }
-                    },
+                    }.into_any(),
                 }
             }}
             <div style="flex-grow: 1; align-content: end; display: flex; flex-direction: column; align-items: center; justify-content: flex-end;">

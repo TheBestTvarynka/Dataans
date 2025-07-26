@@ -4,7 +4,7 @@ use leptos::callback::Callback;
 use leptos::html;
 use leptos::prelude::*;
 use leptos::task::spawn_local;
-use leptos_hotkeys::{use_hotkeys, use_hotkeys_scoped};
+// use leptos_hotkeys::{use_hotkeys, use_hotkeys_scoped};
 use uuid::Uuid;
 
 use crate::backend::convert_file_src;
@@ -23,8 +23,8 @@ pub fn SpaceForm(
 ) -> impl IntoView {
     let toaster = leptoaster::expect_toaster();
 
-    let (space_name, set_space_name) = create_signal(space.as_ref().map(|s| s.name.to_string()).unwrap_or_default());
-    let (avatar, set_avatar) = create_signal(
+    let (space_name, set_space_name) = signal(space.as_ref().map(|s| s.name.to_string()).unwrap_or_default());
+    let (avatar, set_avatar) = signal(
         space
             .as_ref()
             .map(|s| s.avatar.clone())
@@ -59,7 +59,7 @@ pub fn SpaceForm(
     let create_space = move || {
         let name = space_name.get();
         let avatar = avatar.get();
-        on_cancel.call(());
+        on_cancel.run(());
 
         let action = async move {
             if let Some(id) = id {
@@ -94,15 +94,15 @@ pub fn SpaceForm(
 
             set_spaces.set(spaces);
             if let Some(space) = new_current_space {
-                set_selected_space.call(space);
+                set_selected_space.run(space);
             }
         });
     };
 
-    use_hotkeys!(("Escape") => move |_| on_cancel.call(()));
-    use_hotkeys!(("Enter") => move |_| create_space());
-    let regenerate_space_avatar = config.key_bindings.regenerate_space_avatar.clone();
-    use_hotkeys!((regenerate_space_avatar) => move |_| generate_avatar.call(()));
+    // use_hotkeys!(("Escape") => move |_| on_cancel.run(()));
+    // use_hotkeys!(("Enter") => move |_| create_space());
+    // let regenerate_space_avatar = config.key_bindings.regenerate_space_avatar.clone();
+    // use_hotkeys!((regenerate_space_avatar) => move |_| generate_avatar.run(()));
 
     let global_config = expect_context::<RwSignal<Config>>();
 
@@ -116,7 +116,7 @@ pub fn SpaceForm(
             <div class="create-space-avatar">
                 <img class="create-space-avatar-img" src=move || convert_file_src(avatar.get().path(), &global_config.get().app.base_path) />
                 <div style="align-self: center">
-                    <button class="tool" title="Regenerate avatar" on:click=move |_| generate_avatar.call(())>
+                    <button class="tool" title="Regenerate avatar" on:click=move |_| generate_avatar.run(())>
                         <img alt="regenerate-avatar" src="/public/icons/refresh.svg" />
                     </button>
                 </div>
@@ -134,7 +134,7 @@ pub fn SpaceForm(
                 <button
                     class="button_cancel"
                     title="Cancel space creation"
-                    on:click=move |_| on_cancel.call(())
+                    on:click=move |_| on_cancel.run(())
                 >
                     "Cancel"
                 </button>

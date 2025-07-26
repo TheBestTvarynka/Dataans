@@ -15,8 +15,8 @@ pub fn TextArea(
 ) -> impl IntoView {
     let toaster = leptoaster::expect_toaster();
 
-    let (disabled, set_disabled) = create_signal(false);
-    let ref_input = create_node_ref::<html::Textarea>();
+    let (disabled, set_disabled) = signal(false);
+    let ref_input = NodeRef::<html::Textarea>::new();
 
     create_effect(move |_| {
         if let Some(ref_input) = ref_input.get() {
@@ -29,7 +29,7 @@ pub fn TextArea(
     });
 
     let elem_id = id.clone();
-    let paste_handler = move |e: leptos::ev::Event| {
+    let paste_handler = move |e| {
         let ev = e
             .dyn_into::<web_sys::ClipboardEvent>()
             .expect("Event -> ClipboardEvent should not fail");
@@ -70,7 +70,7 @@ pub fn TextArea(
                         text.push(')');
                     }
 
-                    set_text.call(text);
+                    set_text.run(text);
                     set_disabled.set(false);
                 });
             } else {
@@ -118,7 +118,7 @@ pub fn TextArea(
                         (text, None)
                     }
                 };
-                set_text.call(text);
+                set_text.run(text);
                 if let Some((selection_start, selection_end)) = selection {
                     if let Err(err) = text_area.set_selection_start(Some(selection_start)) {
                         error!("{err:?}");
@@ -150,11 +150,10 @@ pub fn TextArea(
             <textarea
                 id=id.clone()
                 node_ref=ref_input
-                type="text"
                 placeholder="Type a note..."
                 class="resizable-textarea-textarea"
                 style=style
-                on:input=move |ev| set_text.call(event_target_value(&ev))
+                on:input=move |ev| set_text.run(event_target_value(&ev))
                 on:keydown=move |ev| {
                     key_down(ev.clone());
                     text_editing_keybindings(ev);

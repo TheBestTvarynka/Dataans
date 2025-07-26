@@ -3,8 +3,8 @@ use common::Config;
 use leptos::callback::Callback;
 use leptos::prelude::*;
 use leptos::task::spawn_local;
-use leptos_hotkeys::{use_hotkeys, use_hotkeys_scoped};
 
+// use leptos_hotkeys::{use_hotkeys, use_hotkeys_scoped};
 use crate::backend::spaces::delete_space;
 use crate::common::{Confirm, Modal};
 use crate::spaces::space_form::SpaceForm;
@@ -18,8 +18,8 @@ pub fn Info(
     #[prop(into)] set_selected_space: Callback<OwnedSpace, ()>,
     config: Config,
 ) -> impl IntoView {
-    let (show_edit_modal, set_show_edit_modal) = create_signal(false);
-    let (show_delete_modal, set_show_delete_modal) = create_signal(false);
+    let (show_edit_modal, set_show_edit_modal) = signal(false);
+    let (show_delete_modal, set_show_delete_modal) = signal(false);
 
     let delete_space = move || {
         let id = current_space.id;
@@ -33,17 +33,17 @@ pub fn Info(
 
     let current_space_name = current_space.name.to_string();
 
-    let key_bindings = &config.key_bindings;
+    // let key_bindings = &config.key_bindings;
 
-    use_hotkeys!((key_bindings.edit_current_space.clone()) => move |_| {
-        set_show_edit_modal.set(true);
-    });
+    // use_hotkeys!((key_bindings.edit_current_space.clone()) => move |_| {
+    //     set_show_edit_modal.set(true);
+    // });
 
-    use_hotkeys!((key_bindings.delete_current_space.clone()) => move |_| {
-        set_show_delete_modal.set(true);
-    });
+    // use_hotkeys!((key_bindings.delete_current_space.clone()) => move |_| {
+    //     set_show_delete_modal.set(true);
+    // });
 
-    use_hotkeys!((key_bindings.find_note_in_selected_space.clone()) => move |_| toggle_note_search.call(()));
+    // use_hotkeys!((key_bindings.find_note_in_selected_space.clone()) => move |_| toggle_note_search.run(()));
 
     let space = Some(current_space.clone());
 
@@ -55,7 +55,7 @@ pub fn Info(
                     <button
                         class="tool"
                         title="Find note"
-                        on:click=move |_| toggle_note_search.call(())
+                        on:click=move |_| toggle_note_search.run(())
                     >
                         <img alt="find note" src="/public/icons/search.svg" />
                     </button>
@@ -78,8 +78,8 @@ pub fn Info(
             <Show when=move || show_delete_modal.get()>
                 <Confirm
                     message=format!("Confirm '{}' space deletion.", current_space.name.as_ref())
-                    on_confirm=move |_| delete_space()
-                    on_cancel=move |_| set_show_delete_modal.set(false)
+                    on_confirm=move || delete_space()
+                    on_cancel=move || set_show_delete_modal.set(false)
                 />
             </Show>
             <Show when=move || show_edit_modal.get()>{
@@ -89,7 +89,7 @@ pub fn Info(
                     <Modal>
                         <SpaceForm
                             space
-                            on_cancel=move |_| set_show_edit_modal.set(false)
+                            on_cancel=move || set_show_edit_modal.set(false)
                             set_spaces
                             set_selected_space
                             config

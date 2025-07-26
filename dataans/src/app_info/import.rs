@@ -6,7 +6,7 @@ use crate::backend::import::{import_app_data, select_import_file};
 #[component]
 pub fn Import() -> impl IntoView {
     let toaster = leptoaster::expect_toaster();
-    let (is_importing, set_is_importing) = create_signal(false);
+    let (is_importing, set_is_importing) = signal(false);
 
     let import_data = move |_| {
         let toaster_clone = toaster.clone();
