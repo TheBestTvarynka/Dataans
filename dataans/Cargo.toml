@@ -16,7 +16,7 @@ url = { workspace = true, features = ["serde"]}
 futures = { workspace = true, features = ["std", "alloc"] }
 
 leptos = { version = "0.8", features = ["csr"] }
-leptos_router = { version = "0.8" }
+leptos_router = "0.8"
 
 # TODO: Replace with a custom implementation. The `leptos_hotkeys` crate is not maintained anymore.
 # And it is hard and complicated to update existing crate Leptos version.

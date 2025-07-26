@@ -9,7 +9,7 @@ pub fn NotePreview(
     minimized: Signal<bool>,
     selected: bool,
     base_path: String,
-    #[prop(into)] set_selected_note: Callback<NoteId, ()>,
+    #[prop(into)] set_selected_note: Callback<(NoteId,), ()>,
 ) -> impl IntoView {
     let class = if selected {
         "note-preview note-preview-selected"
@@ -20,7 +20,7 @@ pub fn NotePreview(
     let note_id = note.id;
 
     view! {
-        <div class=class on:click=move |_| set_selected_note.run(note_id)>
+        <div class=class on:click=move |_| set_selected_note.run((note_id,))>
             <img class="note-preview-image" alt="space avatar image" src=convert_file_src(note.space.avatar.path(), &base_path) />
             <Show when=move || !minimized.get()>
                 <div class="vertical">

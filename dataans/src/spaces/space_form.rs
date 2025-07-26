@@ -18,7 +18,7 @@ pub fn SpaceForm(
     space: Option<OwnedSpace>,
     #[prop(into)] on_cancel: Callback<(), ()>,
     set_spaces: SignalSetter<Vec<OwnedSpace>>,
-    set_selected_space: Callback<OwnedSpace, ()>,
+    set_selected_space: Callback<(OwnedSpace,), ()>,
     config: Config,
 ) -> impl IntoView {
     let toaster = leptoaster::expect_toaster();
@@ -36,9 +36,9 @@ pub fn SpaceForm(
                 )
             }),
     );
-    let ref_input = create_node_ref::<html::Input>();
+    let ref_input = NodeRef::<html::Input>::new();
 
-    create_effect(move |_| {
+    Effect::new(move |_| {
         if let Some(ref_input) = ref_input.get() {
             let _ = ref_input.on_mount(|input| {
                 if let Err(err) = input.focus() {
@@ -94,7 +94,7 @@ pub fn SpaceForm(
 
             set_spaces.set(spaces);
             if let Some(space) = new_current_space {
-                set_selected_space.run(space);
+                set_selected_space.run((space,));
             }
         });
     };

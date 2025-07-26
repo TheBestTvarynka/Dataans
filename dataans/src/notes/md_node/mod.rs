@@ -5,7 +5,6 @@ mod list_item;
 use std::path::Path;
 
 pub use inline_code::InlineCode;
-use leptos::html::HtmlElement;
 use leptos::prelude::*;
 use leptos::task::spawn_local;
 use markdown::mdast::Node;

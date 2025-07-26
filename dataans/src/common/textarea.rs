@@ -10,7 +10,7 @@ use crate::backend::file::load_clipboard_image;
 pub fn TextArea(
     id: String,
     text: Signal<String>,
-    #[prop(into)] set_text: Callback<String, ()>,
+    #[prop(into)] set_text: Callback<(String,), ()>,
     key_down: impl Fn(KeyboardEvent) + 'static,
 ) -> impl IntoView {
     let toaster = leptoaster::expect_toaster();
@@ -18,7 +18,7 @@ pub fn TextArea(
     let (disabled, set_disabled) = signal(false);
     let ref_input = NodeRef::<html::Textarea>::new();
 
-    create_effect(move |_| {
+    Effect::new(move |_| {
         if let Some(ref_input) = ref_input.get() {
             let _ = ref_input.on_mount(|input| {
                 if let Err(err) = input.focus() {
@@ -70,7 +70,7 @@ pub fn TextArea(
                         text.push(')');
                     }
 
-                    set_text.run(text);
+                    set_text.run((text,));
                     set_disabled.set(false);
                 });
             } else {
@@ -118,7 +118,7 @@ pub fn TextArea(
                         (text, None)
                     }
                 };
-                set_text.run(text);
+                set_text.run((text,));
                 if let Some((selection_start, selection_end)) = selection {
                     if let Err(err) = text_area.set_selection_start(Some(selection_start)) {
                         error!("{err:?}");
@@ -153,7 +153,7 @@ pub fn TextArea(
                 placeholder="Type a note..."
                 class="resizable-textarea-textarea"
                 style=style
-                on:input=move |ev| set_text.run(event_target_value(&ev))
+                on:input=move |ev| set_text.run((event_target_value(&ev),))
                 on:keydown=move |ev| {
                     key_down(ev.clone());
                     text_editing_keybindings(ev);

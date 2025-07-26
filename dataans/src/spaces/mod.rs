@@ -8,7 +8,6 @@ use common::note::Id as NoteId;
 use common::profile::{Sync, SyncMode, UserContext};
 use common::space::OwnedSpace;
 use common::Config;
-use leptos::callback::Callback;
 use leptos::prelude::*;
 use leptos::task::spawn_local;
 
@@ -50,7 +49,7 @@ pub fn Spaces(spaces: Signal<Vec<OwnedSpace>>, set_spaces: SignalSetter<Vec<Owne
             set_notes.set(list_notes(space_id).await.expect("Notes listing should not fail"));
         });
     };
-    let focus_note = move |(note_id, space): (NoteId, OwnedSpace)| {
+    let focus_note = move |note_id: NoteId, space: OwnedSpace| {
         let space_id = space.id;
         set_selected_space_s.set(space);
         spawn_local(async move {
@@ -86,7 +85,17 @@ pub fn Spaces(spaces: Signal<Vec<OwnedSpace>>, set_spaces: SignalSetter<Vec<Owne
 
     view! {
         <div class="spaces-container">
-            {move || view! { <Tools set_spaces spaces_minimized set_spaces_minimized set_find_node_mode set_query=set_query.into() set_selected_space config=global_config.get() /> }}
+            {move || view! {
+                <Tools
+                    set_spaces
+                    spaces_minimized
+                    set_spaces_minimized
+                    set_find_node_mode
+                    set_query=set_query.into()
+                    set_selected_space
+                    config=global_config.get()
+                />
+            }}
             {move || {
                 let config = global_config.get();
                 match find_note_mode.get() {
@@ -121,7 +130,7 @@ pub fn Spaces(spaces: Signal<Vec<OwnedSpace>>, set_spaces: SignalSetter<Vec<Owne
                         </button>
                     }.into_any()
                 } else {
-                    view! { <span /> }.into()
+                    view! { <span /> }.into_any()
                 }}
                 <div style="display: inline-flex; width: 100%; justify-content: center; margin-bottom: 0.2em;">
                     <button class="button_cancel" on:click=show_app_info_window>

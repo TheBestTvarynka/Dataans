@@ -7,7 +7,7 @@ use web_sys::KeyboardEvent;
 
 use crate::common::Modal;
 use crate::spaces::space_form::SpaceForm;
-use crate::utils::focus_element;
+// use crate::utils::focus_element;
 use crate::FindNoteMode;
 
 pub const SEARCH_NOTE_INPUT_ID: &str = "search-note-input";
@@ -19,7 +19,7 @@ pub fn Tools(
     set_spaces_minimized: SignalSetter<bool>,
     set_find_node_mode: SignalSetter<FindNoteMode>,
     set_query: SignalSetter<String>,
-    #[prop(into)] set_selected_space: Callback<OwnedSpace, ()>,
+    #[prop(into)] set_selected_space: Callback<(OwnedSpace,), ()>,
     config: Config,
 ) -> impl IntoView {
     let (show_modal, set_show_modal) = signal(false);

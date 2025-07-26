@@ -4,7 +4,6 @@ use common::space::OwnedSpace;
 use common::Config;
 use leptoaster::*;
 use leptos::context::provide_context;
-use leptos::html;
 use leptos::prelude::*;
 use leptos::task::spawn_local;
 // use leptos_hotkeys::{provide_hotkeys_context, scopes, HotkeysContext};
@@ -115,7 +114,7 @@ pub fn App() -> impl IntoView {
         <Router>
             <Toaster stacked=true />
             <main class="app" style=move || theme_css.get()>
-                <Routes>
+                <Routes fallback=|| "Not found.">
                     <Route path=path!("/") view=move || view! {
                         <Spaces spaces set_spaces />
                         <Notes />

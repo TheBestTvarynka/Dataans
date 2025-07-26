@@ -10,7 +10,7 @@ use crate::backend::file::remove_file;
 use crate::common::{Attachment, Files, TextArea};
 
 #[component]
-pub fn Editor(space_id: SpaceId, #[prop(into)] create_note: Callback<Note<'static>, ()>) -> impl IntoView {
+pub fn Editor(space_id: SpaceId, #[prop(into)] create_note: Callback<(Note<'static>,), ()>) -> impl IntoView {
     let toaster = leptoaster::expect_toaster();
 
     let (draft_note, set_draft_note) =
@@ -46,7 +46,7 @@ pub fn Editor(space_id: SpaceId, #[prop(into)] create_note: Callback<Note<'stati
             let new_note = crate::backend::notes::create_note(new_note.clone())
                 .await
                 .expect("Note creating should not fail.");
-            create_note.run(new_note);
+            create_note.run((new_note,));
         });
     };
 
@@ -58,13 +58,13 @@ pub fn Editor(space_id: SpaceId, #[prop(into)] create_note: Callback<Note<'stati
     };
 
     let toaster = toaster.clone();
-    let remove_file = Callback::new(
-        move |File {
+    let remove_file = Callback::<(File,), ()>::new(
+        move |(File {
                   id,
                   name: _,
                   path: _,
                   status: _,
-              }| {
+              },)| {
             let toaster = toaster.clone();
 
             let DraftNote { text, mut files } = draft_note.get();

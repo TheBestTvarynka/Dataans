@@ -97,17 +97,17 @@ pub fn FoundNotesList(
                             <span class="note-search-label">"in:"</span>
                             <Space space base_path set_selected_space=|_| {} selected=true minimized=spaces_minimized />
                         </div>
-                    }.into_view()
+                    }.into_any()
                 } else {
                     view! {
                         <div class="note-search-options">
                             <span class="note-search-label">"Search notes in:"</span>
                             <Space space base_path set_selected_space=|_| {} selected=true minimized=spaces_minimized />
                         </div>
-                    }.into_view()
+                    }.into_any()
                 }
             } else {
-                view! {}.into_view()
+                view! {}.into_any()
             }}
             <Suspense
                 fallback=move || view! { <span>"Loading notes..."</span> }

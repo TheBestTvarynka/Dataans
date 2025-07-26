@@ -131,7 +131,7 @@ pub fn Notes() -> impl IntoView {
                         current_space=current_space.get().unwrap()
                         set_spaces
                         delete_state_space
-                        toggle_note_search=move |_| {
+                        toggle_note_search=move || {
                             set_spaces_minimized.set(false);
                             set_find_node_mode.set(FindNoteMode::FindNote {
                                 space: Some(current_space.get().unwrap()),
