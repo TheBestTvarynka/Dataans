@@ -8,7 +8,7 @@ pub fn CodeBlock(code: String, lang: String) -> impl IntoView {
 
     let language = lang.clone();
     let code_value = code.clone();
-    let highlighted_code = create_resource(
+    let highlighted_code = Resource::new(
         || (),
         move |_| {
             let code_value = code_value.clone();

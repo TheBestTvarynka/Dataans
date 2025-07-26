@@ -8,7 +8,7 @@ use crate::spaces::Space;
 
 #[component]
 pub fn SpacesList(
-    config: Config,
+    #[allow(unused_variables)] config: Config,
     selected_space: Signal<Option<OwnedSpace>>,
     spaces: Signal<Vec<OwnedSpace>>,
     spaces_minimized: Signal<bool>,

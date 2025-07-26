@@ -11,7 +11,7 @@ use crate::spaces::Space;
 
 #[component]
 pub fn FoundNotesList(
-    config: Config,
+    #[allow(unused_variables)] config: Config,
     #[prop(into)] query: Signal<String>,
     search_in_space: Option<OwnedSpace>,
     spaces_minimized: Signal<bool>,
@@ -20,7 +20,7 @@ pub fn FoundNotesList(
     let (selected_note, set_selected_note) = signal(None);
 
     let space = search_in_space.clone();
-    let found_notes = create_resource(
+    let found_notes = Resource::new(
         move || query.get(),
         move |query| {
             let search_in_space = space.clone();
@@ -38,7 +38,7 @@ pub fn FoundNotesList(
         },
     );
 
-    let select_next_note = move || {
+    let _select_next_note = move || {
         if let Some(selected_note_id) = selected_note.get() {
             if let Some(notes) = found_notes.get() {
                 let selected_note_index = notes
@@ -58,7 +58,7 @@ pub fn FoundNotesList(
             }
         }
     };
-    let select_prev_note = move || {
+    let _select_prev_note = move || {
         if let Some(selected_note_id) = selected_note.get() {
             if let Some(notes) = found_notes.get() {
                 let selected_note_index = notes

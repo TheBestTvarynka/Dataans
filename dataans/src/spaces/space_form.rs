@@ -19,7 +19,7 @@ pub fn SpaceForm(
     #[prop(into)] on_cancel: Callback<(), ()>,
     set_spaces: SignalSetter<Vec<OwnedSpace>>,
     set_selected_space: Callback<(OwnedSpace,), ()>,
-    config: Config,
+    #[allow(unused_variables)] config: Config,
 ) -> impl IntoView {
     let toaster = leptoaster::expect_toaster();
 
@@ -39,13 +39,11 @@ pub fn SpaceForm(
     let ref_input = NodeRef::<html::Input>::new();
 
     Effect::new(move |_| {
-        if let Some(ref_input) = ref_input.get() {
-            let _ = ref_input.on_mount(|input| {
-                if let Err(err) = input.focus() {
-                    warn!("Can not focus TextArea: {err:?}");
-                }
-            });
-        }
+        ref_input.on_load(|input| {
+            if let Err(err) = input.focus() {
+                warn!("Can not focus TextArea: {err:?}");
+            }
+        });
     });
 
     let generate_avatar = Callback::new(move |_| {

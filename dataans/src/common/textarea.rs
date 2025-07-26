@@ -1,5 +1,6 @@
 use leptos::html;
 use leptos::prelude::*;
+use leptos::tachys::html::event::ClipboardEvent;
 use leptos::task::spawn_local;
 use leptos::web_sys::KeyboardEvent;
 use wasm_bindgen::JsCast;
@@ -19,17 +20,15 @@ pub fn TextArea(
     let ref_input = NodeRef::<html::Textarea>::new();
 
     Effect::new(move |_| {
-        if let Some(ref_input) = ref_input.get() {
-            let _ = ref_input.on_mount(|input| {
-                if let Err(err) = input.focus() {
-                    warn!("Can not focus TextArea: {err:?}");
-                }
-            });
-        }
+        ref_input.on_load(|input| {
+            if let Err(err) = input.focus() {
+                warn!("Can not focus TextArea: {err:?}");
+            }
+        });
     });
 
     let elem_id = id.clone();
-    let paste_handler = move |e| {
+    let paste_handler = move |e: ClipboardEvent| {
         let ev = e
             .dyn_into::<web_sys::ClipboardEvent>()
             .expect("Event -> ClipboardEvent should not fail");
