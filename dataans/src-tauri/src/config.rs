@@ -6,7 +6,7 @@ use common::error::CommandResult;
 use common::{Config, Theme};
 use tauri::{AppHandle, Manager, Runtime};
 
-use super::{CONFIGS_DIR, CONFIG_FILE_NAME, FILES_DIR};
+use super::{CONFIG_FILE_NAME, CONFIGS_DIR, FILES_DIR};
 
 /// Reads the config file.
 ///

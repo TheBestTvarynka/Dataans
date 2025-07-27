@@ -12,8 +12,8 @@ use futures::channel::{mpsc, oneshot};
 use futures::{Future, FutureExt, Stream, StreamExt};
 use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
-use wasm_bindgen::prelude::Closure;
 use wasm_bindgen::JsValue;
+use wasm_bindgen::prelude::Closure;
 
 pub const WINDOW_RESIZED: &str = "tauri://resize";
 pub const WINDOW_MOVED: &str = "tauri://move";
@@ -378,8 +378,8 @@ impl<T> Future for Once<T> {
 }
 
 pub mod inner {
-    use wasm_bindgen::prelude::{wasm_bindgen, Closure};
     use wasm_bindgen::JsValue;
+    use wasm_bindgen::prelude::{Closure, wasm_bindgen};
 
     #[wasm_bindgen(module = "/src/backend/sync/event.js")]
     extern "C" {

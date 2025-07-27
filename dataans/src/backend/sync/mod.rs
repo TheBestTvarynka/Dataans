@@ -1,18 +1,18 @@
 mod event;
 
+use common::APP_PLUGIN_NAME;
 use common::error::{CommandResult, CommandResultEmpty};
 use common::event::{
-    DataEvent, StatusUpdateEvent, UserContextEvent, DATA_EVENT, STATUS_UPDATE_EVENT, USER_CONTEXT_EVENT,
+    DATA_EVENT, DataEvent, STATUS_UPDATE_EVENT, StatusUpdateEvent, USER_CONTEXT_EVENT, UserContextEvent,
 };
 use common::profile::{Sync, UserContext};
-use common::APP_PLUGIN_NAME;
 use futures::StreamExt;
 use leptoaster::ToasterContext;
 use leptos::prelude::*;
 use serde::Serialize;
 
-use crate::backend::{invoke_command, EmptyArgs};
 use crate::GlobalState;
+use crate::backend::{EmptyArgs, invoke_command};
 
 pub async fn on_user_context(set_user_context: impl Fn(Option<UserContext>)) -> CommandResultEmpty {
     let mut events = event::listen::<UserContextEvent>(USER_CONTEXT_EVENT).await?;

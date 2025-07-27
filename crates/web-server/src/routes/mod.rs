@@ -5,7 +5,7 @@ use std::str::FromStr;
 
 pub use data::*;
 pub use file::*;
-use jsonwebtoken::{decode, decode_header, Algorithm, DecodingKey, Validation};
+use jsonwebtoken::{Algorithm, DecodingKey, Validation, decode, decode_header};
 use rocket::get;
 use rocket::http::{ContentType, Status};
 use rocket::request::{FromRequest, Outcome, Request};

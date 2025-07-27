@@ -1,6 +1,6 @@
 use leptos::children::Children;
 use leptos::prelude::*;
-use leptos::{component, view, IntoView};
+use leptos::{IntoView, component, view};
 
 #[component]
 pub fn Modal(children: Children) -> impl IntoView {

@@ -21,7 +21,7 @@ use std::path::PathBuf;
 use derive_more::{AsRef, From, Into};
 use serde::{Deserialize, Serialize};
 use time::OffsetDateTime;
-use uuid::{uuid, Uuid};
+use uuid::{Uuid, uuid};
 pub use web_api_types as common_api_types;
 
 use crate::export::SchemaVersion;

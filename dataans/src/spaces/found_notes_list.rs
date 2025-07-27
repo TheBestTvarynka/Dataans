@@ -1,6 +1,6 @@
+use common::Config;
 use common::note::Id as NoteId;
 use common::space::OwnedSpace;
-use common::Config;
 use leptos::callback::Callback;
 use leptos::prelude::*;
 

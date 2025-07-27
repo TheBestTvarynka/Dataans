@@ -1,12 +1,12 @@
 use rocket::data::{Data, ToByteUnit};
 use rocket::http::{ContentType, Header, Status};
-use rocket::{get, post, Response, State};
+use rocket::{Response, State, get, post};
 use uuid::Uuid;
 use web_api_types::Result;
 
+use crate::WebServerState;
 use crate::routes::UserContext;
 use crate::services::FileSaver;
-use crate::WebServerState;
 
 #[post("/<id>", data = "<data>")]
 pub async fn upload(_u: UserContext, server: &State<WebServerState>, id: Uuid, data: Data<'_>) -> Result<()> {

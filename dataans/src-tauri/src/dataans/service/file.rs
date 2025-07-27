@@ -8,9 +8,9 @@ use image::{ImageBuffer, Rgba};
 use time::OffsetDateTime;
 use uuid::Uuid;
 
-use crate::dataans::db::model::File as FileModel;
-use crate::dataans::db::Db;
 use crate::dataans::DataansError;
+use crate::dataans::db::Db;
+use crate::dataans::db::model::File as FileModel;
 
 // TODO: Introduce `FileServiceError`.
 

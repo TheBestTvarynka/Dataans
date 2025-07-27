@@ -54,8 +54,8 @@ fn init_tracing(app_data: &Path) {
     use std::fs::OpenOptions;
     use std::{fs, io};
 
-    use tracing_subscriber::prelude::*;
     use tracing_subscriber::EnvFilter;
+    use tracing_subscriber::prelude::*;
 
     let logging_filter: EnvFilter = EnvFilter::builder()
         .with_default_directive(DEFAULT_LOG_LEVEL.parse().expect("Default log level constant is bad."))

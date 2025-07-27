@@ -4,9 +4,9 @@ pub mod md_node;
 mod note;
 pub mod note_preview;
 
+use common::Config;
 use common::note::OwnedNote;
 use common::space::{OwnedSpace, Space as SpaceData};
-use common::Config;
 use leptos::prelude::*;
 use leptos::task::spawn_local;
 use wasm_bindgen::JsCast;
@@ -14,11 +14,11 @@ use wasm_bindgen::JsCast;
 use self::editor::Editor;
 use self::info::Info;
 use self::note::Note;
+use crate::FindNoteMode;
 use crate::app::GlobalState;
 use crate::backend::notes::list_notes;
 use crate::spaces::tools::SEARCH_NOTE_INPUT_ID;
 use crate::utils::focus_element;
-use crate::FindNoteMode;
 
 #[component]
 pub fn Notes() -> impl IntoView {

@@ -1,5 +1,5 @@
-use common::space::OwnedSpace;
 use common::Config;
+use common::space::OwnedSpace;
 use leptos::callback::Callback;
 use leptos::prelude::*;
 

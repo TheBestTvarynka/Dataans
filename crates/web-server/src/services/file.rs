@@ -15,11 +15,11 @@ mod fs {
     use std::path::PathBuf;
 
     use rocket::tokio::fs::File;
-    use rocket::tokio::io::{copy, AsyncRead};
+    use rocket::tokio::io::{AsyncRead, copy};
     use uuid::Uuid;
 
-    use crate::services::FileSaver;
     use crate::Result;
+    use crate::services::FileSaver;
 
     #[derive(Debug)]
     pub struct Fs {

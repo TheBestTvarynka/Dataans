@@ -4,10 +4,10 @@ pub mod space_form;
 mod spaces_list;
 pub mod tools;
 
+use common::Config;
 use common::note::Id as NoteId;
 use common::profile::{Sync, SyncMode, UserContext};
 use common::space::OwnedSpace;
-use common::Config;
 use leptos::prelude::*;
 use leptos::task::spawn_local;
 
@@ -16,12 +16,12 @@ use self::found_notes_list::FoundNotesList;
 use self::space::Space;
 use self::spaces_list::SpacesList;
 use self::tools::Tools;
+use crate::FindNoteMode;
 use crate::app::GlobalState;
 use crate::backend::notes::list_notes;
 use crate::backend::spaces::list_spaces;
 use crate::backend::sync::trigger_full_sync;
 use crate::utils::focus_element;
-use crate::FindNoteMode;
 
 #[component]
 pub fn Spaces(spaces: Signal<Vec<OwnedSpace>>, set_spaces: SignalSetter<Vec<OwnedSpace>>) -> impl IntoView {

@@ -8,9 +8,9 @@ use tauri::async_runtime::block_on;
 use tauri::plugin::{Builder, TauriPlugin};
 use tauri::{Manager, Runtime};
 
-use crate::dataans::db::sqlite::SqliteDb;
 use crate::dataans::db::OperationLogger;
-use crate::{CONFIGS_DIR, CONFIG_FILE_NAME, FILES_DIR, PROFILE_DIR};
+use crate::dataans::db::sqlite::SqliteDb;
+use crate::{CONFIG_FILE_NAME, CONFIGS_DIR, FILES_DIR, PROFILE_DIR};
 
 mod command;
 mod crypto;

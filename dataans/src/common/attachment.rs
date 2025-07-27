@@ -4,7 +4,7 @@ use js_sys::{ArrayBuffer, Uint8Array};
 use leptos::callback::{Callable, Callback};
 use leptos::prelude::*;
 use leptos::task::spawn_local;
-use leptos::{component, view, IntoView};
+use leptos::{IntoView, component, view};
 use uuid::Uuid;
 use wasm_bindgen::JsCast;
 use web_sys::{Blob, HtmlInputElement};

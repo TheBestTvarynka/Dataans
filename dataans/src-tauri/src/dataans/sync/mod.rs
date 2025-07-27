@@ -68,14 +68,14 @@ mod hash;
 use std::path::Path;
 use std::sync::Arc;
 
-use common::event::{DataEvent, DATA_EVENT};
+use common::event::{DATA_EVENT, DataEvent};
 use common::note::{FileId, FileStatus};
 use common::profile::AuthorizationToken;
-use futures::stream::FuturesUnordered;
 use futures::StreamExt;
+use futures::stream::FuturesUnordered;
 pub use hash::{Hash, Hasher};
 use sha2::{Digest, Sha256};
-use tauri::async_runtime::{channel, Receiver, Sender};
+use tauri::async_runtime::{Receiver, Sender, channel};
 use tauri::{Emitter, Runtime};
 use thiserror::Error;
 use tokio_stream::wrappers::ReceiverStream;

@@ -14,8 +14,8 @@ use common::error::{CommandError, CommandResult, CommandResultEmpty};
 use common::{Config, Theme};
 use serde::Serialize;
 use serde_wasm_bindgen::{from_value, to_value};
-use wasm_bindgen::prelude::wasm_bindgen;
 use wasm_bindgen::JsValue;
+use wasm_bindgen::prelude::wasm_bindgen;
 
 /// Accepts image fs path and returns its Tauri asset url.
 pub fn convert_file_src(image_path: impl AsRef<str>, base_path: impl AsRef<str>) -> String {

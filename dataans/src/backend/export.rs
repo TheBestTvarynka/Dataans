@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 
 use common::error::CommandResult;
-use common::{DataExportConfig, APP_PLUGIN_NAME};
+use common::{APP_PLUGIN_NAME, DataExportConfig};
 use serde::Serialize;
 
 use crate::backend::invoke_command;

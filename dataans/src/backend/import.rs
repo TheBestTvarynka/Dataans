@@ -1,5 +1,5 @@
-use common::error::CommandResult;
 use common::APP_PLUGIN_NAME;
+use common::error::CommandResult;
 use serde::Serialize;
 
 use super::EmptyArgs;

@@ -1,5 +1,5 @@
-use common::space::{DeleteSpace, Id as SpaceId, OwnedSpace};
 use common::Config;
+use common::space::{DeleteSpace, Id as SpaceId, OwnedSpace};
 use leptos::callback::Callback;
 use leptos::prelude::*;
 use leptos::task::spawn_local;

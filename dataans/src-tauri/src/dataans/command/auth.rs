@@ -1,12 +1,12 @@
 use common::error::{CommandResult, CommandResultEmpty};
-use common::event::{UserContextEvent, USER_CONTEXT_EVENT};
+use common::event::{USER_CONTEXT_EVENT, UserContextEvent};
 use common::profile::{Sync, SyncMode, UserContext, UserProfile};
 use phraze::cli::ListChoice;
 use phraze::generate_a_passphrase;
 use tauri::{AppHandle, Emitter, Manager, Runtime, State};
 use url::Url;
 
-use crate::dataans::crypto::{derive_encryption_key, EncryptionKey};
+use crate::dataans::crypto::{EncryptionKey, derive_encryption_key};
 use crate::dataans::sync::client::Client;
 use crate::dataans::{DataansError, DataansState};
 

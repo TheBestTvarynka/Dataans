@@ -1,8 +1,8 @@
+use common::APP_PLUGIN_NAME;
 use common::error::{CommandResult, CommandResultEmpty};
 use common::profile::UserContext;
-use common::APP_PLUGIN_NAME;
 
-use crate::backend::{invoke_command, EmptyArgs};
+use crate::backend::{EmptyArgs, invoke_command};
 
 pub async fn profile() -> CommandResult<Option<UserContext>> {
     invoke_command(&format!("plugin:{APP_PLUGIN_NAME}|profile"), &EmptyArgs {}).await

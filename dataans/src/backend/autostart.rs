@@ -2,7 +2,7 @@
 
 use common::error::CommandResult;
 
-use crate::backend::{invoke_command, EmptyArgs};
+use crate::backend::{EmptyArgs, invoke_command};
 
 pub async fn enable() -> CommandResult<bool> {
     let _: () = invoke_command("plugin:autostart|enable", &EmptyArgs {}).await?;

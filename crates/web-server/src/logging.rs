@@ -2,8 +2,8 @@
 pub fn init_tracing() {
     use std::io;
 
-    use tracing_subscriber::prelude::*;
     use tracing_subscriber::EnvFilter;
+    use tracing_subscriber::prelude::*;
 
     const LOGGING_ENV_VAR_NAME: &str = "DATAANS_WEB_SERVER_LOG";
     const DEFAULT_LOG_LEVEL: &str = "trace";

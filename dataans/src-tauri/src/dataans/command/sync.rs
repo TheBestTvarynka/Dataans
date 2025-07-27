@@ -1,9 +1,9 @@
 use std::sync::Arc;
 
 use common::error::{CommandResult, CommandResultEmpty};
-use common::event::{StatusUpdateEvent, STATUS_UPDATE_EVENT};
+use common::event::{STATUS_UPDATE_EVENT, StatusUpdateEvent};
 use common::profile::{Sync, UserContext, UserProfile};
-use tauri::{async_runtime, AppHandle, Emitter, Runtime, State};
+use tauri::{AppHandle, Emitter, Runtime, State, async_runtime};
 
 use crate::dataans::command::auth::emit_user_context;
 use crate::dataans::crypto::EncryptionKey;
