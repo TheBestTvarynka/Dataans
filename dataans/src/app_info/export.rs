@@ -17,7 +17,7 @@ pub fn Export() -> impl IntoView {
     let (export_config, set_export_config) = signal(DataExportConfig::default());
     let (backup_dir, set_backup_dir) = signal(None);
 
-    let export_data_action = Action::new(move |export_config: &DataExportConfig| {
+    let export_data_action = Action::new_unsync(move |export_config: &DataExportConfig| {
         let toaster = toaster.clone();
         let export_config = export_config.clone();
         async move {

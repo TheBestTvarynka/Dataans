@@ -20,23 +20,21 @@ pub fn FoundNotesList(
     let (selected_note, set_selected_note) = signal(None);
 
     let space = search_in_space.clone();
-    let found_notes = Resource::new(
-        move || query.get(),
-        move |query| {
-            let search_in_space = space.clone();
-            async move {
-                if query.is_empty() {
-                    return vec![];
-                }
-                match search_in_space {
-                    Some(space) => search_notes_in_space(space.id, &query)
-                        .await
-                        .expect("Notes searching should not fail"),
-                    None => search_notes(&query).await.expect("Notes searching should not fail"),
-                }
+    let found_notes = LocalResource::new(move || {
+        let query = query.get();
+        let search_in_space = space.clone();
+        async move {
+            if query.is_empty() {
+                return vec![];
             }
-        },
-    );
+            match search_in_space {
+                Some(space) => search_notes_in_space(space.id, &query)
+                    .await
+                    .expect("Notes searching should not fail"),
+                None => search_notes(&query).await.expect("Notes searching should not fail"),
+            }
+        }
+    });
 
     let _select_next_note = move || {
         if let Some(selected_note_id) = selected_note.get() {
