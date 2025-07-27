@@ -55,9 +55,6 @@ pub enum DataansError {
     #[error("failed to send a request: {0:?}")]
     Reqwest(#[from] reqwest::Error),
 
-    #[error("failed to parse secret key: {0:?}")]
-    ParseSecretKey(hex::FromHexError),
-
     #[error(transparent)]
     Tauri(#[from] tauri::Error),
 

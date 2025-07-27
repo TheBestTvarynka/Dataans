@@ -8,7 +8,7 @@ use common::profile::{Sync, UserContext};
 use common::APP_PLUGIN_NAME;
 use futures::StreamExt;
 use leptoaster::ToasterContext;
-use leptos::{RwSignal, SignalUpdate};
+use leptos::prelude::*;
 use serde::Serialize;
 
 use crate::backend::{invoke_command, EmptyArgs};
@@ -54,7 +54,7 @@ pub async fn on_status_update(toaster: ToasterContext) -> CommandResultEmpty {
             StatusUpdateEvent::SyncFailed(message) => {
                 error!("{message:?}");
                 toaster.toast(
-                    leptoaster::ToastBuilder::new(&format!("Synchronization failed: {message}"))
+                    leptoaster::ToastBuilder::new(format!("Synchronization failed: {message}"))
                         .with_level(leptoaster::ToastLevel::Error)
                         .with_position(leptoaster::ToastPosition::BottomRight)
                         .with_expiry(Some(5000)),

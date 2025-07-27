@@ -8,9 +8,10 @@ use common::note::Id as NoteId;
 use common::profile::{Sync, SyncMode, UserContext};
 use common::space::OwnedSpace;
 use common::Config;
-use leptos::*;
-use leptos_hotkeys::use_hotkeys;
+use leptos::prelude::*;
+use leptos::task::spawn_local;
 
+// use leptos_hotkeys::use_hotkeys;
 use self::found_notes_list::FoundNotesList;
 use self::space::Space;
 use self::spaces_list::SpacesList;
@@ -48,7 +49,7 @@ pub fn Spaces(spaces: Signal<Vec<OwnedSpace>>, set_spaces: SignalSetter<Vec<Owne
             set_notes.set(list_notes(space_id).await.expect("Notes listing should not fail"));
         });
     };
-    let focus_note = move |(note_id, space): (NoteId, OwnedSpace)| {
+    let focus_note = move |note_id: NoteId, space: OwnedSpace| {
         let space_id = space.id;
         set_selected_space_s.set(space);
         spawn_local(async move {
@@ -62,7 +63,7 @@ pub fn Spaces(spaces: Signal<Vec<OwnedSpace>>, set_spaces: SignalSetter<Vec<Owne
         |state, minimized| state.minimize_spaces = minimized,
     );
 
-    let (query, set_query) = create_signal(String::new());
+    let (query, set_query) = signal(String::new());
 
     let toaster = leptoaster::expect_toaster();
 
@@ -84,19 +85,29 @@ pub fn Spaces(spaces: Signal<Vec<OwnedSpace>>, set_spaces: SignalSetter<Vec<Owne
 
     view! {
         <div class="spaces-container">
-            {move || view! { <Tools set_spaces spaces_minimized set_spaces_minimized set_find_node_mode set_query=set_query.into() set_selected_space config=global_config.get() /> }}
+            {move || view! {
+                <Tools
+                    set_spaces
+                    spaces_minimized
+                    set_spaces_minimized
+                    set_find_node_mode
+                    set_query=set_query.into()
+                    set_selected_space
+                    config=global_config.get()
+                />
+            }}
             {move || {
                 let config = global_config.get();
                 match find_note_mode.get() {
                     FindNoteMode::None => view!{
                         <SpacesList config selected_space spaces spaces_minimized set_selected_space />
-                    },
+                    }.into_any(),
                     FindNoteMode::FindNote { space } => {
-                        use_hotkeys!(("Escape") => move |_| set_find_node_mode.set(FindNoteMode::None));
+                        // use_hotkeys!(("Escape") => move |_| set_find_node_mode.set(FindNoteMode::None));
                         view! {
                             <FoundNotesList config query search_in_space=space spaces_minimized focus_note />
                         }
-                    },
+                    }.into_any(),
                 }
             }}
             <div style="flex-grow: 1; align-content: end; display: flex; flex-direction: column; align-items: center; justify-content: flex-end;">
@@ -119,7 +130,7 @@ pub fn Spaces(spaces: Signal<Vec<OwnedSpace>>, set_spaces: SignalSetter<Vec<Owne
                         </button>
                     }.into_any()
                 } else {
-                    view! { <span /> }.into()
+                    view! { <span /> }.into_any()
                 }}
                 <div style="display: inline-flex; width: 100%; justify-content: center; margin-bottom: 0.2em;">
                     <button class="button_cancel" on:click=show_app_info_window>

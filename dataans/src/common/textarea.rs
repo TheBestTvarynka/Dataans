@@ -1,5 +1,8 @@
+use leptos::html;
+use leptos::prelude::*;
+use leptos::tachys::html::event::ClipboardEvent;
+use leptos::task::spawn_local;
 use leptos::web_sys::KeyboardEvent;
-use leptos::*;
 use wasm_bindgen::JsCast;
 
 use crate::backend::file::load_clipboard_image;
@@ -8,26 +11,24 @@ use crate::backend::file::load_clipboard_image;
 pub fn TextArea(
     id: String,
     text: Signal<String>,
-    #[prop(into)] set_text: Callback<String, ()>,
+    #[prop(into)] set_text: Callback<(String,), ()>,
     key_down: impl Fn(KeyboardEvent) + 'static,
 ) -> impl IntoView {
     let toaster = leptoaster::expect_toaster();
 
-    let (disabled, set_disabled) = create_signal(false);
-    let ref_input = create_node_ref::<html::Textarea>();
+    let (disabled, set_disabled) = signal(false);
+    let ref_input = NodeRef::<html::Textarea>::new();
 
-    create_effect(move |_| {
-        if let Some(ref_input) = ref_input.get() {
-            let _ = ref_input.on_mount(|input| {
-                if let Err(err) = input.focus() {
-                    warn!("Can not focus TextArea: {err:?}");
-                }
-            });
-        }
+    Effect::new(move |_| {
+        ref_input.on_load(|input| {
+            if let Err(err) = input.focus() {
+                warn!("Can not focus TextArea: {err:?}");
+            }
+        });
     });
 
     let elem_id = id.clone();
-    let paste_handler = move |e: leptos::ev::Event| {
+    let paste_handler = move |e: ClipboardEvent| {
         let ev = e
             .dyn_into::<web_sys::ClipboardEvent>()
             .expect("Event -> ClipboardEvent should not fail");
@@ -68,7 +69,7 @@ pub fn TextArea(
                         text.push(')');
                     }
 
-                    set_text.call(text);
+                    set_text.run((text,));
                     set_disabled.set(false);
                 });
             } else {
@@ -116,7 +117,7 @@ pub fn TextArea(
                         (text, None)
                     }
                 };
-                set_text.call(text);
+                set_text.run((text,));
                 if let Some((selection_start, selection_end)) = selection {
                     if let Err(err) = text_area.set_selection_start(Some(selection_start)) {
                         error!("{err:?}");
@@ -147,12 +148,11 @@ pub fn TextArea(
         <div class="resizable-textarea">
             <textarea
                 id=id.clone()
-                _ref=ref_input
-                type="text"
+                node_ref=ref_input
                 placeholder="Type a note..."
                 class="resizable-textarea-textarea"
                 style=style
-                on:input=move |ev| set_text.call(event_target_value(&ev))
+                on:input=move |ev| set_text.run((event_target_value(&ev),))
                 on:keydown=move |ev| {
                     key_down(ev.clone());
                     text_editing_keybindings(ev);

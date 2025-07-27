@@ -5,7 +5,8 @@ mod sync_settings;
 use std::path::PathBuf;
 
 use common::{App, Appearance, Config, KeyBindings};
-use leptos::*;
+use leptos::prelude::*;
+use leptos::task::spawn_local;
 
 use self::sync_settings::SyncState;
 use crate::app_info::export::Export;
@@ -23,7 +24,7 @@ pub fn AppInfo() -> impl IntoView {
     let open_config_file_folder = move |_| spawn_local(open_config_file_folder());
     let open_theme_file = move |theme: PathBuf| spawn_local(async move { open_theme_file(&theme).await });
 
-    let (is_autostart_enabled, set_autostart) = create_signal(false);
+    let (is_autostart_enabled, set_autostart) = signal(false);
 
     let t = toaster.clone();
     let enable_autostart = Callback::new(move |_| {
@@ -67,10 +68,10 @@ pub fn AppInfo() -> impl IntoView {
                     <img alt="edit note" src="/public/icons/folder-light.png" />
                 </button>
                 {move || if is_autostart_enabled.get() {view! {
-                    <button class="button_ok" on:click=move |ev| disable_autostart.call(ev) title="Disable autostart">"Disable autostart"</button>
-                }} else {view! {
-                    <button class="button_ok" on:click=move |ev| enable_autostart.call(ev)  title="Enable autostart">"Enable autostart"</button>
-                }}}
+                    <button class="button_ok" on:click=move |ev| disable_autostart.run(ev) title="Disable autostart">"Disable autostart"</button>
+                }.into_any()} else {view! {
+                    <button class="button_ok" on:click=move |ev| enable_autostart.run(ev)  title="Enable autostart">"Enable autostart"</button>
+                }.into_any()}}
             </div>
             {move || {
                 let Config { key_bindings, appearance, app } = global_config.get();

@@ -12,16 +12,16 @@ authors.workspace = true
 serde = { workspace = true, features = ["derive"] }
 time = { workspace = true, features = ["macros", "wasm-bindgen"] }
 uuid = { workspace = true, features = ["v4", "js"] }
-hex.workspace = true
 url = { workspace = true, features = ["serde"]}
+futures = { workspace = true, features = ["std", "alloc"] }
 
-leptos = { version = "0.6", features = ["csr"] }
-leptos_router = { version = "0.6", features = ["csr"] }
+leptos = { version = "0.8", features = ["csr"] }
+leptos_router = "0.8"
 
-# TODO: The main branch contains an important fix which is not released yet.
-# Replace `git` link with proper version when a new release will be published:
-leptos_hotkeys = { git = "https://github.com/TheBestTvarynka/leptos-hotkeys.git", rev = "1a3cebb", features = ["debug"] }
-leptoaster = { git = "https://github.com/TheBestTvarynka/leptoaster.git", rev = "983c98b" }
+# TODO: Replace with a custom implementation. The `leptos_hotkeys` crate is not maintained anymore.
+# And it is hard and complicated to update existing crate Leptos version.
+# leptos_hotkeys = { git = "https://github.com/TheBestTvarynka/leptos-hotkeys.git", rev = "1a3cebb" }
+leptoaster = { version = "0.2", features = ["csr"] }
 
 gloo-storage = "0.3"
 wasm-bindgen = "0.2"
@@ -32,7 +32,7 @@ console_error_panic_hook = "0.1"
 log = "0.4"
 wasm-logger = "0.2"
 common = { path = "./common" }
-markdown = { version = "1.0.0-alpha.17", features = ["log"] }
+markdown = { version = "1.0", features = ["log"] }
 web-sys = { version = "0.3", features = [
     "Clipboard",
     "Navigator",
@@ -50,7 +50,6 @@ web-sys = { version = "0.3", features = [
     "HtmlElement",
     "HtmlSelectElement",
 ] }
-futures = { version = "0.3", features = ["std", "alloc"] }
 
 [dev-dependencies]
-leptos_hotkeys = { git = "https://github.com/TheBestTvarynka/leptos-hotkeys.git", rev = "1a3cebb", features = ["debug"] }
+# leptos_hotkeys = { git = "https://github.com/TheBestTvarynka/leptos-hotkeys.git", rev = "1a3cebb", features = ["debug"] }

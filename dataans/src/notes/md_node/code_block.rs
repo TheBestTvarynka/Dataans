@@ -1,4 +1,4 @@
-use leptos::*;
+use leptos::prelude::*;
 
 use crate::backend::parse_code;
 
@@ -8,14 +8,11 @@ pub fn CodeBlock(code: String, lang: String) -> impl IntoView {
 
     let language = lang.clone();
     let code_value = code.clone();
-    let highlighted_code = create_resource(
-        || (),
-        move |_| {
-            let code_value = code_value.clone();
-            let lang = language.clone();
-            async move { parse_code(&lang, &code_value).await.unwrap_or(code_value.clone()) }
-        },
-    );
+    let highlighted_code = LocalResource::new(move || {
+        let code_value = code_value.clone();
+        let lang = language.clone();
+        async move { parse_code(&lang, &code_value).await.unwrap_or(code_value.clone()) }
+    });
 
     let code_value = code.clone();
 

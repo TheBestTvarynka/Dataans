@@ -1,5 +1,6 @@
-use leptos::*;
-use leptos_hotkeys::use_hotkeys;
+use leptos::callback::Callback;
+use leptos::prelude::*;
+// use leptos_hotkeys::use_hotkeys;
 
 #[component]
 pub fn Confirm(
@@ -7,22 +8,22 @@ pub fn Confirm(
     #[prop(into)] on_confirm: Callback<(), ()>,
     #[prop(into)] on_cancel: Callback<(), ()>,
 ) -> impl IntoView {
-    use_hotkeys!(("Escape") => move |_| on_cancel.call(()));
-    use_hotkeys!(("Enter") => move |_| on_confirm.call(()));
+    // use_hotkeys!(("Escape") => move |_| on_cancel.run(()));
+    // use_hotkeys!(("Enter") => move |_| on_confirm.run(()));
 
     view! {
         <div
-            name="confirm-page-background"
+            id="confirm-page-background"
             class="confirm-page"
             tabindex=0
         >
             <div class="confirm-window">
                 <span>{message}</span>
                 <div class="confirm-actions">
-                    <button on:click=move |_| on_cancel.call(()) class="confirm-action-button confirm-cancel-button">
+                    <button on:click=move |_| on_cancel.run(()) class="confirm-action-button confirm-cancel-button">
                         "Cancel"
                     </button>
-                    <button on:click=move |_| on_confirm.call(()) class="confirm-action-button confirm-ok-button">
+                    <button on:click=move |_| on_confirm.run(()) class="confirm-action-button confirm-ok-button">
                         "Confirm"
                     </button>
                 </div>

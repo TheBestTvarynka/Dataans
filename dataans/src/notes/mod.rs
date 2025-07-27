@@ -7,7 +7,8 @@ pub mod note_preview;
 use common::note::OwnedNote;
 use common::space::{OwnedSpace, Space as SpaceData};
 use common::Config;
-use leptos::*;
+use leptos::prelude::*;
+use leptos::task::spawn_local;
 use wasm_bindgen::JsCast;
 
 use self::editor::Editor;
@@ -130,7 +131,7 @@ pub fn Notes() -> impl IntoView {
                         current_space=current_space.get().unwrap()
                         set_spaces
                         delete_state_space
-                        toggle_note_search=move |_| {
+                        toggle_note_search=move || {
                             set_spaces_minimized.set(false);
                             set_find_node_mode.set(FindNoteMode::FindNote {
                                 space: Some(current_space.get().unwrap()),

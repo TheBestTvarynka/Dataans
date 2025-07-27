@@ -1,4 +1,4 @@
-use leptos::document;
+use leptos::tachys::dom::document;
 use wasm_bindgen::JsCast;
 
 pub fn focus_element(id: impl AsRef<str>) {

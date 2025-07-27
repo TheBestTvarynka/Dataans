@@ -1,11 +1,12 @@
-use leptos::*;
+use leptos::prelude::*;
+use leptos::task::spawn_local;
 
 use crate::backend::import::{import_app_data, select_import_file};
 
 #[component]
 pub fn Import() -> impl IntoView {
     let toaster = leptoaster::expect_toaster();
-    let (is_importing, set_is_importing) = create_signal(false);
+    let (is_importing, set_is_importing) = signal(false);
 
     let import_data = move |_| {
         let toaster_clone = toaster.clone();
@@ -15,13 +16,13 @@ pub fn Import() -> impl IntoView {
             match select_import_file().await {
                 Ok(Some(path)) => match import_app_data(path).await {
                     Ok(_) => toaster_clone.success("Import successful!"),
-                    Err(e) => toaster_clone.error(&format!("Import failed: {e}")),
+                    Err(e) => toaster_clone.error(format!("Import failed: {e}")),
                 },
                 Ok(None) => {
                     // User canceled the dialog, do nothing
                 }
                 Err(e) => {
-                    toaster_clone.error(&format!("Cannot select a file: {e}"));
+                    toaster_clone.error(format!("Cannot select a file: {e}"));
                 }
             }
             set_is_importing.set(false);

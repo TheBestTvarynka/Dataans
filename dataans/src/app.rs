@@ -3,9 +3,12 @@ use common::profile::UserContext;
 use common::space::OwnedSpace;
 use common::Config;
 use leptoaster::*;
-use leptos::*;
-use leptos_hotkeys::{provide_hotkeys_context, scopes, HotkeysContext};
-use leptos_router::{Route, Router, Routes};
+use leptos::context::provide_context;
+use leptos::prelude::*;
+use leptos::task::spawn_local;
+// use leptos_hotkeys::{provide_hotkeys_context, scopes, HotkeysContext};
+use leptos_router::components::*;
+use leptos_router::path;
 
 use crate::app_info::AppInfo;
 use crate::backend::auth::profile;
@@ -46,9 +49,9 @@ impl Default for GlobalState {
 
 #[component]
 pub fn App() -> impl IntoView {
-    provide_context(create_rw_signal(GlobalState::default()));
-    provide_context(create_rw_signal(Config::default()));
-    provide_context(create_rw_signal(Option::<UserContext>::None));
+    provide_context(RwSignal::new(GlobalState::default()));
+    provide_context(RwSignal::new(Config::default()));
+    provide_context(RwSignal::new(Option::<UserContext>::None));
     provide_toaster();
 
     let toaster = leptoaster::expect_toaster();
@@ -79,10 +82,10 @@ pub fn App() -> impl IntoView {
         );
     });
 
-    let (theme_css, set_theme_css) = create_signal(String::default());
+    let (theme_css, set_theme_css) = signal(String::default());
 
-    let main_ref = create_node_ref::<html::Main>();
-    let HotkeysContext { .. } = provide_hotkeys_context(main_ref, false, scopes!());
+    // let main_ref = create_node_ref::<html::Main>();
+    // let HotkeysContext { .. } = provide_hotkeys_context(main_ref, false, scopes!());
 
     let global_config = expect_context::<RwSignal<Config>>();
     spawn_local(async move {
@@ -110,13 +113,13 @@ pub fn App() -> impl IntoView {
     view! {
         <Router>
             <Toaster stacked=true />
-            <main class="app" style=move || theme_css.get() _ref=main_ref>
-                <Routes>
-                    <Route path="/" view=move || view! {
+            <main class="app" style=move || theme_css.get()>
+                <Routes fallback=|| "Not found.">
+                    <Route path=path!("/") view=move || view! {
                         <Spaces spaces set_spaces />
                         <Notes />
                     } />
-                    <Route path="/app-info" view=AppInfo />
+                    <Route path=path!("/app-info") view=AppInfo />
                 </Routes>
             </main>
         </Router>

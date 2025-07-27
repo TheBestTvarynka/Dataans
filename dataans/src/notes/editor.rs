@@ -1,7 +1,8 @@
 use common::note::{CreateNote, DraftNote, File, Note};
 use common::space::Id as SpaceId;
 use gloo_storage::{LocalStorage, Storage};
-use leptos::*;
+use leptos::prelude::*;
+use leptos::task::spawn_local;
 use uuid::Uuid;
 use web_sys::KeyboardEvent;
 
@@ -9,14 +10,14 @@ use crate::backend::file::remove_file;
 use crate::common::{Attachment, Files, TextArea};
 
 #[component]
-pub fn Editor(space_id: SpaceId, #[prop(into)] create_note: Callback<Note<'static>, ()>) -> impl IntoView {
+pub fn Editor(space_id: SpaceId, #[prop(into)] create_note: Callback<(Note<'static>,), ()>) -> impl IntoView {
     let toaster = leptoaster::expect_toaster();
 
     let (draft_note, set_draft_note) =
         if let Ok(draft_note) = LocalStorage::get::<DraftNote>(space_id.inner().to_string()) {
-            create_signal(draft_note)
+            signal(draft_note)
         } else {
-            create_signal(DraftNote::default())
+            signal(DraftNote::default())
         };
 
     let set_draft_note = move |draft_note| {
@@ -45,7 +46,7 @@ pub fn Editor(space_id: SpaceId, #[prop(into)] create_note: Callback<Note<'stati
             let new_note = crate::backend::notes::create_note(new_note.clone())
                 .await
                 .expect("Note creating should not fail.");
-            create_note.call(new_note);
+            create_note.run((new_note,));
         });
     };
 
@@ -57,13 +58,13 @@ pub fn Editor(space_id: SpaceId, #[prop(into)] create_note: Callback<Note<'stati
     };
 
     let toaster = toaster.clone();
-    let remove_file = Callback::new(
-        move |File {
+    let remove_file = Callback::<(File,), ()>::new(
+        move |(File {
                   id,
                   name: _,
                   path: _,
                   status: _,
-              }| {
+              },)| {
             let toaster = toaster.clone();
 
             let DraftNote { text, mut files } = draft_note.get();

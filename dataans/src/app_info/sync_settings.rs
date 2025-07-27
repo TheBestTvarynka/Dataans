@@ -1,5 +1,7 @@
 use common::profile::{Sync, SyncMode, UserContext};
-use leptos::*;
+use leptos::html;
+use leptos::prelude::*;
+use leptos::task::spawn_local;
 
 #[component]
 pub fn SyncSettings(context: UserContext) -> impl IntoView {
@@ -21,7 +23,7 @@ pub fn SyncSettings(context: UserContext) -> impl IntoView {
         <div class="app-info-sync-config">
             <div class="horizontal">
                 <input type="text" class="input" value=url style="flex-grow: 1;" disabled=true />
-                <button title="Sign out" class="tool" on:click=move |_| sign_out.call(())>
+                <button title="Sign out" class="tool" on:click=move |_| sign_out.run(())>
                     <img alt="cloud-icon" src="/public/icons/sign-out.png" />
                 </button>
             </div>
@@ -63,7 +65,7 @@ pub fn SetUpSync() -> impl IntoView {
     view! {
         <div class="horizontal">
             <input type="text" class="input" value="https://backup.dataans.com/" style="flex-grow: 1;" node_ref=web_server_url_ref />
-            <button on:click=move |_| show_auth_window.call(()) title="Set up back up & sync" class="tool">
+            <button on:click=move |_| show_auth_window.run(()) title="Set up back up & sync" class="tool">
                 <img alt="cloud-icon" src="/public/icons/cloud-backup-light.png" />
             </button>
         </div>
@@ -79,10 +81,12 @@ pub fn SyncState() -> impl IntoView {
             view! {
                 <SyncSettings context=user_context />
             }
+            .into_any()
         } else {
             view! {
                 <SetUpSync />
             }
+            .into_any()
         }
     }
 }

@@ -1,7 +1,8 @@
 use common::note::{File, Id as NoteId, Note as NoteData, OwnedNote, UpdateNote};
 use common::Config;
+use leptos::prelude::*;
+use leptos::task::spawn_local;
 use leptos::web_sys::KeyboardEvent;
-use leptos::*;
 use markdown::mdast::{Node, Text};
 use markdown::ParseOptions;
 use time::OffsetDateTime;
@@ -17,10 +18,10 @@ pub fn Note(
 ) -> impl IntoView {
     let config = expect_context::<RwSignal<Config>>();
 
-    let (show_modal, set_show_modal) = create_signal(false);
-    let (edit_mode, set_edit_mode) = create_signal(false);
-    let (updated_note_text, set_updated_note_text) = create_signal(note.text.to_string());
-    let (updated_files, set_updated_files) = create_signal(note.files.clone());
+    let (show_modal, set_show_modal) = signal(false);
+    let (edit_mode, set_edit_mode) = signal(false);
+    let (updated_note_text, set_updated_note_text) = signal(note.text.to_string());
+    let (updated_files, set_updated_files) = signal(note.files.clone());
 
     let md = markdown::to_mdast(note.text.as_ref(), &ParseOptions::gfm()).unwrap_or_else(|_| {
         Node::Text(Text {
@@ -74,12 +75,12 @@ pub fn Note(
                     {if note.created_at.as_ref() == note.updated_at.as_ref() { view! {
                         <span class="note-time">{format_date(note.created_at.as_ref())}</span>
                         <span />
-                    }} else { view! {
+                    }.into_any()} else { view! {
                         <span class="note-time" style="white-space: pre-wrap;">" UPD: "</span>
                         <span class="note-time" title=format!("Created at: {}", format_date(note.created_at.as_ref()))>
                             {format_date(note.updated_at.as_ref())}
                         </span>
-                    }}}
+                    }.into_any()}}
                 </div>
                 <div class="note-tools">
                     <button
@@ -157,8 +158,8 @@ pub fn Note(
             <Show when=move || show_modal.get()>
                 <Confirm
                     message="Confirm note deletion.".to_owned()
-                    on_confirm=move |_| delete_note()
-                    on_cancel=move |_| set_show_modal.set(false)
+                    on_confirm=move || delete_note()
+                    on_cancel=move || set_show_modal.set(false)
                 />
             </Show>
         </div>

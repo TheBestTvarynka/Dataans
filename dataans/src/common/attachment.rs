@@ -1,7 +1,10 @@
 use common::note::File;
 use futures::future::try_join_all;
 use js_sys::{ArrayBuffer, Uint8Array};
-use leptos::{component, spawn_local, view, Callable, Callback, IntoView, Signal, SignalGet};
+use leptos::callback::{Callable, Callback};
+use leptos::prelude::*;
+use leptos::task::spawn_local;
+use leptos::{component, view, IntoView};
 use uuid::Uuid;
 use wasm_bindgen::JsCast;
 use web_sys::{Blob, HtmlInputElement};
@@ -10,7 +13,7 @@ use web_sys::{Blob, HtmlInputElement};
 pub fn Attachment(
     id: String,
     files: Signal<Vec<File>>,
-    #[prop(into)] set_files: Callback<Vec<File>, ()>,
+    #[prop(into)] set_files: Callback<(Vec<File>,), ()>,
 ) -> impl IntoView {
     let toaster = leptoaster::expect_toaster();
 
@@ -32,7 +35,7 @@ pub fn Attachment(
             spawn_local(async move {
                 let files = try_exec!(files.await, "Failed to upload files", toaster);
                 attached_files.extend_from_slice(&files);
-                set_files.call(attached_files);
+                set_files.run((attached_files,));
             });
         };
     };
