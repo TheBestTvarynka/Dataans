@@ -35,6 +35,8 @@ tracing-subscriber = { version = "0.3", features = ["std", "fmt", "ansi", "env-f
 # Tigris storage
 aws-sdk-s3 = { version = "1.91", optional = true }
 aws-config = { version = "1.8", optional = true }
+
+# Auth
 jsonwebtoken = "9.3.1"
 
 [dev-dependencies]
