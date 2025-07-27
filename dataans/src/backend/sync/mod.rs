@@ -54,7 +54,7 @@ pub async fn on_status_update(toaster: ToasterContext) -> CommandResultEmpty {
             StatusUpdateEvent::SyncFailed(message) => {
                 error!("{message:?}");
                 toaster.toast(
-                    leptoaster::ToastBuilder::new(&format!("Synchronization failed: {message}"))
+                    leptoaster::ToastBuilder::new(format!("Synchronization failed: {message}"))
                         .with_level(leptoaster::ToastLevel::Error)
                         .with_position(leptoaster::ToastPosition::BottomRight)
                         .with_expiry(Some(5000)),

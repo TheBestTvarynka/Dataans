@@ -105,7 +105,7 @@ pub fn FoundNotesList(
                     }.into_any()
                 }
             } else {
-                view! {}.into_any()
+                ().into_any()
             }}
             <Suspense
                 fallback=move || view! { <span>"Loading notes..."</span> }
