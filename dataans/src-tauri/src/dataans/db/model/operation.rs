@@ -260,7 +260,7 @@ impl Operation<'_> {
 
                     let avatar = SqliteDb::file_by_id(*avatar_id, transaction.as_mut()).await?;
 
-                    Some(DataEvent::SpaceAdded(EventSpace {
+                    Some(DataEvent::SpaceUpdated(EventSpace {
                         id: SpaceId::from(*id),
                         name: SpaceName::from(name.clone()),
                         created_at: CreationDate::from(*created_at),
