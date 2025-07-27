@@ -1,14 +1,14 @@
-use common::space::OwnedSpace;
 use common::Config;
+use common::space::OwnedSpace;
 use leptos::callback::Callback;
 use leptos::prelude::*;
 // use leptos_hotkeys::{use_hotkeys, use_hotkeys_scoped};
 use web_sys::KeyboardEvent;
 
-use crate::common::Modal;
-use crate::spaces::space_form::SpaceForm;
 // use crate::utils::focus_element;
 use crate::FindNoteMode;
+use crate::common::Modal;
+use crate::spaces::space_form::SpaceForm;
 
 pub const SEARCH_NOTE_INPUT_ID: &str = "search-note-input";
 

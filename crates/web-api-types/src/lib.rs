@@ -5,8 +5,8 @@ pub use data::*;
 use derive_more::{AsRef, From, Into};
 pub use error::*;
 use serde::{Deserialize, Serialize};
-use time::serde::rfc3339;
 use time::OffsetDateTime;
+use time::serde::rfc3339;
 
 #[derive(Debug, Serialize, Deserialize, AsRef, From, Copy, Clone, Into, PartialEq, Eq, Hash)]
 pub struct OperationId(uuid::Uuid);

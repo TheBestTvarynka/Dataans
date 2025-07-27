@@ -17,8 +17,8 @@ use common::{CreationDate, UpdateDate};
 use serde::{Deserialize, Serialize};
 use sqlx::pool::PoolConnection;
 use sqlx::{FromRow, Sqlite, SqlitePool, SqliteTransaction, Transaction};
-use time::serde::rfc3339;
 use time::OffsetDateTime;
+use time::serde::rfc3339;
 use uuid::Uuid;
 
 use crate::dataans::db::sqlite::SqliteDb;

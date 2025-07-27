@@ -3,7 +3,7 @@ resolver = "2"
 members = ["dataans/common", "dataans/src-tauri", "dataans", "crates/web-server", "crates/web-api-types"]
 
 [workspace.package]
-edition = "2021"
+edition = "2024"
 license = "MIT"
 homepage = "https://github.com/TheBestTvarynka/Dataans"
 repository = "https://github.com/TheBestTvarynka/Dataans"

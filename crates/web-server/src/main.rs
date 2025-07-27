@@ -58,7 +58,7 @@ async fn prepare_file_loader() -> crate::services::Fs {
 
 #[cfg(feature = "tigris")]
 async fn prepare_file_loader() -> crate::services::Tigris {
-    use aws_config::{load_defaults, BehaviorVersion};
+    use aws_config::{BehaviorVersion, load_defaults};
 
     const BUCKET_NAME: &str = "DATAANS_WEB_SERVER_S3_BUCKET";
 

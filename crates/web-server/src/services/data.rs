@@ -3,8 +3,8 @@ use std::sync::Arc;
 use sha2::{Digest, Sha256};
 use web_api_types::{BlockChecksum, Blocks, Operation};
 
-use crate::db::{Operation as OperationModel, OperationsDb};
 use crate::Result;
+use crate::db::{Operation as OperationModel, OperationsDb};
 
 pub struct Data<D> {
     db: Arc<D>,

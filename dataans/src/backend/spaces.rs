@@ -1,9 +1,9 @@
+use common::APP_PLUGIN_NAME;
 use common::error::{CommandResult, CommandResultEmpty};
 use common::space::{CreateSpace, DeleteSpace, OwnedSpace, UpdateSpace};
-use common::APP_PLUGIN_NAME;
 use serde::Serialize;
 
-use crate::backend::{invoke_command, EmptyArgs};
+use crate::backend::{EmptyArgs, invoke_command};
 
 pub async fn list_spaces() -> CommandResult<Vec<OwnedSpace>> {
     invoke_command(&format!("plugin:{APP_PLUGIN_NAME}|list_spaces"), &EmptyArgs {}).await

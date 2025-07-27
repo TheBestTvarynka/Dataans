@@ -1,9 +1,9 @@
 use rocket::serde::json::Json;
-use rocket::{get, post, State};
+use rocket::{State, get, post};
 use web_api_types::{Blocks, Operation, Result};
 
-use crate::routes::UserContext;
 use crate::WebServerState;
+use crate::routes::UserContext;
 
 #[get("/block?<items_per_block>")]
 pub async fn blocks(_u: UserContext, server: &State<WebServerState>, items_per_block: usize) -> Result<Json<Blocks>> {

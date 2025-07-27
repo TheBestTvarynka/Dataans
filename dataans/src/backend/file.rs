@@ -1,12 +1,12 @@
 use std::path::Path;
 
+use common::APP_PLUGIN_NAME;
 use common::error::{CommandResult, CommandResultEmpty};
 use common::note::File;
-use common::APP_PLUGIN_NAME;
 use serde::Serialize;
 use uuid::Uuid;
 
-use crate::backend::{invoke_command, EmptyArgs};
+use crate::backend::{EmptyArgs, invoke_command};
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]

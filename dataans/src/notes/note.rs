@@ -1,10 +1,10 @@
-use common::note::{File, Id as NoteId, Note as NoteData, OwnedNote, UpdateNote};
 use common::Config;
+use common::note::{File, Id as NoteId, Note as NoteData, OwnedNote, UpdateNote};
 use leptos::prelude::*;
 use leptos::task::spawn_local;
 use leptos::web_sys::KeyboardEvent;
-use markdown::mdast::{Node, Text};
 use markdown::ParseOptions;
+use markdown::mdast::{Node, Text};
 use time::OffsetDateTime;
 
 use crate::common::{Attachment, Confirm, Files, TextArea};

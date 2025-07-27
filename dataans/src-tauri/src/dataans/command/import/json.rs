@@ -1,7 +1,7 @@
 use std::fs::File;
 use std::path::Path;
 
-use common::event::{DataEvent, DATA_EVENT};
+use common::event::{DATA_EVENT, DataEvent};
 use common::export::{Schema, SchemaV1};
 use common::note::{CreateNoteOwned, Note, UpdateNote};
 use common::space::{CreateSpaceOwned, Space, UpdateSpace};

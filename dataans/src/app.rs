@@ -1,7 +1,7 @@
+use common::Config;
 use common::note::Note;
 use common::profile::UserContext;
 use common::space::OwnedSpace;
-use common::Config;
 use leptoaster::*;
 use leptos::context::provide_context;
 use leptos::prelude::*;

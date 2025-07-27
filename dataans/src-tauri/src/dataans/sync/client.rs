@@ -2,15 +2,15 @@ use std::path::Path;
 use std::time::Duration;
 
 use common::profile::AuthorizationToken;
-use reqwest::header::{HeaderMap, HeaderValue};
 use reqwest::ClientBuilder;
+use reqwest::header::{HeaderMap, HeaderValue};
 use sha2::Sha256;
 use url::Url;
 use uuid::Uuid;
 use web_api_types::{Blocks, Operation};
 
 use super::SyncError;
-use crate::dataans::crypto::{decrypt, decrypt_data, encrypt, encrypt_data, EncryptionKey};
+use crate::dataans::crypto::{EncryptionKey, decrypt, decrypt_data, encrypt, encrypt_data};
 use crate::dataans::db::{OperationRecord, OperationRecordOwned};
 use crate::dataans::sync::hash::Hash;
 

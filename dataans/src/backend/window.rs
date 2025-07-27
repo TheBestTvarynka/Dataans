@@ -2,7 +2,7 @@ use common::error::CommandResultEmpty;
 use serde::Serialize;
 use url::Url;
 
-use crate::backend::{invoke_command, EmptyArgs};
+use crate::backend::{EmptyArgs, invoke_command};
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]

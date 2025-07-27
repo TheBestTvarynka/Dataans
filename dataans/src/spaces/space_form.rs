@@ -1,5 +1,5 @@
-use common::space::{Avatar, CreateSpace, OwnedSpace, UpdateSpace};
 use common::Config;
+use common::space::{Avatar, CreateSpace, OwnedSpace, UpdateSpace};
 use leptos::callback::Callback;
 use leptos::html;
 use leptos::prelude::*;

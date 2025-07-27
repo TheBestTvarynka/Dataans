@@ -7,9 +7,9 @@ use thiserror::Error;
 use time::OffsetDateTime;
 use uuid::Uuid;
 
+use crate::dataans::DataansError;
 use crate::dataans::db::model::{File as FileModel, Space as SpaceModel};
 use crate::dataans::db::{Db, DbError};
-use crate::dataans::DataansError;
 
 #[derive(Debug, Error)]
 pub enum SpaceServiceError {

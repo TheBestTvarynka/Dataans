@@ -8,10 +8,10 @@ use futures::future::try_join_all;
 use thiserror::Error;
 use time::OffsetDateTime;
 
+use crate::dataans::DataansError;
 use crate::dataans::db::model::{File as FileModel, Note as NoteModel};
 use crate::dataans::db::{Db, DbError};
 use crate::dataans::service::space::SpaceService;
-use crate::dataans::DataansError;
 
 #[derive(Debug, Error)]
 pub enum NoteServiceError {

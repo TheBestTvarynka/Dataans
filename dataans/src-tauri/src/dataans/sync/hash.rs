@@ -4,9 +4,9 @@
 //! Object hash calculation can be easily customized in the [Hash] trait implementation.
 //! For example, some fields are skipped and do not count in hash calculation.
 
-use sha2::digest::generic_array::GenericArray;
 use sha2::Digest;
 pub use sha2::Sha256;
+use sha2::digest::generic_array::GenericArray;
 use time::OffsetDateTime;
 use uuid::Uuid;
 

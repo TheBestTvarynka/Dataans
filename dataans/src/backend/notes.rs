@@ -1,7 +1,7 @@
+use common::APP_PLUGIN_NAME;
 use common::error::{CommandResult, CommandResultEmpty};
 use common::note::{CreateNote, Id as NoteId, NoteFullOwned, OwnedNote, UpdateNote};
 use common::space::Id as SpaceId;
-use common::APP_PLUGIN_NAME;
 use serde::Serialize;
 
 use crate::backend::invoke_command;
