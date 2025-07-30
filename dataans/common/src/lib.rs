@@ -7,6 +7,8 @@ pub mod error;
 pub mod event;
 /// Contains schema definitions for data export.
 pub mod export;
+/// All possible frontend keybindings definitions.
+pub mod key_bindings;
 /// Contains all note-related structures.
 pub mod note;
 /// User's profile.
@@ -74,75 +76,6 @@ fn theme() -> PathBuf {
     PathBuf::from("theme_dark.toml")
 }
 
-/// Represents all defined keybindings.
-#[derive(Serialize, Deserialize, Debug, Default, Clone, Eq, PartialEq)]
-#[serde(rename_all = "kebab-case")]
-pub struct KeyBindings {
-    /// Toggle spaces bar.
-    #[serde(default = "toggle_spaces_bar")]
-    pub toggle_spaces_bar: String,
-    /// Create space.
-    #[serde(default = "create_space")]
-    pub create_space: String,
-    /// Edit current space.
-    #[serde(default = "edit_current_space")]
-    pub edit_current_space: String,
-    /// Delete current space.
-    #[serde(default = "delete_current_space")]
-    pub delete_current_space: String,
-    /// Select previous space.
-    #[serde(default = "select_next_list_item")]
-    pub select_next_list_item: String,
-    /// Select next space.
-    #[serde(default = "select_prev_list_item")]
-    pub select_prev_list_item: String,
-    /// Find note.
-    #[serde(default = "find_note")]
-    pub find_note: String,
-    /// Find note in the selected space.
-    #[serde(default = "find_note_in_selected_space")]
-    pub find_note_in_selected_space: String,
-    /// Regenerate space avatar image.
-    #[serde(default = "regenerate_space_avatar")]
-    pub regenerate_space_avatar: String,
-}
-
-fn regenerate_space_avatar() -> String {
-    "ControlLeft+keyR".into()
-}
-
-fn find_note_in_selected_space() -> String {
-    "ControlLeft+keyM".into()
-}
-
-fn find_note() -> String {
-    "ControlLeft+keyF".into()
-}
-
-fn select_next_list_item() -> String {
-    "AltLeft+Digit2".into()
-}
-
-fn select_prev_list_item() -> String {
-    "AltLeft+Digit1".into()
-}
-
-fn toggle_spaces_bar() -> String {
-    "ControlLeft+keyS".into()
-}
-
-fn create_space() -> String {
-    "ControlLeft+keyN".into()
-}
-
-fn edit_current_space() -> String {
-    "ControlLeft+keyE".into()
-}
-
-fn delete_current_space() -> String {
-    "ControlLeft+keyE".into()
-}
-
 /// App configuration.
 #[derive(Serialize, Deserialize, Debug, Default, Clone, Eq, PartialEq)]
 #[serde(rename_all = "kebab-case")]
@@ -185,7 +118,7 @@ fn app_toggle() -> String {
 #[serde(rename_all = "kebab-case")]
 pub struct Config {
     /// Defined key bindings.
-    pub key_bindings: KeyBindings,
+    pub key_bindings: key_bindings::KeyBindings,
     /// Appearance configuration options.
     pub appearance: Appearance,
     /// App configuration.
