@@ -1,15 +1,18 @@
 use common::Config;
 use common::space::{Avatar, CreateSpace, OwnedSpace, UpdateSpace};
 use leptos::callback::Callback;
+use leptos::ev::keydown;
 use leptos::html;
 use leptos::prelude::*;
 use leptos::task::spawn_local;
+use leptos_use::use_event_listener;
 // use leptos_hotkeys::{use_hotkeys, use_hotkeys_scoped};
 use uuid::Uuid;
 
 use crate::backend::convert_file_src;
 use crate::backend::file::gen_avatar;
 use crate::backend::spaces::{create_space, list_spaces, update_space};
+use crate::dom::MatchKeyBinding;
 
 const INPUT_ELEM_ID: &str = "space-form";
 
@@ -97,15 +100,28 @@ pub fn SpaceForm(
         });
     };
 
-    // use_hotkeys!(("Escape") => move |_| on_cancel.run(()));
-    // use_hotkeys!(("Enter") => move |_| create_space());
-    // let regenerate_space_avatar = config.key_bindings.regenerate_space_avatar.clone();
-    // use_hotkeys!((regenerate_space_avatar) => move |_| generate_avatar.run(()));
+    let regenerate_space_avatar = config.key_bindings.regenerate_space_avatar.clone();
+    let space_form_element = NodeRef::new();
+
+    let _ = use_event_listener(space_form_element, keydown, move |ev| {
+        let key = ev.key();
+
+        if key == "Escape" {
+            ev.prevent_default();
+            on_cancel.run(());
+        } else if key == "Enter" {
+            ev.prevent_default();
+            create_space();
+        } else if regenerate_space_avatar.matches(&ev) {
+            ev.prevent_default();
+            generate_avatar.run(());
+        }
+    });
 
     let global_config = expect_context::<RwSignal<Config>>();
 
     view! {
-        <div class="create-space-window" on:load=move |_| info!("on_load")>
+        <div class="create-space-window" node_ref=space_form_element>
             {if space.is_some() {
                 view! { <span class="create-space-title">"Update space"</span> }
             } else {

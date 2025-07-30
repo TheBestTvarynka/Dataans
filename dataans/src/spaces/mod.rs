@@ -21,7 +21,7 @@ use crate::app::GlobalState;
 use crate::backend::notes::list_notes;
 use crate::backend::spaces::list_spaces;
 use crate::backend::sync::trigger_full_sync;
-use crate::utils::focus_element;
+use crate::dom::focus_element;
 
 #[component]
 pub fn Spaces(spaces: Signal<Vec<OwnedSpace>>, set_spaces: SignalSetter<Vec<OwnedSpace>>) -> impl IntoView {

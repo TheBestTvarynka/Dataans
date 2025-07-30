@@ -4,7 +4,8 @@ mod sync_settings;
 
 use std::path::PathBuf;
 
-use common::{App, Appearance, Config, KeyBindings};
+use common::key_bindings::KeyBindings;
+use common::{App, Appearance, Config};
 use leptos::prelude::*;
 use leptos::task::spawn_local;
 
@@ -142,55 +143,55 @@ pub fn AppInfo() -> impl IntoView {
                         <tr>
                             <td>"Toggle side bar"</td>
                             <td>
-                                <InlineCode code=toggle_spaces_bar />
+                                <InlineCode code=toggle_spaces_bar.to_string() />
                             </td>
                         </tr>
                         <tr>
                             <td>"Create a new space"</td>
                             <td>
-                                <InlineCode code=create_space />
+                                <InlineCode code=create_space.to_string() />
                             </td>
                         </tr>
                         <tr>
                             <td>"Edit current space"</td>
                             <td>
-                                <InlineCode code=edit_current_space />
+                                <InlineCode code=edit_current_space.to_string() />
                             </td>
                         </tr>
                         <tr>
                             <td>"Delete current space"</td>
                             <td>
-                                <InlineCode code=delete_current_space />
+                                <InlineCode code=delete_current_space.to_string() />
                             </td>
                         </tr>
                         <tr>
                             <td>"Select next item in the side bar list"</td>
                             <td>
-                                <InlineCode code=select_next_list_item />
+                                <InlineCode code=select_next_list_item.to_string() />
                             </td>
                         </tr>
                         <tr>
                             <td>"Select previous item in the side bar list"</td>
                             <td>
-                                <InlineCode code=select_prev_list_item />
+                                <InlineCode code=select_prev_list_item.to_string() />
                             </td>
                         </tr>
                         <tr>
                             <td>"Search notes globally"</td>
                             <td>
-                                <InlineCode code=find_note />
+                                <InlineCode code=find_note.to_string() />
                             </td>
                         </tr>
                         <tr>
                             <td>"Search notes in the current space"</td>
                             <td>
-                                <InlineCode code=find_note_in_selected_space />
+                                <InlineCode code=find_note_in_selected_space.to_string() />
                             </td>
                         </tr>
                         <tr>
                             <td>"Regenerate space avatar image"</td>
                             <td>
-                                <InlineCode code=regenerate_space_avatar />
+                                <InlineCode code=regenerate_space_avatar.to_string() />
                             </td>
                         </tr>
                     </table>

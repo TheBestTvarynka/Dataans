@@ -17,7 +17,7 @@ pub fn ListItem<'a>(list_item: markdown::mdast::ListItem, base_path: &'a str) ->
         }
         .into_any(),
         Some(true) => {
-            let id = crate::utils::gen_id();
+            let id = crate::uuid::gen_id();
             view! {
                 <li class="note-list-checkbox">
                     // Sorry, I'm tired of CSS and I don't know how to do it better (so far).
@@ -33,7 +33,7 @@ pub fn ListItem<'a>(list_item: markdown::mdast::ListItem, base_path: &'a str) ->
             .into_any()
         }
         Some(false) => {
-            let id = crate::utils::gen_id();
+            let id = crate::uuid::gen_id();
             view! {
                 <li class="note-list-checkbox">
                     // Sorry, I'm tired of CSS and I don't know how to do it better (so far).

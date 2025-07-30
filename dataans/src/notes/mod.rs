@@ -17,8 +17,8 @@ use self::note::Note;
 use crate::FindNoteMode;
 use crate::app::GlobalState;
 use crate::backend::notes::list_notes;
+use crate::dom::focus_element;
 use crate::spaces::tools::SEARCH_NOTE_INPUT_ID;
-use crate::utils::focus_element;
 
 #[component]
 pub fn Notes() -> impl IntoView {
