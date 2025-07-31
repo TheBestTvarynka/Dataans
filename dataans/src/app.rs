@@ -6,7 +6,6 @@ use leptoaster::*;
 use leptos::context::provide_context;
 use leptos::prelude::*;
 use leptos::task::spawn_local;
-// use leptos_hotkeys::{provide_hotkeys_context, scopes, HotkeysContext};
 use leptos_router::components::*;
 use leptos_router::path;
 
@@ -83,9 +82,6 @@ pub fn App() -> impl IntoView {
     });
 
     let (theme_css, set_theme_css) = signal(String::default());
-
-    // let main_ref = create_node_ref::<html::Main>();
-    // let HotkeysContext { .. } = provide_hotkeys_context(main_ref, false, scopes!());
 
     let global_config = expect_context::<RwSignal<Config>>();
     spawn_local(async move {

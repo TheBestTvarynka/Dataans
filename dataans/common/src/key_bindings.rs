@@ -42,7 +42,7 @@ fn regenerate_space_avatar() -> KeyBinding {
             ctrl: true,
             ..Default::default()
         },
-        key: "R".into(),
+        key: "r".into(),
     }
 }
 
@@ -52,7 +52,7 @@ fn find_note_in_selected_space() -> KeyBinding {
             ctrl: true,
             ..Default::default()
         },
-        key: "M".into(),
+        key: "m".into(),
     }
 }
 
@@ -62,7 +62,7 @@ fn find_note() -> KeyBinding {
             ctrl: true,
             ..Default::default()
         },
-        key: "F".into(),
+        key: "f".into(),
     }
 }
 
@@ -92,7 +92,7 @@ fn toggle_spaces_bar() -> KeyBinding {
             ctrl: true,
             ..Default::default()
         },
-        key: "S".into(),
+        key: "s".into(),
     }
 }
 
@@ -102,7 +102,7 @@ fn create_space() -> KeyBinding {
             ctrl: true,
             ..Default::default()
         },
-        key: "N".into(),
+        key: "n".into(),
     }
 }
 
@@ -112,7 +112,7 @@ fn edit_current_space() -> KeyBinding {
             ctrl: true,
             ..Default::default()
         },
-        key: "E".into(),
+        key: "e".into(),
     }
 }
 
@@ -122,7 +122,7 @@ fn delete_current_space() -> KeyBinding {
             ctrl: true,
             ..Default::default()
         },
-        key: "Del".into(),
+        key: "Delete".into(),
     }
 }
 

@@ -1,13 +1,13 @@
 [key-bindings]
-toggle-spaces-bar = "ControlLeft+keyS"
-create-space = "ControlLeft+keyN"
-edit-current-space = "ControlLeft+keyE"
-delete-current-space = "ControlLeft+Delete"
-select-prev-list-item = "AltLeft+Digit1"
-select-next-list-item = "AltLeft+Digit2"
-find-note = "ControlLeft+keyF"
-find-note-in-selected-space = "ControlLeft+keyM"
-regenerate-space-avatar = "ControlLeft+keyR"
+toggle-spaces-bar = "Ctrl+s"
+create-space = "Ctrl+n"
+edit-current-space = "Ctrl+e"
+delete-current-space = "Ctrl+Delete"
+select-prev-list-item = "Alt+1"
+select-next-list-item = "Alt+2"
+find-note = "Ctrl+f"
+find-note-in-selected-space = "Ctrl+m"
+regenerate-space-avatar = "Ctrl+r"
 
 [appearance]
 theme = "theme_dark.toml"

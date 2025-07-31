@@ -2,10 +2,12 @@ use common::Config;
 use common::note::Id as NoteId;
 use common::space::OwnedSpace;
 use leptos::callback::Callback;
+use leptos::ev::keydown;
 use leptos::prelude::*;
+use leptos_use::{use_document, use_event_listener};
 
-// use leptos_hotkeys::{use_hotkeys, use_hotkeys_scoped};
 use crate::backend::notes::{search_notes, search_notes_in_space};
+use crate::dom::MatchKeyBinding;
 use crate::notes::note_preview::NotePreview;
 use crate::spaces::Space;
 
@@ -36,7 +38,7 @@ pub fn FoundNotesList(
         }
     });
 
-    let _select_next_note = move || {
+    let select_next_note = move || {
         if let Some(selected_note_id) = selected_note.get() {
             if let Some(notes) = found_notes.get() {
                 let selected_note_index = notes
@@ -56,7 +58,7 @@ pub fn FoundNotesList(
             }
         }
     };
-    let _select_prev_note = move || {
+    let select_prev_note = move || {
         if let Some(selected_note_id) = selected_note.get() {
             if let Some(notes) = found_notes.get() {
                 let selected_note_index = notes
@@ -77,10 +79,21 @@ pub fn FoundNotesList(
         }
     };
 
-    // let key_bindings = config.key_bindings.clone();
+    let key_bindings = config.key_bindings.clone();
+    let select_next_list_item = key_bindings.select_next_list_item;
+    let select_prev_list_item = key_bindings.select_prev_list_item;
 
-    // use_hotkeys!((key_bindings.select_prev_list_item) => move |_| select_prev_note());
-    // use_hotkeys!((key_bindings.select_next_list_item) => move |_| select_next_note());
+    let _ = use_event_listener(use_document(), keydown, move |ev| {
+        if select_next_list_item.matches(&ev) {
+            ev.prevent_default();
+            select_next_note();
+        }
+
+        if select_prev_list_item.matches(&ev) {
+            ev.prevent_default();
+            select_prev_note();
+        }
+    });
 
     let global_config = expect_context::<RwSignal<Config>>();
 

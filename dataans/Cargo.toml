@@ -47,6 +47,3 @@ web-sys = { version = "0.3", features = [
     "HtmlElement",
     "HtmlSelectElement",
 ] }
-
-[dev-dependencies]
-# leptos_hotkeys = { git = "https://github.com/TheBestTvarynka/leptos-hotkeys.git", rev = "1a3cebb", features = ["debug"] }

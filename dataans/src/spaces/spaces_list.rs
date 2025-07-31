@@ -1,9 +1,11 @@
 use common::Config;
 use common::space::OwnedSpace;
 use leptos::callback::Callback;
+use leptos::ev::keydown;
 use leptos::prelude::*;
+use leptos_use::{use_document, use_event_listener};
 
-// use leptos_hotkeys::{use_hotkeys, use_hotkeys_scoped};
+use crate::dom::MatchKeyBinding;
 use crate::spaces::Space;
 
 #[component]
@@ -14,7 +16,7 @@ pub fn SpacesList(
     spaces_minimized: Signal<bool>,
     #[prop(into)] set_selected_space: Callback<(OwnedSpace,), ()>,
 ) -> impl IntoView {
-    let _select_next_space = move || {
+    let select_next_space = move || {
         if let Some(selected_space) = selected_space.get() {
             let spaces = spaces.get();
             let selected_space_index = spaces
@@ -31,7 +33,7 @@ pub fn SpacesList(
                 .clone(),));
         }
     };
-    let _select_prev_space = move || {
+    let select_prev_space = move || {
         if let Some(selected_space) = selected_space.get() {
             let spaces = spaces.get();
             let selected_space_index = spaces
@@ -49,10 +51,21 @@ pub fn SpacesList(
         }
     };
 
-    // let key_bindings = config.key_bindings.clone();
+    let key_bindings = config.key_bindings.clone();
+    let select_next_list_item = key_bindings.select_next_list_item;
+    let select_prev_list_item = key_bindings.select_prev_list_item;
 
-    // use_hotkeys!((key_bindings.select_prev_list_item) => move |_| select_prev_space());
-    // use_hotkeys!((key_bindings.select_next_list_item) => move |_| select_next_space());
+    let _ = use_event_listener(use_document(), keydown, move |ev| {
+        if select_next_list_item.matches(&ev) {
+            ev.prevent_default();
+            select_next_space();
+        }
+
+        if select_prev_list_item.matches(&ev) {
+            ev.prevent_default();
+            select_prev_space();
+        }
+    });
 
     let global_config = expect_context::<RwSignal<Config>>();
 

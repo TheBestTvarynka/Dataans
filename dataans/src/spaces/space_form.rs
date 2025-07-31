@@ -6,7 +6,6 @@ use leptos::html;
 use leptos::prelude::*;
 use leptos::task::spawn_local;
 use leptos_use::use_event_listener;
-// use leptos_hotkeys::{use_hotkeys, use_hotkeys_scoped};
 use uuid::Uuid;
 
 use crate::backend::convert_file_src;
