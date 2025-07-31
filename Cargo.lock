@@ -1874,7 +1874,7 @@ dependencies = [
 
 [[package]]
 name = "dataans"
-version = "0.2.1"
+version = "0.3.0"
 dependencies = [
  "aes-gcm",
  "arboard",
@@ -1914,7 +1914,7 @@ dependencies = [
 
 [[package]]
 name = "dataans-ui"
-version = "0.2.1"
+version = "0.3.0"
 dependencies = [
  "common",
  "console_error_panic_hook",
