@@ -1,13 +1,14 @@
 use common::Config;
 use common::space::OwnedSpace;
 use leptos::callback::Callback;
+use leptos::ev::keydown;
 use leptos::prelude::*;
-// use leptos_hotkeys::{use_hotkeys, use_hotkeys_scoped};
+use leptos_use::{use_document, use_event_listener};
 use web_sys::KeyboardEvent;
 
-// use crate::utils::focus_element;
 use crate::FindNoteMode;
 use crate::common::Modal;
+use crate::dom::{MatchKeyBinding, focus_element};
 use crate::spaces::space_form::SpaceForm;
 
 pub const SEARCH_NOTE_INPUT_ID: &str = "search-note-input";
@@ -32,24 +33,32 @@ pub fn Tools(
         }
     };
 
-    // let key_bindings = &config.key_bindings;
+    let key_bindings = &config.key_bindings;
+    let toggle_spaces_bar = key_bindings.toggle_spaces_bar.clone();
+    let create_space = key_bindings.create_space.clone();
+    let find_note = key_bindings.find_note.clone();
 
-    // let toggle_spaces_bar = key_bindings.toggle_spaces_bar.clone();
-    // use_hotkeys!((toggle_spaces_bar) => move |_| {
-    //     set_spaces_minimized.set(!spaces_minimized.get());
-    // });
+    let _ = use_event_listener(use_document(), keydown, move |ev| {
+        if toggle_spaces_bar.matches(&ev) {
+            ev.prevent_default();
+            set_spaces_minimized.set(!spaces_minimized.get());
+        }
 
-    // use_hotkeys!((key_bindings.create_space.clone()) => move |_| {
-    //     set_show_modal.set(true);
-    // });
+        if create_space.matches(&ev) {
+            ev.prevent_default();
+            set_show_modal.set(true);
+        }
 
-    // use_hotkeys!((key_bindings.find_note.clone()) => move |_| {
-    //     if spaces_minimized.get() {
-    //         set_spaces_minimized.set(false);
-    //     }
-    //     set_find_node_mode.set(FindNoteMode::FindNote { space: None });
-    //     focus_element(SEARCH_NOTE_INPUT_ID);
-    // });
+        if find_note.matches(&ev) {
+            ev.prevent_default();
+
+            if spaces_minimized.get() {
+                set_spaces_minimized.set(false);
+            }
+            set_find_node_mode.set(FindNoteMode::FindNote { space: None });
+            focus_element(SEARCH_NOTE_INPUT_ID);
+        }
+    });
 
     let key_down = move |key: KeyboardEvent| {
         if key.key() == "Enter" {

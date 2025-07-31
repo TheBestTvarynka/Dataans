@@ -10,9 +10,10 @@ mod app;
 mod app_info;
 mod backend;
 mod common;
+mod dom;
 mod notes;
 mod spaces;
-mod utils;
+mod uuid;
 
 use app::*;
 use leptos::prelude::*;

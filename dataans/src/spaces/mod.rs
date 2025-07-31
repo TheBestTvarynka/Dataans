@@ -8,10 +8,11 @@ use common::Config;
 use common::note::Id as NoteId;
 use common::profile::{Sync, SyncMode, UserContext};
 use common::space::OwnedSpace;
+use leptos::ev::keydown;
 use leptos::prelude::*;
 use leptos::task::spawn_local;
+use leptos_use::{use_document, use_event_listener};
 
-// use leptos_hotkeys::use_hotkeys;
 use self::found_notes_list::FoundNotesList;
 use self::space::Space;
 use self::spaces_list::SpacesList;
@@ -21,7 +22,7 @@ use crate::app::GlobalState;
 use crate::backend::notes::list_notes;
 use crate::backend::spaces::list_spaces;
 use crate::backend::sync::trigger_full_sync;
-use crate::utils::focus_element;
+use crate::dom::focus_element;
 
 #[component]
 pub fn Spaces(spaces: Signal<Vec<OwnedSpace>>, set_spaces: SignalSetter<Vec<OwnedSpace>>) -> impl IntoView {
@@ -103,7 +104,13 @@ pub fn Spaces(spaces: Signal<Vec<OwnedSpace>>, set_spaces: SignalSetter<Vec<Owne
                         <SpacesList config selected_space spaces spaces_minimized set_selected_space />
                     }.into_any(),
                     FindNoteMode::FindNote { space } => {
-                        // use_hotkeys!(("Escape") => move |_| set_find_node_mode.set(FindNoteMode::None));
+                        let _ = use_event_listener(use_document(), keydown, move |ev| {
+                            if ev.key() == "Escape" {
+                                ev.prevent_default();
+                                set_find_node_mode.set(FindNoteMode::None)
+                            }
+                        });
+
                         view! {
                             <FoundNotesList config query search_in_space=space spaces_minimized focus_note />
                         }
