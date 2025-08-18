@@ -27,4 +27,4 @@ url = "2.5"
 derive_more = "1.0"
 reqwest = "0.12"
 
-tokio = "1.46"
+tokio = "1.47"
