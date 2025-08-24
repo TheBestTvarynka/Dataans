@@ -97,7 +97,7 @@ pub async fn sign_in<R: Runtime>(
 
     Client::new(
         sync_config.url.as_ref().clone(),
-        *EncryptionKey::from_slice(secret_key.as_ref().as_slice()),
+        EncryptionKey::try_from(secret_key.as_ref().as_slice()).expect("secret key length is always correct"),
         &auth_token,
     )
     .map_err(|err| {

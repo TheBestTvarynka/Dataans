@@ -28,7 +28,6 @@
 use aes_gcm::aead::Aead;
 use aes_gcm::{AeadCore, Aes256Gcm, Key, KeyInit, KeySizeUser, Nonce};
 use pbkdf2::pbkdf2_hmac;
-use rand::rngs::OsRng;
 use serde::Serialize;
 use serde::de::DeserializeOwned;
 use sha2::digest::typenum::Unsigned;
@@ -54,6 +53,9 @@ pub enum CryptoError {
 
     #[error("json error: {0}")]
     Json(#[from] serde_json::Error),
+
+    #[error("OS error: {0}")]
+    Os(String),
 }
 
 type CryptoResult<T> = Result<T, CryptoError>;
@@ -61,7 +63,7 @@ type CryptoResult<T> = Result<T, CryptoError>;
 /// Encrypts the data using the provided encryption key.
 pub fn encrypt_data(data: &[u8], key: &EncryptionKey) -> CryptoResult<Vec<u8>> {
     // Encryption
-    let nonce = Aes256Gcm::generate_nonce(&mut OsRng);
+    let nonce = Aes256Gcm::generate_nonce().map_err(|err| CryptoError::Os(err.to_string()))?;
     let cipher = Aes256Gcm::new(key);
 
     let cipher_text = cipher.encrypt(&nonce, data)?;
@@ -100,12 +102,12 @@ pub fn decrypt_data(data: &[u8], key: &EncryptionKey) -> CryptoResult<Vec<u8>> {
     let (nonce, data) = data.split_at(NONCE_LENGTH);
     let (cipher_text, checksum) = data.split_at(data.len() - HMAC_SHA256_CHECKSUM_LENGTH);
 
-    let nonce = Nonce::from_slice(nonce);
+    let nonce = Nonce::try_from(nonce).expect("nonce length is always correct");
 
     // Decryption
     let cipher = Aes256Gcm::new(key);
 
-    let decrypted = cipher.decrypt(nonce, cipher_text)?;
+    let decrypted = cipher.decrypt(&nonce, cipher_text)?;
 
     // Checksum verification
     let expected_checksum = {
@@ -116,7 +118,7 @@ pub fn decrypt_data(data: &[u8], key: &EncryptionKey) -> CryptoResult<Vec<u8>> {
             CryptoError::InvalidKeyLength
         })?;
 
-        mac.update(nonce);
+        mac.update(&nonce);
         mac.update(&decrypted);
 
         mac.finalize().into_bytes().to_vec()
