@@ -5,7 +5,7 @@ use uuid::Uuid;
 
 use crate::dataans::DataansState;
 
-#[instrument(ret, skip(state))]
+#[instrument(ret, skip(state, data))]
 #[tauri::command]
 pub async fn upload_file(state: State<'_, DataansState>, id: Uuid, name: String, data: Vec<u8>) -> CommandResult<File> {
     Ok(state.file_service.upload_file(id, name, &data).await?)
