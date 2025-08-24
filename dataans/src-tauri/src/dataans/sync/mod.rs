@@ -119,7 +119,7 @@ pub enum SyncError {
     HealthCheckFailed(reqwest::StatusCode),
 }
 
-#[instrument(ret, skip(db, encryption_key, emitter))]
+#[instrument(err, skip(db, encryption_key, emitter))]
 pub async fn sync_future<D: OperationDb, R: Runtime, E: Emitter<R>>(
     db: Arc<D>,
     sync_server: Url,

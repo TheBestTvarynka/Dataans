@@ -70,7 +70,7 @@ impl Client {
     }
 
     /// Requests server's blocks hashes.
-    #[instrument(ret, skip(self))]
+    #[instrument(err, skip(self))]
     pub async fn blocks(&self, items_per_block: usize) -> Result<Vec<Vec<u8>>, SyncError> {
         let mut blocks_url = self.sync_server.join("data/block")?;
         blocks_url
@@ -88,7 +88,7 @@ impl Client {
     ///
     /// The server will skip the first `operations_to_skip` operations and will return the rest of them.
     /// This method automatically decrypt the received operation.
-    #[instrument(ret, skip(self))]
+    #[instrument(err, skip(self))]
     pub async fn operations(&self, operations_to_skip: usize) -> Result<Vec<OperationRecordOwned>, SyncError> {
         let mut operations_url = self.sync_server.join("data/operation")?;
         operations_url
@@ -116,7 +116,7 @@ impl Client {
     /// Sends the provided operations to the server.
     ///
     /// This method automatically encrypts provided operations.
-    #[instrument(ret, skip(self, operations))]
+    #[instrument(err, skip(self, operations))]
     pub async fn upload_operations(&self, operations: &[&OperationRecord<'_>]) -> Result<(), SyncError> {
         let operations = operations
             .iter()
@@ -144,7 +144,7 @@ impl Client {
     /// Uploads the file to the server.
     ///
     /// The provided path must be absolute in the file system.
-    #[instrument(ret, skip(self))]
+    #[instrument(err, skip(self))]
     pub async fn upload_file(&self, id: Uuid, path: &Path) -> Result<(), SyncError> {
         let file_data = tokio::fs::read(path).await?;
 
