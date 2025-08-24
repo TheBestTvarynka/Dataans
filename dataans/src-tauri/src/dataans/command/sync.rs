@@ -43,7 +43,7 @@ pub async fn full_sync<R: Runtime>(app: AppHandle<R>, state: State<'_, DataansSt
         let status_update_event = sync_future(
             operation_logger,
             sync_config.url.into(),
-            *EncryptionKey::from_slice(secret_key.as_ref().as_slice()),
+            EncryptionKey::try_from(secret_key.as_ref().as_slice()).expect("secret key length is always correct"),
             &app,
             files_path,
             &auth_token,
