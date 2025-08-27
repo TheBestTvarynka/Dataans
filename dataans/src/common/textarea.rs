@@ -82,49 +82,49 @@ pub fn TextArea(
 
     let elem_id = id.clone();
     let text_editing_keybindings = move |event: KeyboardEvent| {
-        if let Some(text) = text.try_get() {
-            if let Some(format_fn) = get_text_format_fn(event) {
-                let text_area = document()
-                    .get_element_by_id(&elem_id)
-                    .expect("Dom element should present");
-                let text_area = text_area
-                    .dyn_into::<web_sys::HtmlTextAreaElement>()
-                    .expect("Element should be textarea");
+        if let Some(format_fn) = get_text_format_fn(event) {
+            let text_area = document()
+                .get_element_by_id(&elem_id)
+                .expect("Dom element should present");
+            let text_area = text_area
+                .dyn_into::<web_sys::HtmlTextAreaElement>()
+                .expect("Element should be textarea");
+            let text = text_area.value();
 
-                let (text, selection) = match (
-                    text_area.selection_start().ok().flatten(),
-                    text_area.selection_end().ok().flatten(),
-                ) {
-                    (Some(start), Some(end)) => {
-                        let pre_text = text.chars().take(start as usize).collect::<String>();
-                        let link_text = text
-                            .chars()
-                            .skip(start as usize)
-                            .take((end - start) as usize)
-                            .collect::<String>();
-                        let after_text = text.chars().skip(end as usize).collect::<String>();
+            let (text, selection) = match (
+                text_area.selection_start().ok().flatten(),
+                text_area.selection_end().ok().flatten(),
+            ) {
+                (Some(start), Some(end)) => {
+                    let pre_text = text.chars().take(start as usize).collect::<String>();
+                    let link_text = text
+                        .chars()
+                        .skip(start as usize)
+                        .take((end - start) as usize)
+                        .collect::<String>();
+                    let after_text = text.chars().skip(end as usize).collect::<String>();
 
-                        format_fn(pre_text, link_text, after_text, start)
-                    }
-                    (Some(position), None) | (None, Some(position)) => {
-                        let pre_text = text.chars().take(position as usize).collect::<String>();
-                        let after_text = text.chars().skip(position as usize).collect::<String>();
+                    format_fn(pre_text, link_text, after_text, start)
+                }
+                (Some(position), None) | (None, Some(position)) => {
+                    let pre_text = text.chars().take(position as usize).collect::<String>();
+                    let after_text = text.chars().skip(position as usize).collect::<String>();
 
-                        format_fn(pre_text, String::new(), after_text, position)
-                    }
-                    (None, None) => {
-                        warn!("Empty text selection");
-                        (text, None)
-                    }
-                };
-                set_text.run((text,));
-                if let Some((selection_start, selection_end)) = selection {
-                    if let Err(err) = text_area.set_selection_start(Some(selection_start)) {
-                        error!("{err:?}");
-                    }
-                    if let Err(err) = text_area.set_selection_end(Some(selection_end)) {
-                        error!("{err:?}");
-                    }
+                    format_fn(pre_text, String::new(), after_text, position)
+                }
+                (None, None) => {
+                    warn!("Empty text selection");
+                    (text, None)
+                }
+            };
+            text_area.set_value(&text);
+            set_text.run((text,));
+            if let Some((selection_start, selection_end)) = selection {
+                if let Err(err) = text_area.set_selection_start(Some(selection_start)) {
+                    error!("{err:?}");
+                }
+                if let Err(err) = text_area.set_selection_end(Some(selection_end)) {
+                    error!("{err:?}");
                 }
             }
         }
@@ -180,26 +180,29 @@ fn get_text_format_fn(event: KeyboardEvent) -> Option<TextFormatFn> {
         })
     } else if event.ctrl_key() && event.key() == "b" {
         Some(&move |pre_text, selected_text, after_text, start| {
-            let selection = start + 2 /* "**" */ + selected_text.len() as u32 + 2 /* "**" */;
+            let selection_start = start + 2 /* "**" */;
+            let selection_end = selection_start + selected_text.len() as u32;
             (
                 format!("{pre_text}**{selected_text}**{after_text}"),
-                Some((selection, selection)),
+                Some((selection_start, selection_end)),
             )
         })
     } else if event.ctrl_key() && event.key() == "i" {
         Some(&move |pre_text, selected_text, after_text, start| {
-            let selection = start + 1 /* "*" */ + selected_text.len() as u32 + 1 /* "*" */;
+            let selection_start = start + 1 /* "_" */;
+            let selection_end = selection_start + selected_text.len() as u32;
             (
-                format!("{pre_text}*{selected_text}*{after_text}"),
-                Some((selection, selection)),
+                format!("{pre_text}_{selected_text}_{after_text}"),
+                Some((selection_start, selection_end)),
             )
         })
     } else if event.ctrl_key() && event.shift_key() && event.key() == "M" {
         Some(&move |pre_text, selected_text, after_text, start| {
-            let selection = start + 1 /* "`" */ + selected_text.len() as u32 + 1 /* "`" */;
+            let selection_start = start + 1 /* "_" */;
+            let selection_end = selection_start + selected_text.len() as u32;
             (
                 format!("{pre_text}`{selected_text}`{after_text}"),
-                Some((selection, selection)),
+                Some((selection_start, selection_end)),
             )
         })
     } else {
