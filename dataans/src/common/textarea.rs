@@ -1,8 +1,11 @@
+use std::sync::LazyLock;
+
 use leptos::html;
 use leptos::prelude::*;
 use leptos::tachys::html::event::ClipboardEvent;
 use leptos::task::spawn_local;
 use leptos::web_sys::KeyboardEvent;
+use regex::Regex;
 use wasm_bindgen::JsCast;
 
 use crate::backend::file::load_clipboard_image;
@@ -205,7 +208,75 @@ fn get_text_format_fn(event: KeyboardEvent) -> Option<TextFormatFn> {
                 Some((selection_start, selection_end)),
             )
         })
+    } else if event.shift_key() && event.key() == "Enter" {
+        event.prevent_default();
+
+        Some(
+            &move |pre_text, selected_text, after_text, _start| match parse_prev_line(&pre_text) {
+                PrevLineType::None { trimmed } => {
+                    let current = pre_text.len() as u32 + 1 + trimmed.len() as u32;
+                    (
+                        format!("{pre_text}\n{trimmed}{selected_text}{after_text}"),
+                        Some((current, current)),
+                    )
+                }
+                PrevLineType::UnorderedList { trimmed, marker } => {
+                    let current = pre_text.len() as u32 + 3 + trimmed.len() as u32;
+                    (
+                        format!("{pre_text}\n{trimmed}{marker} {selected_text}{after_text}"),
+                        Some((current, current)),
+                    )
+                }
+                PrevLineType::OrderedList { trimmed, number } => {
+                    let number = (number + 1).to_string();
+                    let current = pre_text.len() as u32 + 3 + trimmed.len() as u32 + number.len() as u32;
+                    (
+                        format!("{pre_text}\n{trimmed}{number}. {selected_text}{after_text}"),
+                        Some((current, current)),
+                    )
+                }
+            },
+        )
     } else {
         None
+    }
+}
+
+enum PrevLineType<'a> {
+    UnorderedList { trimmed: &'a str, marker: char },
+    OrderedList { trimmed: &'a str, number: u32 },
+    None { trimmed: &'a str },
+}
+
+static ORDERED_LIST_PATTERN: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"^(\d+)\. ").unwrap());
+
+fn parse_prev_line<'a>(pre_text: &'a str) -> PrevLineType<'a> {
+    let prev_line = if let Some(start) = pre_text.rfind('\n') {
+        if start == pre_text.len() - 1 {
+            return PrevLineType::None { trimmed: "" };
+        }
+
+        &pre_text[start + 1..]
+    } else {
+        pre_text
+    };
+
+    let trimmed_line = prev_line.trim_start();
+    let (trimmed, line) = prev_line.split_at(prev_line.len() - trimmed_line.len());
+
+    if line.starts_with("* ") {
+        PrevLineType::UnorderedList { trimmed, marker: '*' }
+    } else if line.starts_with("- ") {
+        PrevLineType::UnorderedList { trimmed, marker: '-' }
+    } else if line.starts_with("+ ") {
+        PrevLineType::UnorderedList { trimmed, marker: '+' }
+    } else if let Some(number) = ORDERED_LIST_PATTERN.find(line) {
+        let number = number.as_str();
+        number[0..number.len() - 2 /* ". " */]
+            .parse::<u32>()
+            .map(|number| PrevLineType::OrderedList { trimmed, number })
+            .unwrap_or(PrevLineType::None { trimmed })
+    } else {
+        PrevLineType::None { trimmed }
     }
 }
