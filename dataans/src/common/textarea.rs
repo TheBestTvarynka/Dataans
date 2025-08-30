@@ -213,23 +213,34 @@ fn get_text_format_fn(event: KeyboardEvent) -> Option<TextFormatFn> {
 
         Some(
             &move |pre_text, selected_text, after_text, _start| match parse_prev_line(&pre_text) {
-                PrevLineType::None { trimmed } => {
+                LineType::None { trimmed } => {
                     let current = pre_text.len() as u32 + 1 + trimmed.len() as u32;
                     (
                         format!("{pre_text}\n{trimmed}{selected_text}{after_text}"),
                         Some((current, current)),
                     )
                 }
-                PrevLineType::UnorderedList { trimmed, marker } => {
+                LineType::UnorderedList { trimmed, marker } => {
                     let current = pre_text.len() as u32 + 3 + trimmed.len() as u32;
                     (
                         format!("{pre_text}\n{trimmed}{marker} {selected_text}{after_text}"),
                         Some((current, current)),
                     )
                 }
-                PrevLineType::OrderedList { trimmed, number } => {
-                    let number = (number + 1).to_string();
+                LineType::OrderedList {
+                    trimmed,
+                    number: current_number,
+                } => {
+                    let number = (current_number + 1).to_string();
                     let current = pre_text.len() as u32 + 3 + trimmed.len() as u32 + number.len() as u32;
+                    let after_text = if !after_text.is_empty()
+                        && after_text[1 + trimmed.len()..].starts_with(&format!("{number}. "))
+                    {
+                        increment_next_items(&after_text[1..], current_number + 1, trimmed)
+                    } else {
+                        after_text
+                    };
+
                     (
                         format!("{pre_text}\n{trimmed}{number}. {selected_text}{after_text}"),
                         Some((current, current)),
@@ -242,7 +253,7 @@ fn get_text_format_fn(event: KeyboardEvent) -> Option<TextFormatFn> {
     }
 }
 
-enum PrevLineType<'a> {
+enum LineType<'a> {
     UnorderedList { trimmed: &'a str, marker: char },
     OrderedList { trimmed: &'a str, number: u32 },
     None { trimmed: &'a str },
@@ -250,10 +261,55 @@ enum PrevLineType<'a> {
 
 static ORDERED_LIST_PATTERN: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"^(\d+)\. ").unwrap());
 
-fn parse_prev_line<'a>(pre_text: &'a str) -> PrevLineType<'a> {
+fn increment_next_items(after_text: &str, mut number: u32, padding: &str) -> String {
+    let mut result = String::new();
+
+    let mut lines = after_text.lines();
+    for line in &mut lines {
+        let pattern = format!("{padding}{number}. ");
+
+        if line.starts_with(&pattern) {
+            result.push_str(&format!("\n{padding}{}. {}", number + 1, &line[pattern.len()..]));
+            number += 1;
+        } else {
+            result.push('\n');
+            result.push_str(line);
+            break;
+        }
+    }
+
+    lines.fold(result, |mut result, line| {
+        result.push('\n');
+        result.push_str(line);
+        result
+    })
+}
+
+fn parse_line<'a>(line: &'a str) -> LineType<'a> {
+    let trimmed_line = line.trim_start();
+    let (trimmed, line) = line.split_at(line.len() - trimmed_line.len());
+
+    if line.starts_with("* ") {
+        LineType::UnorderedList { trimmed, marker: '*' }
+    } else if line.starts_with("- ") {
+        LineType::UnorderedList { trimmed, marker: '-' }
+    } else if line.starts_with("+ ") {
+        LineType::UnorderedList { trimmed, marker: '+' }
+    } else if let Some(number) = ORDERED_LIST_PATTERN.find(line) {
+        let number = number.as_str();
+        number[0..number.len() - 2 /* ". " */]
+            .parse::<u32>()
+            .map(|number| LineType::OrderedList { trimmed, number })
+            .unwrap_or(LineType::None { trimmed })
+    } else {
+        LineType::None { trimmed }
+    }
+}
+
+fn parse_prev_line<'a>(pre_text: &'a str) -> LineType<'a> {
     let prev_line = if let Some(start) = pre_text.rfind('\n') {
         if start == pre_text.len() - 1 {
-            return PrevLineType::None { trimmed: "" };
+            return LineType::None { trimmed: "" };
         }
 
         &pre_text[start + 1..]
@@ -261,22 +317,5 @@ fn parse_prev_line<'a>(pre_text: &'a str) -> PrevLineType<'a> {
         pre_text
     };
 
-    let trimmed_line = prev_line.trim_start();
-    let (trimmed, line) = prev_line.split_at(prev_line.len() - trimmed_line.len());
-
-    if line.starts_with("* ") {
-        PrevLineType::UnorderedList { trimmed, marker: '*' }
-    } else if line.starts_with("- ") {
-        PrevLineType::UnorderedList { trimmed, marker: '-' }
-    } else if line.starts_with("+ ") {
-        PrevLineType::UnorderedList { trimmed, marker: '+' }
-    } else if let Some(number) = ORDERED_LIST_PATTERN.find(line) {
-        let number = number.as_str();
-        number[0..number.len() - 2 /* ". " */]
-            .parse::<u32>()
-            .map(|number| PrevLineType::OrderedList { trimmed, number })
-            .unwrap_or(PrevLineType::None { trimmed })
-    } else {
-        PrevLineType::None { trimmed }
-    }
+    parse_line(prev_line)
 }
