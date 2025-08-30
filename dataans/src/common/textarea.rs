@@ -248,8 +248,94 @@ fn get_text_format_fn(event: KeyboardEvent) -> Option<TextFormatFn> {
                 }
             },
         )
+    } else if !event.ctrl_key() && !event.alt_key() && event.key() == "Tab" {
+        event.prevent_default();
+
+        if event.shift_key() {
+            // Decrement indentation.
+            None
+        } else {
+            // Increment indentation.
+            Some(&move |pre_text, selected_text, after_text, _start| {
+                let (pre_text, lines, after_text) =
+                    select_lines_for_indentation(&pre_text, &selected_text, &after_text);
+                let mut lines = lines.lines();
+                let mut formatted = lines
+                    .next()
+                    .map(|line| format!("  {line}"))
+                    .unwrap_or_default()
+                    .to_owned();
+
+                lines.for_each(|line| {
+                    formatted.push('\n');
+                    formatted.push_str("  ");
+                    formatted.push_str(line);
+                });
+
+                (
+                    format!("{pre_text}{formatted}{after_text}"),
+                    Some((pre_text.len() as u32, (pre_text.len() + formatted.len()) as u32)),
+                )
+            })
+        }
     } else {
         None
+    }
+}
+
+fn select_lines_for_indentation<'a>(
+    pre_text: &'a str,
+    selected_text: &'a str,
+    after_text: &'a str,
+) -> (&'a str, String, &'a str) {
+    let start = pre_text.rfind('\n');
+    let end = after_text.find('\n');
+
+    match (start, end) {
+        (Some(start), Some(end)) => {
+            let mut lines = String::new();
+
+            if start + 1 < pre_text.len() {
+                lines.push_str(&pre_text[start + 1..]);
+            }
+
+            lines.push_str(selected_text);
+            lines.push_str(&after_text[0..end]);
+
+            (&pre_text[0..start + 1], lines, &after_text[end..])
+        }
+        // The user selected from some part of the text to the end of text (to the last line)
+        // There are some lines before the start of the selection.
+        (Some(start), None) => {
+            let mut lines = String::new();
+
+            if start + 1 < pre_text.len() {
+                lines.push_str(&pre_text[start + 1..]);
+            }
+
+            lines.push_str(selected_text);
+            lines.push_str(after_text);
+
+            (&pre_text[0..start + 1], lines, "")
+        }
+        // The user selected from the first line to some part of the text (there are some lines after the end of the selection).
+        (None, Some(end)) => {
+            let mut lines = String::new();
+            lines.push_str(pre_text);
+            lines.push_str(selected_text);
+            lines.push_str(&after_text[0..end]);
+
+            ("", lines, &after_text[end..])
+        }
+        // The user started selection from the first line to the end of text (to the last line).
+        (None, None) => {
+            let mut lines = String::with_capacity(pre_text.len() + selected_text.len() + after_text.len());
+            lines.push_str(pre_text);
+            lines.push_str(selected_text);
+            lines.push_str(after_text);
+
+            ("", lines, "")
+        }
     }
 }
 
