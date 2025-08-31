@@ -248,12 +248,27 @@ fn get_text_format_fn(event: KeyboardEvent) -> Option<TextFormatFn> {
                 }
             },
         )
-    } else if !event.ctrl_key() && !event.alt_key() && event.key() == "Tab" {
+    } else if !event.ctrl_key() && !event.alt_key() && (event.key() == "Tab" || event.code() == "Tab") {
         event.prevent_default();
 
         if event.shift_key() {
             // Decrement indentation.
-            None
+            Some(&move |pre_text, selected_text, after_text, _start| {
+                let (pre_text, lines, after_text) =
+                    select_lines_for_indentation(&pre_text, &selected_text, &after_text);
+                let mut lines = lines.lines();
+                let mut formatted = lines.next().map(decrement_indentation).unwrap_or_default().to_owned();
+
+                lines.for_each(|line| {
+                    formatted.push('\n');
+                    formatted.push_str(&decrement_indentation(line));
+                });
+
+                (
+                    format!("{pre_text}{formatted}{after_text}"),
+                    Some((pre_text.len() as u32, (pre_text.len() + formatted.len()) as u32)),
+                )
+            })
         } else {
             // Increment indentation.
             Some(&move |pre_text, selected_text, after_text, _start| {
@@ -281,6 +296,22 @@ fn get_text_format_fn(event: KeyboardEvent) -> Option<TextFormatFn> {
     } else {
         None
     }
+}
+
+fn decrement_indentation(line: &str) -> String {
+    let tab_size = 2.min(line.len());
+
+    let mut i = 0;
+
+    while i < tab_size {
+        if !char::from(line.as_bytes()[i]).is_ascii_whitespace() {
+            break;
+        }
+
+        i += 1;
+    }
+
+    line[i..].to_string()
 }
 
 fn select_lines_for_indentation<'a>(
@@ -404,4 +435,32 @@ fn parse_prev_line<'a>(pre_text: &'a str) -> LineType<'a> {
     };
 
     parse_line(prev_line)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_decrement_indentation() {
+        assert_eq!(
+            decrement_indentation("        LineType::None { trimmed }"),
+            "      LineType::None { trimmed }",
+        );
+
+        assert_eq!(
+            decrement_indentation("  LineType::None { trimmed }"),
+            "LineType::None { trimmed }",
+        );
+
+        assert_eq!(
+            decrement_indentation(" LineType::None { trimmed }"),
+            "LineType::None { trimmed }",
+        );
+
+        assert_eq!(
+            decrement_indentation("LineType::None { trimmed }"),
+            "LineType::None { trimmed }",
+        );
+    }
 }
