@@ -10,9 +10,7 @@ static SYNTAXES: LazyLock<SyntaxSet> = LazyLock::new(SyntaxSet::load_defaults_ne
 /// Parsed the code block value and returns generated HTML for this code.
 #[tauri::command]
 pub fn parse_code(lang: String, code: String) -> String {
-    let syntax = if let Some(syntax) = SYNTAXES.find_syntax_by_name(&lang) {
-        syntax
-    } else if let Some(syntax) = SYNTAXES.find_syntax_by_extension(&lang) {
+    let syntax = if let Some(syntax) = SYNTAXES.find_syntax_by_token(&lang) {
         syntax
     } else {
         SYNTAXES.find_syntax_plain_text()
