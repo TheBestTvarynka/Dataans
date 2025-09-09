@@ -12,7 +12,7 @@ authors = ["Pavlo Myroniuk <the.best.tvarynka@gmail.com>"]
 [workspace.dependencies]
 web-api-types = { path = "crates/web-api-types" }
 sha2 = "0.10"
-aes-gcm = { version = "0.11.0-rc.0" }
+aes-gcm = { version = "0.11.0-rc.1" }
 hmac = "0.12"
 
 sqlx = "0.8"
