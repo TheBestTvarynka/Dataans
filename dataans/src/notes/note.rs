@@ -16,6 +16,8 @@ pub fn Note(
     delete_note: SignalSetter<NoteId>,
     update_note: SignalSetter<OwnedNote>,
 ) -> impl IntoView {
+    let toaster = leptoaster::expect_toaster();
+
     let config = expect_context::<RwSignal<Config>>();
 
     let (show_modal, set_show_modal) = signal(false);
@@ -83,6 +85,21 @@ pub fn Note(
                     }.into_any()}}
                 </div>
                 <div class="note-tools">
+                    <button
+                        class="tool"
+                        title="Copy note"
+                        on:click=move |_| {
+                            let clipboard = window().navigator().clipboard();
+                            let _ = clipboard.write_text(note.text.as_ref());
+                            toaster.toast(
+                                leptoaster::ToastBuilder::new("Copied!")
+                                    .with_level(leptoaster::ToastLevel::Success)
+                                    .with_position(leptoaster::ToastPosition::BottomRight),
+                            );
+                        }
+                    >
+                        <img alt="edit note" src="/public/icons/copy-light.png" />
+                    </button>
                     <button
                         class="tool"
                         title="Edit note"
