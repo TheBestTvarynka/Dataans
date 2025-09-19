@@ -31,7 +31,7 @@ pub fn CodeBlock(code: String, lang: String) -> impl IntoView {
             <div class="note-code-block-meta-container">
                 <button
                     class="code-block-tool"
-                    title="copy code"
+                    title="Copy code"
                     on:click=move |_| {
                         let clipboard = window().navigator().clipboard();
                         let _ = clipboard.write_text(&code_value);
