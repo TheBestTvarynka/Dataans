@@ -201,7 +201,7 @@ fn get_text_format_fn(event: KeyboardEvent) -> Option<TextFormatFn> {
         })
     } else if event.ctrl_key() && event.shift_key() && event.key() == "M" {
         Some(&move |pre_text, selected_text, after_text, start| {
-            let selection_start = start + 1 /* "_" */;
+            let selection_start = start + 1 /* "`" */;
             let selection_end = selection_start + selected_text.len() as u32;
             (
                 format!("{pre_text}`{selected_text}`{after_text}"),
@@ -293,6 +293,27 @@ fn get_text_format_fn(event: KeyboardEvent) -> Option<TextFormatFn> {
                 )
             })
         }
+    } else if event.key() == "`" {
+        event.prevent_default();
+
+        Some(&move |pre_text, selected_text, after_text, start| {
+            let selection_start = start + 1;
+            if pre_text.ends_with("``") {
+                // `get_prev_line` returns `None` only when `\n` is the last char of the string slice.
+                // But it is impossible because `pre_text` ends with "``" (if statement above).
+                // Thus, it is safe to unwrap here.
+                let prev_line = get_prev_line(&pre_text).expect("'\n' should not be the last char in `pre_text`");
+                (
+                    format!("{pre_text}`{selected_text}\n{prev_line}`{after_text}"),
+                    Some((selection_start, selection_start)),
+                )
+            } else {
+                (
+                    format!("{pre_text}`{selected_text}{after_text}"),
+                    Some((selection_start, selection_start)),
+                )
+            }
+        })
     } else {
         None
     }
@@ -423,15 +444,21 @@ fn parse_line<'a>(line: &'a str) -> LineType<'a> {
     }
 }
 
-fn parse_prev_line<'a>(pre_text: &'a str) -> LineType<'a> {
-    let prev_line = if let Some(start) = pre_text.rfind('\n') {
+fn get_prev_line(pre_text: &str) -> Option<&str> {
+    Some(if let Some(start) = pre_text.rfind('\n') {
         if start == pre_text.len() - 1 {
-            return LineType::None { trimmed: "" };
+            return None;
         }
 
         &pre_text[start + 1..]
     } else {
         pre_text
+    })
+}
+
+fn parse_prev_line<'a>(pre_text: &'a str) -> LineType<'a> {
+    let Some(prev_line) = get_prev_line(pre_text) else {
+        return LineType::None { trimmed: "" };
     };
 
     parse_line(prev_line)
