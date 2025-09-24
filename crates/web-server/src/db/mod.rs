@@ -12,6 +12,9 @@ pub enum DbError {
 
     #[error("{0} operation is unsupported")]
     Unsupported(&'static str),
+
+    #[error("invalid operation: {0}")]
+    InvalidOperation(&'static str),
 }
 
 pub trait OperationsDb: Send + Sync {
