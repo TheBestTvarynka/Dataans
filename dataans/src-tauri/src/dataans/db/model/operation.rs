@@ -417,6 +417,16 @@ impl OperationLogger {
         Self { pool }
     }
 
+    /// Returns `true` if the operation with the given id already exists in the local database.
+    async fn is_operation_exists(id: Uuid, transaction: &mut Transaction<'_, Sqlite>) -> Result<bool, DbError> {
+        let record: (i64,) = sqlx::query_as("SELECT COUNT(id) FROM operations WHERE id = ?1")
+            .bind(id)
+            .fetch_one(&mut **transaction)
+            .await?;
+
+        Ok(record.0 > 0)
+    }
+
     /// Returns the direct connection to the database.
     ///
     /// # Correctness
@@ -491,6 +501,19 @@ impl OperationDb for OperationLogger {
             created_at,
             operation,
         } = operation;
+
+        // In theory, the following check is not needed. But in the past we has a bug in the synchronization
+        // algorithm that caused the same operation to be applied multiple times. To be safe, we add this check.
+        if Self::is_operation_exists(*id, &mut transaction).await? {
+            warn!(
+                "Operation ({id}) already exists, skipping... This should not be possible and should not happen (but it is what it is)."
+            );
+            trace!(?operation, "Operation ({id}) already exists, skipping...");
+
+            transaction.rollback().await?;
+
+            return Ok(None);
+        }
 
         let event = operation.apply(*created_at, &mut transaction).await?;
         OperationLogger::log(
