@@ -117,7 +117,7 @@ impl Client {
     ///
     /// This method automatically encrypts provided operations.
     #[instrument(err, skip(self, operations))]
-    pub async fn upload_operations(&self, operations: &[&OperationRecord<'_>]) -> Result<(), SyncError> {
+    pub async fn upload_operations(&self, operations: &[OperationRecord<'_>]) -> Result<(), SyncError> {
         let operations = operations
             .iter()
             .map(|operation| {

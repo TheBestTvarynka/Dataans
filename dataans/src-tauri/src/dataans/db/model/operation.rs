@@ -28,7 +28,7 @@ use crate::dataans::sync::{Hash, Hasher};
 /// The user's operation type (and its data).
 ///
 /// This enumeration lists all possible user operation types.
-#[derive(Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Eq, Serialize, Deserialize, Clone)]
 pub enum Operation<'data> {
     CreateNote(Cow<'data, Note>),
     UpdateNote(Cow<'data, Note>),
@@ -362,7 +362,7 @@ impl Hash for Operation<'_> {
     }
 }
 
-#[derive(Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Eq, Serialize, Deserialize, Clone)]
 pub struct OperationRecord<'data> {
     pub id: Uuid,
     #[serde(with = "rfc3339")]
