@@ -120,7 +120,7 @@ impl Operation<'_> {
                 }))
             }
             Operation::UpdateNote(note) => {
-                let local_note = SqliteDb::note_by_id(note.id, transaction.as_mut()).await?;
+                let local_note = SqliteDb::absolute_note_by_id(note.id, transaction.as_mut()).await?;
 
                 if local_note.updated_at < operation_time {
                     SqliteDb::update_note(note.as_ref(), operation_time, transaction).await?;
@@ -173,7 +173,7 @@ impl Operation<'_> {
                 }
             }
             Operation::DeleteNote(id) => {
-                let local_note = SqliteDb::note_by_id(*id, transaction.as_mut()).await?;
+                let local_note = SqliteDb::absolute_note_by_id(*id, transaction.as_mut()).await?;
 
                 if local_note.updated_at < operation_time {
                     SqliteDb::remove_note_inner(*id, operation_time, transaction).await?;
@@ -213,7 +213,7 @@ impl Operation<'_> {
                 }))
             }
             Operation::DeleteFile(id) => {
-                let local_file = SqliteDb::file_by_id(*id, transaction.as_mut()).await?;
+                let local_file = SqliteDb::absolute_file_by_id(*id, transaction.as_mut()).await?;
 
                 if local_file.updated_at < operation_time {
                     SqliteDb::remove_file(*id, operation_time, transaction).await?;
@@ -244,7 +244,7 @@ impl Operation<'_> {
                 }))
             }
             Operation::UpdateSpace(space) => {
-                let local_space = SqliteDb::space_by_id(space.id, transaction.as_mut()).await?;
+                let local_space = SqliteDb::absolute_space_by_id(space.id, transaction.as_mut()).await?;
 
                 if local_space.updated_at < operation_time {
                     SqliteDb::update_space(space.as_ref(), operation_time, transaction).await?;
@@ -272,7 +272,7 @@ impl Operation<'_> {
                 }
             }
             Operation::DeleteSpace(id) => {
-                let local_space = SqliteDb::space_by_id(*id, transaction.as_mut()).await?;
+                let local_space = SqliteDb::absolute_space_by_id(*id, transaction.as_mut()).await?;
 
                 if local_space.updated_at < operation_time {
                     SqliteDb::remove_space(*id, operation_time, transaction).await?;

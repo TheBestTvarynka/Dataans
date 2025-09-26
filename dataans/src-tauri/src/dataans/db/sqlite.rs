@@ -62,6 +62,20 @@ impl SqliteDb {
         Ok(())
     }
 
+    /// Returns the space by its id.
+    ///
+    /// The same as [SqliteDb::space_by_id] but returns the space even if deleted.
+    pub async fn absolute_space_by_id(space_id: Uuid, connection: &mut SqliteConnection) -> Result<Space, DbError> {
+        let space =
+            sqlx::query_as("SELECT id, name, avatar_id, created_at, updated_at, is_deleted FROM spaces WHERE id = ?1")
+                .bind(space_id)
+                .fetch_one(&mut *connection)
+                .await?;
+
+        Ok(space)
+    }
+
+    /// Returns the space by its id. Returns an error if the space is deleted.
     pub async fn space_by_id(space_id: Uuid, connection: &mut SqliteConnection) -> Result<Space, DbError> {
         let space = sqlx::query_as("SELECT id, name, avatar_id, created_at, updated_at, is_deleted FROM spaces WHERE id = ?1 AND is_deleted = FALSE")
             .bind(space_id)
@@ -168,6 +182,20 @@ impl SqliteDb {
         Ok(())
     }
 
+    /// Returns the note by its id.
+    ///
+    /// The dame as [SqliteDb::node_by_id] but returns the note even if deleted.
+    pub async fn absolute_note_by_id(note_id: Uuid, connection: &mut SqliteConnection) -> Result<Note, DbError> {
+        let note =
+            sqlx::query_as("SELECT id, text, created_at, updated_at, space_id, is_deleted FROM notes WHERE id = ?1")
+                .bind(note_id)
+                .fetch_one(&mut *connection)
+                .await?;
+
+        Ok(note)
+    }
+
+    /// Returns the note by its id. Returns an error if the node is deleted.
     pub async fn note_by_id(note_id: Uuid, connection: &mut SqliteConnection) -> Result<Note, DbError> {
         let note = sqlx::query_as("SELECT id, text, created_at, updated_at, space_id, is_deleted FROM notes WHERE id = ?1 AND is_deleted = FALSE")
             .bind(note_id)
@@ -232,6 +260,21 @@ impl SqliteDb {
         Ok(())
     }
 
+    /// Returns the file by its id.
+    ///
+    /// The same as [SqliteDb::file_by_id] but returns the file even if deleted.
+    pub async fn absolute_file_by_id(file_id: Uuid, connection: &mut SqliteConnection) -> Result<File, DbError> {
+        let file = sqlx::query_as(
+            "SELECT id, name, path, created_at, updated_at, is_deleted, is_uploaded FROM files WHERE id = ?1",
+        )
+        .bind(file_id)
+        .fetch_one(&mut *connection)
+        .await?;
+
+        Ok(file)
+    }
+
+    /// Returns the file by its id. Returns an error if the file is deleted.
     pub async fn file_by_id(file_id: Uuid, connection: &mut SqliteConnection) -> Result<File, DbError> {
         let file = sqlx::query_as(
             "SELECT id, name, path, created_at, updated_at, is_deleted, is_uploaded FROM files WHERE id = ?1 AND is_deleted = FALSE",
