@@ -227,6 +227,13 @@ impl<D: OperationDb> Synchronizer<D> {
                     SyncError::Event("failed to emit data event")
                 })?;
         } else {
+            // We need to improve this case in the future. Why do we even have it:
+            // When we accept the `CreateFile` operation from the sync server, we do not know if the file is already uploaded or not.
+            // Obviously, the file does not exist locally. Also, file's `is_uploaded` property is false by default.
+            // Here we try to download the file. But if the file is not found on the server, then [_there is nothing we can do_](https://knowyourmeme.com/memes/napoleon-there-is-nothing-we-can-do).
+
+            //
+            // TODO: improve.
             warn!(?file.id, ?file.path, "File does not exist locally and is not uploaded. Something weird happens here...");
             emitter
                 .emit(

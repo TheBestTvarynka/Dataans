@@ -150,7 +150,7 @@ impl<D: Db> FileService<D> {
         let image_data = clipboard.get_image()?;
 
         let id = Uuid::new_v4();
-        let name = format!("{}.png", Uuid::new_v4());
+        let name = format!("{id}.png");
 
         let image_path = self.files_path.join(&name);
 

@@ -187,8 +187,11 @@ impl Operation<'_> {
                 }
             }
             Operation::CreateFile(file) => {
-                let mut file = file.clone().into_owned();
-                file.is_uploaded = true;
+                // The commented line below is a bug. Previously, we assumed that when we accept `CreateFile` operation,
+                // than it also means that the file is also uploaded. But it not necessarily true. The operation can be synced
+                // with the server before the actual file upload happens. For example, when the file uploading failed but
+                // operations uploading succeeded, or when two sync processes happened concurrently.
+                // file.is_uploaded = true;
 
                 SqliteDb::add_file(&file, operation_time, transaction).await?;
 
@@ -200,14 +203,14 @@ impl Operation<'_> {
                     updated_at: _,
                     is_deleted: _,
                     is_uploaded,
-                } = file;
+                } = file.as_ref();
 
-                let path = PathBuf::from(path);
-                let status = FileStatus::status_for_file(&path, is_uploaded);
+                let path = PathBuf::from(path.clone());
+                let status = FileStatus::status_for_file(&path, *is_uploaded);
 
                 Some(DataEvent::FileAdded(EventFile {
-                    id: id.into(),
-                    name,
+                    id: (*id).into(),
+                    name: name.clone(),
                     path,
                     status,
                 }))
