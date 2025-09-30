@@ -164,7 +164,12 @@ impl Client {
     pub async fn exists(&self, id: Uuid) -> Result<bool, SyncError> {
         let response = self
             .client
-            .get(self.sync_server.join("file/")?.join(&id.to_string())?)
+            .get(
+                self.sync_server
+                    .join("file/")?
+                    .join(&format!("{id}/"))?
+                    .join("exists")?,
+            )
             .send()
             .await?
             .error_for_status()?;
