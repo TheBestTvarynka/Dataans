@@ -160,6 +160,18 @@ impl Client {
         Ok(())
     }
 
+    /// Checks whether the file with the given ID exists on the server.
+    pub async fn exists(&self, id: Uuid) -> Result<bool, SyncError> {
+        let response = self
+            .client
+            .get(self.sync_server.join("file/")?.join(&id.to_string())?)
+            .send()
+            .await?
+            .error_for_status()?;
+
+        Ok(response.json::<bool>().await?)
+    }
+
     /// Downloads the file from the server.
     ///
     /// The provided path must be absolute in the file system.
