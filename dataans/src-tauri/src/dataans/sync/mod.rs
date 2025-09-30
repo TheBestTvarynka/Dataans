@@ -65,6 +65,7 @@
 pub mod client;
 mod hash;
 
+use std::collections::HashSet;
 use std::path::Path;
 use std::sync::Arc;
 
@@ -226,16 +227,56 @@ impl<D: OperationDb> Synchronizer<D> {
                     SyncError::Event("failed to emit data event")
                 })?;
         } else {
-            warn!(?file.id, ?file.path, "File does not exist locally and is not uploaded. Something weird happens here...");
-            emitter
-                .emit(
-                    DATA_EVENT,
-                    DataEvent::FileStatusUpdated(file.id.into(), FileStatus::NotExistAndNotUploaded),
-                )
-                .map_err(|err| {
-                    error!(?err, "Failed to emit data event");
-                    SyncError::Event("failed to emit data event")
-                })?;
+            // The files does not exist locally and is not uploaded.
+            //
+            // We need to improve this case in the future. Why do we even have it:
+            // When we accept the `CreateFile` operation from the sync server, we do not know if the file is already uploaded or not.
+            // Obviously, the file does not exist locally. Also, file's `is_uploaded` property is false by default.
+            // Here we try to download the file. But if the file is not found on the server, then [_there is nothing we can do_](https://knowyourmeme.com/memes/napoleon-there-is-nothing-we-can-do).
+            match self.client.exists(file.id).await {
+                Ok(true) => {
+                    self.db.mark_file_as_uploaded(file.id).await?;
+
+                    debug!(?file.id, ?file.path, "File does not exist locally, but is uploaded. Downloading...");
+
+                    self.client.download_file(file.id, &file_path).await?;
+                    emitter
+                        .emit(
+                            DATA_EVENT,
+                            DataEvent::FileStatusUpdated(file.id.into(), FileStatus::ExistAndUploaded),
+                        )
+                        .map_err(|err| {
+                            error!(?err, "Failed to emit data event");
+                            SyncError::Event("failed to emit data event")
+                        })?;
+                }
+                Ok(false) => {
+                    trace!(?file.id, "File does not exist on the server.");
+
+                    emitter
+                        .emit(
+                            DATA_EVENT,
+                            DataEvent::FileStatusUpdated(file.id.into(), FileStatus::NotExistAndNotUploaded),
+                        )
+                        .map_err(|err| {
+                            error!(?err, "Failed to emit data event");
+                            SyncError::Event("failed to emit data event")
+                        })?;
+                }
+                Err(err) => {
+                    error!(?err, ?file.id, "Failed to check if the file is uploaded");
+
+                    emitter
+                        .emit(
+                            DATA_EVENT,
+                            DataEvent::FileStatusUpdated(file.id.into(), FileStatus::NotExistAndNotUploaded),
+                        )
+                        .map_err(|err| {
+                            error!(?err, "Failed to emit data event");
+                            SyncError::Event("failed to emit data event")
+                        })?;
+                }
+            }
         }
 
         Ok(())
@@ -337,42 +378,26 @@ impl<D: OperationDb> Synchronizer<D> {
             return Ok(());
         }
 
-        let mut local_operations = local_operations[blocks_to_skip * OPERATIONS_PER_BLOCK..].iter();
+        let local_operations = &local_operations[blocks_to_skip * OPERATIONS_PER_BLOCK..];
         // Step 3: Request operations from the server.
         let remote_operations = self.client.operations(blocks_to_skip * OPERATIONS_PER_BLOCK).await?;
-        let mut remote_operations = remote_operations.iter();
 
         // Step 4: Find the difference between local and remote operations.
-        let mut operations_to_upload = Vec::new();
-        let mut operations_to_apply = Vec::new();
+        // Yes, the algorithm below can be optimized. But I do not want to make it complicated unless there is a real need for that.
+        let local_operations_set = local_operations
+            .iter()
+            .map(|operation| operation.id)
+            .collect::<HashSet<_>>();
+        let remote_operations_set = remote_operations.iter().map(|operation| operation.id).collect();
+        let common_operation = local_operations_set
+            .intersection(&remote_operations_set)
+            .collect::<HashSet<_>>();
 
-        loop {
-            match (local_operations.next(), remote_operations.next()) {
-                (Some(local_operation), Some(remote_operation)) => {
-                    if local_operation.id != remote_operation.id {
-                        operations_to_upload.push(local_operation);
-                        operations_to_apply.push(remote_operation);
+        let mut operations_to_upload = local_operations.to_vec();
+        let mut operations_to_apply = remote_operations;
 
-                        for local_operation in local_operations {
-                            operations_to_upload.push(local_operation);
-                        }
-
-                        for remote_operation in remote_operations {
-                            operations_to_apply.push(remote_operation);
-                        }
-
-                        break;
-                    }
-                }
-                (Some(local_operation), None) => {
-                    operations_to_upload.push(local_operation);
-                }
-                (None, Some(remote_operation)) => {
-                    operations_to_apply.push(remote_operation);
-                }
-                (None, None) => break,
-            }
-        }
+        operations_to_upload.retain(|operation| !common_operation.contains(&operation.id));
+        operations_to_apply.retain(|operation| !common_operation.contains(&operation.id));
 
         trace!(?operations_to_upload);
         trace!(?operations_to_apply);
@@ -382,7 +407,7 @@ impl<D: OperationDb> Synchronizer<D> {
         let result = futures::join!(
             async {
                 for operation in operations_to_apply {
-                    if let Some(event) = self.db.apply_operation(operation).await.inspect_err(|err| {
+                    if let Some(event) = self.db.apply_operation(&operation).await.inspect_err(|err| {
                         error!(?err, ?operation, "Failed to apply operation");
                     })? {
                         if let DataEvent::FileAdded(file) = &event {

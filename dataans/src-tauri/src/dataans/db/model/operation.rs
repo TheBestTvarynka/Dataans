@@ -28,7 +28,7 @@ use crate::dataans::sync::{Hash, Hasher};
 /// The user's operation type (and its data).
 ///
 /// This enumeration lists all possible user operation types.
-#[derive(Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Eq, Serialize, Deserialize, Clone)]
 pub enum Operation<'data> {
     CreateNote(Cow<'data, Note>),
     UpdateNote(Cow<'data, Note>),
@@ -120,7 +120,7 @@ impl Operation<'_> {
                 }))
             }
             Operation::UpdateNote(note) => {
-                let local_note = SqliteDb::note_by_id(note.id, transaction.as_mut()).await?;
+                let local_note = SqliteDb::absolute_note_by_id(note.id, transaction.as_mut()).await?;
 
                 if local_note.updated_at < operation_time {
                     SqliteDb::update_note(note.as_ref(), operation_time, transaction).await?;
@@ -173,7 +173,7 @@ impl Operation<'_> {
                 }
             }
             Operation::DeleteNote(id) => {
-                let local_note = SqliteDb::note_by_id(*id, transaction.as_mut()).await?;
+                let local_note = SqliteDb::absolute_note_by_id(*id, transaction.as_mut()).await?;
 
                 if local_note.updated_at < operation_time {
                     SqliteDb::remove_note_inner(*id, operation_time, transaction).await?;
@@ -187,10 +187,13 @@ impl Operation<'_> {
                 }
             }
             Operation::CreateFile(file) => {
-                let mut file = file.clone().into_owned();
-                file.is_uploaded = true;
+                // The commented line below is a bug. Previously, we assumed that when we accept the `CreateFile` operation,
+                // it also means that the file is uploaded. But it is not necessarily true. The operation can be synced with
+                // the server before the actual file upload happens. For example, when the file uploading failed but the operations
+                // uploading succeeded, or when two sync processes happened concurrently.
+                // file.is_uploaded = true;
 
-                SqliteDb::add_file(&file, operation_time, transaction).await?;
+                SqliteDb::add_file(file, operation_time, transaction).await?;
 
                 let File {
                     id,
@@ -200,20 +203,20 @@ impl Operation<'_> {
                     updated_at: _,
                     is_deleted: _,
                     is_uploaded,
-                } = file;
+                } = file.as_ref();
 
-                let path = PathBuf::from(path);
-                let status = FileStatus::status_for_file(&path, is_uploaded);
+                let path = PathBuf::from(path.clone());
+                let status = FileStatus::status_for_file(&path, *is_uploaded);
 
                 Some(DataEvent::FileAdded(EventFile {
-                    id: id.into(),
-                    name,
+                    id: (*id).into(),
+                    name: name.clone(),
                     path,
                     status,
                 }))
             }
             Operation::DeleteFile(id) => {
-                let local_file = SqliteDb::file_by_id(*id, transaction.as_mut()).await?;
+                let local_file = SqliteDb::absolute_file_by_id(*id, transaction.as_mut()).await?;
 
                 if local_file.updated_at < operation_time {
                     SqliteDb::remove_file(*id, operation_time, transaction).await?;
@@ -244,7 +247,7 @@ impl Operation<'_> {
                 }))
             }
             Operation::UpdateSpace(space) => {
-                let local_space = SqliteDb::space_by_id(space.id, transaction.as_mut()).await?;
+                let local_space = SqliteDb::absolute_space_by_id(space.id, transaction.as_mut()).await?;
 
                 if local_space.updated_at < operation_time {
                     SqliteDb::update_space(space.as_ref(), operation_time, transaction).await?;
@@ -272,7 +275,7 @@ impl Operation<'_> {
                 }
             }
             Operation::DeleteSpace(id) => {
-                let local_space = SqliteDb::space_by_id(*id, transaction.as_mut()).await?;
+                let local_space = SqliteDb::absolute_space_by_id(*id, transaction.as_mut()).await?;
 
                 if local_space.updated_at < operation_time {
                     SqliteDb::remove_space(*id, operation_time, transaction).await?;
@@ -362,7 +365,7 @@ impl Hash for Operation<'_> {
     }
 }
 
-#[derive(Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Eq, Serialize, Deserialize, Clone)]
 pub struct OperationRecord<'data> {
     pub id: Uuid,
     #[serde(with = "rfc3339")]
@@ -415,6 +418,16 @@ impl OperationLogger {
     /// Creates a new [OperationLogger] instance.
     pub fn new(pool: SqlitePool) -> Self {
         Self { pool }
+    }
+
+    /// Returns `true` if the operation with the given id already exists in the local database.
+    async fn is_operation_exists(id: Uuid, transaction: &mut Transaction<'_, Sqlite>) -> Result<bool, DbError> {
+        let record: (i64,) = sqlx::query_as("SELECT COUNT(id) FROM operations WHERE id = ?1")
+            .bind(id)
+            .fetch_one(&mut **transaction)
+            .await?;
+
+        Ok(record.0 > 0)
     }
 
     /// Returns the direct connection to the database.
@@ -491,6 +504,19 @@ impl OperationDb for OperationLogger {
             created_at,
             operation,
         } = operation;
+
+        // In theory, the following check is not needed. But in the past we has a bug in the synchronization
+        // algorithm that caused the same operation to be applied multiple times. To be safe, we add this check.
+        if Self::is_operation_exists(*id, &mut transaction).await? {
+            warn!(
+                "Operation ({id}) already exists, skipping... This should not be possible and should not happen (but it is what it is)."
+            );
+            trace!(?operation, "Operation ({id}) already exists, skipping...");
+
+            transaction.rollback().await?;
+
+            return Ok(None);
+        }
 
         let event = operation.apply(*created_at, &mut transaction).await?;
         OperationLogger::log(
