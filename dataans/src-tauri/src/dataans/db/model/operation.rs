@@ -187,10 +187,10 @@ impl Operation<'_> {
                 }
             }
             Operation::CreateFile(file) => {
-                // The commented line below is a bug. Previously, we assumed that when we accept `CreateFile` operation,
-                // than it also means that the file is also uploaded. But it not necessarily true. The operation can be synced
-                // with the server before the actual file upload happens. For example, when the file uploading failed but
-                // operations uploading succeeded, or when two sync processes happened concurrently.
+                // The commented line below is a bug. Previously, we assumed that when we accept the `CreateFile` operation,
+                // it also means that the file is uploaded. But it is not necessarily true. The operation can be synced with
+                // the server before the actual file upload happens. For example, when the file uploading failed but the operations
+                // uploading succeeded, or when two sync processes happened concurrently.
                 // file.is_uploaded = true;
 
                 SqliteDb::add_file(file, operation_time, transaction).await?;
