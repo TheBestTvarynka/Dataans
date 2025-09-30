@@ -193,7 +193,7 @@ impl Operation<'_> {
                 // operations uploading succeeded, or when two sync processes happened concurrently.
                 // file.is_uploaded = true;
 
-                SqliteDb::add_file(&file, operation_time, transaction).await?;
+                SqliteDb::add_file(file, operation_time, transaction).await?;
 
                 let File {
                     id,

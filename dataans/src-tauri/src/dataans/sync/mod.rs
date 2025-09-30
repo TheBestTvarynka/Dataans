@@ -277,19 +277,6 @@ impl<D: OperationDb> Synchronizer<D> {
                         })?;
                 }
             }
-
-            //
-            // TODO: improve.
-            warn!(?file.id, ?file.path, "File does not exist locally and is not uploaded. Something weird happens here...");
-            emitter
-                .emit(
-                    DATA_EVENT,
-                    DataEvent::FileStatusUpdated(file.id.into(), FileStatus::NotExistAndNotUploaded),
-                )
-                .map_err(|err| {
-                    error!(?err, "Failed to emit data event");
-                    SyncError::Event("failed to emit data event")
-                })?;
         }
 
         Ok(())
