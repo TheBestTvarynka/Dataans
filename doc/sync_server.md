@@ -126,10 +126,10 @@ So, we can discard operations that belong to blocks with the same hashes. If eit
 
 After that, the app requests the server's notes starting from the end of the last discarded block. The same for local operations: the app selects local operation starting from the last discarded block.
 
-As a result, the app has two operation lists: local and remote. Both lists are sorted by timestamp. The app will compare them one by one and discard operations with the same id.
-This process stops when the app finds the two operations with different ids. Starting from this point, the rest of the local operations will be uploaded on the remote server, and the rest of the remote operations will be applied on the local database.
-Starting from this point, the app does not need to check other operations in lists, because it is guaranteed that their ids will be different.
-The app can safely stop comparing on the first operations pair with different ids.
+As a result, the app has two operation lists: local and remote. Both lists are sorted by timestamp. The app finds common operations for both lists.
+Then, these common operations are eliminated from local and remote operations lists. After that, we will have two lists with unique operations.
+
+The rest is an easy job. The app applies remote operations on a local database and uploads local operations.
 
 ### Conflict resolution
 
