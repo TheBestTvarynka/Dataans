@@ -1,5 +1,6 @@
 use rocket::data::{Data, ToByteUnit};
 use rocket::http::{ContentType, Header, Status};
+use rocket::serde::json::Json;
 use rocket::{Response, State, get, post};
 use uuid::Uuid;
 use web_api_types::Result;
@@ -13,6 +14,11 @@ pub async fn upload(_u: UserContext, server: &State<WebServerState>, id: Uuid, d
     server.file_saver.save_file(id, data.open(2.gigabytes())).await?;
 
     Ok(())
+}
+
+#[get("/<id>/exists")]
+pub async fn exists(_u: UserContext, server: &State<WebServerState>, id: Uuid) -> Result<Json<bool>> {
+    Ok(Json(server.file_saver.exists(id).await?))
 }
 
 pub struct Resp<'r>(Response<'r>);

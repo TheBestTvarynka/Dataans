@@ -8,6 +8,7 @@ use crate::Result;
 pub trait FileSaver: Send + Sync {
     async fn save_file(&self, id: Uuid, reader: impl AsyncRead + Unpin) -> Result<()>;
     async fn open_file(&self, id: Uuid) -> Result<(Option<usize>, impl AsyncRead + Send)>;
+    async fn exists(&self, id: Uuid) -> Result<bool>;
 }
 
 #[cfg(feature = "fs")]
@@ -40,6 +41,11 @@ mod fs {
             copy(&mut reader, &mut file).await?;
 
             Ok(())
+        }
+
+        #[instrument(err)]
+        async fn exists(&self, id: Uuid) -> Result<bool> {
+            Ok(self.dest.join(id.to_string()).exists())
         }
 
         #[instrument(err)]
@@ -119,6 +125,32 @@ mod tigris {
             trace!(?object, "File has been saved to S3");
 
             Ok(())
+        }
+
+        #[instrument(err)]
+        async fn exists(&self, id: Uuid) -> Result<bool> {
+            let head_object = self
+                .client
+                .head_object()
+                .bucket(&self.bucket)
+                .key(id.to_string())
+                .send()
+                .await;
+
+            match head_object {
+                Ok(_) => Ok(true),
+                Err(err) => {
+                    if let Some(service_error) = err.as_service_error() {
+                        if service_error.is_not_found() {
+                            Ok(false)
+                        } else {
+                            Err(Error::FileSaver(err.to_string()))
+                        }
+                    } else {
+                        Err(Error::FileSaver(err.to_string()))
+                    }
+                }
+            }
         }
 
         #[instrument(err)]
