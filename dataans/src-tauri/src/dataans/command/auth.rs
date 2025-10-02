@@ -28,6 +28,12 @@ pub async fn sign_out<R: Runtime>(app: AppHandle<R>, state: State<'_, DataansSta
     app.emit(USER_CONTEXT_EVENT, UserContextEvent::SignedOut)
         .map_err(DataansError::from)?;
 
+    let cookies = state.base_path.join("cookies");
+
+    if cookies.exists() {
+        tokio::fs::remove_file(cookies).await?;
+    }
+
     Ok(())
 }
 
@@ -126,6 +132,7 @@ pub async fn sign_in<R: Runtime>(
 
     if let Some(window) = app.webview_windows().get(crate::window::CF_WINDOW_TITLE) {
         window.close().map_err(DataansError::from)?;
+        window.destroy().map_err(DataansError::from)?;
     } else {
         warn!("CF-Auth windows not found.");
     }

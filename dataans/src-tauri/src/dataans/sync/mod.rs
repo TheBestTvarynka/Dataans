@@ -118,6 +118,15 @@ pub enum SyncError {
 
     #[error("health check failed: {0:?}")]
     HealthCheckFailed(reqwest::StatusCode),
+
+    #[error("access token is expired")]
+    TokenExpired,
+}
+
+impl SyncError {
+    pub fn is_token_expired(&self) -> bool {
+        matches!(self, SyncError::TokenExpired)
+    }
 }
 
 #[instrument(err, skip(db, encryption_key, emitter))]
@@ -147,17 +156,21 @@ pub async fn sync_future<D: OperationDb, R: Runtime, E: Emitter<R>>(
         (Err(main_err), Err(file_err)) => {
             error!(?main_err, ?file_err, "Failed to sync DB data and files data");
 
+            if main_err.is_token_expired() || file_err.is_token_expired() {
+                return Err(SyncError::TokenExpired);
+            }
+
             Err(SyncError::SyncFailed("failed to sync DB data and files data"))
         }
         (Err(err), _) => {
             error!(?err, "Failed to sync DB data");
 
-            Err(SyncError::SyncFailed("failed to sync DB data"))
+            Err(err)
         }
         (_, Err(err)) => {
             error!(?err, "Failed to sync files data");
 
-            Err(SyncError::SyncFailed("failed to sync files data"))
+            Err(err)
         }
     }
 }

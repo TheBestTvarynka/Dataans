@@ -2,9 +2,11 @@ use std::path::PathBuf;
 
 use common::error::{CommandError, CommandResult, CommandResultEmpty};
 use futures::channel::oneshot;
-use tauri::{AppHandle, Manager, WebviewUrl, WebviewWindowBuilder};
+use tauri::{AppHandle, Manager, Runtime, WebviewUrl, WebviewWindowBuilder};
 use tauri_plugin_dialog::{DialogExt, FilePath};
 use url::Url;
+
+use crate::dataans::error::DataansError;
 
 const APP_INFO_WINDOW_TITLE: &str = "App-Info";
 pub const CF_WINDOW_TITLE: &str = "CF-Auth";
@@ -40,14 +42,16 @@ pub async fn open_app_info_window(app: AppHandle) -> CommandResultEmpty {
 /// It is used for authenticating to Cloudflare Zero Trust Access.
 #[instrument(level = "trace", ret, skip(app))]
 #[tauri::command]
-pub async fn cf_auth(app: AppHandle, url: Url) -> CommandResultEmpty {
+pub async fn cf_auth<R: Runtime>(app: AppHandle<R>, url: Url) -> CommandResultEmpty {
     if let Some(window) = app.webview_windows().get(CF_WINDOW_TITLE) {
         info!("CF-Auth window already opened");
+
+        window.clear_all_browsing_data().map_err(DataansError::from)?;
 
         window.show().map_err(|err| CommandError::Tauri(err.to_string()))?;
         window.set_focus().map_err(|err| CommandError::Tauri(err.to_string()))?;
     } else {
-        WebviewWindowBuilder::new(
+        let window = WebviewWindowBuilder::new(
             &app,
             CF_WINDOW_TITLE,
             WebviewUrl::External(url.join("health/authorize.html").expect("Invalid URL for CF-Auth")),
@@ -57,9 +61,11 @@ pub async fn cf_auth(app: AppHandle, url: Url) -> CommandResultEmpty {
         .closable(true)
         .focused(true)
         .inner_size(800.0, 800.0)
-        .title("CF-Auth")
+        .title(CF_WINDOW_TITLE)
         .build()
         .map_err(|err| CommandError::Tauri(err.to_string()))?;
+
+        window.clear_all_browsing_data().map_err(DataansError::from)?;
     }
 
     Ok(())
