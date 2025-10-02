@@ -63,7 +63,13 @@ impl Client {
         let response = self.client.get(health_url).send().await?;
 
         if response.status().is_success() {
-            Ok(())
+            if response.url().domain() != self.sync_server.domain() {
+                info!(url = ?response.url().domain(), "Token expired. Redirecting to a login page...");
+
+                Err(SyncError::TokenExpired)
+            } else {
+                Ok(())
+            }
         } else {
             Err(SyncError::HealthCheckFailed(response.status()))
         }
@@ -77,7 +83,14 @@ impl Client {
             .query_pairs_mut()
             .append_pair("items_per_block", &items_per_block.to_string());
 
-        let blocks = self.client.get(blocks_url).send().await?.json::<Blocks>().await?;
+        let response = self.client.get(blocks_url).send().await?.error_for_status()?;
+
+        if response.url().domain() != self.sync_server.domain() {
+            info!(url = ?response.url().domain(), "Token expired. Redirecting to a login page...");
+            return Err(SyncError::TokenExpired);
+        }
+
+        let blocks = response.json::<Blocks>().await?;
 
         let blocks = blocks.0.into_iter().map(|block| block.0).collect::<Vec<_>>();
 
@@ -95,13 +108,15 @@ impl Client {
             .query_pairs_mut()
             .append_pair("operations_to_skip", &operations_to_skip.to_string());
 
-        let operations = self
-            .client
-            .get(operations_url)
-            .send()
-            .await?
-            .json::<Vec<Operation>>()
-            .await?;
+        let response = self.client.get(operations_url).send().await?.error_for_status()?;
+
+        if response.url().domain() != self.sync_server.domain() {
+            info!(url = ?response.url().domain(), "Token expired. Redirecting to a login page...");
+
+            return Err(SyncError::TokenExpired);
+        }
+
+        let operations = response.json::<Vec<Operation>>().await?;
 
         let operations = operations
             .into_iter()
@@ -131,12 +146,19 @@ impl Client {
             })
             .collect::<Result<Vec<_>, SyncError>>()?;
 
-        self.client
+        let response = self
+            .client
             .post(self.sync_server.join("data/operation")?)
             .json(&operations)
             .send()
             .await?
             .error_for_status()?;
+
+        if response.url().domain() != self.sync_server.domain() {
+            info!(url = ?response.url().domain(), "Token expired. Redirecting to a login page...");
+
+            return Err(SyncError::TokenExpired);
+        }
 
         Ok(())
     }
@@ -150,12 +172,19 @@ impl Client {
 
         let data = encrypt_data(&file_data, &self.encryption_key)?;
 
-        self.client
+        let response = self
+            .client
             .post(self.sync_server.join("file/")?.join(&id.to_string())?)
             .body(data)
             .send()
             .await?
             .error_for_status()?;
+
+        if response.url().domain() != self.sync_server.domain() {
+            info!(url = ?response.url().domain(), "Token expired. Redirecting to a login page...");
+
+            return Err(SyncError::TokenExpired);
+        }
 
         Ok(())
     }
@@ -174,6 +203,12 @@ impl Client {
             .await?
             .error_for_status()?;
 
+        if response.url().domain() != self.sync_server.domain() {
+            info!(url = ?response.url().domain(), "Token expired. Redirecting to a login page...");
+
+            return Err(SyncError::TokenExpired);
+        }
+
         Ok(response.json::<bool>().await?)
     }
 
@@ -188,6 +223,12 @@ impl Client {
             .send()
             .await?
             .error_for_status()?;
+
+        if response.url().domain() != self.sync_server.domain() {
+            info!(url = ?response.url().domain(), "Token expired. Redirecting to a login page...");
+
+            return Err(SyncError::TokenExpired);
+        }
 
         let data = response.bytes().await?.to_vec();
         let file_data = decrypt_data(&data, &self.encryption_key)?;
