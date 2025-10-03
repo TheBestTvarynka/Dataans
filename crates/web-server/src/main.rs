@@ -22,7 +22,7 @@ use rocket::routes;
 use sqlx::postgres::PgPoolOptions;
 
 use crate::db::PostgresDb;
-use crate::services::Data as DataService;
+use crate::services::{Data as DataService, UserService};
 
 const CF_TEAM_NAME: &str = "DATAANS_WEB_SERVER_CF_TEAM_NAME";
 const CF_AUD: &str = "DATAANS_WEB_CF_AUD";
@@ -32,6 +32,7 @@ pub struct State<D, S> {
     pub cf_team_name: String,
     pub cf_aud: String,
     pub data_service: DataService<D>,
+    pub user_service: UserService<D>,
     pub file_saver: S,
 }
 
@@ -91,6 +92,7 @@ impl WebServerState {
             cf_team_name,
             cf_aud,
             data_service: DataService::new(Arc::clone(&db)),
+            user_service: UserService::new(Arc::clone(&db)),
             file_saver: prepare_file_loader().await,
         }
     }
@@ -109,6 +111,7 @@ async fn main() -> std::result::Result<(), Box<rocket::Error>> {
             routes![routes::blocks, routes::operations, routes::add_operations,],
         )
         .mount("/file", routes![routes::upload, routes::download, routes::exists,])
+        .mount("/user", routes![routes::get_user, routes::init_user,])
         .mount(
             "/health",
             routes![routes::health, routes::health_auth, routes::cf_token],

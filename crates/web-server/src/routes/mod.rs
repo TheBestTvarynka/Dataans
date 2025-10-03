@@ -1,5 +1,6 @@
 mod data;
 mod file;
+mod user;
 
 use std::str::FromStr;
 
@@ -11,6 +12,7 @@ use rocket::http::{ContentType, Status};
 use rocket::request::{FromRequest, Outcome, Request};
 use rocket::response::{self, Responder, Response};
 use serde::Deserialize;
+pub use user::*;
 use uuid::Uuid;
 
 use crate::{Error, WebServerState};
