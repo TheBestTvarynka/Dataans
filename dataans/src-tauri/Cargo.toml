@@ -39,6 +39,7 @@ tracing-subscriber = { version = "0.3", features = ["std", "fmt", "ansi", "env-f
 
 common = { path = "../common" }
 toml = "0.9"
+base64ct = "1.8"
 
 avatar_generator = { git = "https://gitlab.com/dataans/tools.git", rev = "0a3f1c526d86e223216ab0cb26afa076cfddc363", package = "image" }
 opener = { version = "0.8", features = ["reveal"] }

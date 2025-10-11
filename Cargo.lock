@@ -1904,6 +1904,7 @@ dependencies = [
  "aes-gcm",
  "arboard",
  "argon2",
+ "base64ct",
  "common",
  "futures",
  "hmac",
