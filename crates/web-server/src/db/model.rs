@@ -10,3 +10,9 @@ pub struct Operation {
     pub data: Vec<u8>,
     pub checksum: Vec<u8>,
 }
+
+#[derive(Debug, FromRow, Serialize, Deserialize)]
+pub struct User {
+    pub id: Uuid,
+    pub secret_key_hash: String,
+}

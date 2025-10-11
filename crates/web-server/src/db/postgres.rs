@@ -2,7 +2,7 @@ use sqlx::{PgConnection, PgPool};
 use uuid::Uuid;
 
 use super::model::*;
-use super::{DbError, OperationsDb};
+use super::{DbError, OperationsDb, UserDb};
 
 pub struct PostgresDb {
     pool: PgPool,
@@ -80,5 +80,39 @@ impl OperationsDb for PostgresDb {
         transaction.commit().await?;
 
         Ok(())
+    }
+}
+
+impl UserDb for PostgresDb {
+    async fn init(&self, user: &User) -> Result<(), DbError> {
+        let mut transaction = self.pool.begin().await?;
+
+        let existing_user = sqlx::query_as::<_, User>("select id, secret_key_hash from \"user\" limit 1")
+            .fetch_optional(&mut *transaction)
+            .await?;
+
+        if existing_user.is_some() {
+            return Err(DbError::UserAlreadyExist);
+        }
+
+        sqlx::query!(
+            "insert into \"user\" (id, secret_key_hash) values ($1, $2)",
+            user.id,
+            user.secret_key_hash
+        )
+        .execute(&mut *transaction)
+        .await?;
+
+        transaction.commit().await?;
+
+        Ok(())
+    }
+
+    async fn user(&self) -> Result<User, DbError> {
+        let user = sqlx::query_as::<_, User>("select id, secret_key_hash from \"user\"")
+            .fetch_one(&self.pool)
+            .await?;
+
+        Ok(user)
     }
 }

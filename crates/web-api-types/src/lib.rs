@@ -1,5 +1,6 @@
 mod data;
 mod error;
+mod user;
 
 pub use data::*;
 use derive_more::{AsRef, From, Into};
@@ -7,6 +8,7 @@ pub use error::*;
 use serde::{Deserialize, Serialize};
 use time::OffsetDateTime;
 use time::serde::rfc3339;
+pub use user::*;
 
 #[derive(Debug, Serialize, Deserialize, AsRef, From, Copy, Clone, Into, PartialEq, Eq, Hash)]
 pub struct OperationId(uuid::Uuid);

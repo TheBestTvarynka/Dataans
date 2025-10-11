@@ -5,8 +5,11 @@ use phraze::cli::ListChoice;
 use phraze::generate_a_passphrase;
 use tauri::{AppHandle, Emitter, Manager, Runtime, State};
 use url::Url;
+use uuid::Uuid;
+use web_api_types::User;
 
-use crate::dataans::crypto::{EncryptionKey, derive_encryption_key};
+use crate::dataans::crypto::{EncryptionKey, derive_encryption_key, hash_encryption_key, verify_encryption_key_hash};
+use crate::dataans::sync::SyncError;
 use crate::dataans::sync::client::Client;
 use crate::dataans::{DataansError, DataansState};
 
@@ -100,24 +103,67 @@ pub async fn sign_in<R: Runtime>(
         }
     };
     let auth_token = token.into();
+    let encryption_key =
+        EncryptionKey::try_from(secret_key.as_ref().as_slice()).expect("secret key length is always correct");
 
-    Client::new(
-        sync_config.url.as_ref().clone(),
-        EncryptionKey::try_from(secret_key.as_ref().as_slice()).expect("secret key length is always correct"),
-        &auth_token,
-    )
-    .map_err(|err| {
+    let client = Client::new(sync_config.url.as_ref().clone(), encryption_key, &auth_token).map_err(|err| {
         error!(?err, "Failed to create sync client");
         DataansError::from(err)
-    })?
-    .auth_health()
-    .await
-    .map_err(|err| {
+    })?;
+
+    client.auth_health().await.map_err(|err| {
         error!(?err, "Failed to perform auth health check");
         DataansError::from(err)
     })?;
 
     info!("Auth health check is successful!");
+
+    let user_res = client.user().await;
+
+    let user = if let Err(SyncError::Reqwest(err)) = &user_res {
+        if let Some(status) = err.status()
+            && status == reqwest::StatusCode::NOT_FOUND
+        {
+            let user = User {
+                id: Uuid::new_v4().into(),
+                secret_key_hash: hash_encryption_key(&encryption_key)
+                    .map_err(|err| {
+                        error!(?err, "Failed to hash derived secret (encryption) key");
+                        DataansError::from(err)
+                    })?
+                    .into(),
+            };
+
+            client.init_user(&user).await.map_err(|err| {
+                error!(?err, "Failed to initialize user on the server");
+                DataansError::from(err)
+            })?;
+
+            info!("The user has been initialized on the server!");
+
+            user
+        } else {
+            return Err(user_res
+                .map_err(|err| {
+                    error!(?err, "Failed to get user from the server");
+                    DataansError::from(err)
+                })
+                .expect_err("user must be an error here")
+                .into());
+        }
+    } else {
+        user_res.map_err(|err| {
+            error!(?err, "Failed to get user from the server");
+            DataansError::from(err)
+        })?
+    };
+
+    verify_encryption_key_hash(&encryption_key, user.secret_key_hash.as_ref()).map_err(|err| {
+        error!(?err, "Failed to verify encryption key hash");
+        DataansError::from(err)
+    })?;
+
+    info!("Password and salt are correct!");
 
     let profile = UserProfile {
         auth_token,

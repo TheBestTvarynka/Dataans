@@ -10,11 +10,13 @@ pub struct Data<D> {
     db: Arc<D>,
 }
 
-impl<D: OperationsDb> Data<D> {
+impl<D> Data<D> {
     pub fn new(db: Arc<D>) -> Self {
         Self { db }
     }
+}
 
+impl<D: OperationsDb> Data<D> {
     pub async fn blocks(&self, items_per_block: usize) -> Result<Blocks> {
         let operations = self.db.operations(0).await?;
 

@@ -121,6 +121,9 @@ pub enum SyncError {
 
     #[error("access token is expired")]
     TokenExpired,
+
+    #[error("invalid authorization token: {0}")]
+    InvalidAuthToken(String),
 }
 
 impl SyncError {
