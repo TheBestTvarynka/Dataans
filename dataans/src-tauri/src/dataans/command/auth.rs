@@ -106,12 +106,12 @@ pub async fn sign_in<R: Runtime>(
     let encryption_key =
         EncryptionKey::try_from(secret_key.as_ref().as_slice()).expect("secret key length is always correct");
 
-    let client = Client::new(sync_config.url.as_ref().clone(), encryption_key.clone(), &auth_token).map_err(|err| {
+    let client = Client::new(sync_config.url.as_ref().clone(), encryption_key, &auth_token).map_err(|err| {
         error!(?err, "Failed to create sync client");
         DataansError::from(err)
     })?;
 
-    let _ = client.auth_health().await.map_err(|err| {
+    client.auth_health().await.map_err(|err| {
         error!(?err, "Failed to perform auth health check");
         DataansError::from(err)
     })?;
