@@ -7,7 +7,7 @@ use reqwest::header::{HeaderMap, HeaderValue};
 use sha2::Sha256;
 use url::Url;
 use uuid::Uuid;
-use web_api_types::{Blocks, Operation};
+use web_api_types::{Blocks, Operation, User};
 
 use super::SyncError;
 use crate::dataans::crypto::{EncryptionKey, decrypt, decrypt_data, encrypt, encrypt_data};
@@ -234,6 +234,48 @@ impl Client {
         let file_data = decrypt_data(&data, &self.encryption_key)?;
 
         tokio::fs::write(path, &file_data).await?;
+
+        Ok(())
+    }
+
+    /// Returns the [User] object from the sync server.
+    ///
+    /// There is noting special about the [User] object. It is only used to validate the user's
+    /// password and salt by checking the secret key hash.
+    #[instrument(err, skip(self))]
+    pub async fn user(&self) -> Result<User, SyncError> {
+        let response = self
+            .client
+            .get(self.sync_server.join("user/")?)
+            .send()
+            .await?
+            .error_for_status()?;
+
+        if response.url().domain() != self.sync_server.domain() {
+            info!(url = ?response.url().domain(), "Token expired. Redirecting to a login page...");
+            return Err(SyncError::TokenExpired);
+        }
+
+        Ok(response.json::<User>().await?)
+    }
+
+    /// Initializes the user on the sync server.
+    ///
+    /// This method **must** be called only _once_.
+    #[instrument(err, skip(self))]
+    pub async fn init_user(&self, user: &User) -> Result<(), SyncError> {
+        let response = self
+            .client
+            .post(self.sync_server.join("user/")?)
+            .json(user)
+            .send()
+            .await?
+            .error_for_status()?;
+
+        if response.url().domain() != self.sync_server.domain() {
+            info!(url = ?response.url().domain(), "Token expired. Redirecting to a login page...");
+            return Err(SyncError::TokenExpired);
+        }
 
         Ok(())
     }

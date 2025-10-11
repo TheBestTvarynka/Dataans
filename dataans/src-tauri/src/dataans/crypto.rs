@@ -25,8 +25,12 @@
 //! ```
 //! let key = pbkdf2(sha256(password), sha256(salt), 1_200_000);
 //! ```
+
 use aes_gcm::aead::Aead;
 use aes_gcm::{AeadCore, Aes256Gcm, Key, KeyInit, KeySizeUser, Nonce};
+use argon2::Argon2;
+use argon2::password_hash::rand_core::OsRng;
+use argon2::password_hash::{PasswordHash, PasswordHasher, PasswordVerifier, SaltString};
 use pbkdf2::pbkdf2_hmac;
 use serde::Serialize;
 use serde::de::DeserializeOwned;
@@ -56,6 +60,9 @@ pub enum CryptoError {
 
     #[error("OS error: {0}")]
     Os(String),
+
+    #[error("argon2 hash error: {0}")]
+    Argon2Hash(#[from] argon2::password_hash::Error),
 }
 
 type CryptoResult<T> = Result<T, CryptoError>;
@@ -158,6 +165,24 @@ pub fn derive_encryption_key(password: &[u8], salt: &[u8]) -> CryptoResult<Encry
     pbkdf2_hmac::<Sha256>(&password, &salt, 1_200_000, &mut key);
 
     Ok(key.into())
+}
+
+/// Computes argon2 hash of the encryption key.
+pub fn hash_encryption_key(key: &EncryptionKey) -> Result<String, CryptoError> {
+    let salt = SaltString::generate(&mut OsRng);
+    let argon2 = Argon2::default();
+    let hash = argon2.hash_password(key.as_ref(), &salt)?.to_string();
+
+    Ok(hash)
+}
+
+/// Verifies that the provided encryption key matches the hash.
+pub fn verify_encryption_key_hash(key: &EncryptionKey, hash: &str) -> Result<(), CryptoError> {
+    let parsed_hash = PasswordHash::new(hash)?;
+
+    Argon2::default().verify_password(key.as_ref(), &parsed_hash)?;
+
+    Ok(())
 }
 
 #[cfg(test)]

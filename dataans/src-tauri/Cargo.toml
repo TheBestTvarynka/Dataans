@@ -49,6 +49,7 @@ serde_json = "1"
 rand = "0.9"
 pbkdf2 = "0.12"
 phraze = "0.3"
+argon2 = { version = "0.5", features = ["std"] }
 
 [features]
 # This feature is used for production builds or when a dev server is not specified, DO NOT REMOVE!!
