@@ -37,7 +37,7 @@ aws-sdk-s3 = { version = "1.91", optional = true }
 aws-config = { version = "1.8", optional = true }
 
 # Auth
-jsonwebtoken = "9.3.1"
+jsonwebtoken = "10.0.0"
 
 [dev-dependencies]
 tokio = { workspace = true, features = ["full"] }
