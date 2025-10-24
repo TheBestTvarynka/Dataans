@@ -5,6 +5,37 @@ use leptos::task::spawn_local;
 use crate::backend::file::{open, reveal};
 
 #[component]
+pub fn NoteFileOptions() -> impl IntoView {
+    let (show_options, set_show_options) = signal(false);
+
+    let onclick = move |_| {
+        set_show_options.update(|show| *show = !*show);
+    };
+
+    let onmouseleave = move |_| {
+        set_show_options.set(false);
+    };
+
+    view! {
+        <div style="position: relative">
+            <button title="More actions" class="note-file-options-trigger" on:click=onclick>
+                <img alt="more-icon" src="/public/icons/more.svg" />
+            </button>
+            {move || if show_options.get() { view! {
+                <div class="note-file-options" on:mouseleave=onmouseleave>
+                    <button class="note-file-options-item">
+                        <img src="/public/icons/download-light.png" alt="" class="note-file-options-icon" />
+                        <span>"Save as..."</span>
+                    </button>
+                </div>
+            }.into_any() } else { view! {
+                <div />
+            }.into_any() }}
+        </div>
+    }
+}
+
+#[component]
 pub fn File(file: File, edit_mode: bool, #[prop(into)] remove_file: Callback<(File,), ()>) -> impl IntoView {
     let file_data = file.clone();
     let file_path = file.path.clone();
@@ -47,6 +78,7 @@ pub fn File(file: File, edit_mode: bool, #[prop(into)] remove_file: Callback<(Fi
                 .into_any()
             }}
             <span title="click to open the file" on:click=open_file>{file.name.clone()}</span>
+            <NoteFileOptions />
         </div>
     }
 }
