@@ -32,13 +32,18 @@ pub async fn handle_clipboard_image(state: State<'_, DataansState>) -> CommandRe
 }
 
 #[tauri::command]
-pub async fn save_file_as<R: Runtime>(app: AppHandle<R>, file: File) -> CommandResultEmpty {
+pub async fn save_file_as<R: Runtime>(
+    app: AppHandle<R>,
+    state: State<'_, DataansState>,
+    file: File,
+) -> CommandResultEmpty {
     let (tx, rx) = oneshot::channel();
 
+    let file_name = file.name.clone();
     tauri::async_runtime::spawn(async move {
         app.dialog()
             .file()
-            .set_title(file.name.as_str())
+            .set_file_name(file_name)
             .set_title("Save file")
             .save_file(move |file_path| {
                 let result = match file_path {
@@ -64,6 +69,8 @@ pub async fn save_file_as<R: Runtime>(app: AppHandle<R>, file: File) -> CommandR
             };
 
             info!("Saving file to {:?}", path);
+
+            state.file_service.save_file_as(&file, &path).await?;
 
             Ok(())
         }
