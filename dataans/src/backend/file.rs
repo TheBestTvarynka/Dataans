@@ -48,6 +48,20 @@ pub async fn load_clipboard_image() -> CommandResult<File> {
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
+struct SafeFileAsArgs {
+    file: File,
+}
+
+pub async fn save_file_as(file: File) -> CommandResultEmpty {
+    invoke_command(
+        &format!("plugin:{APP_PLUGIN_NAME}|save_file_as"),
+        &SafeFileAsArgs { file },
+    )
+    .await
+}
+
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
 struct FilePath<'path> {
     path: &'path Path,
 }

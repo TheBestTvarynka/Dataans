@@ -18,6 +18,7 @@ fn main() {
             "import_app_data",
             "upload_file",
             "delete_file",
+            "save_file_as",
             "gen_random_avatar",
             "handle_clipboard_image",
             "profile",

@@ -2,7 +2,50 @@ use common::note::{File, FileStatus};
 use leptos::prelude::*;
 use leptos::task::spawn_local;
 
-use crate::backend::file::{open, reveal};
+use crate::backend::file::{open, reveal, save_file_as};
+
+#[component]
+pub fn NoteFileOptions(file: File) -> impl IntoView {
+    let (show_options, set_show_options) = signal(false);
+
+    let onclick = move |_| {
+        set_show_options.set(true);
+    };
+
+    let onmouseleave = move |_| {
+        set_show_options.set(false);
+    };
+
+    view! {
+        <div style="position: relative">
+            <button title="More actions" class="note-file-options-trigger" on:click=onclick>
+                <img alt="more-icon" src="/public/icons/more.svg" />
+            </button>
+            {move || {
+                if show_options.get() {
+                    let file = file.clone();
+
+                    let on_file_save_as = move |file: File| {
+                        spawn_local(async move {
+                            let _ = save_file_as(file).await;
+                        });
+                    };
+
+                    view! {
+                        <div class="note-file-options" on:mouseleave=onmouseleave>
+                            <button class="note-file-options-item" on:click=move |_| on_file_save_as(file.clone())>
+                                <img src="/public/icons/download-light.png" alt="" class="note-file-options-icon" />
+                                <span>"Save as..."</span>
+                            </button>
+                        </div>
+                    }.into_any()
+                } else { view! {
+                    <div />
+                }.into_any() }
+            }}
+        </div>
+    }
+}
 
 #[component]
 pub fn File(file: File, edit_mode: bool, #[prop(into)] remove_file: Callback<(File,), ()>) -> impl IntoView {
@@ -32,7 +75,7 @@ pub fn File(file: File, edit_mode: bool, #[prop(into)] remove_file: Callback<(Fi
                 }
                 .into_any()
             } else {
-                let file_path = file.path;
+                let file_path = file.path.clone();
                 let reveal_file = move |_| {
                     let file = file_path.clone();
                     spawn_local(async move {
@@ -47,6 +90,7 @@ pub fn File(file: File, edit_mode: bool, #[prop(into)] remove_file: Callback<(Fi
                 .into_any()
             }}
             <span title="click to open the file" on:click=open_file>{file.name.clone()}</span>
+            <NoteFileOptions file />
         </div>
     }
 }

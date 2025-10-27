@@ -145,6 +145,12 @@ impl<D: Db> FileService<D> {
         })
     }
 
+    pub async fn save_file_as(&self, file: &File, destination: &Path) -> Result<(), DataansError> {
+        fs::copy(self.files_path.join(&file.path), destination)?;
+
+        Ok(())
+    }
+
     pub async fn handle_clipboard_image(&self) -> Result<File, DataansError> {
         let mut clipboard = Clipboard::new()?;
         let image_data = clipboard.get_image()?;
