@@ -54,7 +54,7 @@ pub fn TextArea(
                     let image = try_exec!(load_clipboard_image().await, "Failed to load clipboard image", toaster);
                     let image_path = try_exec!(
                         image.path.to_str().ok_or("use UTF-8 valid paths"),
-                        "Image path is not valid UTF-8 string",
+                        "Image path is not a valid UTF-8 string",
                         toaster
                     );
 
@@ -65,7 +65,7 @@ pub fn TextArea(
 
                     if let Some(start) = text_area.selection_start().expect("selection start error") {
                         let start = start as usize;
-                        text = format!("{} ![]({}){}", &text[0..start], &image_path, &text[start..]);
+                        text = format!("{}![]({}){}", &text[0..start], &image_path, &text[start..]);
                     } else {
                         text.push_str("![](");
                         text.push_str(image_path);
@@ -136,7 +136,7 @@ pub fn TextArea(
     let style = move || {
         #[cfg(windows_is_host_os)]
         {
-            // WARN: This CSS property is experimental and supported only in WebView2 which is used on Windows. More info:
+            // WARN: This CSS property is experimental and supported only in WebView2, which is used on Windows. More info:
             // https://developer.mozilla.org/en-US/docs/Web/CSS/field-sizing#browser_compatibility
             "field-sizing: content".to_owned()
         }
