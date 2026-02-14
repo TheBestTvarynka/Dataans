@@ -1,12 +1,18 @@
 /// Parses the image alt text to extract an information about its size.
 ///
-/// Originally, the MD does not allow to resize images.
-/// However, we use a small workaround to allow images resizing.
-/// The user can specify the image size in the alt text. The image size must met
+/// Originally, the MD does not allow resizing images.
+/// However, we use a small workaround to allow image resizing.
+/// The user can specify the image size in the alt text. The image size must meet
 /// the predefined format:
 ///
 /// ```not_rust
 /// =WIDTHxHEIGHT
+/// ```
+/// 
+/// or
+/// 
+/// ```not_rust
+/// =PERCENT%
 /// ```
 ///
 /// ## Example
@@ -25,11 +31,13 @@
 /// ![=20%](path/to/image.png)
 /// ```
 ///
-/// **Attention:** you cannot specify relative image size for width and height.
+/// **Attention:** You cannot specify a relative image size for width and height.
 /// The following format is invalid:
+/// 
 /// ```md
 /// ![=40%x60%](path/to/image.png)
 /// ```
+/// 
 /// Why? Because it is hard to support such a behavior in CSS. Also, it is not a common use case.
 /// It's not worth the trouble.
 ///
@@ -40,7 +48,7 @@
 /// ## Why ALT text?
 ///
 /// Because it is not usually used for anything else in our app. We always expect the image to exist.
-/// Even if the images does not exist, the alt text will be displayed instead of the image.
+/// Even if the image does not exist, the alt text will be displayed instead.
 pub fn parse_image_size(alt: &str) -> Option<String> {
     if !alt.starts_with('=') {
         return None;
