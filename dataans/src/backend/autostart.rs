@@ -18,7 +18,7 @@ pub async fn disable() -> CommandResult<bool> {
 
 pub async fn is_enabled() -> CommandResult<bool> {
     let is_enabled = invoke_command("plugin:autostart|is_enabled", &EmptyArgs {}).await?;
-    trace!("Is autostart enabled: {is_enabled:?}.");
+    trace!(is_enabled, "Is autostart enabled");
 
     Ok(is_enabled)
 }

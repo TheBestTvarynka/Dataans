@@ -225,7 +225,7 @@ pub(crate) struct Listen<T> {
 
 impl<T> Drop for Listen<T> {
     fn drop(&mut self) {
-        log::debug!("Calling unlisten for listen callback");
+        debug!("Calling unlisten for listen callback");
         self.unlisten.call0(&wasm_bindgen::JsValue::NULL).unwrap();
     }
 }
