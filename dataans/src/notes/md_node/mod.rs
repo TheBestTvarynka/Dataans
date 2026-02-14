@@ -163,7 +163,7 @@ pub fn render_md_node(node: &Node, base_path: &str) -> AnyView {
             let alt = image.alt.clone();
             let style = parse_image_size(&alt);
             view! {
-                <img src=convert_file_src(&image.url, base_path) alt={alt} class="note-image" style={style} on:click=open_image />
+                <img src=convert_file_src(&image.url, base_path) alt={alt} class="note-image" style={style} on:click=open_image title={image.title.clone()} />
             }
         }
         .into_any(),

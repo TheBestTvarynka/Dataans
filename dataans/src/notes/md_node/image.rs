@@ -8,9 +8,9 @@
 /// ```not_rust
 /// =WIDTHxHEIGHT
 /// ```
-/// 
+///
 /// or
-/// 
+///
 /// ```not_rust
 /// =PERCENT%
 /// ```
@@ -33,11 +33,11 @@
 ///
 /// **Attention:** You cannot specify a relative image size for width and height.
 /// The following format is invalid:
-/// 
+///
 /// ```md
 /// ![=40%x60%](path/to/image.png)
 /// ```
-/// 
+///
 /// Why? Because it is hard to support such a behavior in CSS. Also, it is not a common use case.
 /// It's not worth the trouble.
 ///
