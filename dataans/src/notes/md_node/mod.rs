@@ -1,4 +1,5 @@
 mod code_block;
+mod image;
 mod inline_code;
 mod list_item;
 
@@ -13,6 +14,7 @@ use self::code_block::CodeBlock;
 use self::list_item::ListItem;
 use crate::backend::convert_file_src;
 use crate::backend::file::open;
+use crate::notes::md_node::image::parse_image_size;
 
 pub fn render_md_node(node: &Node, base_path: &str) -> AnyView {
     match node {
@@ -158,8 +160,10 @@ pub fn render_md_node(node: &Node, base_path: &str) -> AnyView {
                     open(Path::new(&path)).await;
                 })
             };
+            let alt = image.alt.clone();
+            let style = parse_image_size(&alt);
             view! {
-                <img src=convert_file_src(&image.url, base_path) alt=image.alt.clone() class="note-image" on:click=open_image />
+                <img src=convert_file_src(&image.url, base_path) alt={alt} class="note-image" style={style} on:click=open_image title={image.title.clone()} />
             }
         }
         .into_any(),
