@@ -33,7 +33,7 @@ pub async fn pick_avatar<R: Runtime>(app: AppHandle<R>, state: State<'_, Dataans
     tauri::async_runtime::spawn(async move {
         app.dialog()
             .file()
-            .add_filter("Avatar", &["png", "jpg", "jpeg", "bmp", "gif", "webp", "svg", "tiff"])
+            .add_filter("Avatar", &["png", "jpg", "jpeg", "bmp", "gif", "webp", "svg", "tiff", "ico"])
             .pick_file(move |file_path| {
                 let result = match file_path {
                     Some(FilePath::Path(p)) => Ok(Some(p)),
