@@ -105,3 +105,35 @@ pub fn parse_image_size(alt: &str) -> Option<String> {
 fn is_valid_dimension(dimension: &str) -> bool {
     dimension.parse::<u32>().is_ok()
 }
+
+#[cfg(test)]
+mod tests {
+    use super::parse_image_size;
+
+    #[test]
+    fn parse_valid_image_size() {
+        assert_eq!(
+            parse_image_size("=200x300"),
+            Some("width: 200px;height: 300px;".to_string())
+        );
+        assert_eq!(parse_image_size("=100x"), Some("width: 100px;".to_string()));
+        assert_eq!(parse_image_size("=x150"), Some("height: 150px;".to_string()));
+        assert_eq!(parse_image_size("=20%"), Some("zoom: 20%;".to_string()));
+    }
+
+    #[test]
+    fn parse_invalid_image_size() {
+        // Missing '=' prefix.
+        assert_eq!(parse_image_size("200x300"), None);
+
+        // Relative sizes on both width and height are not supported.
+        assert_eq!(parse_image_size("=40%x60%"), None);
+
+        // Non-numeric width/height.
+        assert_eq!(parse_image_size("=abcx10"), None);
+        assert_eq!(parse_image_size("=10xdef"), None);
+
+        // Empty dimensions.
+        assert_eq!(parse_image_size("="), None);
+    }
+}
