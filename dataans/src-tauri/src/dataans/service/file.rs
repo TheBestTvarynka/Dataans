@@ -111,6 +111,29 @@ impl<D: Db> FileService<D> {
         Ok(())
     }
 
+    pub async fn pick_avatar(&self, avatar_file: &Path) -> Result<File, DataansError> {
+        let id = Uuid::new_v4();
+        let name = format!("{id}.png");
+
+        let avatar_path = self.files_path.join(&name);
+
+        fs::copy(avatar_file, &avatar_path)?;
+
+        let now = OffsetDateTime::now_utc();
+        self.db
+            .add_file(&FileModel::new(id, name.clone(), name.clone(), now, now))
+            .await?;
+
+        let status = FileStatus::status_for_file(&avatar_path, false);
+
+        Ok(File {
+            id: id.into(),
+            name: name.clone(),
+            path: name.into(),
+            status,
+        })
+    }
+
     pub async fn gen_random_avatar(&self) -> Result<File, DataansError> {
         let avatar = avatar_generator::generate::avatar();
 

@@ -20,6 +20,7 @@ fn main() {
             "delete_file",
             "save_file_as",
             "gen_random_avatar",
+            "pick_avatar",
             "handle_clipboard_image",
             "profile",
             "set_sync_options",

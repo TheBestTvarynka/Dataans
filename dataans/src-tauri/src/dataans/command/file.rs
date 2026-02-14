@@ -27,6 +27,52 @@ pub async fn gen_random_avatar(state: State<'_, DataansState>) -> CommandResult<
 
 #[instrument(ret, skip(state))]
 #[tauri::command]
+pub async fn pick_avatar<R: Runtime>(app: AppHandle<R>, state: State<'_, DataansState>) -> CommandResult<Option<File>> {
+    let (tx, rx) = oneshot::channel();
+
+    tauri::async_runtime::spawn(async move {
+        app.dialog()
+            .file()
+            .add_filter(
+                "Avatar",
+                &["png", "jpg", "jpeg", "bmp", "gif", "webp", "svg", "tiff", "ico"],
+            )
+            .pick_file(move |file_path| {
+                let result = match file_path {
+                    Some(FilePath::Path(p)) => Ok(Some(p)),
+                    Some(_) => {
+                        let err = CommandError::Dataans("unsupported image type selected".to_string());
+                        error!(?err, "Failed to select image");
+
+                        Err(err)
+                    }
+                    None => Ok(None),
+                };
+                let _ = tx.send(result);
+            });
+    });
+
+    match rx.await {
+        Ok(image_path) => {
+            let Some(image_path) = image_path? else {
+                debug!("User cancelled file save dialog");
+
+                return Ok(None);
+            };
+
+            Ok(Some(state.file_service.pick_avatar(&image_path).await?))
+        }
+        Err(e) => {
+            let err = CommandError::Dataans(format!("failed to receive image path: {e}"));
+            error!(?err, "failed to select image");
+
+            Err(err)
+        }
+    }
+}
+
+#[instrument(ret, skip(state))]
+#[tauri::command]
 pub async fn handle_clipboard_image(state: State<'_, DataansState>) -> CommandResult<File> {
     Ok(state.file_service.handle_clipboard_image().await?)
 }

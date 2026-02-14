@@ -110,6 +110,7 @@ pub fn init_dataans_plugin<R: Runtime>() -> TauriPlugin<R> {
             command::file::upload_file,
             command::file::delete_file,
             command::file::gen_random_avatar,
+            command::file::pick_avatar,
             command::file::handle_clipboard_image,
             command::file::save_file_as,
             command::export::export_app_data,
