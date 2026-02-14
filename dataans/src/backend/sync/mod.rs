@@ -18,7 +18,7 @@ pub async fn on_user_context(set_user_context: impl Fn(Option<UserContext>)) -> 
     let mut events = event::listen::<UserContextEvent>(USER_CONTEXT_EVENT).await?;
 
     while let Some(event) = events.next().await {
-        info!("Event received: {event:?}");
+        info!(?event, "Event received:");
 
         match event.payload {
             UserContextEvent::SignedIn(user_context) => {
@@ -40,7 +40,7 @@ pub async fn on_status_update(toaster: ToasterContext) -> CommandResultEmpty {
     let mut events = event::listen::<StatusUpdateEvent>(STATUS_UPDATE_EVENT).await?;
 
     while let Some(event) = events.next().await {
-        info!("Event received: {event:?}");
+        info!(?event, "Event received:");
 
         match event.payload {
             StatusUpdateEvent::SyncSuccessful => {
@@ -70,7 +70,7 @@ pub async fn on_data(data: RwSignal<GlobalState>) -> CommandResultEmpty {
     let mut events = event::listen::<DataEvent>(DATA_EVENT).await?;
 
     while let Some(event) = events.next().await {
-        info!("Event received: {event:?}");
+        info!(?event, "Event received:");
 
         match event.payload {
             DataEvent::FileStatusUpdated(file_id, file_status) => {
@@ -83,7 +83,7 @@ pub async fn on_data(data: RwSignal<GlobalState>) -> CommandResultEmpty {
                 });
             }
             DataEvent::FileAdded(file) => {
-                debug!("File added: {file:?}");
+                debug!(?file, "File added.");
                 // Nothing to do here.
             }
             DataEvent::SpaceAdded(space) => {
@@ -96,7 +96,7 @@ pub async fn on_data(data: RwSignal<GlobalState>) -> CommandResultEmpty {
                     if let Some(local_space) = state.spaces.iter_mut().find(|s| s.id == space.id) {
                         *local_space = space;
                     } else {
-                        warn!("Received space update event for space that does not exist: {space:?}");
+                        warn!(?space, "Received space update event for space that does not exist");
                     }
                 });
             }
@@ -116,7 +116,7 @@ pub async fn on_data(data: RwSignal<GlobalState>) -> CommandResultEmpty {
                         state.notes.push(note);
                         state.notes.sort_by(|a, b| a.created_at.cmp(&b.created_at));
                     } else {
-                        trace!("Received update note event for a space that is not selected: {note:?}");
+                        trace!(?note, "Received update note event for a space that is not selected.");
                     }
                 });
             }

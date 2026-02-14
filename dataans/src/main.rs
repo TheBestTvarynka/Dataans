@@ -2,7 +2,6 @@
 
 #[macro_use]
 extern crate tracing;
-// extern crate log;
 
 #[macro_use]
 pub mod macros;
@@ -21,7 +20,6 @@ use leptos::prelude::*;
 
 fn main() {
     console_error_panic_hook::set_once();
-    // console_log::init_with_level(log::Level::Debug).expect("Failed to initialize console_log");
     {
         use tracing_subscriber::EnvFilter;
         use tracing_subscriber::fmt::format::Pretty;

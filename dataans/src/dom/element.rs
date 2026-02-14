@@ -8,8 +8,8 @@ pub fn focus_element(id: impl AsRef<str>) {
             .dyn_into::<web_sys::HtmlElement>()
             .expect("Expected HtmlElement");
         let _res = element.focus();
-        info!("{_res:?}");
+        info!(?_res);
     } else {
-        warn!("Element not found (id = '{id}')");
+        warn!(id, "Element not found:");
     }
 }

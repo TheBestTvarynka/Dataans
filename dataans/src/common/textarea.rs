@@ -25,7 +25,7 @@ pub fn TextArea(
     Effect::new(move |_| {
         ref_input.on_load(|input| {
             if let Err(err) = input.focus() {
-                warn!("Can not focus TextArea: {err:?}");
+                warn!(?err, "Can not focus TextArea:");
             }
         });
     });
