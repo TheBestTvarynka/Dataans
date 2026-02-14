@@ -18,12 +18,20 @@
 /// Resize the image to 100 pixels in width and auto height:
 /// ![=100x](path/to/image.png)
 ///
-/// Resize the image to 20% of its original size (by width):
-/// ![=20%x](path/to/image.png)
+/// Resize the image to auto width and 150 pixels in height:
+/// ![=x150](path/to/image.png)
 ///
-/// Resize the image to 50% of its original size (by height):
-/// ![=x50%](path/to/image.png)
+/// Resize the image to 20% of its original size:
+/// ![=20%](path/to/image.png)
 /// ```
+///
+/// **Attention:** you cannot specify relative image size for width and height.
+/// The following format is invalid:
+/// ```md
+/// ![=40%x60%](path/to/image.png)
+/// ```
+/// Why? Because it is hard to support such a behavior in CSS. Also, it is not a common use case.
+/// It's not worth the trouble.
 ///
 /// ## Return value
 ///
@@ -38,13 +46,31 @@ pub fn parse_image_size(alt: &str) -> Option<String> {
         return None;
     }
 
+    if !alt.contains('x') {
+        // Relative resizing (e.g. "=20%").
+
+        if !alt.ends_with('%') {
+            warn!(?alt, "Invalid image size format: must end with '%':");
+
+            return None;
+        }
+
+        if !is_valid_dimension(&alt[1..alt.len() - 1]) {
+            warn!(?alt, "Invalid image size format: must be a number followed by '%':");
+
+            return None;
+        }
+
+        return Some(format!("zoom: {};", alt[1..].trim()));
+    }
+
     let mut dimensions = alt[1..].split('x');
 
     let width = dimensions
         .next()
         .and_then(|w| if w.is_empty() { None } else { Some(w) });
     if let Some(width) = width.as_ref() {
-        if !validate_dimension(width) {
+        if !is_valid_dimension(width) {
             warn!(?width, "Invalid image width:");
 
             return None;
@@ -55,7 +81,7 @@ pub fn parse_image_size(alt: &str) -> Option<String> {
         .next()
         .and_then(|h| if h.is_empty() { None } else { Some(h) });
     if let Some(height) = height.as_ref() {
-        if !validate_dimension(height) {
+        if !is_valid_dimension(height) {
             warn!(?height, "Invalid image height:");
 
             return None;
@@ -64,18 +90,10 @@ pub fn parse_image_size(alt: &str) -> Option<String> {
 
     let mut style = String::new();
     if let Some(width) = width {
-        if width.ends_with('%') {
-            style.push_str(&format!("width: {width};"));
-        } else {
-            style.push_str(&format!("width: {width}px;"));
-        }
+        style.push_str(&format!("width: {width}px;"));
     }
     if let Some(height) = height {
-        if height.ends_with('%') {
-            style.push_str(&format!("height: {height};"));
-        } else {
-            style.push_str(&format!("height: {height}px;"));
-        }
+        style.push_str(&format!("height: {height}px;"));
     }
 
     Some(style)
@@ -83,12 +101,7 @@ pub fn parse_image_size(alt: &str) -> Option<String> {
 
 /// Validates the image dimension string.
 ///
-/// The dimension string can be either a number (e.g. "100") or a percentage (e.g. "50%").
-/// All other formats are considered invalid.
-fn validate_dimension(dimension: &str) -> bool {
-    if dimension.ends_with('%') {
-        return dimension[..dimension.len() - 1].parse::<u32>().is_ok();
-    }
-
+/// The dimension value must be a positive number.
+fn is_valid_dimension(dimension: &str) -> bool {
     dimension.parse::<u32>().is_ok()
 }
