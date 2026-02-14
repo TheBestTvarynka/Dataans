@@ -9,7 +9,7 @@ use leptos_use::use_event_listener;
 use uuid::Uuid;
 
 use crate::backend::convert_file_src;
-use crate::backend::file::gen_avatar;
+use crate::backend::file::{gen_avatar, pick_avatar};
 use crate::backend::spaces::{create_space, list_spaces, update_space};
 use crate::dom::MatchKeyBinding;
 
@@ -48,10 +48,21 @@ pub fn SpaceForm(
         });
     });
 
+    let gen_avatar_toaster = toaster.clone();
     let generate_avatar = Callback::new(move |_| {
-        let toaster = toaster.clone();
+        let toaster = gen_avatar_toaster.clone();
         spawn_local(async move {
             set_avatar.set(try_exec!(gen_avatar().await, "Failed to generate a new avatar:", toaster).into());
+        });
+    });
+
+    let pick_avatar = Callback::new(move |_| {
+        let toaster = toaster.clone();
+        spawn_local(async move {
+            if let Some(avatar_image_file) = try_exec!(pick_avatar().await, "Failed to generate a new avatar:", toaster)
+            {
+                set_avatar.set(avatar_image_file.into());
+            }
         });
     });
 
@@ -131,6 +142,9 @@ pub fn SpaceForm(
                 <div style="align-self: center">
                     <button class="tool" title="Regenerate avatar" on:click=move |_| generate_avatar.run(())>
                         <img alt="regenerate-avatar" src="/public/icons/refresh.svg" />
+                    </button>
+                    <button class="tool" title="Pick custom image" on:click=move |_| pick_avatar.run(())>
+                        <img alt="pick-custom-image" src="/public/icons/camera-light.png" />
                     </button>
                 </div>
             </div>

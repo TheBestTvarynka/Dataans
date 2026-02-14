@@ -38,6 +38,10 @@ pub async fn gen_avatar() -> CommandResult<File> {
     invoke_command(&format!("plugin:{APP_PLUGIN_NAME}|gen_random_avatar"), &EmptyArgs {}).await
 }
 
+pub async fn pick_avatar() -> CommandResult<Option<File>> {
+    invoke_command(&format!("plugin:{APP_PLUGIN_NAME}|pick_avatar"), &EmptyArgs {}).await
+}
+
 pub async fn load_clipboard_image() -> CommandResult<File> {
     invoke_command(
         &format!("plugin:{APP_PLUGIN_NAME}|handle_clipboard_image"),
