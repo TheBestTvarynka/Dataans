@@ -78,9 +78,8 @@ pub fn Note(
                         <span class="note-time">{format_date(note.created_at.as_ref())}</span>
                         <span />
                     }.into_any()} else { view! {
-                        <span class="note-time" style="white-space: pre-wrap;">" UPD: "</span>
-                        <span class="note-time" title=format!("Created at: {}", format_date(note.created_at.as_ref()))>
-                            {format_date(note.updated_at.as_ref())}
+                        <span class="note-time" title=format!("Updated at: {}", format_date(note.updated_at.as_ref()))>
+                            {format_date(note.created_at.as_ref())}
                         </span>
                     }.into_any()}}
                 </div>

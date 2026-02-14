@@ -139,7 +139,7 @@ pub fn SpaceForm(
             }}
             <div class="create-space-avatar">
                 <img class="create-space-avatar-img" src=move || convert_file_src(avatar.get().path(), &global_config.get().app.base_path) />
-                <div style="align-self: center">
+                <div style="display: inline-flex; gap: 5px; justify-content: center;">
                     <button class="tool" title="Regenerate avatar" on:click=move |_| generate_avatar.run(())>
                         <img alt="regenerate-avatar" src="/public/icons/refresh.svg" />
                     </button>
