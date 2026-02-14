@@ -128,8 +128,8 @@ impl<D: Db> FileService<D> {
 
         Ok(File {
             id: id.into(),
-            name,
-            path: avatar_path,
+            name: name.clone(),
+            path: name.into(),
             status,
         })
     }
