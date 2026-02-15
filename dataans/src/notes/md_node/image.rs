@@ -77,23 +77,23 @@ pub fn parse_image_size(alt: &str) -> Option<String> {
     let width = dimensions
         .next()
         .and_then(|w| if w.is_empty() { None } else { Some(w) });
-    if let Some(width) = width.as_ref() {
-        if !is_valid_dimension(width) {
-            warn!(?width, "Invalid image width:");
+    if let Some(width) = width.as_ref()
+        && !is_valid_dimension(width)
+    {
+        warn!(?width, "Invalid image width:");
 
-            return None;
-        }
+        return None;
     }
 
     let height = dimensions
         .next()
         .and_then(|h| if h.is_empty() { None } else { Some(h) });
-    if let Some(height) = height.as_ref() {
-        if !is_valid_dimension(height) {
-            warn!(?height, "Invalid image height:");
+    if let Some(height) = height.as_ref()
+        && !is_valid_dimension(height)
+    {
+        warn!(?height, "Invalid image height:");
 
-            return None;
-        }
+        return None;
     }
 
     let mut style = String::new();

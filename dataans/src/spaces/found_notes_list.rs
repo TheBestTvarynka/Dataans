@@ -39,43 +39,43 @@ pub fn FoundNotesList(
     });
 
     let select_next_note = move || {
-        if let Some(selected_note_id) = selected_note.get() {
-            if let Some(notes) = found_notes.get() {
-                let selected_note_index = notes
-                    .iter()
-                    .position(|n| n.id == selected_note_id)
-                    .expect("selected note should present in found notes");
-                set_selected_note.set(Some(
-                    notes
-                        .get(if selected_note_index + 1 == notes.len() {
-                            0
-                        } else {
-                            selected_note_index + 1
-                        })
-                        .expect("valid note index")
-                        .id,
-                ));
-            }
+        if let Some(selected_note_id) = selected_note.get()
+            && let Some(notes) = found_notes.get()
+        {
+            let selected_note_index = notes
+                .iter()
+                .position(|n| n.id == selected_note_id)
+                .expect("selected note should present in found notes");
+            set_selected_note.set(Some(
+                notes
+                    .get(if selected_note_index + 1 == notes.len() {
+                        0
+                    } else {
+                        selected_note_index + 1
+                    })
+                    .expect("valid note index")
+                    .id,
+            ));
         }
     };
     let select_prev_note = move || {
-        if let Some(selected_note_id) = selected_note.get() {
-            if let Some(notes) = found_notes.get() {
-                let selected_note_index = notes
-                    .iter()
-                    .position(|n| n.id == selected_note_id)
-                    .expect("selected note should present in found notes");
-                set_selected_note.set(Some(
-                    notes
-                        .get(if selected_note_index == 0 {
-                            notes.len() - 1
-                        } else {
-                            selected_note_index - 1
-                        })
-                        .expect("valid note index")
-                        .id,
-                ));
-            }
+        if let Some(selected_note_id) = selected_note.get()
+            && let Some(notes) = found_notes.get()
+        {
+            let selected_note_index = notes
+                .iter()
+                .position(|n| n.id == selected_note_id)
+                .expect("selected note should present in found notes");
+            set_selected_note.set(Some(
+                notes
+                    .get(if selected_note_index == 0 {
+                        notes.len() - 1
+                    } else {
+                        selected_note_index - 1
+                    })
+                    .expect("valid note index")
+                    .id,
+            ));
         }
     };
 
