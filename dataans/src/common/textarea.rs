@@ -122,6 +122,7 @@ pub fn TextArea(
             };
             text_area.set_value(&text);
             set_text.run((text,));
+
             if let Some((selection_start, selection_end)) = selection {
                 if let Err(err) = text_area.set_selection_start(Some(selection_start)) {
                     error!("{err:?}");
@@ -206,6 +207,34 @@ fn get_text_format_fn(event: KeyboardEvent) -> Option<TextFormatFn> {
             (
                 format!("{pre_text}`{selected_text}`{after_text}"),
                 Some((selection_start, selection_end)),
+            )
+        })
+    } else if event.ctrl_key() && event.shift_key() && event.key() == "Q" {
+        event.prevent_default();
+
+        Some(&move |pre_text, selected_text, after_text, _start| {
+            let (pre_text, lines, after_text) = select_lines_for_indentation(&pre_text, &selected_text, &after_text);
+
+            let pre_text_len_chars = pre_text.chars().count() as u32;
+
+            let mut lines = lines.lines();
+            let mut formatted = lines
+                .next()
+                .map(|line| format!("> {line}"))
+                .unwrap_or_default()
+                .to_owned();
+
+            lines.for_each(|line| {
+                formatted.push('\n');
+                formatted.push_str("> ");
+                formatted.push_str(line);
+            });
+
+            let formatter_len_chars = formatted.chars().count() as u32;
+
+            (
+                format!("{pre_text}{formatted}{after_text}"),
+                Some((pre_text_len_chars, pre_text_len_chars + formatter_len_chars)),
             )
         })
     } else if event.shift_key() && event.key() == "Enter" {
