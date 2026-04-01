@@ -176,7 +176,8 @@ type TextFormatFn = &'static dyn Fn(String, String, String, u32) -> (String, Opt
 fn get_text_format_fn(event: KeyboardEvent) -> Option<TextFormatFn> {
     if event.ctrl_key() && event.key() == "k" {
         Some(&move |pre_text, selected_text, after_text, start| {
-            let selection_start = start + selected_text.len() as u32 + 3 /* "[](" */;
+            let selected_text_len = selected_text.chars().count() as u32;
+            let selection_start = start + selected_text_len + 3 /* "[](" */;
             (
                 format!("{pre_text}[{selected_text}](url){after_text}"),
                 Some((selection_start, selection_start + 3 /* "url" */)),
@@ -184,8 +185,11 @@ fn get_text_format_fn(event: KeyboardEvent) -> Option<TextFormatFn> {
         })
     } else if event.ctrl_key() && event.key() == "b" {
         Some(&move |pre_text, selected_text, after_text, start| {
+            let selected_text_len = selected_text.chars().count() as u32;
+
             let selection_start = start + 2 /* "**" */;
-            let selection_end = selection_start + selected_text.len() as u32;
+            let selection_end = selection_start + selected_text_len;
+
             (
                 format!("{pre_text}**{selected_text}**{after_text}"),
                 Some((selection_start, selection_end)),
@@ -193,8 +197,10 @@ fn get_text_format_fn(event: KeyboardEvent) -> Option<TextFormatFn> {
         })
     } else if event.ctrl_key() && event.key() == "i" {
         Some(&move |pre_text, selected_text, after_text, start| {
+            let selected_text_len = selected_text.chars().count() as u32;
+
             let selection_start = start + 1 /* "_" */;
-            let selection_end = selection_start + selected_text.len() as u32;
+            let selection_end = selection_start + selected_text_len;
             (
                 format!("{pre_text}_{selected_text}_{after_text}"),
                 Some((selection_start, selection_end)),
@@ -202,8 +208,10 @@ fn get_text_format_fn(event: KeyboardEvent) -> Option<TextFormatFn> {
         })
     } else if event.ctrl_key() && event.shift_key() && event.key() == "M" {
         Some(&move |pre_text, selected_text, after_text, start| {
+            let selected_text_len = selected_text.chars().count() as u32;
+
             let selection_start = start + 1 /* "`" */;
-            let selection_end = selection_start + selected_text.len() as u32;
+            let selection_end = selection_start + selected_text_len;
             (
                 format!("{pre_text}`{selected_text}`{after_text}"),
                 Some((selection_start, selection_end)),
@@ -243,14 +251,18 @@ fn get_text_format_fn(event: KeyboardEvent) -> Option<TextFormatFn> {
         Some(
             &move |pre_text, selected_text, after_text, _start| match parse_prev_line(&pre_text) {
                 LineType::None { trimmed } => {
-                    let current = pre_text.len() as u32 + 1 + trimmed.len() as u32;
+                    let trimmed_len = trimmed.chars().count() as u32;
+                    let current = pre_text.len() as u32 + 1 + trimmed_len;
                     (
                         format!("{pre_text}\n{trimmed}{selected_text}{after_text}"),
                         Some((current, current)),
                     )
                 }
                 LineType::UnorderedList { trimmed, marker } => {
-                    let current = pre_text.len() as u32 + 3 + trimmed.len() as u32;
+                    let pre_text_len = pre_text.chars().count() as u32;
+                    let trimmed_len = trimmed.chars().count() as u32;
+
+                    let current = pre_text_len + 3 + trimmed_len;
                     (
                         format!("{pre_text}\n{trimmed}{marker} {selected_text}{after_text}"),
                         Some((current, current)),
@@ -261,7 +273,11 @@ fn get_text_format_fn(event: KeyboardEvent) -> Option<TextFormatFn> {
                     number: current_number,
                 } => {
                     let number = (current_number + 1).to_string();
-                    let current = pre_text.len() as u32 + 3 + trimmed.len() as u32 + number.len() as u32;
+
+                    let pre_text_len = pre_text.chars().count() as u32;
+                    let trimmed_len = trimmed.chars().count() as u32;
+                    let current = pre_text_len + 3 + trimmed_len + number.len() as u32;
+
                     let after_text = if !after_text.is_empty()
                         && after_text[1 + trimmed.len()..].starts_with(&format!("{number}. "))
                     {
@@ -293,9 +309,12 @@ fn get_text_format_fn(event: KeyboardEvent) -> Option<TextFormatFn> {
                     formatted.push_str(&decrement_indentation(line));
                 });
 
+                let pre_text_len = pre_text.chars().count() as u32;
+                let formatted_len = formatted.chars().count() as u32;
+
                 (
                     format!("{pre_text}{formatted}{after_text}"),
-                    Some((pre_text.len() as u32, (pre_text.len() + formatted.len()) as u32)),
+                    Some((pre_text_len, pre_text_len + formatted_len)),
                 )
             })
         } else {
@@ -316,9 +335,12 @@ fn get_text_format_fn(event: KeyboardEvent) -> Option<TextFormatFn> {
                     formatted.push_str(line);
                 });
 
+                let pre_text_len = pre_text.chars().count() as u32;
+                let formatted_len = formatted.chars().count() as u32;
+
                 (
                     format!("{pre_text}{formatted}{after_text}"),
-                    Some((pre_text.len() as u32, (pre_text.len() + formatted.len()) as u32)),
+                    Some((pre_text_len, pre_text_len + formatted_len)),
                 )
             })
         }
