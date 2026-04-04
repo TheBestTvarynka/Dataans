@@ -11,7 +11,7 @@ assignees: ''
 
 A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
 
-# The solution I'd like
+## The solution I'd like
 
 A clear and concise description of what you want to happen.
 
