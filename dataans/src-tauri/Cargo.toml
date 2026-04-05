@@ -22,7 +22,7 @@ url.workspace = true
 aes-gcm.workspace = true
 hmac.workspace = true
 sha2.workspace = true
-reqwest = { workspace = true, features = ["json", "rustls-tls", "http2"] }
+reqwest = { workspace = true, features = ["json", "rustls", "http2"] }
 
 tauri = { version = "2", features = [
     "protocol-asset", "tray-icon",
@@ -45,9 +45,9 @@ avatar_generator = { git = "https://gitlab.com/dataans/tools.git", rev = "0a3f1c
 opener = { version = "0.8", features = ["reveal"] }
 image = "0.25"
 arboard = "3.6"
-syntect = "5.2"
+syntect = "5.3"
 serde_json = "1"
-rand = "0.9"
+rand = "0.10"
 pbkdf2 = "0.12"
 phraze = "0.3"
 argon2 = { version = "0.5", features = ["std"] }
