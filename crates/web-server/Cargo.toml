@@ -27,13 +27,13 @@ time = { workspace = true }
 rocket = { workspace = true, features = ["json"] }
 futures.workspace = true
 sha2.workspace = true
-reqwest = { workspace = true, features = ["json", "rustls-tls", "http2"] }
+reqwest = { workspace = true, features = ["json", "rustls", "http2"] }
 
 # logging
 tracing-subscriber = { version = "0.3", features = ["std", "fmt", "ansi", "env-filter"] }
 
 # Tigris storage
-aws-sdk-s3 = { version = "1.91", optional = true }
+aws-sdk-s3 = { version = "1.128", optional = true }
 aws-config = { version = "1.8", optional = true }
 
 # Auth

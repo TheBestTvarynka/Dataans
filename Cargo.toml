@@ -18,13 +18,13 @@ hmac = "0.12"
 sqlx = "0.8"
 thiserror = "2.0"
 time = { version = "0.3" , default-features = false }
-uuid = { version = "1.18", default-features = false }
+uuid = { version = "1.23", default-features = false }
 tracing = "0.1"
 serde = "1"
 rocket = "0.5"
 futures = "0.3"
 url = "2.5"
-derive_more = "1.0"
-reqwest = { version = "0.12", features = ["rustls-tls"], default-features = false }
+derive_more = "2.1"
+reqwest = { version = "0.13", features = ["rustls"], default-features = false }
 
-tokio = "1.47"
+tokio = "1.50"

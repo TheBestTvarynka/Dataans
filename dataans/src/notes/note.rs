@@ -166,7 +166,7 @@ pub fn Note(
                     view !{
                         <div class="vertical">
                             {render_md_node(&md, &config.app.base_path)}
-                            {move || view! { <Files files=updated_files.get() remove_file=|_| {} edit_mode=false /> }}
+                            {move || view! { <Files files=updated_files.get() remove_file=|_: File| {} edit_mode=false /> }}
                         </div>
                     }.into_any()
                 }}
