@@ -36,7 +36,7 @@ pub fn render_md_node(node: &Node, base_path: &str) -> AnyView {
             </span>
         }
         .into_any(),
-        Node::ThematicBreak(_) => view! { <br class="br" /> }.into_any(),
+        Node::ThematicBreak(_) => view! { <div class="br" /> }.into_any(),
         Node::Heading(heading) => {
             let inner = heading.children.iter().map(|n| render_md_node(n, base_path)).collect::<Vec<_>>();
             match heading.depth {
