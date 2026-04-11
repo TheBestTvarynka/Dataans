@@ -252,7 +252,7 @@ fn get_text_format_fn(event: KeyboardEvent) -> Option<TextFormatFn> {
             &move |pre_text, selected_text, after_text, _start| match parse_prev_line(&pre_text) {
                 LineType::None { trimmed } => {
                     let trimmed_len = trimmed.chars().count() as u32;
-                    let current = pre_text.len() as u32 + 1 + trimmed_len;
+                    let current = pre_text.chars().count() as u32 + 1 + trimmed_len;
                     (
                         format!("{pre_text}\n{trimmed}{selected_text}{after_text}"),
                         Some((current, current)),
