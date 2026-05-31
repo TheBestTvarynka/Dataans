@@ -36,48 +36,40 @@ pub fn TextArea(
             .dyn_into::<web_sys::ClipboardEvent>()
             .expect("Event -> ClipboardEvent should not fail");
         if let Some(clipboard_data) = ev.clipboard_data() {
-            let types = clipboard_data.types();
-            let len = types.length();
-            if (0..len).any(|type_index| {
-                let ty = types
-                    .get(type_index)
-                    .as_string()
-                    .expect("MIME type JsValue should be string");
-                ty.to_ascii_lowercase().contains("files")
-            }) {
-                let toaster = toaster.clone();
+            let toaster = toaster.clone();
+
+            let mut text = text.get();
+            let id = elem_id.clone();
+            spawn_local(async move {
+                let Ok(image) = load_clipboard_image().await else {
+                    return;
+                };
 
                 ev.prevent_default();
-                let mut text = text.get();
-                let id = elem_id.clone();
-                spawn_local(async move {
-                    let image = try_exec!(load_clipboard_image().await, "Failed to load clipboard image", toaster);
-                    let image_path = try_exec!(
-                        image.path.to_str().ok_or("use UTF-8 valid paths"),
-                        "Image path is not a valid UTF-8 string",
-                        toaster
-                    );
 
-                    let text_area = document().get_element_by_id(&id).expect("Dom element should present");
-                    let text_area = text_area
-                        .dyn_into::<web_sys::HtmlTextAreaElement>()
-                        .expect("Element should be textarea");
+                let image_path = try_exec!(
+                    image.path.to_str().ok_or("use UTF-8 valid paths"),
+                    "Image path is not a valid UTF-8 string",
+                    toaster
+                );
 
-                    if let Some(start) = text_area.selection_start().expect("selection start error") {
-                        let start = start as usize;
-                        text = format!("{}![]({}){}", &text[0..start], &image_path, &text[start..]);
-                    } else {
-                        text.push_str("![](");
-                        text.push_str(image_path);
-                        text.push(')');
-                    }
+                let text_area = document().get_element_by_id(&id).expect("Dom element should present");
+                let text_area = text_area
+                    .dyn_into::<web_sys::HtmlTextAreaElement>()
+                    .expect("Element should be textarea");
 
-                    set_text.run((text,));
-                    set_disabled.set(false);
-                });
-            } else {
-                info!("No images to upload.");
-            }
+                if let Some(start) = text_area.selection_start().expect("selection start error") {
+                    let start = start as usize;
+                    text = format!("{}![]({}){}", &text[0..start], &image_path, &text[start..]);
+                } else {
+                    text.push_str("![](");
+                    text.push_str(image_path);
+                    text.push(')');
+                }
+
+                set_text.run((text,));
+                set_disabled.set(false);
+            });
         } else {
             info!("No clipboard data.");
         }
