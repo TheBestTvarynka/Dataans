@@ -35,7 +35,7 @@ pub fn TextArea(
         let ev = e
             .dyn_into::<web_sys::ClipboardEvent>()
             .expect("Event -> ClipboardEvent should not fail");
-        if let Some(clipboard_data) = ev.clipboard_data() {
+        if ev.clipboard_data().is_some() {
             let toaster = toaster.clone();
 
             let mut text = text.get();
