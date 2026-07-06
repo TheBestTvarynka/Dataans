@@ -5,6 +5,8 @@ First of all, thank you for considering contributing to this project :heart:. We
 
 We'll help to set up the environment, explain needed parts of the code, discuss implementation, and review the code.
 
+And last but not least, read our [`AI_POLICY.md`](./AI_POLICY.md).
+
 ## Workflow
 
 1. Fork the repo: https://github.com/TheBestTvarynka/Dataans/fork.
@@ -15,7 +17,7 @@ We'll help to set up the environment, explain needed parts of the code, discuss 
 
 ## Commit messages
 
-We don't have a strict style guide for the commit messages. Your pull request will be [squashed and merged](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/incorporating-changes-from-a-pull-request/about-pull-request-merges#squash-and-merge-your-commits) anyway. The only restriction we have is our [`CODE_OF_CONDUCT.md`](https://github.com/TheBestTvarynka/Dataans/blob/main/CODE_OF_CONDUCT.md). Please, follow this policy :blush:.
+We don't have a strict style guide for the commit messages. Your pull request will be [squashed and merged](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/incorporating-changes-from-a-pull-request/about-pull-request-merges#squash-and-merge-your-commits) anyway. The only restriction we have is our [`CODE_OF_CONDUCT.md`](./CODE_OF_CONDUCT.md). Please, follow this policy :blush:.
 
 ## Code style
 
