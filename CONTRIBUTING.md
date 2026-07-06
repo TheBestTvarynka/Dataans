@@ -5,7 +5,7 @@ First of all, thank you for considering contributing to this project :heart:. We
 
 We'll help to set up the environment, explain needed parts of the code, discuss implementation, and review the code.
 
-And last but not least, read our [AI_POLICY.md](./AI_POLICY.md).
+And last but not least, read our [`AI_POLICY.md`](./AI_POLICY.md).
 
 ## Workflow
 
