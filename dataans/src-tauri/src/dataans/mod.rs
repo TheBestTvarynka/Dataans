@@ -42,7 +42,10 @@ impl DataansState {
     pub async fn init(db_dir: PathBuf, base_path: Arc<Path>) -> Self {
         // It's okay to panic in this function because the app is useless without a working db.
 
+        println!("{base_path:?}");
+
         let db_file = db_dir.join("dataans.sqlite");
+        println!("{db_file:?}");
 
         info!(?db_file, "Database file");
 
