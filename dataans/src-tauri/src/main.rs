@@ -51,9 +51,9 @@ fn toggle_app_visibility(app: &AppHandle) -> Result<()> {
 }
 
 fn init_tracing(app_data: &Path) {
-    use std::fs::OpenOptions;
     use std::{fs, io};
 
+    use tracing_appender::rolling::{Builder, Rotation};
     use tracing_subscriber::EnvFilter;
     use tracing_subscriber::prelude::*;
 
@@ -82,14 +82,21 @@ fn init_tracing(app_data: &Path) {
         }
     }
 
-    let log_file = logs_dir.join("dataans.log");
-    match OpenOptions::new().create(true).append(true).open(&log_file) {
-        Ok(log_file) => {
-            let log_file_layer = tracing_subscriber::fmt::layer().pretty().with_writer(log_file);
+    // Rotates weekly and keeps at most 2 log files (the active one plus one previous week),
+    // deleting older ones automatically.
+    match Builder::new()
+        .rotation(Rotation::WEEKLY)
+        .filename_prefix("dataans")
+        .filename_suffix("log")
+        .max_log_files(2)
+        .build(&logs_dir)
+    {
+        Ok(file_appender) => {
+            let log_file_layer = tracing_subscriber::fmt::layer().pretty().with_writer(file_appender);
             registry.with(log_file_layer).with(logging_filter).init();
         }
         Err(e) => {
-            eprintln!("Couldn't open log file: {e}. Path: {log_file:?}.");
+            eprintln!("Couldn't init the rolling log file appender: {e}. Path: {logs_dir:?}.");
             registry.with(logging_filter).init();
         }
     }
