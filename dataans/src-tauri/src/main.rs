@@ -35,13 +35,17 @@ const BACKUPS_DIR: &str = "backups";
 
 fn toggle_app_visibility(app: &AppHandle) -> Result<()> {
     if let Some(window) = app.get_webview_window(MAIN_WINDOW_NAME) {
-        if window.is_visible().unwrap_or(false) {
+        if window.is_visible().unwrap_or(false) && window.is_focused().unwrap_or(false) {
             info!("Hide main window");
             window.hide()?;
+        } else if window.is_visible().unwrap_or(false) && !window.is_focused().unwrap_or(false) {
+            info!("Focus main window");
+            // `.set_focus()` doesn't work well on Linux, so we have to hide and show the window to bring it to the front.
+            window.hide()?;
+            window.show()?;
         } else {
             info!("Show main window");
             window.show()?;
-            window.set_focus()?;
         }
     } else {
         error!("{MAIN_WINDOW_NAME} window not found!");
