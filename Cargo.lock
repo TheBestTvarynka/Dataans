@@ -1955,7 +1955,7 @@ dependencies = [
  "opener",
  "pbkdf2",
  "phraze",
- "rand 0.10.2",
+ "rand 0.10.3",
  "reqwest",
  "serde",
  "serde_json",
@@ -5634,7 +5634,7 @@ dependencies = [
  "clap_complete",
  "clap_mangen",
  "include-lines",
- "rand 0.10.2",
+ "rand 0.10.3",
  "unicode-normalization",
 ]
 
@@ -6021,7 +6021,7 @@ dependencies = [
  "bytes",
  "getrandom 0.4.2",
  "lru-slab",
- "rand 0.10.2",
+ "rand 0.10.3",
  "rand_pcg 0.10.2",
  "ring",
  "rustc-hash",
@@ -6128,9 +6128,9 @@ dependencies = [
 
 [[package]]
 name = "rand"
-version = "0.10.2"
+version = "0.10.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c7f5fa3a058cd35567ef9bfa5e75732bee0f9e4c55fa90477bef2dfcdbc4be80"
+checksum = "65c9fb96cbc91e3478eaae79a69fcd3f1ae4ad052e471fe6732fff548984b4af"
 dependencies = [
  "chacha20",
  "getrandom 0.4.2",
@@ -10362,9 +10362,9 @@ checksum = "66fee0b777b0f5ac1c69bb06d361268faafa61cd4682ae064a171c16c433e9e4"
 
 [[package]]
 name = "xxhash-rust"
-version = "0.8.15"
+version = "0.8.19"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fdd20c5420375476fbd4394763288da7eb0cc0b8c11deed431a91562af7335d3"
+checksum = "550a2b930b62486a393c52d5c3b84bff264b28aa437ed64694d31e93b1757af7"
 
 [[package]]
 name = "y4m"
