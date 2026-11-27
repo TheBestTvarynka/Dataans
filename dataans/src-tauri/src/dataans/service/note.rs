@@ -102,11 +102,17 @@ impl<D: Db> NoteService<D> {
         })
     }
 
+    /// Returns all space notes.
+    ///
+    /// INVARIANT: Notes are sorted by creation time from the oldest to the newest.
     pub async fn space_notes(&self, space_id: SpaceId) -> NoteServiceResult<Vec<OwnedNote>> {
+        let mut notes = self.db.space_notes(space_id.inner()).await?;
+        // The database does not guarantee any rows order.
+        notes.sort_by(|a, b| a.created_at.cmp(&b.created_at));
+
+        // `try_join_all` preserves the input order.
         let notes = try_join_all(
-            self.db
-                .space_notes(space_id.inner())
-                .await?
+            notes
                 .into_iter()
                 .map(|note| Self::map_note_model_to_note(note, &self.db, &self.files_path)),
         )
@@ -115,11 +121,17 @@ impl<D: Db> NoteService<D> {
         Ok(notes)
     }
 
+    /// Returns all notes.
+    ///
+    /// INVARIANT: Notes are sorted by creation time from the oldest to the newest.
     pub async fn notes(&self) -> NoteServiceResult<Vec<OwnedNote>> {
+        let mut notes = self.db.notes().await?;
+        // The database does not guarantee any rows order.
+        notes.sort_by(|a, b| a.created_at.cmp(&b.created_at));
+
+        // `try_join_all` preserves the input order.
         let notes = try_join_all(
-            self.db
-                .notes()
-                .await?
+            notes
                 .into_iter()
                 .map(|note| Self::map_note_model_to_note(note, &self.db, &self.files_path)),
         )
