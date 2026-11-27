@@ -1,8 +1,9 @@
 use std::sync::Arc;
 
 use common::error::CommandError;
-use common::space::{Avatar, CreateSpaceOwned, DeleteSpace, Id as SpaceId, OwnedSpace, UpdateSpace};
+use common::space::{Avatar, CreateSpaceOwned, DeleteSpace, Id as SpaceId, OwnedSpace, UpdateSpace, sort_spaces};
 use futures::future::try_join_all;
+use futures::try_join;
 use thiserror::Error;
 use time::OffsetDateTime;
 use uuid::Uuid;
@@ -88,6 +89,8 @@ impl<D: Db> SpaceService<D> {
             avatar,
             created_at: created_at.into(),
             updated_at: created_at.into(),
+            // The space has just been created, so it has no notes.
+            newest_note: created_at.into(),
         })
     }
 
@@ -119,12 +122,15 @@ impl<D: Db> SpaceService<D> {
             ))
             .await?;
 
+        let newest_note = self.db.space_newest_note(id).await?;
+
         Ok(OwnedSpace {
             id: space_id,
             name,
             avatar,
             created_at: created_at.into(),
             updated_at: updated_at.into(),
+            newest_note: newest_note.into(),
         })
     }
 
@@ -134,7 +140,11 @@ impl<D: Db> SpaceService<D> {
         Ok(self.db.remove_space(id.inner()).await?)
     }
 
-    pub async fn map_model_space_to_space(space: SpaceModel, db: &D) -> SpaceServiceResult<OwnedSpace> {
+    pub async fn map_model_space_to_space(
+        space: SpaceModel,
+        newest_note: OffsetDateTime,
+        db: &D,
+    ) -> SpaceServiceResult<OwnedSpace> {
         let SpaceModel {
             id,
             name,
@@ -160,23 +170,33 @@ impl<D: Db> SpaceService<D> {
             avatar: Avatar::new(avatar_id.into(), avatar_path),
             created_at: created_at.into(),
             updated_at: updated_at.into(),
+            newest_note: newest_note.into(),
         })
     }
 
+    /// Returns all spaces.
+    ///
+    /// INVARIANT: Spaces are sorted by [sort_spaces].
     pub async fn spaces(&self) -> SpaceServiceResult<Vec<OwnedSpace>> {
-        let spaces = try_join_all(
-            self.db
-                .spaces()
-                .await?
-                .into_iter()
-                .map(|space| Self::map_model_space_to_space(space, &*self.db)),
-        )
+        let (spaces, newest_notes) = try_join!(self.db.spaces(), self.db.spaces_newest_note())?;
+
+        let mut spaces = try_join_all(spaces.into_iter().map(|space| {
+            // A space created between the two queries is not in `newest_notes`, but then it has no notes yet.
+            let newest_note = newest_notes.get(&space.id).copied().unwrap_or(space.created_at);
+            Self::map_model_space_to_space(space, newest_note, &*self.db)
+        }))
         .await?;
+        sort_spaces(&mut spaces);
 
         Ok(spaces)
     }
 
     pub async fn space_by_id(&self, space_id: SpaceId) -> SpaceServiceResult<OwnedSpace> {
-        Self::map_model_space_to_space(self.db.space_by_id(space_id.inner()).await?, &*self.db).await
+        let (space, newest_note) = try_join!(
+            self.db.space_by_id(space_id.inner()),
+            self.db.space_newest_note(space_id.inner())
+        )?;
+
+        Self::map_model_space_to_space(space, newest_note, &*self.db).await
     }
 }

@@ -8,7 +8,7 @@ use crate::note::{File, FileId};
 use crate::{CreationDate, UpdateDate};
 
 /// Represent a space ID.
-#[derive(Serialize, Deserialize, Debug, Default, Copy, Clone, Eq, PartialEq, Hash)]
+#[derive(Serialize, Deserialize, Debug, Default, Copy, Clone, Eq, PartialEq, Hash, PartialOrd, Ord)]
 pub struct Id(Uuid);
 
 impl Id {
@@ -117,6 +117,7 @@ impl From<File> for Avatar<'_> {
 ///
 /// Space - a collection of notes.
 #[derive(Serialize, Deserialize, Debug, Clone, Eq, PartialEq)]
+#[serde(from = "SerializedSpace<'name, 'avatar>")]
 pub struct Space<'name, 'avatar> {
     /// Space ID.
     pub id: Id,
@@ -128,6 +129,78 @@ pub struct Space<'name, 'avatar> {
     pub updated_at: UpdateDate,
     /// Avatar image name.
     pub avatar: Avatar<'avatar>,
+    /// Creation date of the newest non-deleted space note.
+    ///
+    /// INVARIANT: The value is the latest of [Space::created_at] and the creation dates of all non-deleted space notes.
+    /// So it equals [Space::created_at] when the space has no notes.
+    /// The space creation date is also taken into account when the space has notes,
+    /// because a note can be older than its space when device clocks differ.
+    /// This keeps the value monotonic on note creation, so it can be updated without knowing the other space notes.
+    pub newest_note: CreationDate,
+}
+
+impl Space<'_, '_> {
+    /// Records that a note created at `note_created_at` has been added to the space.
+    pub fn note_added(&mut self, note_created_at: &CreationDate) {
+        if self.newest_note < *note_created_at {
+            self.newest_note = note_created_at.clone();
+        }
+    }
+
+    /// Recomputes [Space::newest_note] after a note deletion.
+    ///
+    /// `newest_note_created_at` is the creation date of the newest remaining space note, or [None] if no notes are left.
+    pub fn note_deleted(&mut self, newest_note_created_at: Option<&CreationDate>) {
+        self.newest_note = newest_note_created_at
+            .filter(|newest_note_created_at| self.created_at < **newest_note_created_at)
+            .unwrap_or(&self.created_at)
+            .clone();
+    }
+}
+
+/// [Space] as it appears in serialized data.
+///
+/// JSON exports made by older app versions do not have the `newest_note` field.
+/// Then it falls back to the space creation date, so the [Space::newest_note] invariant holds.
+#[derive(Deserialize)]
+struct SerializedSpace<'name, 'avatar> {
+    id: Id,
+    name: Name<'name>,
+    created_at: CreationDate,
+    updated_at: UpdateDate,
+    avatar: Avatar<'avatar>,
+    newest_note: Option<CreationDate>,
+}
+
+impl<'name, 'avatar> From<SerializedSpace<'name, 'avatar>> for Space<'name, 'avatar> {
+    fn from(space: SerializedSpace<'name, 'avatar>) -> Self {
+        let SerializedSpace {
+            id,
+            name,
+            created_at,
+            updated_at,
+            avatar,
+            newest_note,
+        } = space;
+
+        Self {
+            id,
+            name,
+            newest_note: newest_note.unwrap_or_else(|| created_at.clone()),
+            created_at,
+            updated_at,
+            avatar,
+        }
+    }
+}
+
+/// Sorts spaces from the most recently active to the least recently active.
+///
+/// Spaces are ordered by [Space::newest_note] in descending order.
+/// Spaces with equal dates are ordered by id, so the order is deterministic.
+/// This is the only place that defines the spaces order: the backend and the frontend must both use it.
+pub fn sort_spaces(spaces: &mut [Space<'_, '_>]) {
+    spaces.sort_by(|a, b| b.newest_note.cmp(&a.newest_note).then_with(|| a.id.cmp(&b.id)));
 }
 
 /// Owned version of [Space].
@@ -163,4 +236,87 @@ pub struct UpdateSpace<'name> {
 pub struct DeleteSpace {
     /// Space ID.
     pub id: Id,
+}
+
+#[cfg(test)]
+mod tests {
+    use time::OffsetDateTime;
+    use uuid::Uuid;
+
+    use super::*;
+
+    fn date(unix_timestamp: i64) -> CreationDate {
+        OffsetDateTime::from_unix_timestamp(unix_timestamp)
+            .expect("valid timestamp")
+            .into()
+    }
+
+    fn space(id: u128, created_at: i64, newest_note: i64) -> OwnedSpace {
+        Space {
+            id: Uuid::from_u128(id).into(),
+            name: Name::from(id.to_string()),
+            created_at: date(created_at),
+            updated_at: OffsetDateTime::from(date(created_at)).into(),
+            avatar: Avatar::new(Uuid::nil().into(), ""),
+            newest_note: date(newest_note),
+        }
+    }
+
+    fn ids(spaces: &[OwnedSpace]) -> Vec<u128> {
+        spaces.iter().map(|space| space.id.inner().as_u128()).collect()
+    }
+
+    #[test]
+    fn sorts_by_newest_note() {
+        let mut spaces = vec![space(1, 10, 20), space(2, 50, 50), space(3, 5, 40), space(4, 1, 1)];
+
+        sort_spaces(&mut spaces);
+
+        assert_eq!(ids(&spaces), [2, 3, 1, 4]);
+    }
+
+    #[test]
+    fn breaks_ties_by_id() {
+        let mut spaces = vec![space(3, 10, 10), space(1, 0, 10), space(2, 10, 10)];
+
+        sort_spaces(&mut spaces);
+
+        assert_eq!(ids(&spaces), [1, 2, 3]);
+    }
+
+    #[test]
+    fn note_added_keeps_the_newest_date() {
+        let mut space = space(1, 0, 20);
+
+        space.note_added(&date(10));
+        assert_eq!(space.newest_note, date(20));
+
+        space.note_added(&date(30));
+        assert_eq!(space.newest_note, date(30));
+    }
+
+    #[test]
+    fn note_deleted_falls_back_to_space_creation_date() {
+        let mut space = space(1, 10, 30);
+
+        space.note_deleted(Some(&date(20)));
+        assert_eq!(space.newest_note, date(20));
+
+        // A note older than its space.
+        space.note_deleted(Some(&date(5)));
+        assert_eq!(space.newest_note, date(10));
+
+        space.note_deleted(None);
+        assert_eq!(space.newest_note, date(10));
+    }
+
+    #[test]
+    fn deserializes_space_without_newest_note() {
+        let mut value = serde_json::to_value(space(1, 10, 30)).expect("serializable space");
+        value.as_object_mut().expect("space object").remove("newest_note");
+
+        let space: OwnedSpace = serde_json::from_value(value).expect("deserializable space");
+
+        assert_eq!(space.newest_note, date(10));
+    }
 }

@@ -178,10 +178,13 @@ impl Operation<'_> {
                 if local_note.updated_at < operation_time {
                     SqliteDb::remove_note_inner(*id, operation_time, transaction).await?;
 
-                    Some(DataEvent::NoteDeleted(
-                        SpaceId::from(local_note.space_id),
-                        NoteId::from(local_note.id),
-                    ))
+                    let newest_note = SqliteDb::space_newest_note(local_note.space_id, transaction.as_mut()).await?;
+
+                    Some(DataEvent::NoteDeleted {
+                        space_id: SpaceId::from(local_note.space_id),
+                        note_id: NoteId::from(local_note.id),
+                        newest_note: CreationDate::from(newest_note),
+                    })
                 } else {
                     None
                 }
@@ -237,6 +240,7 @@ impl Operation<'_> {
                 } = space.as_ref();
 
                 let avatar = SqliteDb::file_by_id(*avatar_id, transaction.as_mut()).await?;
+                let newest_note = SqliteDb::space_newest_note(*id, transaction.as_mut()).await?;
 
                 Some(DataEvent::SpaceAdded(EventSpace {
                     id: SpaceId::from(*id),
@@ -244,6 +248,7 @@ impl Operation<'_> {
                     created_at: CreationDate::from(*created_at),
                     updated_at: UpdateDate::from(*updated_at),
                     avatar: Avatar::new((*avatar_id).into(), avatar.path),
+                    newest_note: CreationDate::from(newest_note),
                 }))
             }
             Operation::UpdateSpace(space) => {
@@ -262,6 +267,7 @@ impl Operation<'_> {
                     } = space.as_ref();
 
                     let avatar = SqliteDb::file_by_id(*avatar_id, transaction.as_mut()).await?;
+                    let newest_note = SqliteDb::space_newest_note(*id, transaction.as_mut()).await?;
 
                     Some(DataEvent::SpaceUpdated(EventSpace {
                         id: SpaceId::from(*id),
@@ -269,6 +275,7 @@ impl Operation<'_> {
                         created_at: CreationDate::from(*created_at),
                         updated_at: UpdateDate::from(*updated_at),
                         avatar: Avatar::new((*avatar_id).into(), avatar.path),
+                        newest_note: CreationDate::from(newest_note),
                     }))
                 } else {
                     None

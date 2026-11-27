@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
 
+use crate::CreationDate;
 use crate::note::{File, FileId, FileStatus, Id as NoteId, OwnedNote};
 use crate::profile::UserContext;
 use crate::space::{Id as SpaceId, OwnedSpace};
@@ -45,7 +46,14 @@ pub enum DataEvent {
     /// The note has been updated.
     NoteUpdated(OwnedNote),
     /// The note has been deleted.
-    NoteDeleted(SpaceId, NoteId),
+    NoteDeleted {
+        /// The id of the space the note belonged to.
+        space_id: SpaceId,
+        /// The deleted note id.
+        note_id: NoteId,
+        /// The space [newest note](crate::space::Space::newest_note) after the deletion.
+        newest_note: CreationDate,
+    },
     /// A file has been added.
     FileAdded(File),
     /// A file status has been updated.

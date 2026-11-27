@@ -1,4 +1,5 @@
 use std::borrow::Cow;
+use std::collections::HashMap;
 use std::sync::Arc;
 
 use sqlx::{Sqlite, SqliteConnection, Transaction};
@@ -73,6 +74,58 @@ impl SqliteDb {
                 .await?;
 
         Ok(space)
+    }
+
+    /// Returns the space [newest note](common::space::Space::newest_note) date.
+    ///
+    /// Works for deleted spaces too, because a note deletion can be synced after its space deletion.
+    pub async fn space_newest_note(
+        space_id: Uuid,
+        connection: &mut SqliteConnection,
+    ) -> Result<OffsetDateTime, DbError> {
+        // The maximum is computed on decoded dates rather than with SQL `MAX`.
+        // Dates are stored as text with a variable number of fractional digits, so their text order can differ from their time order.
+        let dates: Vec<(OffsetDateTime,)> = sqlx::query_as(
+            "SELECT created_at FROM spaces WHERE id = ?1
+            UNION ALL
+            SELECT created_at FROM notes WHERE space_id = ?1 AND is_deleted = FALSE",
+        )
+        .bind(space_id)
+        .fetch_all(&mut *connection)
+        .await?;
+
+        // The space row is always selected if the space exists.
+        dates
+            .into_iter()
+            .map(|(created_at,)| created_at)
+            .max()
+            .ok_or(DbError::SqlxError(sqlx::Error::RowNotFound))
+    }
+
+    /// Returns the [newest note](common::space::Space::newest_note) date for every non-deleted space.
+    ///
+    /// It exists so that listing spaces costs one query instead of one query per space.
+    pub async fn spaces_newest_note(
+        connection: &mut SqliteConnection,
+    ) -> Result<HashMap<Uuid, OffsetDateTime>, DbError> {
+        // See [SqliteDb::space_newest_note] for why the maximum is not computed with SQL `MAX`.
+        let dates: Vec<(Uuid, OffsetDateTime)> = sqlx::query_as(
+            "SELECT id, created_at FROM spaces WHERE is_deleted = FALSE
+            UNION ALL
+            SELECT space_id, created_at FROM notes WHERE is_deleted = FALSE",
+        )
+        .fetch_all(&mut *connection)
+        .await?;
+
+        let mut newest_notes = HashMap::new();
+        for (space_id, created_at) in dates {
+            newest_notes
+                .entry(space_id)
+                .and_modify(|newest_note: &mut OffsetDateTime| *newest_note = (*newest_note).max(created_at))
+                .or_insert(created_at);
+        }
+
+        Ok(newest_notes)
     }
 
     /// Returns the space by its id. Returns an error if the space is deleted.
@@ -441,6 +494,20 @@ impl Db for SqliteDb {
         .await?;
 
         Ok(spaces)
+    }
+
+    #[instrument(ret, skip(self))]
+    async fn space_newest_note(&self, space_id: Uuid) -> Result<OffsetDateTime, DbError> {
+        let mut connection = self.pool.read_only_connection().await?;
+
+        SqliteDb::space_newest_note(space_id, &mut connection).await
+    }
+
+    #[instrument(ret, skip(self))]
+    async fn spaces_newest_note(&self) -> Result<HashMap<Uuid, OffsetDateTime>, DbError> {
+        let mut connection = self.pool.read_only_connection().await?;
+
+        SqliteDb::spaces_newest_note(&mut connection).await
     }
 
     #[instrument(ret, skip(self))]

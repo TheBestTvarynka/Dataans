@@ -1,8 +1,11 @@
 pub mod model;
 pub mod sqlite;
 
+use std::collections::HashMap;
+
 use common::event::DataEvent;
 use thiserror::Error;
+use time::OffsetDateTime;
 use uuid::Uuid;
 
 pub use self::model::*;
@@ -26,6 +29,10 @@ pub trait Db: Send + Sync {
 
     async fn spaces(&self) -> Result<Vec<Space>, DbError>;
     async fn space_by_id(&self, space_id: Uuid) -> Result<Space, DbError>;
+    /// Returns the space [newest note](common::space::Space::newest_note) date.
+    async fn space_newest_note(&self, space_id: Uuid) -> Result<OffsetDateTime, DbError>;
+    /// Returns the [newest note](common::space::Space::newest_note) date for every non-deleted space.
+    async fn spaces_newest_note(&self) -> Result<HashMap<Uuid, OffsetDateTime>, DbError>;
     async fn create_space(&self, space: &Space) -> Result<(), DbError>;
     async fn remove_space(&self, space_id: Uuid) -> Result<(), DbError>;
     async fn update_space(&self, space: &Space) -> Result<(), DbError>;
