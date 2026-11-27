@@ -43,7 +43,7 @@ pub fn Notes() -> impl IntoView {
                     state.selected_space = None;
                 }
             }
-            state.spaces = spaces;
+            state.set_spaces(spaces);
         },
     );
 
@@ -76,7 +76,15 @@ pub fn Notes() -> impl IntoView {
     let (_, delete_note) = create_slice(
         global_state,
         |_state| (),
-        |state, note_id| state.notes.retain(|note| note.id != note_id),
+        |state, note_id| {
+            state.notes.retain(|note| note.id != note_id);
+            if let Some(space_id) = state.selected_space.as_ref().map(|space| space.id) {
+                // `state.notes` holds all notes of the selected space sorted by creation date,
+                // so the last one is the newest remaining note.
+                let newest_note_created_at = state.notes.last().map(|note| note.created_at.clone());
+                state.note_deleted(space_id, newest_note_created_at.as_ref());
+            }
+        },
     );
     let (_, delete_state_space) = create_slice(
         global_state,
@@ -84,11 +92,18 @@ pub fn Notes() -> impl IntoView {
         |state, space_id| {
             state.notes.clear();
             state.selected_space = None;
-            state.spaces.retain(|space| space.id != space_id);
+            state.remove_space(space_id);
         },
     );
 
-    let (_, create_note) = create_slice(global_state, |_state| (), |state, new_note| state.notes.push(new_note));
+    let (_, create_note) = create_slice(
+        global_state,
+        |_state| (),
+        |state, new_note: OwnedNote| {
+            state.note_added(new_note.space_id, &new_note.created_at);
+            state.notes.push(new_note);
+        },
+    );
 
     let create_note = move |note| {
         create_note.set(note);

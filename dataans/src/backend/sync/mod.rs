@@ -88,25 +88,27 @@ pub async fn on_data(data: RwSignal<GlobalState>) -> CommandResultEmpty {
             }
             DataEvent::SpaceAdded(space) => {
                 data.update(|state| {
-                    state.spaces.push(space);
+                    state.add_space(space);
                 });
             }
             DataEvent::SpaceUpdated(space) => {
                 data.update(|state| {
-                    if let Some(local_space) = state.spaces.iter_mut().find(|s| s.id == space.id) {
-                        *local_space = space;
-                    } else {
-                        warn!(?space, "Received space update event for space that does not exist");
+                    let space_id = space.id;
+                    if !state.update_space(space) {
+                        warn!(?space_id, "Received space update event for space that does not exist");
                     }
                 });
             }
             DataEvent::SpaceDeleted(space_id) => {
                 data.update(|state| {
-                    state.spaces.retain(|s| s.id != space_id);
+                    state.remove_space(space_id);
                 });
             }
             DataEvent::NoteAdded(note) => {
                 data.update(|state| {
+                    // Spaces must be reordered even if the note belongs to a space that is not selected.
+                    state.note_added(note.space_id, &note.created_at);
+
                     if state
                         .selected_space
                         .as_ref()
@@ -127,9 +129,14 @@ pub async fn on_data(data: RwSignal<GlobalState>) -> CommandResultEmpty {
                     }
                 });
             }
-            DataEvent::NoteDeleted(_space_id, note_id) => {
+            DataEvent::NoteDeleted {
+                space_id,
+                note_id,
+                newest_note,
+            } => {
                 data.update(|state| {
                     state.notes.retain(|n| n.id != note_id);
+                    state.set_space_newest_note(space_id, newest_note);
                 });
             }
         }

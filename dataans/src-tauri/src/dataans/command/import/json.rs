@@ -37,6 +37,7 @@ pub async fn import_v1<D: Db, R: Runtime, E: Emitter<R>>(
             created_at: _,
             updated_at,
             avatar,
+            newest_note: _,
         } = space;
 
         match space_service.space_by_id(space.id).await {

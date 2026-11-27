@@ -1,7 +1,7 @@
-use common::Config;
 use common::note::Note;
 use common::profile::UserContext;
-use common::space::OwnedSpace;
+use common::space::{Id as SpaceId, OwnedSpace, sort_spaces};
+use common::{Config, CreationDate};
 use leptoaster::*;
 use leptos::context::provide_context;
 use leptos::prelude::*;
@@ -27,6 +27,10 @@ pub enum FindNoteMode {
 
 #[derive(Debug, Clone)]
 pub struct GlobalState {
+    /// Loaded spaces.
+    ///
+    /// INVARIANT: Spaces are sorted by [sort_spaces].
+    /// Change spaces only through [GlobalState] methods, which keep the invariant.
     pub spaces: Vec<OwnedSpace>,
     pub notes: Vec<Note<'static>>,
     pub selected_space: Option<OwnedSpace>,
@@ -42,6 +46,66 @@ impl Default for GlobalState {
             selected_space: Default::default(),
             minimize_spaces: true,
             find_note_mode: Default::default(),
+        }
+    }
+}
+
+impl GlobalState {
+    /// Replaces all spaces.
+    pub fn set_spaces(&mut self, mut spaces: Vec<OwnedSpace>) {
+        sort_spaces(&mut spaces);
+        self.spaces = spaces;
+    }
+
+    /// Adds a new space or replaces the existing one with the same id.
+    pub fn add_space(&mut self, space: OwnedSpace) {
+        self.spaces.retain(|s| s.id != space.id);
+        self.spaces.push(space);
+        sort_spaces(&mut self.spaces);
+    }
+
+    /// Replaces the existing space with the same id.
+    ///
+    /// Returns `false` if the space does not exist.
+    pub fn update_space(&mut self, space: OwnedSpace) -> bool {
+        let Some(local_space) = self.spaces.iter_mut().find(|s| s.id == space.id) else {
+            return false;
+        };
+        *local_space = space;
+        sort_spaces(&mut self.spaces);
+
+        true
+    }
+
+    /// Removes the space.
+    pub fn remove_space(&mut self, space_id: SpaceId) {
+        // Removal keeps the remaining spaces sorted.
+        self.spaces.retain(|s| s.id != space_id);
+    }
+
+    /// Records that a note created at `note_created_at` has been added to the space.
+    pub fn note_added(&mut self, space_id: SpaceId, note_created_at: &CreationDate) {
+        if let Some(space) = self.spaces.iter_mut().find(|s| s.id == space_id) {
+            space.note_added(note_created_at);
+            sort_spaces(&mut self.spaces);
+        }
+    }
+
+    /// Records that a space note has been deleted.
+    ///
+    /// `newest_note_created_at` is the creation date of the newest remaining space note, or [None] if no notes are left.
+    pub fn note_deleted(&mut self, space_id: SpaceId, newest_note_created_at: Option<&CreationDate>) {
+        if let Some(space) = self.spaces.iter_mut().find(|s| s.id == space_id) {
+            space.note_deleted(newest_note_created_at);
+            sort_spaces(&mut self.spaces);
+        }
+    }
+
+    /// Sets the space [newest note](common::space::Space::newest_note) date computed by the backend.
+    pub fn set_space_newest_note(&mut self, space_id: SpaceId, newest_note: CreationDate) {
+        if let Some(space) = self.spaces.iter_mut().find(|s| s.id == space_id) {
+            space.newest_note = newest_note;
+            sort_spaces(&mut self.spaces);
         }
     }
 }
@@ -103,7 +167,7 @@ pub fn App() -> impl IntoView {
     let (spaces, set_spaces) = create_slice(
         global_state,
         |state| state.spaces.clone(),
-        |state, spaces| state.spaces = spaces,
+        |state, spaces| state.set_spaces(spaces),
     );
 
     view! {

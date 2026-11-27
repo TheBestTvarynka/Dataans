@@ -45,6 +45,7 @@ async fn write_space_notes_per_file<D: Db>(
                     avatar,
                     created_at: space_created_at,
                     updated_at: space_updated_at,
+                    newest_note: _,
                 } = &space;
 
                 let mut file = File::create(notes_dir.join(format!("{}.md", id.inner())))?;
@@ -120,6 +121,7 @@ fn write_space(space: &OwnedSpace, file: &mut File) -> Result<(), DataansError> 
         created_at,
         updated_at,
         avatar,
+        newest_note: _,
     } = space;
     writeln!(file, "# {}\n", name.as_ref())?;
 
